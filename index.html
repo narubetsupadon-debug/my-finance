@@ -212,7 +212,8 @@
     <div class="field full"><label>รายละเอียด</label><input id="txDesc" required placeholder="เช่น ค่าอาหาร"></div>
     <div class="field"><label>จำนวนเงิน</label><input id="txAmount" type="number" min="0.01" step="0.01" required></div>
     <div class="field"><label>หมวดหมู่</label><select id="txCategory"></select></div>
-    <div class="field full"><label>บัญชี</label><select id="txAccount"></select></div>
+    <div id="cardPaymentSuggest" class="field full hidden"><label>💳 เลือกบัตร/สินเชื่อที่จะจ่าย</label><div id="cardPaymentList" class="payment-suggest-grid"></div><div class="muted">แตะรายการเพื่อใส่ชื่อและยอดที่ต้องจ่ายรอบนี้ให้อัตโนมัติ</div></div>
+    <div class="field full"><label>บัญชีที่ใช้จ่าย</label><select id="txAccount"></select></div>
     <div class="field full"><label>หมายเหตุ</label><textarea id="txNote" placeholder="ไม่บังคับ"></textarea></div>
   </div>
   <div class="modal-actions"><button type="button" class="btn ghost" onclick="txDialog.close()">ยกเลิก</button><button class="btn primary">บันทึก</button></div>
