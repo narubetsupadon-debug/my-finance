@@ -31,15 +31,63 @@ async function loadAll(){
  categories=c.data||[];accounts=a.data||[];transactions=t.data||[];bills=b.data||[];debts=d.data||[];budgets=g.data||[];renderAll()
 }
 function renderAll(){renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary();fillTxSelectors()}
+function showAppToast(message){
+ const el=$('appToast'); if(!el)return; el.textContent=message; el.classList.remove('hidden'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>el.classList.add('hidden'),2200)
+}
+function quickCategoryMatch(label){
+ const aliases={อาหาร:['อาหาร'],กาแฟ:['อาหาร'],รถ:['รถยนต์','เดินทาง'],ซื้อของ:['ช้อปปิ้ง'],จ่ายหนี้:['หนี้/ผ่อน'],บิล:['บิล/สาธารณูปโภค']}
+ const names=aliases[label]||[label]
+ return categories.find(c=>c.type==='expense'&&names.includes(c.name))||categories.find(c=>c.type==='expense')
+}
+window.quickAdd=(label,desc='')=>{
+ const cat=quickCategoryMatch(label); openTx(); $('txType').value='expense'; fillTxSelectors(); if(cat)$('txCategory').value=cat.id; $('txDesc').value=desc||label; $('txAmount').focus()
+}
+function nextDueDate(day){
+ const now=new Date(),y=now.getFullYear(),m=now.getMonth(); let d=new Date(y,m,Math.min(Number(day||28),new Date(y,m+1,0).getDate()))
+ if(d<new Date(y,m,now.getDate())){const nm=m+1;d=new Date(y,nm,Math.min(Number(day||28),new Date(y,nm+1,0).getDate()))}
+ return d
+}
 function renderDashboard(){
- $('accountCount').textContent=accounts.length
- const now=new Date(),y=now.getFullYear(),m=now.getMonth(),monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
- const inc=monthly.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=monthly.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
- $('monthLabel').textContent=now.toLocaleDateString('th-TH',{month:'long',year:'numeric'});$('incomeTotal').textContent=money(inc);$('expenseTotal').textContent=money(exp);$('balanceTotal').textContent=money(inc-exp)
- $('billTotal').textContent=money(bills.filter(x=>x.is_active).reduce((s,x)=>s+Number(x.amount||0),0));$('debtTotal').textContent=money(debts.filter(x=>x.is_active).reduce((s,x)=>s+Number(x.outstanding_amount||0),0));const bsum=budgetTotals();$('budgetRemainDash').textContent=money(bsum.remain);$('budgetDailyDash').textContent='ใช้ได้วันละ '+money(bsum.daily)
- renderTxList($('recentList'),transactions.slice(0,8))
+ const now=new Date(),today=now.toISOString().slice(0,10),y=now.getFullYear(),m=now.getMonth()
+ const monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
+ const prevDate=new Date(y,m-1,1),py=prevDate.getFullYear(),pm=prevDate.getMonth()
+ const previous=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===py&&d.getMonth()===pm&&x.status!=='cancelled'})
+ const inc=monthly.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0)
+ const exp=monthly.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
+ const prevExp=previous.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
+ const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=todayRows.reduce((s,x)=>s+Number(x.amount),0)
+ const bsum=budgetTotals(),dailyLeft=Math.max(0,bsum.daily-todaySpent),pct=bsum.limit?Math.min(100,bsum.spent/bsum.limit*100):0
+ $('todayLabel').textContent=now.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+ $('monthLabel').textContent=now.toLocaleDateString('th-TH',{month:'long',year:'numeric'})
+ $('todaySpent').textContent=money(todaySpent);$('todayCount').textContent=todayRows.length+' รายการ'
+ $('todayCanSpend').textContent=money(dailyLeft);$('todayCanSpendHint').textContent=bsum.limit?'จากงบเฉลี่ยต่อวันที่เหลือ':'ยังไม่ได้ตั้งงบ'
+ $('incomeTotal').textContent=money(inc);$('expenseTotal').textContent=money(exp);$('balanceTotal').textContent=money(inc-exp)
+ $('debtTotal').textContent=money(debts.filter(x=>x.is_active).reduce((s,x)=>s+Number(x.outstanding_amount||0),0))
+ $('budgetSpentDash').textContent=money(bsum.spent);$('budgetLimitDash').textContent=money(bsum.limit);$('budgetRemainDash').textContent=money(bsum.remain);$('budgetDailyDash').textContent='ใช้ได้เฉลี่ยวันละ '+money(bsum.daily)
+ $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
+
+ const quick=[
+  ['🍜','อาหาร','อาหาร'],['☕','กาแฟ','กาแฟ'],['🚗','รถ','รถ'],['🛍️','ซื้อของ','ซื้อของ'],['💳','จ่ายหนี้','จ่ายหนี้'],['🧾','บิล','บิล']
+ ]
+ $('quickAdd').innerHTML=quick.map(([ico,label,desc])=>'<button class="quick-btn" onclick="quickAdd(\''+label+'\',\''+desc+'\')"><span>'+ico+'</span><b>'+label+'</b></button>').join('')+'<button class="quick-btn more" onclick="openTx()"><span>＋</span><b>อื่น ๆ</b></button>'
+
  const sums={};monthly.filter(x=>x.type==='expense').forEach(x=>{const n=x.categories?.name||'อื่นๆ';sums[n]=(sums[n]||0)+Number(x.amount)})
- const max=Math.max(1,...Object.values(sums));$('categoryChart').innerHTML=Object.keys(sums).length?Object.entries(sums).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([n,v])=>'<div class="bar-row"><span>'+esc(n)+'</span><div class="barbg"><div class="barfill" style="width:'+Math.round(v/max*100)+'%"></div></div><b>'+money(v)+'</b></div>').join(''):'<div class="empty">ยังไม่มีรายจ่ายเดือนนี้</div>'
+ const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]),top=sorted[0]
+ const insights=[]
+ if(top)insights.push('เดือนนี้ใช้มากสุดที่ '+top[0]+' '+money(top[1]))
+ if(prevExp>0){const diff=(exp-prevExp)/prevExp*100;insights.push(diff>0?'รายจ่ายมากกว่าเดือนก่อน '+Math.abs(diff).toFixed(0)+'%':'รายจ่ายลดลงจากเดือนก่อน '+Math.abs(diff).toFixed(0)+'%')}
+ if(bsum.limit)insights.push(bsum.spent>bsum.limit?'งบ 4,000 เกินแล้ว '+money(bsum.spent-bsum.limit):'งบใช้ทั่วไปยังเหลือ '+money(bsum.remain))
+ if(inc>0)insights.push('เดือนนี้เก็บเหลือ '+((inc-exp)/inc*100).toFixed(0)+'% ของรายรับ')
+ $('insightList').innerHTML=insights.length?insights.slice(0,4).map((t,k)=>'<div class="insight-item"><span>'+['✨','📊','🎯','💙'][k%4]+'</span><div>'+esc(t)+'</div></div>').join(''):'<div class="empty">เริ่มบันทึกรายการ แล้วนิลินจะสรุปให้ตรงนี้ ✨</div>'
+
+ const upcoming=[
+  ...bills.filter(x=>x.is_active).map(x=>({kind:'บิล',name:x.name,amount:Number(x.amount||0),due:nextDueDate(x.due_day)})),
+  ...debts.filter(x=>x.is_active&&Number(x.outstanding_amount||0)>0).map(x=>({kind:'หนี้',name:x.name,amount:Number(x.installment_amount||0)||Number(x.outstanding_amount||0),due:nextDueDate(x.due_day)}))
+ ].sort((a,b)=>a.due-b.due).slice(0,5)
+ $('upcomingList').innerHTML=upcoming.length?upcoming.map(x=>{const days=Math.ceil((x.due-new Date(y,m,now.getDate()))/86400000);return '<div class="upcoming-item"><div><b>'+esc(x.name)+'</b><div class="muted">'+x.kind+' · '+(days===0?'วันนี้':'อีก '+days+' วัน')+'</div></div><div><b>'+money(x.amount)+'</b><div class="muted">'+x.due.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+'</div></div></div>'}).join(''):'<div class="empty">ไม่มีรายการใกล้ครบกำหนด 🎉</div>'
+
+ renderTxList($('recentList'),transactions.slice(0,8))
+ const max=Math.max(1,...Object.values(sums));$('categoryChart').innerHTML=Object.keys(sums).length?sorted.slice(0,8).map(([n,v])=>'<div class="bar-row"><span>'+esc(n)+'</span><div class="barbg"><div class="barfill" style="width:'+Math.round(v/max*100)+'%"></div></div><b>'+money(v)+'</b></div>').join(''):'<div class="empty">ยังไม่มีรายจ่ายเดือนนี้</div>'
 }
 function filteredTx(){let a=[...transactions],f=$('txFilterType').value,q=$('txSearch').value.trim().toLowerCase(),cat=$('txFilterCategory').value,mon=$('txFilterMonth').value;if(f!=='all')a=a.filter(x=>x.type===f);if(cat)a=a.filter(x=>x.category_id===cat);if(mon)a=a.filter(x=>String(x.transaction_date).slice(0,7)===mon);if(q)a=a.filter(x=>(x.description+' '+(x.categories?.name||'')+' '+(x.note||'')).toLowerCase().includes(q));return a}
 function renderTransactions(){const arr=filteredTx();renderTxList($('txList'),arr);$('txCount').textContent=arr.length+' รายการ'}
@@ -126,11 +174,11 @@ function renderSummary(){
 function fillTxSelectors(){$('txCategory').innerHTML=categories.filter(c=>c.type===$('txType').value).map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('');$('txAccount').innerHTML='<option value="">ไม่ระบุบัญชี</option>'+accounts.map(a=>'<option value="'+a.id+'">'+esc(a.name)+'</option>').join('');$('txFilterCategory').innerHTML='<option value="">ทุกหมวด</option>'+categories.map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')}
 
 function showPage(name){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$(name+'Page').classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===name))}
-document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showPage(b.dataset.page))
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
 for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=fillTxSelectors;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary
 
 window.openTx=(id=null)=>{editing={type:'tx',id};$('txDialog').showModal();$('txDate').value=new Date().toISOString().slice(0,10);$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';fillTxSelectors();if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||''}}}
-$('txForm').onsubmit=async e=>{e.preventDefault();const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:'paid',note:$('txNote').value.trim()||null,source:'web'};let r=editing.id?await supabase.from('transactions').update(row).eq('id',editing.id):await supabase.from('transactions').insert(row);if(r.error)return alert(r.error.message);$('txDialog').close();await loadAll()}
+$('txForm').onsubmit=async e=>{e.preventDefault();const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:'paid',note:$('txNote').value.trim()||null,source:'web'};let r=editing.id?await supabase.from('transactions').update(row).eq('id',editing.id):await supabase.from('transactions').insert(row);if(r.error)return alert(r.error.message);$('txDialog').close();showAppToast('บันทึกแล้ว ✅');await loadAll()}
 
 window.openEntity=(type,id=null)=>{editing={type,id};const f=$('entityFields'),title=$('entityTitle');let x
  if(type==='category'){x=id?categories.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'หมวดหมู่';f.innerHTML='<div class="field full"><label>ชื่อหมวด</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="type"><option value="expense" '+(x?.type!=='income'?'selected':'')+'>รายจ่าย</option><option value="income" '+(x?.type==='income'?'selected':'')+'>รายรับ</option></select></div><div class="field"><label>ไอคอน Emoji</label><input name="icon" value="'+esc(x?.icon||'🏷️')+'"></div>'}
@@ -148,3 +196,5 @@ document.addEventListener('click',async e=>{const edit=e.target.closest('[data-e
 function subscribe(){if(channel)supabase.removeChannel(channel);channel=supabase.channel('finance-live').on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+user.id},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+user.id},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'bills',filter:'user_id=eq.'+user.id},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'debts',filter:'user_id=eq.'+user.id},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'budgets',filter:'user_id=eq.'+user.id},loadAll).subscribe()}
 window.txDialog=$('txDialog');window.entityDialog=$('entityDialog');
 const {data:{session}}=await supabase.auth.getSession();if(session?.user)await boot(session.user)
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn))}
