@@ -24,3 +24,9 @@ dialog{border:0;border-radius:22px;padding:0;width:min(580px,calc(100% - 24px));
 .chart-box.tall{height:390px}.chart-box.donut{height:330px;max-width:650px;margin:14px auto 0}
 .summary-note{padding:10px 12px;border-radius:12px;background:#f8fafc;color:#667085;font-size:12px}
 @media(max-width:820px){.chart-box{height:280px}.chart-box.tall{height:360px}.chart-box.donut{height:300px}}
+
+.budget-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.budget-card{overflow:hidden}.budget-numbers{display:flex;align-items:baseline;gap:6px;margin-top:18px}.budget-numbers b{font-size:26px}.budget-numbers span{color:var(--muted);font-size:13px}
+.budget-progress{height:12px;background:#eef2f7;border-radius:999px;overflow:hidden;margin-top:10px}.budget-progress-fill{height:100%;background:linear-gradient(90deg,#22c55e,#84cc16);border-radius:999px}.budget-progress-fill.over{background:linear-gradient(90deg,#f97316,#ef4444)}
+.budget-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.check{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff}.check input{width:auto}
+@media(max-width:820px){.sidebar{grid-template-columns:repeat(8,1fr)}.budget-grid,.budget-checks{grid-template-columns:1fr}}
