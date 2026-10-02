@@ -2,80 +2,140 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#4f46e5">
 <title>My Finance</title>
-<style>
-:root{font-family:Inter,"Noto Sans Thai",system-ui,sans-serif;color:#172033;background:#f5f7fb}*{box-sizing:border-box}body{margin:0;background:#f5f7fb}button,input,select{font:inherit}.hidden{display:none!important}
-.top{background:#fff;border-bottom:1px solid #e8ebf2;position:sticky;top:0;z-index:5}.topin{max-width:1100px;margin:auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:20px;font-weight:900;color:#3730a3}.muted{color:#7c879b;font-size:12px}
-.wrap{max-width:1100px;margin:auto;padding:18px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{background:#fff;border:1px solid #e7eaf1;border-radius:18px;padding:16px}.metric b{display:block;font-size:26px;margin-top:5px}.income{color:#07875b}.expense{color:#cf3f3f}.balance{color:#4338ca}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:#4f46e5;color:#fff}.ghost{background:#f3f4f6;color:#374151}.danger{background:#fee2e2;color:#b91c1c}
-.section{margin-top:14px}.list{display:flex;flex-direction:column;gap:8px}.item{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:12px;border:1px solid #edf0f5;border-radius:14px}.item b{display:block}.amt{font-weight:900;white-space:nowrap}.empty{text-align:center;color:#8b95a7;padding:24px}
-.authwrap{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#eef2ff,#f8fafc)}.auth{width:min(420px,100%);background:#fff;border:1px solid #e5e7eb;border-radius:24px;padding:24px;box-shadow:0 20px 60px rgba(46,56,100,.12)}.auth h1{margin:0;color:#3730a3}.tabs{display:flex;background:#f3f4f6;padding:4px;border-radius:12px;margin:18px 0}.tabs button{flex:1;border:0;border-radius:9px;padding:9px;background:transparent;font-weight:800;cursor:pointer}.tabs .active{background:#fff;color:#4338ca}.field{display:flex;flex-direction:column;gap:6px;margin-top:10px}.field label{font-size:12px;font-weight:800;color:#596174}input,select{border:1px solid #dfe3eb;border-radius:11px;padding:10px 11px}.msg{margin-top:12px;padding:10px 12px;border-radius:10px;background:#f8fafc;font-size:13px}.ok{background:#ecfdf5;color:#047857}.err{background:#fff1f2;color:#be123c}
-dialog{border:0;border-radius:20px;padding:0;width:min(520px,calc(100% - 24px));box-shadow:0 24px 80px rgba(22,30,55,.22)}dialog::backdrop{background:rgba(17,24,39,.45)}.modal{padding:20px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.item{grid-template-columns:1fr auto}.item button{grid-column:1/-1}.wrap{padding:12px}}
-</style>
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<div id="authScreen" class="authwrap">
-  <div class="auth">
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
     <h1>💙 My Finance</h1>
-    <p class="muted">ข้อมูลซิงก์กับ Supabase</p>
-    <div class="tabs"><button id="loginTab" class="active">เข้าสู่ระบบ</button><button id="signupTab">สมัครใช้งาน</button></div>
+    <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และหนี้ในที่เดียว</p>
+    <div class="auth-tabs">
+      <button id="tabLogin" class="active">เข้าสู่ระบบ</button>
+      <button id="tabSignup">สมัครใช้งาน</button>
+    </div>
     <div class="field"><label>อีเมล</label><input id="email" type="email" autocomplete="email"></div>
-    <div class="field"><label>รหัสผ่าน</label><input id="password" type="password" autocomplete="current-password"></div>
-    <button id="authBtn" class="btn primary" style="width:100%;margin-top:14px">เข้าสู่ระบบ</button>
-    <div id="msg" class="msg hidden"></div>
+    <div class="field" style="margin-top:10px"><label>รหัสผ่าน</label><input id="password" type="password" autocomplete="current-password"></div>
+    <button id="authBtn" class="btn primary full" style="margin-top:14px">เข้าสู่ระบบ</button>
+    <div id="authMsg" class="notice hidden"></div>
   </div>
 </div>
 
-<div id="app" class="hidden">
-  <header class="top"><div class="topin"><div><div class="brand">💙 My Finance</div><div class="muted">GitHub Pages + Supabase</div></div><div><span id="who" class="muted"></span> <button id="logout" class="btn ghost">ออกจากระบบ</button></div></div></header>
-  <main class="wrap">
-    <div class="row"><div><h2 style="margin:0">ภาพรวมเดือนนี้</h2><div id="month" class="muted"></div></div><button class="btn primary" id="addBtn">+ เพิ่มรายการ</button></div>
-    <div class="grid section">
-      <div class="card metric"><span class="muted">รายรับ</span><b id="income" class="income">฿0</b></div>
-      <div class="card metric"><span class="muted">รายจ่าย</span><b id="expense" class="expense">฿0</b></div>
-      <div class="card metric"><span class="muted">คงเหลือ</span><b id="balance" class="balance">฿0</b></div>
+<div id="app" class="app hidden">
+  <header class="topbar">
+    <div class="topin">
+      <div><div class="brand">💙 My Finance</div><div class="muted">Supabase Cloud Sync</div></div>
+      <div class="userbox">
+        <a class="btn small soft" href="./import.html">📥 นำเข้า r3</a>
+        <span id="userEmail" class="muted"></span>
+        <button id="logout" class="btn small ghost">ออกจากระบบ</button>
+      </div>
     </div>
-    <div class="card section"><div class="row"><h3 style="margin:0">รายการล่าสุด</h3><select id="filter"><option value="all">ทั้งหมด</option><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select></div><div id="list" class="list section"></div></div>
-  </main>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="navbtn active" data-page="dashboard">📊 ภาพรวม</button>
+      <button class="navbtn" data-page="transactions">🧾 รายการ</button>
+      <button class="navbtn" data-page="categories">🏷️ หมวดหมู่</button>
+      <button class="navbtn" data-page="accounts">🏦 บัญชี</button>
+      <button class="navbtn" data-page="bills">📅 บิล</button>
+      <button class="navbtn" data-page="debts">💳 หนี้</button>
+      <button class="navbtn" data-page="summary">📈 สรุป</button>
+    </aside>
+
+    <main class="content">
+      <section id="dashboardPage" class="page">
+        <div class="page-head"><div><h2>ภาพรวมการเงิน</h2><div id="monthLabel" class="muted"></div></div><button class="btn primary" onclick="openTx()">+ เพิ่มรายการ</button></div>
+        <div class="grid3">
+          <div class="card metric"><div class="label">รายรับเดือนนี้</div><div id="incomeTotal" class="value income money">฿0</div></div>
+          <div class="card metric"><div class="label">รายจ่ายเดือนนี้</div><div id="expenseTotal" class="value expense money">฿0</div></div>
+          <div class="card metric"><div class="label">คงเหลือเดือนนี้</div><div id="balanceTotal" class="value balance money">฿0</div></div>
+        </div>
+        <div class="grid4 section">
+          <div class="card metric"><div class="label">บิลประจำรวม</div><div id="billTotal" class="value warning money">฿0</div></div>
+          <div class="card metric"><div class="label">หนี้คงเหลือ</div><div id="debtTotal" class="value expense money">฿0</div></div>
+          <div class="card metric"><div class="label">จำนวนบัญชี</div><div class="value"><span id="accountCount">—</span></div></div>
+          <div class="card metric"><div class="label">จำนวนหมวด</div><div class="value"><span id="categoryCount">—</span></div></div>
+        </div>
+        <div class="card section"><div class="row"><h3 style="margin:0">รายจ่ายตามหมวด</h3></div><div id="categoryChart"></div></div>
+        <div class="card section"><div class="row"><h3 style="margin:0">รายการล่าสุด</h3><button class="btn small soft" onclick="openTx()">+ เพิ่ม</button></div><div id="recentList" class="list section"></div></div>
+      </section>
+
+      <section id="transactionsPage" class="page hidden">
+        <div class="page-head"><div><h2>รายรับ‑รายจ่าย</h2><div id="txCount" class="muted"></div></div><button class="btn primary" onclick="openTx()">+ เพิ่มรายการ</button></div>
+        <div class="card">
+          <div class="filters">
+            <input id="txSearch" placeholder="ค้นหารายการ...">
+            <select id="txFilterType"><option value="all">ทุกประเภท</option><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select>
+            <select id="txFilterCategory"><option value="">ทุกหมวด</option></select>
+            <input id="txFilterMonth" type="month">
+          </div>
+          <div id="txList" class="list section"></div>
+        </div>
+      </section>
+
+      <section id="categoriesPage" class="page hidden">
+        <div class="page-head"><div><h2>หมวดหมู่</h2><div class="muted">สร้างหมวดเองได้ไม่จำกัด</div></div><button class="btn primary" onclick="openEntity('category')">+ เพิ่มหมวด</button></div>
+        <div class="card"><div class="row"><h3>รายจ่าย</h3><span class="pill expense">Expense</span></div><div id="expenseCats" class="category-grid section"></div></div>
+        <div class="card section"><div class="row"><h3>รายรับ</h3><span class="pill income">Income</span></div><div id="incomeCats" class="category-grid section"></div></div>
+      </section>
+
+      <section id="accountsPage" class="page hidden">
+        <div class="page-head"><div><h2>บัญชี</h2><div class="muted">เงินสด ธนาคาร บัตรเครดิต E‑Wallet</div></div><button class="btn primary" onclick="openEntity('account')">+ เพิ่มบัญชี</button></div>
+        <div id="accountList" class="card list"></div>
+      </section>
+
+      <section id="billsPage" class="page hidden">
+        <div class="page-head"><div><h2>บิลประจำ</h2><div class="muted">ค่าเน็ต ค่าหอ Subscription และค่าใช้จ่ายประจำ</div></div><button class="btn primary" onclick="openEntity('bill')">+ เพิ่มบิล</button></div>
+        <div id="billList" class="card list"></div>
+      </section>
+
+      <section id="debtsPage" class="page hidden">
+        <div class="page-head"><div><h2>หนี้และสินเชื่อ</h2><div class="muted">ติดตามยอดคงเหลือและยอดผ่อน</div></div><button class="btn primary" onclick="openEntity('debt')">+ เพิ่มหนี้</button></div>
+        <div id="debtList" class="card list"></div>
+      </section>
+
+      <section id="summaryPage" class="page hidden">
+        <div class="page-head"><div><h2>สรุปการเงิน</h2><div class="muted">ภาพรวมจากข้อมูลทั้งหมด</div></div></div>
+        <div class="grid3">
+          <div class="card metric"><div class="label">รายรับทั้งหมด</div><div id="sumIncome" class="value income money">฿0</div></div>
+          <div class="card metric"><div class="label">รายจ่ายทั้งหมด</div><div id="sumExpense" class="value expense money">฿0</div></div>
+          <div class="card metric"><div class="label">สุทธิทั้งหมด</div><div id="sumBalance" class="value balance money">฿0</div></div>
+        </div>
+        <div class="card section"><h3>ตารางสรุปรายเดือน</h3><div id="summaryTable"></div></div>
+      </section>
+    </main>
+  </div>
+  <button class="fab" onclick="openTx()">＋ บันทึกรายการ</button>
 </div>
 
-<dialog id="txDialog"><form id="txForm" class="modal"><h3>เพิ่มรายการ</h3>
-  <div class="field"><label>วันที่</label><input id="date" type="date" required></div>
-  <div class="field"><label>ประเภท</label><select id="type"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select></div>
-  <div class="field"><label>รายละเอียด</label><input id="desc" required></div>
-  <div class="field"><label>จำนวนเงิน</label><input id="amount" type="number" min="0.01" step="0.01" required></div>
-  <div class="field"><label>หมวดหมู่</label><select id="category"></select></div>
-  <div class="actions"><button type="button" class="btn ghost" id="cancelBtn">ยกเลิก</button><button class="btn primary">บันทึก</button></div>
-</form></dialog>
+<dialog id="txDialog">
+<form id="txForm" class="modal">
+  <h3>บันทึกรายรับ / รายจ่าย</h3>
+  <div class="fields">
+    <div class="field"><label>วันที่</label><input id="txDate" type="date" required></div>
+    <div class="field"><label>ประเภท</label><select id="txType"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select></div>
+    <div class="field full"><label>รายละเอียด</label><input id="txDesc" required placeholder="เช่น ค่าอาหาร"></div>
+    <div class="field"><label>จำนวนเงิน</label><input id="txAmount" type="number" min="0.01" step="0.01" required></div>
+    <div class="field"><label>หมวดหมู่</label><select id="txCategory"></select></div>
+    <div class="field full"><label>บัญชี</label><select id="txAccount"></select></div>
+    <div class="field full"><label>หมายเหตุ</label><textarea id="txNote" placeholder="ไม่บังคับ"></textarea></div>
+  </div>
+  <div class="modal-actions"><button type="button" class="btn ghost" onclick="txDialog.close()">ยกเลิก</button><button class="btn primary">บันทึก</button></div>
+</form>
+</dialog>
 
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
-const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
-const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
-const supabase=createClient(url,key)
-const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0))
-let mode='login',user=null,cats=[],txs=[],ch=null
-function showMsg(t,c=''){const e=$('msg');e.textContent=t;e.className='msg '+c}
-function setMode(m){mode=m;$('loginTab').classList.toggle('active',m==='login');$('signupTab').classList.toggle('active',m==='signup');$('authBtn').textContent=m==='login'?'เข้าสู่ระบบ':'สร้างบัญชี'}
-$('loginTab').onclick=()=>setMode('login');$('signupTab').onclick=()=>setMode('signup')
-$('authBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||password.length<6){showMsg('กรอกอีเมลและรหัสผ่านอย่างน้อย 6 ตัวอักษร','err');return}
-try{if(mode==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name:'มิว'}}});if(error)throw error;if(!data.session){showMsg('สมัครแล้ว ✅ กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ','ok');return}await boot(data.user)}
-else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user)}}catch(e){showMsg(e.message,'err')}}
-$('logout').onclick=async()=>{await supabase.auth.signOut();location.reload()}
-async function boot(u){user=u;$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('who').textContent=u.email||'';await load();subscribe()}
-async function load(){const [c,t]=await Promise.all([supabase.from('categories').select('*').order('sort_order'),supabase.from('transactions').select('*,categories(name,icon)').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).limit(300)]);if(c.error)alert(c.error.message);if(t.error)alert(t.error.message);cats=c.data||[];txs=t.data||[];render()}
-function render(){const now=new Date(),y=now.getFullYear(),m=now.getMonth();$('month').textContent=now.toLocaleDateString('th-TH',{month:'long',year:'numeric'});const a=txs.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'});const inc=a.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=a.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0);$('income').textContent=money(inc);$('expense').textContent=money(exp);$('balance').textContent=money(inc-exp);renderList();fillCats()}
-function renderList(){const f=$('filter').value,arr=f==='all'?txs:txs.filter(x=>x.type===f);$('list').innerHTML=arr.length?arr.map(x=>'<div class="item"><div><b>'+(x.categories?.icon||'🧾')+' '+esc(x.description)+'</b><span class="muted">'+x.transaction_date+' · '+esc(x.categories?.name||'ไม่ระบุหมวด')+'</span></div><span class="amt '+(x.type==='income'?'income':'expense')+'">'+(x.type==='income'?'+':'-')+money(x.amount)+'</span><button class="btn danger" data-id="'+x.id+'">ลบ</button></div>').join(''):'<div class="empty">ยังไม่มีรายการ</div>'}
-function fillCats(){const t=$('type').value;$('category').innerHTML=cats.filter(c=>c.type===t).map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')}
-function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-$('addBtn').onclick=()=>{$('date').value=new Date().toISOString().slice(0,10);$('desc').value='';$('amount').value='';fillCats();$('txDialog').showModal()}
-$('cancelBtn').onclick=()=>$('txDialog').close();$('type').onchange=fillCats;$('filter').onchange=renderList
-$('txForm').onsubmit=async e=>{e.preventDefault();const {error}=await supabase.from('transactions').insert({user_id:user.id,transaction_date:$('date').value,type:$('type').value,description:$('desc').value.trim(),amount:Number($('amount').value),category_id:$('category').value||null,status:'paid',source:'web'});if(error){alert(error.message);return}$('txDialog').close();await load()}
-document.addEventListener('click',async e=>{const b=e.target.closest('[data-id]');if(!b)return;if(!confirm('ยืนยันลบรายการนี้?'))return;const {error}=await supabase.from('transactions').delete().eq('id',b.dataset.id);if(error)alert(error.message);else await load()})
-function subscribe(){if(ch)supabase.removeChannel(ch);ch=supabase.channel('finance-live').on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+user.id},load).subscribe()}
-const {data:{session}}=await supabase.auth.getSession();if(session?.user)await boot(session.user)
-</script>
-</body></html>
+<dialog id="entityDialog">
+<form id="entityForm" class="modal">
+  <h3 id="entityTitle"></h3>
+  <div id="entityFields" class="fields"></div>
+  <div class="modal-actions"><button type="button" class="btn ghost" onclick="entityDialog.close()">ยกเลิก</button><button class="btn primary">บันทึก</button></div>
+</form>
+</dialog>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
