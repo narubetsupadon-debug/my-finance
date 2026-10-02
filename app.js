@@ -31,6 +31,7 @@ async function loadAll(){
 }
 function renderAll(){renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderSummary();fillTxSelectors()}
 function renderDashboard(){
+ $('accountCount').textContent=accounts.length;$('categoryCount').textContent=categories.length
  const now=new Date(),y=now.getFullYear(),m=now.getMonth(),monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
  const inc=monthly.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=monthly.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
  $('monthLabel').textContent=now.toLocaleDateString('th-TH',{month:'long',year:'numeric'});$('incomeTotal').textContent=money(inc);$('expenseTotal').textContent=money(exp);$('balanceTotal').textContent=money(inc-exp)
@@ -70,4 +71,5 @@ $('entityForm').onsubmit=async e=>{e.preventDefault();const fd=Object.fromEntrie
 
 document.addEventListener('click',async e=>{const edit=e.target.closest('[data-edit]');if(edit){const t=edit.dataset.edit,id=edit.dataset.id;if(t==='tx')openTx(id);else openEntity(t,id);return}const del=e.target.closest('[data-del]');if(del){if(!confirm('ยืนยันลบรายการนี้?'))return;const {error}=await supabase.from(del.dataset.del).delete().eq('id',del.dataset.id);if(error)alert('ลบไม่ได้: '+error.message);else await loadAll()}})
 function subscribe(){if(channel)supabase.removeChannel(channel);channel=supabase.channel('finance-live').on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+user.id},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+user.id},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'bills',filter:'user_id=eq.'+user.id},loadAll).on('postgres_changes',{event:'*',schema:'public',table:'debts',filter:'user_id=eq.'+user.id},loadAll).subscribe()}
+window.txDialog=$('txDialog');window.entityDialog=$('entityDialog');
 const {data:{session}}=await supabase.auth.getSession();if(session?.user)await boot(session.user)
