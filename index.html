@@ -43,6 +43,7 @@
       <button class="navbtn" data-page="accounts">🏦 บัญชี</button>
       <button class="navbtn" data-page="bills">📅 บิล</button>
       <button class="navbtn" data-page="debts">💳 หนี้</button>
+      <button class="navbtn" data-page="budget">🎯 งบประมาณ</button>
       <button class="navbtn" data-page="summary">📈 สรุป</button>
     </aside>
 
@@ -58,7 +59,7 @@
           <div class="card metric"><div class="label">บิลประจำรวม</div><div id="billTotal" class="value warning money">฿0</div></div>
           <div class="card metric"><div class="label">หนี้คงเหลือ</div><div id="debtTotal" class="value expense money">฿0</div></div>
           <div class="card metric"><div class="label">จำนวนบัญชี</div><div class="value"><span id="accountCount">—</span></div></div>
-          <div class="card metric"><div class="label">จำนวนหมวด</div><div class="value"><span id="categoryCount">—</span></div></div>
+          <div class="card metric"><div class="label">งบกิน/ทั่วไปคงเหลือ</div><div id="budgetRemainDash" class="value balance money">฿0</div><div id="budgetDailyDash" class="muted">ใช้ได้วันละ ฿0</div></div>
         </div>
         <div class="card section"><div class="row"><h3 style="margin:0">รายจ่ายตามหมวด</h3></div><div id="categoryChart"></div></div>
         <div class="card section"><div class="row"><h3 style="margin:0">รายการล่าสุด</h3><button class="btn small soft" onclick="openTx()">+ เพิ่ม</button></div><div id="recentList" class="list section"></div></div>
@@ -96,6 +97,19 @@
       <section id="debtsPage" class="page hidden">
         <div class="page-head"><div><h2>หนี้และสินเชื่อ</h2><div class="muted">ติดตามยอดคงเหลือและยอดผ่อน</div></div><button class="btn primary" onclick="openEntity('debt')">+ เพิ่มหนี้</button></div>
         <div id="debtList" class="card list"></div>
+      </section>
+
+      <section id="budgetPage" class="page hidden">
+        <div class="page-head">
+          <div><h2>งบประมาณรายเดือน</h2><div class="muted">ตั้งเพดานค่าใช้จ่ายและดูว่าเหลือใช้ได้วันละเท่าไร</div></div>
+          <button class="btn primary" onclick="openEntity('budget')">+ เพิ่มงบ</button>
+        </div>
+        <div class="grid3">
+          <div class="card metric"><div class="label">งบรวมเดือนนี้</div><div id="budgetLimitTotal" class="value balance money">฿0</div></div>
+          <div class="card metric"><div class="label">ใช้ไปแล้ว</div><div id="budgetSpentTotal" class="value expense money">฿0</div></div>
+          <div class="card metric"><div class="label">คงเหลือ</div><div id="budgetRemainTotal" class="value income money">฿0</div><div id="budgetDailyTotal" class="muted">ใช้ได้วันละ ฿0</div></div>
+        </div>
+        <div id="budgetList" class="budget-grid section"></div>
       </section>
 
       <section id="summaryPage" class="page hidden">
