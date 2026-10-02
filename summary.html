@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>สรุปการเงิน - My Finance</title>
+<style>
+body{font-family:Inter,"Noto Sans Thai",system-ui,sans-serif;background:#f5f7fb;color:#172033;margin:0}.wrap{max-width:1100px;margin:auto;padding:20px}.card{background:#fff;border:1px solid #e7eaf1;border-radius:18px;padding:18px;margin-top:14px;overflow:auto}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.btn{display:inline-block;text-decoration:none;border:0;border-radius:12px;padding:10px 14px;font-weight:800;background:#eef2ff;color:#4338ca}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.metric b{display:block;font-size:26px;margin-top:4px}.muted{font-size:12px;color:#7c879b}.income{color:#07875b}.expense{color:#cf3f3f}.balance{color:#4338ca}
+table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:12px;border-bottom:1px solid #edf0f5;text-align:right}th:first-child,td:first-child{text-align:left}th{font-size:12px;color:#687386;background:#f8fafc;position:sticky;top:0}.empty{text-align:center;color:#8892a4;padding:24px}@media(max-width:760px){.grid{grid-template-columns:1fr}.wrap{padding:12px}}
+</style></head><body><main class="wrap">
+<div class="row"><div><h1 style="margin:0;color:#3730a3">📊 สรุป My Finance</h1><div class="muted">สรุปจากข้อมูลใน Supabase</div></div><a class="btn" href="./">← กลับหน้าหลัก</a></div>
+<div class="grid" style="margin-top:14px">
+<div class="card metric"><span class="muted">รายรับทั้งหมด</span><b id="allIncome" class="income">฿0</b></div>
+<div class="card metric"><span class="muted">รายจ่ายทั้งหมด</span><b id="allExpense" class="expense">฿0</b></div>
+<div class="card metric"><span class="muted">คงเหลือสุทธิ</span><b id="allBalance" class="balance">฿0</b></div>
+</div>
+<div class="card"><h2>ตารางสรุปรายเดือน</h2><div id="monthTable"></div></div>
+<div class="card"><h2>สรุปรายจ่ายตามหมวด</h2><div id="catTable"></div></div>
+</main>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
+const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
+const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
+const supabase=createClient(url,key)
+const money=n=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+const {data:{user}}=await supabase.auth.getUser()
+if(!user){document.body.innerHTML='<main class="wrap"><div class="card"><h2>กรุณาเข้าสู่ระบบ My Finance ก่อน</h2><a class="btn" href="./">ไปหน้าเข้าสู่ระบบ</a></div></main>'}
+else{
+ const {data:tx,error}=await supabase.from('transactions').select('transaction_date,type,amount,status,categories(name)').order('transaction_date',{ascending:true})
+ if(error){document.getElementById('monthTable').innerHTML='<div class="empty">'+esc(error.message)+'</div>'}
+ else{
+  const rows=(tx||[]).filter(x=>x.status!=='cancelled')
+  const inc=rows.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount||0),0)
+  const exp=rows.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount||0),0)
+  document.getElementById('allIncome').textContent=money(inc);document.getElementById('allExpense').textContent=money(exp);document.getElementById('allBalance').textContent=money(inc-exp)
+  const m={}
+  for(const x of rows){const k=String(x.transaction_date).slice(0,7);if(!m[k])m[k]={income:0,expense:0,count:0};m[k][x.type]+=Number(x.amount||0);m[k].count++}
+  const months=Object.entries(m).sort((a,b)=>b[0].localeCompare(a[0]))
+  document.getElementById('monthTable').innerHTML=months.length?'<table><thead><tr><th>เดือน</th><th>รายรับ</th><th>รายจ่าย</th><th>คงเหลือ</th><th>จำนวนรายการ</th></tr></thead><tbody>'+months.map(([k,v])=>{const [y,mo]=k.split('-');const label=new Date(Number(y),Number(mo)-1,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'});return '<tr><td>'+label+'</td><td class="income">'+money(v.income)+'</td><td class="expense">'+money(v.expense)+'</td><td class="balance">'+money(v.income-v.expense)+'</td><td>'+v.count+'</td></tr>'}).join('')+'</tbody></table>':'<div class="empty">ยังไม่มีข้อมูล</div>'
+  const c={}
+  for(const x of rows.filter(x=>x.type==='expense')){const n=x.categories?.name||'อื่นๆ';c[n]=(c[n]||0)+Number(x.amount||0)}
+  const cats=Object.entries(c).sort((a,b)=>b[1]-a[1])
+  document.getElementById('catTable').innerHTML=cats.length?'<table><thead><tr><th>หมวดหมู่</th><th>ยอดรวม</th><th>สัดส่วน</th></tr></thead><tbody>'+cats.map(([n,v])=>'<tr><td>'+esc(n)+'</td><td>'+money(v)+'</td><td>'+((v/exp)*100||0).toFixed(1)+'%</td></tr>').join('')+'</tbody></table>':'<div class="empty">ยังไม่มีข้อมูลรายจ่าย</div>'
+ }
+}
+</script></body></html>
