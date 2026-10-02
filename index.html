@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="stylesheet" href="./style.css">
 </head>
@@ -49,20 +53,72 @@
 
     <main class="content">
       <section id="dashboardPage" class="page">
-        <div class="page-head"><div><h2>ภาพรวมการเงิน</h2><div id="monthLabel" class="muted"></div></div><button class="btn primary" onclick="openTx()">+ เพิ่มรายการ</button></div>
-        <div class="grid3">
+        <div class="hero">
+          <div>
+            <div class="eyebrow">MY FINANCE • DAILY</div>
+            <h1 id="helloTitle">สวัสดีมิว 👋</h1>
+            <div id="todayLabel" class="hero-sub">วันนี้</div>
+          </div>
+          <button class="btn hero-btn" onclick="openTx()">＋ บันทึกรายการ</button>
+        </div>
+
+        <div class="today-grid section">
+          <div class="card today-card accent">
+            <div class="label">วันนี้ใช้ไป</div>
+            <div id="todaySpent" class="today-value money">฿0</div>
+            <div id="todayCount" class="muted">0 รายการ</div>
+          </div>
+          <div class="card today-card">
+            <div class="label">วันนี้ยังใช้ได้</div>
+            <div id="todayCanSpend" class="today-value balance money">฿0</div>
+            <div id="todayCanSpendHint" class="muted">จากงบที่เหลือ</div>
+          </div>
+          <div class="card today-card">
+            <div class="label">คงเหลือเดือนนี้</div>
+            <div id="balanceTotal" class="today-value income money">฿0</div>
+            <div id="monthLabel" class="muted"></div>
+          </div>
+        </div>
+
+        <div class="card budget-hero section">
+          <div class="row">
+            <div>
+              <div class="eyebrow">งบกิน / ใช้ทั่วไป</div>
+              <h3 style="margin:4px 0 0"><span id="budgetSpentDash">฿0</span> / <span id="budgetLimitDash">฿0</span></h3>
+            </div>
+            <div class="budget-badge"><span id="budgetPctDash">0%</span></div>
+          </div>
+          <div class="budget-progress large"><div id="budgetProgressDash" class="budget-progress-fill" style="width:0%"></div></div>
+          <div class="budget-footer">
+            <span>เหลือ <b id="budgetRemainDash">฿0</b></span>
+            <span id="budgetDailyDash">ใช้ได้วันละ ฿0</span>
+          </div>
+        </div>
+
+        <div class="card section">
+          <div class="row"><div><div class="eyebrow">QUICK ADD</div><h3 style="margin:3px 0 0">บันทึกให้ไวที่สุด</h3></div><span class="muted">แตะหมวด → ใส่ยอด → บันทึก</span></div>
+          <div id="quickAdd" class="quick-grid"></div>
+        </div>
+
+        <div class="home-grid section">
+          <div class="card">
+            <div class="row"><div><div class="eyebrow">INSIGHT</div><h3 style="margin:3px 0 0">สรุปให้แล้ว</h3></div><span>✨</span></div>
+            <div id="insightList" class="insight-list"></div>
+          </div>
+          <div class="card">
+            <div class="row"><div><div class="eyebrow">UPCOMING</div><h3 style="margin:3px 0 0">ใกล้ถึงกำหนด</h3></div><button class="btn small soft" data-page-jump="bills">ดูทั้งหมด</button></div>
+            <div id="upcomingList" class="upcoming-list"></div>
+          </div>
+        </div>
+
+        <div class="grid3 section">
           <div class="card metric"><div class="label">รายรับเดือนนี้</div><div id="incomeTotal" class="value income money">฿0</div></div>
           <div class="card metric"><div class="label">รายจ่ายเดือนนี้</div><div id="expenseTotal" class="value expense money">฿0</div></div>
-          <div class="card metric"><div class="label">คงเหลือเดือนนี้</div><div id="balanceTotal" class="value balance money">฿0</div></div>
-        </div>
-        <div class="grid4 section">
-          <div class="card metric"><div class="label">บิลประจำรวม</div><div id="billTotal" class="value warning money">฿0</div></div>
           <div class="card metric"><div class="label">หนี้คงเหลือ</div><div id="debtTotal" class="value expense money">฿0</div></div>
-          <div class="card metric"><div class="label">จำนวนบัญชี</div><div class="value"><span id="accountCount">—</span></div></div>
-          <div class="card metric"><div class="label">งบกิน/ทั่วไปคงเหลือ</div><div id="budgetRemainDash" class="value balance money">฿0</div><div id="budgetDailyDash" class="muted">ใช้ได้วันละ ฿0</div></div>
         </div>
-        <div class="card section"><div class="row"><h3 style="margin:0">รายจ่ายตามหมวด</h3></div><div id="categoryChart"></div></div>
-        <div class="card section"><div class="row"><h3 style="margin:0">รายการล่าสุด</h3><button class="btn small soft" onclick="openTx()">+ เพิ่ม</button></div><div id="recentList" class="list section"></div></div>
+
+        <div class="card section"><div class="row"><div><div class="eyebrow">THIS MONTH</div><h3 style="margin:3px 0 0">รายจ่ายตามหมวด</h3></div></div><div id="categoryChart"></div></div>
+        <div class="card section"><div class="row"><div><div class="eyebrow">RECENT</div><h3 style="margin:3px 0 0">รายการล่าสุด</h3></div><button class="btn small soft" onclick="openTx()">+ เพิ่ม</button></div><div id="recentList" class="list section"></div></div>
       </section>
 
       <section id="transactionsPage" class="page hidden">
@@ -172,6 +228,7 @@
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<div id="appToast" class="app-toast hidden"></div>
 <script type="module" src="./app.js"></script>
 </body>
 </html>
