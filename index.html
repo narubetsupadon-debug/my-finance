@@ -99,13 +99,34 @@
       </section>
 
       <section id="summaryPage" class="page hidden">
-        <div class="page-head"><div><h2>สรุปการเงิน</h2><div class="muted">ภาพรวมจากข้อมูลทั้งหมด</div></div></div>
+        <div class="page-head">
+          <div><h2>สรุปการเงิน</h2><div class="muted">กราฟและตารางสรุปรายเดือนแบบเดียวกับแนวคิดในไฟล์ Excel</div></div>
+          <div class="filters"><select id="summaryYear"></select><select id="summaryMonth"><option value="all">ทุกเดือน</option></select></div>
+        </div>
         <div class="grid3">
-          <div class="card metric"><div class="label">รายรับทั้งหมด</div><div id="sumIncome" class="value income money">฿0</div></div>
-          <div class="card metric"><div class="label">รายจ่ายทั้งหมด</div><div id="sumExpense" class="value expense money">฿0</div></div>
-          <div class="card metric"><div class="label">สุทธิทั้งหมด</div><div id="sumBalance" class="value balance money">฿0</div></div>
+          <div class="card metric"><div class="label">รายรับตามช่วงที่เลือก</div><div id="sumIncome" class="value income money">฿0</div></div>
+          <div class="card metric"><div class="label">รายจ่ายตามช่วงที่เลือก</div><div id="sumExpense" class="value expense money">฿0</div></div>
+          <div class="card metric"><div class="label">คงเหลือตามช่วงที่เลือก</div><div id="sumBalance" class="value balance money">฿0</div></div>
+        </div>
+        <div class="grid3 section">
+          <div class="card metric"><div class="label">ชำระบัตร/สินเชื่อ</div><div id="sumDebtPay" class="value expense money">฿0</div></div>
+          <div class="card metric"><div class="label">ค่าห้อง + รถ</div><div id="sumHomeCar" class="value warning money">฿0</div></div>
+          <div class="card metric"><div class="label">รายจ่ายประจำ</div><div id="sumRecurring" class="value balance money">฿0</div></div>
+        </div>
+        <div class="card section">
+          <div class="row"><div><h3 style="margin:0">รายรับ vs รายจ่ายรายเดือน</h3><div class="muted">ดูแนวโน้มเงินเข้า เงินออก และคงเหลือ</div></div></div>
+          <div class="chart-box"><canvas id="monthlyTrendChart"></canvas></div>
+        </div>
+        <div class="card section">
+          <div class="row"><div><h3 style="margin:0">รายจ่ายแยกหมวดหมู่รายเดือน</h3><div class="muted">ค่าห้อง · ค่างวดรถ · บัตร/สินเชื่อ · รายจ่ายประจำ · ซ่อม/ประกัน/ภาษีรถ · อื่น ๆ</div></div></div>
+          <div class="chart-box tall"><canvas id="monthlyCategoryChart"></canvas></div>
+        </div>
+        <div class="card section">
+          <div class="row"><div><h3 style="margin:0">สัดส่วนรายจ่าย</h3><div class="muted">ตามช่วงที่เลือก</div></div></div>
+          <div class="chart-box donut"><canvas id="categoryPieChart"></canvas></div>
         </div>
         <div class="card section"><h3>ตารางสรุปรายเดือน</h3><div id="summaryTable"></div></div>
+        <div class="card section"><h3>ตารางรายจ่ายแยกหมวด × เดือน</h3><div id="categoryMonthTable"></div></div>
       </section>
     </main>
   </div>
@@ -136,6 +157,7 @@
 </form>
 </dialog>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script type="module" src="./app.js"></script>
 </body>
 </html>
