@@ -32,7 +32,7 @@ async function loadAll(){
 }
 function renderAll(){renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary();fillTxSelectors()}
 function renderDashboard(){
- $('accountCount').textContent=accounts.length;$('categoryCount').textContent=categories.length
+ $('accountCount').textContent=accounts.length
  const now=new Date(),y=now.getFullYear(),m=now.getMonth(),monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
  const inc=monthly.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=monthly.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
  $('monthLabel').textContent=now.toLocaleDateString('th-TH',{month:'long',year:'numeric'});$('incomeTotal').textContent=money(inc);$('expenseTotal').textContent=money(exp);$('balanceTotal').textContent=money(inc-exp)
