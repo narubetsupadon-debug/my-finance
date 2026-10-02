@@ -63,3 +63,14 @@ var(--bg)}
 .credit-stats b{font-size:17px}
 .credit-used{height:100%;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:999px}
 @media(max-width:820px){.credit-stats{grid-template-columns:1fr}.credit-card .actions{margin-top:8px}}
+
+.payment-suggest-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:2px}
+.payment-pick{width:100%;border:1px solid #e8ebf2;background:linear-gradient(180deg,#fff,#fafbff);border-radius:15px;padding:12px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;text-align:left;color:var(--text);transition:.18s ease}
+.payment-pick:hover{border-color:#c7d2fe;transform:translateY(-1px);box-shadow:0 8px 20px rgba(79,70,229,.08)}
+.payment-pick:active{transform:scale(.99)}
+.payment-pick .pay-icon{font-size:24px}
+.payment-pick span:nth-child(2){min-width:0}
+.payment-pick b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.payment-pick small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.payment-pick strong{color:#4338ca;white-space:nowrap}
+@media(max-width:520px){.payment-pick{grid-template-columns:auto 1fr}.payment-pick strong{grid-column:2}}
