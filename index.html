@@ -15,7 +15,7 @@
 <div id="authScreen" class="auth-screen">
   <div class="auth-card">
     <h1>💙 My Finance</h1>
-    <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และหนี้ในที่เดียว</p>
+    <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และยอดคงเหลือบัตรในที่เดียว</p>
     <div class="auth-tabs">
       <button id="tabLogin" class="active">เข้าสู่ระบบ</button>
       <button id="tabSignup">สมัครใช้งาน</button>
@@ -46,7 +46,7 @@
       <button class="navbtn" data-page="categories">🏷️ หมวดหมู่</button>
       <button class="navbtn" data-page="accounts">🏦 บัญชี</button>
       <button class="navbtn" data-page="bills">📅 บิล</button>
-      <button class="navbtn" data-page="debts">💳 หนี้</button>
+      <button class="navbtn" data-page="debts">💳 บัตร/สินเชื่อ</button>
       <button class="navbtn" data-page="budget">🎯 งบประมาณ</button>
       <button class="navbtn" data-page="summary">📈 สรุป</button>
     </aside>
@@ -114,7 +114,7 @@
         <div class="grid3 section">
           <div class="card metric"><div class="label">รายรับเดือนนี้</div><div id="incomeTotal" class="value income money">฿0</div></div>
           <div class="card metric"><div class="label">รายจ่ายเดือนนี้</div><div id="expenseTotal" class="value expense money">฿0</div></div>
-          <div class="card metric"><div class="label">หนี้คงเหลือ</div><div id="debtTotal" class="value expense money">฿0</div></div>
+          <div class="card metric"><div class="label">ยอดคงเหลือบัตร/สินเชื่อ</div><div id="debtTotal" class="value expense money">฿0</div></div>
         </div>
 
         <div class="card section"><div class="row"><div><div class="eyebrow">THIS MONTH</div><h3 style="margin:3px 0 0">รายจ่ายตามหมวด</h3></div></div><div id="categoryChart"></div></div>
@@ -151,7 +151,7 @@
       </section>
 
       <section id="debtsPage" class="page hidden">
-        <div class="page-head"><div><h2>หนี้และสินเชื่อ</h2><div class="muted">ติดตามยอดคงเหลือและยอดผ่อน</div></div><button class="btn primary" onclick="openEntity('debt')">+ เพิ่มหนี้</button></div>
+        <div class="page-head"><div><h2>บัตรและสินเชื่อ</h2><div class="muted">ดูยอดที่ใช้ไป วงเงินคงเหลือ และยอดที่ต้องจ่ายรอบนี้</div></div><button class="btn primary" onclick="openEntity('debt')">+ เพิ่มบัตร/สินเชื่อ</button></div>
         <div id="debtList" class="card list"></div>
       </section>
 
