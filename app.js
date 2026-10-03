@@ -47,7 +47,60 @@ function nextDueDate(day){
  if(d<new Date(y,m,now.getDate())){const nm=m+1;d=new Date(y,nm,Math.min(Number(day||28),new Date(y,nm+1,0).getDate()))}
  return d
 }
+
+const dailyMessages = [
+ 'วันนี้มีอะไรดี ๆ รอมิวอยู่บ้างนะ ☀️',
+ 'แวะมาดูแลเงินกันสักนิดนะมิว 💙',
+ 'มิว วันนี้อยากเก็บเงินไว้ทำอะไรดี ✨',
+ 'วันใหม่ เริ่มจากเรื่องเล็ก ๆ ก็พอ 🌱',
+ 'กาแฟพร้อม แล้วกระเป๋าล่ะมิว ☕',
+ 'วันนี้ใช้เงินกับสิ่งที่มิวชอบได้เลย 🌷',
+ 'เหนื่อยก็พัก แล้วค่อยมาเล่าให้ฟังนะ 💙',
+ 'มิว วันนี้มีรายการไหนอยากจดไว้ไหม 📝',
+ 'เก็บทีละนิด ก็เข้าใกล้สิ่งที่อยากได้ 🌱',
+ 'วันนี้ขอให้ตัวเลขใจดีกับมิวนะ 😄',
+ 'มิว แวะเช็กเงินก่อนออกไปลุยกัน 🚀',
+ 'ซื้อความสุขบ้าง แล้วเผื่อเงินให้พรุ่งนี้ด้วย 🌈',
+ 'วันนี้ไม่ต้องเป๊ะทุกอย่างก็ได้มิว 💙',
+ 'มิว มีเป้าหมายเล็ก ๆ ของวันนี้หรือยัง 🎯',
+ 'เรื่องเงินค่อย ๆ จัดการไปด้วยกันนะ 🤝',
+ 'กลับมาแล้วเหรอมิว วันนี้เป็นยังไงบ้าง 🌤️',
+ 'เงินเข้าเงินออก มาเล่าให้นิลินฟังได้เลย 🧾',
+ 'มิว วันนี้ให้รางวัลตัวเองแบบไหนดี 🎁',
+ 'บันทึกนิดเดียว เดี๋ยวที่เหลือนิลินรวมให้ ✨',
+ 'วันนี้ขอให้มิวมีเรื่องให้ยิ้มเยอะ ๆ 😊',
+ 'กระเป๋าพร้อมไปกับมิวทุกวัน 👛',
+ 'มิว ลองดูว่าเดือนนี้เข้าใกล้เป้าหมายแค่ไหน 🌟',
+ 'วันธรรมดา ก็มีความสุขเล็ก ๆ ได้ 🍃',
+ 'มิว วันนี้มีเงินเหลือเก็บสักนิดไหม 🪙',
+ 'แวะพักตรงนี้ แล้วค่อยไปต่อก็ได้นะ 💙',
+ 'วันนี้อยากกินอะไร อย่าลืมจดด้วยนะ 🍜',
+ 'มิว มาดูว่าเงินเดินทางไปไหนบ้าง 🔎',
+ 'จดวันนี้ไว้ จะได้ไม่ต้องนึกย้อนหลัง 📝',
+ 'เริ่มวันด้วยใจเบา ๆ นะมิว 🌼',
+ 'มิว วันนี้เลือกสิ่งที่คุ้มกับความสุขของเรา ✨',
+ 'นิลินอยู่ตรงนี้ มาเช็กเงินกันได้เลย 💙'
+];
+let dailyGreetingDate = '';
+function refreshDailyGreeting() {
+ const parts = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit'
+ }).formatToParts(new Date());
+ const part = type => parts.find(p => p.type === type).value;
+ const dayKey = part('year') + '-' + part('month') + '-' + part('day');
+ if (dayKey === dailyGreetingDate) return;
+ const ordinal = Math.floor(Date.UTC(Number(part('year')), Number(part('month')) - 1, Number(part('day'))) / 86400000);
+ const heading = $('helloTitle');
+ if (heading) heading.textContent = dailyMessages[ordinal % dailyMessages.length];
+ dailyGreetingDate = dayKey;
+}
+setInterval(refreshDailyGreeting, 60000);
+document.addEventListener('visibilitychange', () => {
+ if (!document.hidden) refreshDailyGreeting();
+});
+
 function renderDashboard(){
+ refreshDailyGreeting();
  const now=new Date(),today=now.toISOString().slice(0,10),y=now.getFullYear(),m=now.getMonth()
  const monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
  const prevDate=new Date(y,m-1,1),py=prevDate.getFullYear(),pm=prevDate.getMonth()
