@@ -132,3 +132,30 @@ dialog{overflow:hidden}.modal{padding:22px}.modal h3{font-size:20px}.modal-actio
  .sidebar .navbtn{flex-direction:column;gap:4px;min-width:80px;min-height:62px;margin:0;padding:7px 5px;font-size:11px;font-weight:650}
  .nav-icon{flex:0 0 27px;width:27px;height:27px;border-radius:8px;font-size:18px}
 }
+
+/* App navigation: primary destinations always within thumb reach. */
+.mobile-app-nav{display:none}
+.app-menu-sheet{border:0;border-radius:26px;max-width:480px;width:calc(100% - 24px);padding:22px;color:#20263d;background:#fff;box-shadow:0 24px 80px #12183940}
+.app-menu-sheet::backdrop{background:rgba(20,25,45,.4);backdrop-filter:blur(4px)}
+.app-menu-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.app-menu-head h2{margin:3px 0 0;font-size:23px}
+.app-menu-eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;color:#858da4}
+.app-menu-close{width:42px;height:42px;border:0;border-radius:50%;background:#f2f4fa;color:#596174;cursor:pointer;font-size:18px}
+.app-menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.app-menu-item{display:flex;align-items:center;gap:11px;min-height:70px;padding:14px;border:1px solid #e9ecf5;border-radius:17px;background:#fafbff;color:#414b66;font:inherit;font-weight:650;text-align:left;cursor:pointer}
+.app-menu-item .app-nav-icon{display:grid;place-items:center;min-width:35px;font-size:24px}
+.app-menu-item.is-active{background:#eef2ff;border-color:#c7d2fe;color:#4338ca}
+.app-nav-tab:focus-visible,.app-menu-item:focus-visible,.app-menu-close:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
+@media(max-width:820px){
+ .sidebar{display:none!important}
+ .mobile-app-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;z-index:50;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom,0px));padding:6px 4px;border:1px solid #e8eaf3;border-radius:23px;background:rgba(255,255,255,.97);box-shadow:0 8px 35px #20294a24;backdrop-filter:blur(16px)}
+ .app-nav-tab{min-width:0;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;border-radius:16px;background:transparent;color:#858da2;font:inherit;font-size:10px;font-weight:650;cursor:pointer;-webkit-tap-highlight-color:transparent}
+ .app-nav-tab .app-nav-icon{font-size:21px;line-height:1.15;min-height:25px}
+ .app-nav-tab.is-active{color:#4338ca;background:#eef2ff}
+ .app-nav-tab:active,.app-menu-item:active{background:#e6eaff}
+ .app-menu-sheet{position:fixed;inset:auto 0 0;width:100%;max-width:none;max-height:85dvh;margin:0;border-radius:26px 26px 0 0;padding:24px 18px calc(24px + env(safe-area-inset-bottom,0px));box-sizing:border-box;overflow:auto}
+ .layout,.salary-wrap,.car-wrap{padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))}
+ .fab{bottom:calc(91px + env(safe-area-inset-bottom,0px));right:16px;z-index:35}
+ .salary-net{bottom:calc(90px + env(safe-area-inset-bottom,0px))}
+}
+@media(prefers-reduced-motion:reduce){.app-nav-tab,.app-menu-item{transition:none}}

@@ -17,7 +17,7 @@ $('authBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('p
  else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user)}}catch(e){toast(e.message||'เกิดข้อผิดพลาด','err')}finally{$('authBtn').disabled=false}}
 $('logout').onclick=async()=>{await supabase.auth.signOut();location.reload()}
 
-async function boot(u){user=u;$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();subscribe()}
+async function boot(u){user=u;$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();subscribe();showPage(location.hash.slice(1)||'dashboard')}
 async function loadAll(){
  const [c,a,t,b,d,g]=await Promise.all([
   supabase.from('categories').select('*').order('sort_order').order('name'),
@@ -244,7 +244,9 @@ function fillTxSelectors(){
  renderCardPaymentSuggestions()
 }
 
-function showPage(name){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$(name+'Page').classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===name))}
+function showPage(name){const target=$(name+'Page');if(!target||!target.classList.contains('page'))return;document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));target.classList.remove('hidden');document.querySelectorAll('.navbtn[data-page]').forEach(x=>{const selected=x.dataset.page===name;x.classList.toggle('active',selected);if(selected)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});history.replaceState(null,'','#'+name);window.dispatchEvent(new CustomEvent('finance:page',{detail:name}));window.scrollTo({top:0,behavior:'instant'})}
+window.addEventListener('finance:navigate',e=>showPage(e.detail));
+window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)||'dashboard'));
 document.querySelectorAll('.navbtn[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
 for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=fillTxSelectors;$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary
 
