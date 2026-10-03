@@ -245,7 +245,7 @@ function fillTxSelectors(){
 }
 
 function showPage(name){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$(name+'Page').classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===name))}
-document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
+document.querySelectorAll('.navbtn[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
 for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=fillTxSelectors;$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary
 
 window.openTx=(id=null)=>{editing={type:'tx',id};$('txDialog').showModal();$('txDate').value=new Date().toISOString().slice(0,10);$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';fillTxSelectors();renderCardPaymentSuggestions();if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||''}}}
