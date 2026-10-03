@@ -40,17 +40,26 @@
   </header>
 
   <div class="layout">
-    <aside class="sidebar">
-      <a class="navbtn" style="text-decoration:none" href="./car.html">🚗 ผ่อนรถ</a>
-      <a class="navbtn" style="text-decoration:none" href="./salary.html">💰 เงินเดือน</a>
-      <button class="navbtn active" data-page="dashboard">📊 ภาพรวม</button>
-      <button class="navbtn" data-page="transactions">🧾 รายการ</button>
-      <button class="navbtn" data-page="categories">🏷️ หมวดหมู่</button>
-      <button class="navbtn" data-page="accounts">🏦 บัญชี</button>
-      <button class="navbtn" data-page="bills">📅 บิล</button>
-      <button class="navbtn" data-page="debts">💳 บัตร/สินเชื่อ</button>
-      <button class="navbtn" data-page="budget">🎯 งบประมาณ</button>
-      <button class="navbtn" data-page="summary">📈 สรุป</button>
+    <aside class="sidebar" aria-label="เมนูหลัก">
+      <div class="nav-group">
+        <div class="nav-group-label">ประจำวัน</div>
+        <button class="navbtn active" data-page="dashboard"><span class="nav-icon" aria-hidden="true">📊</span><span>ภาพรวม</span></button>
+        <button class="navbtn" data-page="transactions"><span class="nav-icon" aria-hidden="true">🧾</span><span>รายการ</span></button>
+        <button class="navbtn" data-page="summary"><span class="nav-icon" aria-hidden="true">📈</span><span>สรุป</span></button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">วางแผนการเงิน</div>
+        <a class="navbtn" href="./salary.html"><span class="nav-icon" aria-hidden="true">💰</span><span>เงินเดือน</span></a>
+        <button class="navbtn" data-page="budget"><span class="nav-icon" aria-hidden="true">🎯</span><span>งบประมาณ</span></button>
+        <button class="navbtn" data-page="bills"><span class="nav-icon" aria-hidden="true">📅</span><span>บิลประจำ</span></button>
+        <button class="navbtn" data-page="debts"><span class="nav-icon" aria-hidden="true">💳</span><span>บัตร/สินเชื่อ</span></button>
+        <a class="navbtn" href="./car.html"><span class="nav-icon" aria-hidden="true">🚗</span><span>ผ่อนรถ</span></a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">จัดการข้อมูล</div>
+        <button class="navbtn" data-page="accounts"><span class="nav-icon" aria-hidden="true">🏦</span><span>บัญชี</span></button>
+        <button class="navbtn" data-page="categories"><span class="nav-icon" aria-hidden="true">🏷️</span><span>หมวดหมู่</span></button>
+      </div>
     </aside>
 
     <main class="content">
