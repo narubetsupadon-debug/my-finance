@@ -32,3 +32,5 @@ function active(page){
 window.addEventListener('finance:page',e=>active(e.detail));
 active(location.pathname.endsWith('/salary.html')?'salary':location.pathname.endsWith('/car.html')?'car':location.hash.slice(1)||'dashboard');
 mount.append(nav,sheet);
+
+document.documentElement.classList.add('mobile-nav-ready');
