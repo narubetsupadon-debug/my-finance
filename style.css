@@ -93,7 +93,7 @@ dialog{overflow:hidden}.modal{padding:22px}.modal h3{font-size:20px}.modal-actio
 .field input,.field select,.field textarea{transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}.field input:hover,.field select:hover,.field textarea:hover{background:#fcfcff}
 .auth-card{border-radius:30px}.auth-card .btn.primary{padding:12px 14px}
 .credit-card{position:relative;overflow:hidden;border:0;background:linear-gradient(145deg,#171b2f 0%,#293252 52%,#4338ca 120%);color:#fff;box-shadow:0 18px 42px rgba(37,45,86,.22)}
-.credit-card:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08);right:-45px;top:-75px}
+.credit-card:before{pointer-events:none;content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08);right:-45px;top:-75px}
 .credit-card .muted{color:rgba(255,255,255,.66)}.credit-card .btn.soft{background:rgba(255,255,255,.14);color:#fff}.credit-card .btn.danger{background:rgba(254,226,226,.14);color:#fecaca}
 .credit-card .credit-stats>div{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.08)}.credit-card .credit-stats span{color:rgba(255,255,255,.62)}.credit-card .credit-stats b{color:#fff}.credit-card .credit-stats .income{color:#86efac}.credit-card .credit-stats .expense{color:#fecaca}.credit-card .budget-progress{background:rgba(255,255,255,.16)}
 .quick-btn{position:relative;overflow:hidden}.quick-btn:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(99,102,241,.08),transparent 58%);opacity:0;transition:.18s}.quick-btn:hover:after{opacity:1}
