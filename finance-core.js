@@ -28,7 +28,11 @@ export function monthlyDue(day,today=bangkokDay()) {
   if(due<new Date(y,m-1,d))due=new Date(y,m,Math.min(Number(day),new Date(y,m+1,0).getDate()));
   return due;
 }
-export function billDue(bill) {
-  if(bill.next_due_date)return new Date(bill.next_due_date+'T00:00:00');
-  return bill.frequency==='monthly'?monthlyDue(bill.due_day):null;
+export function billDue(bill, today=bangkokDay()) {
+  const next=bill.next_due_date?new Date(bill.next_due_date+'T00:00:00'):null;
+  if(next){
+    const todayDate=new Date(today+'T00:00:00');
+    if(next>=todayDate || bill.frequency!=='monthly')return next;
+  }
+  return bill.frequency==='monthly'?monthlyDue(bill.due_day,today):null;
 }
