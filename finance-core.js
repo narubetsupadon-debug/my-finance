@@ -36,3 +36,28 @@ export function billDue(bill, today=bangkokDay()) {
   }
   return bill.frequency==='monthly'?monthlyDue(bill.due_day,today):null;
 }
+
+export function excelDay(value) {
+  if(value==null || value==='')return null;
+  const pad=n=>String(n).padStart(2,'0');
+  const out=(y,m,d)=>{
+    y=Number(y);m=Number(m);d=Number(d);
+    if(y>2400)y-=543;
+    const dt=new Date(Date.UTC(y,m-1,d));
+    if(dt.getUTCFullYear()!==y || dt.getUTCMonth()!==m-1 || dt.getUTCDate()!==d)return null;
+    return y+'-'+pad(m)+'-'+pad(d);
+  };
+  if(typeof value==='number' && Number.isFinite(value)){
+    const dt=new Date(Date.UTC(1899,11,30)+Math.floor(value*86400000));
+    return dt.toISOString().slice(0,10);
+  }
+  if(value instanceof Date && !Number.isNaN(value.getTime()))return out(value.getFullYear(),value.getMonth()+1,value.getDate());
+  const s=String(value).trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\D|$)/);
+  if(m)return out(m[1],m[2],m[3]);
+  m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})(?:\D|$)/);
+  if(m)return out(m[3],m[2],m[1]);
+  const dt=new Date(s);
+  if(Number.isNaN(dt.getTime()))return null;
+  return out(dt.getFullYear(),dt.getMonth()+1,dt.getDate());
+}
