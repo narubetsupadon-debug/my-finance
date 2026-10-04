@@ -1,5 +1,5 @@
-const CACHE='my-finance-v22-carexp1';
-const SHELL=['./','./index.html','./style.css?v=20261004-carexp1','./minimal-dark.css?v=20261004-carexp1','./theme.js?v=20261004-carexp1','./app.js?v=20261004-carexp1','./finance-core.js?v=20261004-carexp1','./app-nav.js?v=20261004-carexp1','./car.html','./car.js?v=20261004-carexp1','./salary.html','./salary.js?v=20261004-carexp1','./import.html','./summary.html','./manifest.webmanifest','./app-icon.svg'];
+const CACHE='my-finance-v23-navsmooth1';
+const SHELL=['./','./index.html','./style.css?v=20261004-navsmooth1','./minimal-dark.css?v=20261004-navsmooth1','./theme.js?v=20261004-navsmooth1','./app.js?v=20261004-navsmooth1','./finance-core.js?v=20261004-navsmooth1','./app-nav.js?v=20261004-navsmooth1','./car.html','./car.js?v=20261004-navsmooth1','./salary.html','./salary.js?v=20261004-navsmooth1','./import.html','./summary.html','./manifest.webmanifest','./app-icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
