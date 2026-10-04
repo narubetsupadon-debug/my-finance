@@ -95,7 +95,7 @@ function readUiSettings(){
 let uiSettings=readUiSettings();
 function writeUiSettings(patch){
  uiSettings={...uiSettings,...patch};
- localStorage.setItem(UI_SETTINGS_KEY,JSON.stringify(uiSettings));
+ try{localStorage.setItem(UI_SETTINGS_KEY,JSON.stringify(uiSettings))}catch{}
  applyUiSettings();
 }
 function applyUiSettings(){
