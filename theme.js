@@ -13,12 +13,12 @@
   const allowed=new Set(['system','light','dark']);
   const mq=window.matchMedia('(prefers-color-scheme: dark)');
   function getMode(){
-    const saved=localStorage.getItem(KEY);
+    let saved=null;try{saved=localStorage.getItem(KEY)}catch{}
     return allowed.has(saved)?saved:'system';
   }
   function apply(mode){
     if(!allowed.has(mode))mode='system';
-    localStorage.setItem(KEY,mode);
+    try{localStorage.setItem(KEY,mode)}catch{}
     const link=document.getElementById('darkThemeStylesheet');
     if(link){
       link.media=mode==='dark'?'all':mode==='light'?'not all':'(prefers-color-scheme: dark)';
