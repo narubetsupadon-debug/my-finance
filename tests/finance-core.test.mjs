@@ -14,6 +14,11 @@ assert.equal(core.monthlyDue(1,'2026-12-31').getFullYear(),2027);
 assert.equal(core.billDue({frequency:'yearly',due_day:5}),null);
 assert.equal(core.billDue({frequency:'monthly',due_day:15,next_due_date:'2026-09-15'},'2026-10-04').toISOString().slice(0,10),'2026-10-15'); // stale monthly next_due_date rolls forward
 assert.equal(core.billDue({frequency:'once',due_day:15,next_due_date:'2026-09-15'},'2026-10-04').toISOString().slice(0,10),'2026-09-15');
+assert.equal(core.excelDay(1),'1899-12-31');
+assert.equal(core.excelDay('2026-10-04'),'2026-10-04');
+assert.equal(core.excelDay('04/10/2026'),'2026-10-04');
+assert.equal(core.excelDay('04/10/2569'),'2026-10-04');
+assert.equal(core.excelDay('31/02/2026'),null);
 const input=Array.from({length:1201},(_,id)=>({id}));
 assert.equal((await core.readAll(()=>({range:async(a,b)=>({data:input.slice(a,b+1)})}))).length,1201);
 let calls=0;
