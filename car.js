@@ -1,6 +1,6 @@
 import {bangkokDay,readAll} from './finance-core.js?v=20261004-audit2';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');const $=id=>document.getElementById(id),money=n=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0)),date=s=>new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});let user,rows=[],editing;
+const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');const $=id=>document.getElementById(id),money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0)),date=s=>new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});let user,rows=[],editing;
 function msg(s){$('carMessage').textContent=s;if($('carDialog').open)$('carFormMessage').textContent=s;}
 function option(el,id,name){const o=document.createElement('option');o.value=id;o.textContent=name;el.append(o);}
 async function load(){const data=await readAll(()=>db.from('car_installments').select('*').eq('user_id',user.id).order('installment_no').order('id'));rows=data;render();}
