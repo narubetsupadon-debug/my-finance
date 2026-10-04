@@ -280,3 +280,13 @@ dialog::backdrop{background:rgba(2,4,8,.72);backdrop-filter:blur(3px)}
 .system-preview{border-color:#303849}
 .system-preview:after{background:#251b40;color:#ddd6fe}
 
+/* Settings v2 — Minimal Dark */
+.settings-title>span{background:#1b2230}
+.setting-select select{background:#0f141e;border-color:#2a3242;color:#eef1f7}
+.quick-settings-list{border-color:#293141}
+.quick-setting-row{border-color:#293141}
+.switch>span{background:#303847}
+.switch>span:after{background:#f4f6fb}
+.settings-help{background:#171d28;color:#9ca7b9}
+.accent-dot.active{border-color:#121722;outline-color:#f4f6fb}
+
