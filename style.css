@@ -448,3 +448,20 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
 .page.page-enter{animation:page-enter .12s ease-out both}
 @keyframes page-enter{from{opacity:.82;transform:translateY(2px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.page.page-enter{animation:none}}
+
+
+/* Sync, health and duplicate guardrails */
+.sync-status{display:flex;align-items:center;gap:8px;max-width:1200px;margin:8px auto 0;padding:7px 16px;color:var(--muted);font-size:11px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;flex:0 0 auto}
+.sync-dot[data-state="syncing"]{background:#f59e0b;animation:sync-pulse 1s ease-in-out infinite}
+.sync-dot[data-state="ok"]{background:#10b981}
+.sync-dot[data-state="error"]{background:#ef4444}
+.sync-status[data-state="error"]{color:#ef4444}
+@keyframes sync-pulse{50%{opacity:.35}}
+.health-summary{display:flex;flex-direction:column;margin-top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.health-row{display:flex;justify-content:space-between;gap:14px;padding:11px 12px;border-bottom:1px solid var(--line);font-size:12px}
+.health-row:last-child{border-bottom:0}.health-row b{font-size:11px;text-align:right}.health-bad{color:#ef4444!important}
+.health-actions{align-items:center}.health-actions small{flex:1}
+.duplicate-warning{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;border-radius:14px;border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.10);margin-top:12px}
+.duplicate-warning b{font-size:13px}.duplicate-warning p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+@media(max-width:520px){.duplicate-warning{align-items:flex-start;flex-direction:column}.duplicate-warning .btn{width:100%}.sync-status{padding-left:18px;padding-right:18px}}
