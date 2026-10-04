@@ -1,5 +1,7 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261004-structure1';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261004-structure1';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261004-structure3';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261004-structure3';
+import {createSummaryRenderer} from './app-summary.js?v=20261004-structure3';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261004-structure3';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -14,7 +16,7 @@ const $=id=>document.getElementById(id)
 const money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
 const fmtDate=s=>s?new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'2-digit'}).format(new Date(s+'T00:00:00')):''
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
-let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},trendChart=null,categoryChart2=null,pieChart=null,carExpenseTxIds=new Set()
+let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set()
 
 const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
 const PUSH_ENDPOINT='https://mmvdhopogchcxwlstflk.supabase.co/functions/v1/push-reminders';
@@ -246,81 +248,24 @@ document.addEventListener('visibilitychange', () => {
  if (!document.hidden) refreshDailyGreeting();
 });
 
-function renderDashboard(){
- refreshDailyGreeting();
- const now=bangkokDate(),today=bangkokDay(),y=now.getFullYear(),m=now.getMonth()
- const monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
- const prevDate=new Date(y,m-1,1),py=prevDate.getFullYear(),pm=prevDate.getMonth()
- const previous=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===py&&d.getMonth()===pm&&x.status!=='cancelled'})
- const inc=monthly.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0)
- const exp=monthly.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
- const prevExp=previous.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
- const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=todayRows.reduce((s,x)=>s+Number(x.amount),0)
- const bsum=budgetTotals(),dailyLeft=bsum.daily,pct=bsum.limit?Math.min(100,bsum.spent/bsum.limit*100):0
- $('nextBillCard')?.classList.toggle('hidden',uiSettings.dueReminder===false);
- $('upcomingList')?.closest('details')?.classList.toggle('hidden',uiSettings.dueReminder===false);
- document.querySelector('.budget-panel')?.classList.toggle('budget-panel-warning',uiSettings.budgetReminder!==false&&bsum.limit>0&&bsum.spent/bsum.limit>=.8);
- $('todayLabel').textContent=now.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
- $('monthLabel').textContent=now.toLocaleDateString('th-TH',{month:'long',year:'numeric'})
- $('todaySpent').textContent=money(todaySpent);$('todayCount').textContent=todayRows.length+' รายการ'
- $('todayCanSpend').textContent=money(dailyLeft);$('todayCanSpendHint').textContent=bsum.limit?'จากงบเฉลี่ยต่อวันที่เหลือ':'ยังไม่ได้ตั้งงบ'
- $('incomeTotal').textContent=money(inc);$('expenseTotal').textContent=money(exp);$('balanceTotal').textContent=money(inc-exp)
- $('debtTotal').textContent=money(debts.filter(x=>x.is_active).reduce((s,x)=>s+Number(x.outstanding_amount||0),0))
- $('budgetSpentDash').textContent=money(bsum.spent);$('budgetLimitDash').textContent=money(bsum.limit);$('budgetRemainDash').textContent=money(bsum.remain);$('budgetDailyDash').textContent='ใช้ได้เฉลี่ยวันละ '+money(bsum.daily)
- $('homeBudgetStatus').textContent=!bsum.limit?'ยังไม่ได้ตั้งงบ · แตะเพื่อเริ่ม':bsum.spent>bsum.limit?'เกินงบ '+money(bsum.spent-bsum.limit):'เฉลี่ยได้อีกวันละ '+money(bsum.daily);
- $('homeBudgetStatus').classList.toggle('is-over',bsum.spent>bsum.limit);
- $('budgetRemainDash').textContent=bsum.limit?money(bsum.remain):'ยังไม่ตั้งงบ';
- $('viewToday').onclick=()=>openInsightDetails('รายจ่ายวันนี้',[{label:fmtDate(today),rows:todayRows}],'รายการที่บันทึกวันนี้ ไม่รวมรายการยกเลิก');
- $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
-
- const quick=orderedQuickItems().filter(x=>!uiSettings.quickHidden.includes(x.label))
- $('quickAdd').innerHTML=quick.map(({icon,label,desc})=>'<button class="quick-btn" onclick="quickAdd(\''+label+'\',\''+desc+'\')"><span>'+icon+'</span><b>'+label+'</b></button>').join('')+'<button class="quick-btn more" onclick="openTx()"><span>＋</span><b>อื่น ๆ</b></button>'
-
- const sums={};monthly.filter(x=>x.type==='expense').forEach(x=>{const n=x.categories?.name||'อื่นๆ';sums[n]=(sums[n]||0)+Number(x.amount)})
- const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]),top=sorted[0]
-
- const insights=[];
- const cutoff=Math.min(now.getDate(),new Date(y,m,0).getDate());
- const currentComparable=monthly.filter(x=>x.type==='expense'&&Number(x.transaction_date.slice(8,10))<=cutoff);
- const priorComparable=previous.filter(x=>x.type==='expense'&&Number(x.transaction_date.slice(8,10))<=cutoff);
- const currentSum=currentComparable.reduce((s,x)=>s+Number(x.amount),0),priorSum=priorComparable.reduce((s,x)=>s+Number(x.amount),0);
- if(top)insights.push({text:'เดือนนี้ใช้มากสุดที่ '+top[0]+' '+money(top[1]),icon:'✨',open:()=>openInsightDetails('รายจ่ายหมวด '+top[0],[{label:'เดือนนี้ · '+top[0],rows:monthly.filter(x=>x.type==='expense'&&(x.categories?.name||'อื่นๆ')===top[0])}],'ไม่รวมรายการยกเลิก')});
- if(priorSum>0){const diff=(currentSum-priorSum)/priorSum*100;insights.push({text:diff===0?'รายจ่ายเท่ากับเดือนก่อนในช่วงเดียวกัน':('รายจ่าย'+(diff>0?'เพิ่มขึ้น ':'ลดลง ')+Math.abs(diff).toFixed(0)+'% ในช่วงเดียวกัน'),icon:'📊',open:()=>openInsightDetails('เทียบรายจ่ายช่วงวันที่ 1–'+cutoff,[{label:now.toLocaleDateString('th-TH',{month:'long',year:'numeric'}),rows:currentComparable},{label:prevDate.toLocaleDateString('th-TH',{month:'long',year:'numeric'}),rows:priorComparable}],'เทียบช่วงวันที่เท่ากันของสองเดือน จากรายการที่บันทึกไว้ ไม่รวมรายการยกเลิก')});}
- if(bsum.limit)insights.push({text:bsum.spent>bsum.limit?'ใช้เกินงบรวม '+money(bsum.spent-bsum.limit):'งบรวมยังเหลือ '+money(bsum.remain),icon:'🎯',open:()=>showPage('budget')});
- if(inc>0)insights.push({text:'รายรับหักรายจ่ายเดือนนี้ '+money(inc-exp),icon:'💙',open:()=>openInsightDetails('รายรับและรายจ่ายเดือนนี้',[{label:'รายรับ',rows:monthly.filter(x=>x.type==='income')},{label:'รายจ่าย',rows:monthly.filter(x=>x.type==='expense')}],'ผลต่าง '+money(inc-exp)+' จากรายการที่บันทึกในเดือนนี้ ไม่ใช่ยอดเงินคงเหลือทุกบัญชี')});
- const insightRoot=$('insightList');insightRoot.replaceChildren();
- if(!insights.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='เริ่มบันทึกรายการ แล้วนิลินจะสรุปให้ตรงนี้ ✨';insightRoot.append(empty);}
- insights.slice(0,4).forEach(item=>{const b=document.createElement('button');b.type='button';b.className='insight-item insight-link';const icon=document.createElement('span');icon.textContent=item.icon;icon.setAttribute('aria-hidden','true');const text=document.createElement('div');text.textContent=item.text;const hint=document.createElement('small');hint.textContent='ดูรายละเอียด ›';text.append(document.createElement('br'),hint);b.append(icon,text);b.onclick=item.open;insightRoot.append(b);});
-
- const upcoming=[
-  ...bills.filter(x=>x.is_active).map(x=>({kind:'บิล',name:x.name,amount:Number(x.amount||0),due:billDue(x)})),
-  ...debts.filter(x=>x.is_active&&Number(x.outstanding_amount||0)>0).map(x=>({kind:'บัตร/สินเชื่อ',name:x.name,amount:Number(x.installment_amount||0)||null,due:nextDueDate(x.due_day)}))
- ].filter(x=>x.due).sort((a,b)=>a.due-b.due).slice(0,5)
- const next=upcoming[0];
- $('nextBillName').textContent=next?next.name:'ยังไม่มีวันครบกำหนด';
- $('nextBillAmount').textContent=next?(next.amount===null?'ยังไม่ระบุยอด':money(next.amount)):'—';
- if(next){const days=Math.round((next.due-new Date(y,m,now.getDate()))/86400000);$('nextBillDate').textContent=(days<0?'เลยกำหนด '+Math.abs(days)+' วัน':days===0?'ครบกำหนดวันนี้':'อีก '+days+' วัน')+' · '+next.due.toLocaleDateString('th-TH',{day:'numeric',month:'short'});$('nextBillDate').classList.toggle('is-over',days<=0);}
- else{$('nextBillDate').textContent='แตะเพื่อจัดการบิลและวันครบกำหนด';$('nextBillDate').classList.remove('is-over');}
- $('nextBillCard').onclick=()=>showPage(next?.kind==='บัตร/สินเชื่อ'?'debts':'bills');
- $('upcomingList').innerHTML=upcoming.length?upcoming.map(x=>{const days=Math.ceil((x.due-new Date(y,m,now.getDate()))/86400000);return '<div class="upcoming-item"><div><b>'+esc(x.name)+'</b><div class="muted">'+x.kind+' · '+(days===0?'วันนี้':days<0?'เลยกำหนด '+Math.abs(days)+' วัน':'อีก '+days+' วัน')+'</div></div><div><b>'+(x.amount===null?'ยังไม่ระบุยอดรอบนี้':money(x.amount))+'</b><div class="muted">'+x.due.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+'</div></div></div>'}).join(''):'<div class="empty">ไม่มีรายการใกล้ครบกำหนด 🎉</div>'
-
- renderTxList($('recentList'),transactions.slice(0,5),true)
- const max=Math.max(1,...Object.values(sums));$('categoryChart').innerHTML=Object.keys(sums).length?sorted.slice(0,8).map(([n,v])=>'<div class="bar-row"><span>'+esc(n)+'</span><div class="barbg"><div class="barfill" style="width:'+Math.round(v/max*100)+'%"></div></div><b>'+money(v)+'</b></div>').join(''):'<div class="empty">ยังไม่มีรายจ่ายเดือนนี้</div>'
-}
-
-function openInsightDetails(title,groups,note){
- $('insightDetailTitle').textContent=title;$('insightDetailNote').textContent=note;
- const root=$('insightDetailBody');root.replaceChildren();
- groups.forEach(group=>{
-  const section=document.createElement('section');section.className='insight-detail-group';
-  const heading=document.createElement('h4');const sum=group.rows.reduce((s,r)=>s+Number(r.amount),0);
-  heading.textContent=group.label+' · '+money(sum)+' · '+group.rows.length+' รายการ';section.append(heading);
-  if(!group.rows.length){const p=document.createElement('p');p.className='muted';p.textContent='ไม่มีรายการที่บันทึกในช่วงนี้';section.append(p);}
-  group.rows.forEach(r=>{const row=document.createElement('div');row.className='insight-detail-row';const detail=document.createElement('div');const name=document.createElement('b');name.textContent=r.description;const sub=document.createElement('small');sub.textContent=fmtDate(r.transaction_date)+' · '+(r.categories?.name||'ไม่ระบุหมวด')+' · '+(r.accounts?.name||'ไม่ระบุบัญชี');detail.append(name,sub);const amount=document.createElement('strong');amount.textContent=money(r.amount);amount.className=r.type==='income'?'income':'expense';row.append(detail,amount);section.append(row);});
-  root.append(section);
- });
- $('insightDetailDialog').showModal();
-}
+const renderDashboard=createDashboardRenderer({
+ $,
+ money,
+ fmtDate,
+ esc,
+ bangkokDate,
+ bangkokDay,
+ billDue,
+ nextDueDate,
+ getTransactions:()=>transactions,
+ getDebts:()=>debts,
+ getUiSettings:()=>uiSettings,
+ budgetTotals,
+ orderedQuickItems,
+ showPage,
+ renderTxList,
+ refreshDailyGreeting
+});
 
 function filteredTx(){let a=[...transactions],f=$('txFilterType').value,q=$('txSearch').value.trim().toLowerCase(),cat=$('txFilterCategory').value,mon=$('txFilterMonth').value;if(f!=='all')a=a.filter(x=>x.type===f);if(cat)a=a.filter(x=>x.category_id===cat);if(mon)a=a.filter(x=>String(x.transaction_date).slice(0,7)===mon);if(q)a=a.filter(x=>(x.description+' '+(x.categories?.name||'')+' '+(x.note||'')).toLowerCase().includes(q));return a}
 function renderTransactions(){const arr=filteredTx();renderTxList($('txList'),arr);$('txCount').textContent=arr.length+' รายการ'}
@@ -343,71 +288,14 @@ function renderBudget(){
  const t=budgetTotals();$('budgetLimitTotal').textContent=money(t.limit);$('budgetSpentTotal').textContent=money(t.spent);$('budgetRemainTotal').textContent=money(t.remain);$('budgetDailyTotal').textContent='ใช้ได้วันละ '+money(t.daily)+' จนจบเดือน'
  $('budgetList').innerHTML=budgets.length?budgets.map(b=>{const spent=budgetSpent(b),limit=Number(b.monthly_limit||0),remain=Math.max(0,limit-spent),pct=limit?Math.min(100,spent/limit*100):0,status=spent>limit?'เกินงบ '+money(spent-limit):'เหลือ '+money(remain);return '<div class="card budget-card"><div class="row"><div><h3 style="margin:0">'+esc(b.name)+'</h3><div class="muted">'+esc((b.category_names||[]).join(' · '))+'</div></div><div class="actions"><button class="btn small soft" data-edit="budget" data-id="'+b.id+'">แก้ไข</button><button class="btn small danger" data-del="budgets" data-id="'+b.id+'">ลบ</button></div></div><div class="budget-numbers"><b>'+money(spent)+'</b><span>/ '+money(limit)+'</span></div><div class="budget-progress"><div class="budget-progress-fill '+(spent>limit?'over':'')+'" style="width:'+pct+'%"></div></div><div class="'+(spent>limit?'expense':'income')+'" style="font-weight:800;margin-top:8px">'+status+'</div></div>'}).join(''):'<div class="card empty">ยังไม่มีงบประมาณ</div>'
 }
-function excelGroup(x){
- const cat=x.categories?.name||'อื่นๆ',text=((x.description||'')+' '+(x.note||'')).toLowerCase()
- if(cat==='ที่พัก')return 'ค่าห้อง'
- if(cat==='หนี้/ผ่อน')return 'ชำระบัตร/สินเชื่อ'
- if(cat==='บิล/สาธารณูปโภค')return 'รายจ่ายประจำ'
- if(cat==='รถยนต์'){
-  if(/ค่างวด|ผ่อนรถ|รถ – มิว|รถ - มิว/.test(text))return 'ค่างวดรถ'
-  if(/น้ำมัน/.test(text))return 'น้ำมันรถ'
-  if(/ซ่อม|ประกัน|ภาษี|พ\.ร\.บ|เช็กระยะ|เช็คระยะ|บำรุง/.test(text))return 'ซ่อม/ประกัน/ภาษีรถ'
-  if(/ทางด่วน|ที่จอด|ล้างรถ/.test(text))return 'ค่าใช้รถอื่น ๆ'
-  return 'รถยนต์อื่น ๆ'
- }
- return cat
-}
-function setupSummaryFilters(){
- const years=[...new Set([bangkokDay().slice(0,4),...transactions.map(x=>String(x.transaction_date).slice(0,4)).filter(Boolean)])].sort((a,b)=>b.localeCompare(a))
- const ys=$('summaryYear'),current=ys.value||bangkokDay().slice(0,4)
- ys.innerHTML=years.map(y=>'<option value="'+y+'" '+(y===current?'selected':'')+'>'+y+'</option>').join('')
- if(!ys.value&&years.length)ys.value=years[0]
- const ms=$('summaryMonth'),mv=ms.value||'all'
- ms.innerHTML='<option value="all">ทุกเดือน</option>'+Array.from({length:12},(_,i)=>{const v=String(i+1).padStart(2,'0'),label=new Date(2026,i,1).toLocaleDateString('th-TH',{month:'long'});return '<option value="'+v+'" '+(v===mv?'selected':'')+'>'+label+'</option>'}).join('')
-}
-function renderSummary(){
- setupSummaryFilters()
- const year=$('summaryYear').value,month=$('summaryMonth').value
- const base=transactions.filter(x=>x.status!=='cancelled'&&String(x.transaction_date).slice(0,4)===year)
- const rows=month==='all'?base:base.filter(x=>String(x.transaction_date).slice(5,7)===month)
- const inc=rows.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=rows.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
- $('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumBalance').textContent=money(inc-exp)
- const grouped=rows.filter(x=>x.type==='expense').reduce((o,x)=>{const g=excelGroup(x);o[g]=(o[g]||0)+Number(x.amount);return o},{})
- $('sumDebtPay').textContent=money(grouped['ชำระบัตร/สินเชื่อ']||0)
- $('sumHomeCar').textContent=money((grouped['ค่าห้อง']||0)+(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0))
- $('sumRecurring').textContent=money(grouped['รายจ่ายประจำ']||0)
-
- const monthKeys=Array.from({length:12},(_,i)=>year+'-'+String(i+1).padStart(2,'0'))
- const monthLabels=monthKeys.map(k=>new Date(Number(k.slice(0,4)),Number(k.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'short'}))
- const monthly=monthKeys.map(k=>{const r=base.filter(x=>String(x.transaction_date).slice(0,7)===k);const income=r.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),expense=r.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0);return{income,expense,balance:income-expense,count:r.length}})
- const moneyFmt=v=>document.body?.classList.contains('privacy-mode')?'••••':new Intl.NumberFormat('th-TH',{maximumFractionDigits:0}).format(v)
- if(trendChart)trendChart.destroy()
- if(typeof Chart!=='undefined')trendChart=new Chart($('monthlyTrendChart'),{data:{labels:monthLabels,datasets:[
-  {type:'bar',label:'รายรับ',data:monthly.map(x=>x.income),backgroundColor:'rgba(16,185,129,.72)',borderRadius:7},
-  {type:'bar',label:'รายจ่าย',data:monthly.map(x=>x.expense),backgroundColor:'rgba(239,68,68,.70)',borderRadius:7},
-  {type:'line',label:'คงเหลือ',data:monthly.map(x=>x.balance),borderColor:'#4f46e5',backgroundColor:'#4f46e5',borderWidth:3,tension:.3,pointRadius:3}
- ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{y:{ticks:{callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}},x:{grid:{display:false}}}}})
-
- const priority=['ค่าห้อง','ค่างวดรถ','น้ำมันรถ','ซ่อม/ประกัน/ภาษีรถ','ค่าใช้รถอื่น ๆ','ชำระบัตร/สินเชื่อ','รายจ่ายประจำ']
- const other=[...new Set(base.filter(x=>x.type==='expense').map(excelGroup).filter(x=>!priority.includes(x)))].sort()
- const cats=[...priority,...other].filter(g=>base.some(x=>x.type==='expense'&&excelGroup(x)===g))
- const monthlyByCat=cats.map(g=>monthKeys.map(k=>base.filter(x=>x.type==='expense'&&String(x.transaction_date).slice(0,7)===k&&excelGroup(x)===g).reduce((s,x)=>s+Number(x.amount),0)))
- if(categoryChart2)categoryChart2.destroy()
- const palette=['#6366f1','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#10b981','#ec4899','#64748b','#84cc16','#f97316','#14b8a6','#a855f7']
- if(typeof Chart!=='undefined')categoryChart2=new Chart($('monthlyCategoryChart'),{type:'bar',data:{labels:monthLabels,datasets:cats.map((g,idx)=>({label:g,data:monthlyByCat[idx],backgroundColor:palette[idx%palette.length],borderRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}}}}})
-
- const pieCats=Object.entries(grouped).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1])
- if(pieChart)pieChart.destroy()
- if(typeof Chart!=='undefined')pieChart=new Chart($('categoryPieChart'),{type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+((c.raw/(exp||1))*100).toFixed(1)+'%)'}}}}})
-
- const visibleMonths=month==='all'?monthKeys:[year+'-'+month]
- const visibleMonthly=visibleMonths.map(k=>{const idx=monthKeys.indexOf(k);return [k,monthly[idx]]})
- $('summaryTable').innerHTML=visibleMonthly.length?'<div class="table-wrap"><table class="table"><thead><tr><th>เดือน</th><th>รายรับ</th><th>รายจ่าย</th><th>คงเหลือ</th><th>รายการ</th></tr></thead><tbody>'+visibleMonthly.map(([k,v])=>{const label=new Date(Number(k.slice(0,4)),Number(k.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'});return '<tr><td>'+label+'</td><td class="income">'+money(v.income)+'</td><td class="expense">'+money(v.expense)+'</td><td class="balance">'+money(v.balance)+'</td><td>'+v.count+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">ยังไม่มีข้อมูล</div>'
-
- const matrixCats=cats.length?cats:['ไม่มีข้อมูล']
- const headers=visibleMonths.map(k=>new Date(Number(k.slice(0,4)),Number(k.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'short'}))
- $('categoryMonthTable').innerHTML=cats.length?'<div class="table-wrap"><table class="table"><thead><tr><th>หมวด</th>'+headers.map(h=>'<th>'+h+'</th>').join('')+'<th>รวม</th></tr></thead><tbody>'+matrixCats.map(g=>{const vals=visibleMonths.map(k=>base.filter(x=>x.type==='expense'&&String(x.transaction_date).slice(0,7)===k&&excelGroup(x)===g).reduce((s,x)=>s+Number(x.amount),0));return '<tr><td>'+esc(g)+'</td>'+vals.map(v=>'<td>'+money(v)+'</td>').join('')+'<td><b>'+money(vals.reduce((a,b)=>a+b,0))+'</b></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">ยังไม่มีข้อมูลรายจ่าย</div>'
-}
+const renderSummary=createSummaryRenderer({
+ $,
+ money,
+ esc,
+ bangkokDay,
+ getTransactions:()=>transactions,
+ ChartCtor:typeof Chart==='undefined'?null:Chart
+});
 function renderCardPaymentSuggestions(){
  const box=$('cardPaymentSuggest'),list=$('cardPaymentList'); if(!box||!list)return
  const cat=categories.find(c=>c.id===$('txCategory').value),show=$('txType').value==='expense'&&cat?.name==='หนี้/ผ่อน'
