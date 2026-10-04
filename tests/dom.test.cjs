@@ -4,6 +4,7 @@ const root=require('node:path').join(__dirname,'../');
 const core=fs.readFileSync(root+'finance-core.js','utf8').replaceAll('export ','');
 const appData=fs.readFileSync(root+'app-data.js','utf8').replaceAll('export ','');
 const appSummary=fs.readFileSync(root+'app-summary.js','utf8').replaceAll('export ','');
+const appDashboard=fs.readFileSync(root+'app-dashboard.js','utf8').replaceAll('export ','');
 function dbMock(data){
  const state={fail:false,writes:[]};
  const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),signOut:async()=>({error:null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
@@ -24,7 +25,7 @@ async function page(html,js,data,expose){
  w.HTMLElement.prototype.scrollIntoView=function(){};w.requestAnimationFrame=cb=>{cb();return 1};w.cancelAnimationFrame=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  const code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
- const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+code+'\nreturn {'+expose+'};})()');
+ const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+code+'\nreturn {'+expose+'};})()');
  return {w,api,state,close:()=>w.close(),el:id=>w.document.getElementById(id)};
 }
 (async()=>{
