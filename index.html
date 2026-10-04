@@ -33,6 +33,11 @@
 </div>
 
 <div id="app" class="app hidden"><div id="dataError" class="notice err hidden" role="alert"><span id="dataErrorText"></span> <button id="retryData" type="button" class="btn small">โหลดใหม่</button></div>
+  <div id="syncStatusBar" class="sync-status" role="status" aria-live="polite">
+    <span id="syncStatusDot" class="sync-dot"></span>
+    <span id="syncStatusText">กำลังเชื่อมต่อ…</span>
+    <button id="syncRetryBtn" type="button" class="text-action hidden">ลองใหม่</button>
+  </div>
   <header class="topbar">
     <div class="topin">
       <div><div class="brand">💙 My Finance</div><div class="muted">Supabase Cloud Sync</div></div>
@@ -267,6 +272,23 @@
             </label>
           </div>
 
+
+          <div class="card settings-card health-card">
+            <div class="settings-title"><span>🛡️</span><div><h3>สุขภาพระบบ</h3><p>ตรวจการซิงก์ รายการซ้ำ และข้อมูลที่เชื่อมกัน</p></div></div>
+            <div id="healthSummary" class="health-summary">
+              <div class="health-row"><span>☁️ Database Sync</span><b id="healthSync">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🔎 Transaction ซ้ำ</span><b id="healthDuplicates">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>💰 เงินเดือน</span><b id="healthSalary">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🚗 ค่างวดรถ</span><b id="healthInstallments">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🔧 ค่าใช้จ่ายรถ</span><b id="healthCar">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🔔 Push Notification</span><b id="healthPush">ยังไม่ได้ตรวจ</b></div>
+            </div>
+            <div class="row section health-actions">
+              <small id="healthCheckedAt" class="muted">ยังไม่ได้ตรวจสอบ</small>
+              <button id="runHealthCheck" type="button" class="btn soft">ตรวจสอบอีกครั้ง</button>
+            </div>
+          </div>
+
           <div class="card settings-card notification-settings">
             <div class="settings-title"><span>🔔</span><div><h3>การแจ้งเตือน</h3><p>แยกชัด ๆ ระหว่างแจ้งเตือนมือถือกับข้อความบนหน้า Home</p></div></div>
 
@@ -325,6 +347,10 @@
     <div class="field full date-field"><label for="txDate">วันที่</label><input id="txDate" type="date" required></div>
   </div>
   <details id="txExtra" class="capture-extra"><summary>เพิ่มหมายเหตุ / เก็บเป็นรายการโปรด</summary><div class="field"><label for="txNote">หมายเหตุ</label><textarea id="txNote" placeholder="รายละเอียดเพิ่มเติม ถ้ามี" maxlength="2000"></textarea></div><label class="repeat-favorite"><input id="txFavorite" type="checkbox"><span>★ เก็บเป็นรายการโปรด <small>จำชื่อ หมวด และบัญชีไว้ในเครื่องนี้</small></span></label></details>
+  <div id="txDuplicateWarning" class="duplicate-warning hidden" role="status">
+    <div><b>⚠️ อาจเป็นรายการซ้ำ</b><p id="txDuplicateText"></p></div>
+    <button id="txDuplicateContinue" type="button" class="btn small soft">บันทึกต่อ</button>
+  </div>
   <p id="txError" class="notice err hidden" role="alert"></p>
   <div class="modal-actions capture-actions"><button type="button" class="btn ghost" onclick="txDialog.close()">ยกเลิก</button><button type="submit" class="btn primary">บันทึก</button></div>
 </form>
