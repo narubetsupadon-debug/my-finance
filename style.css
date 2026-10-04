@@ -353,3 +353,54 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
 .push-actions{justify-content:flex-start;margin-top:12px;flex-wrap:wrap}
 .push-actions .btn{min-height:39px}
 @media(max-width:520px){.push-setting-head{align-items:flex-start}.push-actions .btn{flex:1;min-width:120px}}
+
+
+/* iOS keyboard-safe transaction sheet */
+#txDialog{overflow:hidden}
+#txDialog .capture-form{
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+@media(max-width:820px){
+  #txDialog{
+    width:100%;
+    max-width:none;
+    height:auto;
+    max-height:92dvh;
+    margin:auto 0 0;
+    border-radius:24px 24px 0 0;
+  }
+  #txDialog .capture-form{
+    max-height:92dvh;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));
+    scroll-padding-top:86px;
+    scroll-padding-bottom:110px;
+  }
+  #txDialog.keyboard-open{
+    max-height:100dvh;
+  }
+  #txDialog.keyboard-open .capture-form{
+    max-height:100dvh;
+    padding-bottom:18px;
+  }
+  .capture-header{
+    position:sticky;
+    top:-18px;
+    z-index:5;
+    margin:0 -16px 14px;
+    padding:18px 16px 12px;
+    background:var(--card);
+    border-bottom:1px solid var(--line);
+  }
+  .capture-actions{
+    position:sticky;
+    bottom:calc(-18px - env(safe-area-inset-bottom,0px));
+    margin:16px -16px -18px;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+    background:var(--card);
+    border-top:1px solid var(--line);
+    z-index:5;
+  }
+}
