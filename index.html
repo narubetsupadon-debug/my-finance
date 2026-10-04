@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
-<link rel="stylesheet" href="./style.css?v=20261004-audit1">
+<link rel="stylesheet" href="./style.css?v=20261004-ui1">
 <style>
 .insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 #insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -67,72 +67,66 @@
 
     <main class="content">
       <section id="dashboardPage" class="page">
-        <div class="hero">
-          <div>
-            <div class="eyebrow">MY FINANCE • DAILY</div>
-            <h1 id="helloTitle">สวัสดีมิว 👋</h1>
-            <div id="todayLabel" class="hero-sub">วันนี้</div>
-          </div>
-          <button class="btn hero-btn" onclick="openTx()">＋ บันทึกรายการ</button>
+
+        <div class="home-welcome">
+          <div><div id="todayLabel" class="welcome-date">วันนี้</div><h1 id="helloTitle">แวะมาดูแลเงินกันนะมิว 💙</h1></div>
+          <button class="btn primary welcome-add" onclick="openTx()">＋ บันทึกรายการ</button>
         </div>
 
-        <div class="today-grid section">
-          <div class="card today-card accent">
-            <div class="label">วันนี้ใช้ไป</div>
-            <div id="todaySpent" class="today-value money">฿0</div>
-            <div id="todayCount" class="muted">0 รายการ</div>
+        <div class="daily-overview">
+          <div class="daily-panel spent-panel">
+            <div class="daily-label"><span aria-hidden="true">↗</span> วันนี้ใช้ไป</div>
+            <div id="todaySpent" class="daily-amount money">฿0</div>
+            <div class="daily-panel-foot"><span id="todayCount">0 รายการ</span><button class="text-action" id="viewToday" type="button">ดูรายการวันนี้ →</button></div>
           </div>
-          <div class="card today-card">
-            <div class="label">งบเฉลี่ยต่อวันที่เหลือ</div>
-            <div id="todayCanSpend" class="today-value balance money">฿0</div>
-            <div id="todayCanSpendHint" class="muted">จากงบที่เหลือ</div>
-          </div>
-          <div class="card today-card">
-            <div class="label">คงเหลือเดือนนี้</div>
-            <div id="balanceTotal" class="today-value income money">฿0</div>
-            <div id="monthLabel" class="muted"></div>
-          </div>
+          <button type="button" class="daily-panel budget-panel" data-page-jump="budget">
+            <div class="daily-label"><span aria-hidden="true">◉</span> งบเดือนนี้ยังเหลือ <span class="panel-arrow">↗</span></div>
+            <div id="budgetRemainDash" class="daily-amount money">฿0</div>
+            <div class="budget-meter"><div class="budget-progress"><div id="budgetProgressDash" class="budget-progress-fill"></div></div><span id="budgetPctDash">0%</span></div>
+            <div id="homeBudgetStatus" class="daily-caption">แตะเพื่อตั้งงบประมาณ</div>
+            <div class="budget-reference"><span id="budgetSpentDash">฿0</span> / <span id="budgetLimitDash">฿0</span></div>
+            <span id="budgetDailyDash" class="sr-only"></span><span id="todayCanSpend" class="sr-only"></span><span id="todayCanSpendHint" class="sr-only"></span>
+          </button>
+          <button type="button" class="daily-panel next-panel" id="nextBillCard">
+            <div class="daily-label"><span aria-hidden="true">◷</span> กำหนดชำระถัดไป <span class="panel-arrow">↗</span></div>
+            <div id="nextBillName" class="next-bill-name">ยังไม่มีรายการ</div>
+            <div id="nextBillAmount" class="next-bill-amount money">—</div>
+            <div id="nextBillDate" class="daily-caption">เพิ่มบิลไว้ช่วยจำได้เลย</div>
+          </button>
         </div>
 
-        <div class="card budget-hero section">
-          <div class="row">
-            <div>
-              <div class="eyebrow">งบกิน / ใช้ทั่วไป</div>
-              <h3 style="margin:4px 0 0"><span id="budgetSpentDash">฿0</span> / <span id="budgetLimitDash">฿0</span></h3>
-            </div>
-            <div class="budget-badge"><span id="budgetPctDash">0%</span></div>
-          </div>
-          <div class="budget-progress large"><div id="budgetProgressDash" class="budget-progress-fill" style="width:0%"></div></div>
-          <div class="budget-footer">
-            <span>เหลือ <b id="budgetRemainDash">฿0</b></span>
-            <span id="budgetDailyDash">ใช้ได้วันละ ฿0</span>
-          </div>
-        </div>
-
-        <div class="card section">
-          <div class="row"><div><div class="eyebrow">QUICK ADD</div><h3 style="margin:3px 0 0">บันทึกให้ไวที่สุด</h3></div><span class="muted">แตะหมวด → ใส่ยอด → บันทึก</span></div>
+        <div class="card quick-capture section">
+          <div class="section-heading"><div><h2>วันนี้จ่ายอะไรบ้าง?</h2><p>เลือกหมวด แล้วใส่ยอดได้เลย</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
           <div id="quickAdd" class="quick-grid"></div>
         </div>
 
-        <div class="home-grid section">
-          <div class="card">
-            <div class="row"><div><div class="eyebrow">INSIGHT</div><h3 style="margin:3px 0 0">สรุปให้แล้ว</h3></div><span>✨</span></div>
+        <div class="home-feed section">
+          <div class="card recent-card">
+            <div class="section-heading"><h2>รายการล่าสุด</h2><button class="text-action" data-page-jump="transactions">ดูทั้งหมด →</button></div>
+            <div id="recentList" class="list section"></div>
+          </div>
+          <div class="card insight-card">
+            <div class="section-heading"><div><span class="section-kicker">นิลินสรุปให้</span><h2>มองเงินให้ชัดขึ้น</h2></div><span aria-hidden="true">✦</span></div>
             <div id="insightList" class="insight-list"></div>
           </div>
-          <div class="card">
-            <div class="row"><div><div class="eyebrow">UPCOMING</div><h3 style="margin:3px 0 0">ใกล้ถึงกำหนด</h3></div><button class="btn small soft" data-page-jump="bills">ดูทั้งหมด</button></div>
-            <div id="upcomingList" class="upcoming-list"></div>
+        </div>
+
+        <details class="home-detail card section">
+          <summary><span><strong>ภาพรวมเดือนนี้</strong><small id="monthLabel"></small></span><span class="detail-cue">ดูรายละเอียด <span aria-hidden="true">⌄</span></span></summary>
+          <div class="grid4 section">
+            <div class="metric"><div class="label">รายรับ</div><div id="incomeTotal" class="value income money">฿0</div></div>
+            <div class="metric"><div class="label">รายจ่าย</div><div id="expenseTotal" class="value expense money">฿0</div></div>
+            <div class="metric"><div class="label">รายรับหักรายจ่าย</div><div id="balanceTotal" class="value balance money">฿0</div></div>
+            <div class="metric"><div class="label">ยอดบัตร / สินเชื่อ</div><div id="debtTotal" class="value expense money">฿0</div></div>
           </div>
-        </div>
-
-        <div class="grid3 section">
-          <div class="card metric"><div class="label">รายรับเดือนนี้</div><div id="incomeTotal" class="value income money">฿0</div></div>
-          <div class="card metric"><div class="label">รายจ่ายเดือนนี้</div><div id="expenseTotal" class="value expense money">฿0</div></div>
-          <div class="card metric"><div class="label">ยอดคงเหลือบัตร/สินเชื่อ</div><div id="debtTotal" class="value expense money">฿0</div></div>
-        </div>
-
-        <div class="card section"><div class="row"><div><div class="eyebrow">THIS MONTH</div><h3 style="margin:3px 0 0">รายจ่ายตามหมวด</h3></div></div><div id="categoryChart"></div></div>
-        <div class="card section"><div class="row"><div><div class="eyebrow">RECENT</div><h3 style="margin:3px 0 0">รายการล่าสุด</h3></div><button class="btn small soft" onclick="openTx()">+ เพิ่ม</button></div><div id="recentList" class="list section"></div></div>
+          <h3 class="detail-heading">รายจ่ายตามหมวด</h3><div id="categoryChart"></div>
+          <button class="btn soft section" data-page-jump="summary">เปิดสรุปและกราฟทั้งหมด →</button>
+        </details>
+        <details class="home-detail card section">
+          <summary><strong>รายการใกล้ถึงกำหนด</strong><span class="detail-cue">ดูทั้งหมด <span aria-hidden="true">⌄</span></span></summary>
+          <div id="upcomingList" class="upcoming-list"></div>
+          <div class="row section"><button class="text-action" data-page-jump="bills">จัดการบิลประจำ →</button><button class="text-action" data-page-jump="debts">บัตร / สินเชื่อ →</button></div>
+        </details>
       </section>
 
       <section id="transactionsPage" class="page hidden">
@@ -217,20 +211,26 @@
   <button class="fab" onclick="openTx()">＋ บันทึกรายการ</button>
 </div>
 
-<dialog id="txDialog">
-<form id="txForm" class="modal">
-  <h3>บันทึกรายรับ / รายจ่าย</h3><div id="txRepeatSection" class="repeat-section"><b>ใช้รายการเดิมให้ไวขึ้น</b><p class="muted">แตะรายการ → ใส่ยอด → บันทึก</p><div id="txRepeatList" class="repeat-list"></div></div>
-  <div class="fields">
-    <div class="field"><label>วันที่</label><input id="txDate" type="date" required></div>
-    <div class="field"><label>ประเภท</label><select id="txType"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select></div>
-    <div class="field full"><label>รายละเอียด</label><input id="txDesc" required placeholder="เช่น ค่าอาหาร"></div>
-    <div class="field"><label>จำนวนเงิน</label><input id="txAmount" inputmode="decimal" type="number" min="0.01" step="0.01" required></div>
-    <div class="field"><label>หมวดหมู่</label><select id="txCategory"></select></div>
-    <div id="cardPaymentSuggest" class="field full hidden"><label>💳 เลือกบัตร/สินเชื่อที่จะจ่าย</label><div id="cardPaymentList" class="payment-suggest-grid"></div><div class="muted">แตะรายการเพื่อใส่ชื่อและยอดที่ต้องจ่ายรอบนี้ให้อัตโนมัติ</div></div>
-    <div class="field full"><label>บัญชีที่ใช้จ่าย</label><select id="txAccount"></select></div>
-    <div class="field full"><label>หมายเหตุ</label><textarea id="txNote" placeholder="ไม่บังคับ"></textarea></div>
+<dialog id="txDialog" aria-labelledby="txDialogTitle">
+<form id="txForm" class="modal capture-form">
+  <div class="capture-header"><h3 id="txDialogTitle">บันทึกรายการ</h3><button type="button" class="icon-close" onclick="txDialog.close()" aria-label="ปิดฟอร์ม">✕</button></div>
+  <div class="type-switch" role="group" aria-label="ประเภทรายการ">
+    <button type="button" data-tx-type="expense" aria-pressed="true">↗ รายจ่าย</button>
+    <button type="button" data-tx-type="income" aria-pressed="false">↙ รายรับ</button>
   </div>
-  <label class="repeat-favorite"><input id="txFavorite" type="checkbox"><span>★ เก็บเป็นรายการโปรด <small>จำชื่อ หมวด และบัญชีไว้ในเครื่องนี้</small></span></label><div class="modal-actions"><button type="button" class="btn ghost" onclick="txDialog.close()">ยกเลิก</button><button type="submit" class="btn primary">บันทึก</button></div>
+  <select id="txType" class="hidden" aria-hidden="true" tabindex="-1"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select>
+  <div class="capture-amount field"><label for="txAmount">จำนวนเงิน</label><div class="amount-entry"><span aria-hidden="true">฿</span><input id="txAmount" inputmode="decimal" type="number" min="0.01" step="0.01" required placeholder="0.00" autocomplete="off" enterkeyhint="next"></div></div>
+  <details id="txRepeatSection" class="capture-repeat"><summary>↻ ใช้รายการโปรด / รายการเดิม</summary><div id="txRepeatList" class="repeat-list"></div></details>
+  <div class="fields capture-fields">
+    <div class="field full"><label for="txDesc">รายการอะไร?</label><input id="txDesc" required placeholder="เช่น ข้าวกลางวัน กาแฟ หรือของเข้าบ้าน" maxlength="250" enterkeyhint="next"></div>
+    <div class="field"><label for="txCategory">หมวดหมู่</label><select id="txCategory"></select></div>
+    <div class="field"><label for="txAccount">บัญชีที่ใช้</label><select id="txAccount"></select></div>
+    <div id="cardPaymentSuggest" class="field full hidden"><label>เลือกบัตร / สินเชื่อ</label><div id="cardPaymentList" class="payment-suggest-grid"></div><div class="muted">ตรวจยอดที่จ่ายจริงก่อนบันทึก</div></div>
+    <div class="field full date-field"><label for="txDate">วันที่</label><input id="txDate" type="date" required></div>
+  </div>
+  <details id="txExtra" class="capture-extra"><summary>เพิ่มหมายเหตุ / เก็บเป็นรายการโปรด</summary><div class="field"><label for="txNote">หมายเหตุ</label><textarea id="txNote" placeholder="รายละเอียดเพิ่มเติม ถ้ามี" maxlength="2000"></textarea></div><label class="repeat-favorite"><input id="txFavorite" type="checkbox"><span>★ เก็บเป็นรายการโปรด <small>จำชื่อ หมวด และบัญชีไว้ในเครื่องนี้</small></span></label></details>
+  <p id="txError" class="notice err hidden" role="alert"></p>
+  <div class="modal-actions capture-actions"><button type="button" class="btn ghost" onclick="txDialog.close()">ยกเลิก</button><button type="submit" class="btn primary">บันทึก</button></div>
 </form>
 </dialog>
 
@@ -244,8 +244,8 @@
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<div id="appToast" class="app-toast hidden"></div>
-<script type="module" src="./app.js?v=20261004-audit1"></script>
-<script type="module" src="./app-nav.js?v=20261004-audit1"></script></body>
+<div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
+<script type="module" src="./app.js?v=20261004-ui1"></script>
+<script type="module" src="./app-nav.js?v=20261004-ui1"></script></body>
 </html>
 

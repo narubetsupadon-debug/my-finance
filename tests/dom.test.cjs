@@ -34,6 +34,16 @@ async function page(html,js,data,expose){
  const p=await page('index.html','app.js',{categories,accounts,transactions},'loadAll,fillTxSelectors');
  assert.equal(p.el('txCount').textContent,'1201 รายการ');
  assert.equal(p.el('txList').querySelector('img'),null);
+ assert.equal(p.el('recentList').querySelectorAll('.transaction-row').length,5);
+ assert.match(p.el('txList').querySelector('.status-cancelled').textContent,/ยกเลิก/);
+ p.el('viewToday').click();assert.equal(p.el('insightDetailDialog').open,true);p.el('insightDetailDialog').close();
+ p.el('nextBillCard').click();assert.equal(p.el('billsPage').classList.contains('hidden'),false);
+ p.w.openTx();assert.equal(p.w.document.activeElement.id,'txAmount');
+ p.w.document.querySelector('[data-tx-type="income"]').click();
+ assert.equal(p.el('txType').value,'income');assert.equal(p.el('txCategory').value,'inc');
+ assert.equal(p.w.document.querySelector('[data-tx-type="income"]').getAttribute('aria-pressed'),'true');
+ p.w.quickAdd('อาหาร');assert.equal(p.el('txType').value,'expense');assert.equal(p.el('txDesc').value,'อาหาร');
+ assert.equal(p.el('txAmount').value,'');p.el('txDialog').close();
  p.el('txFilterCategory').value='cat';p.w.openTx('t0');p.el('txAccount').value='acc';await p.api.loadAll();
  assert.equal(p.el('txFilterCategory').value,'cat');assert.equal(p.el('txAccount').value,'acc');
  await p.el('txForm').onsubmit({preventDefault(){},currentTarget:p.el('txForm')});

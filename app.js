@@ -1,4 +1,4 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261004-audit1';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261004-ui1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -125,6 +125,10 @@ function renderDashboard(){
  $('incomeTotal').textContent=money(inc);$('expenseTotal').textContent=money(exp);$('balanceTotal').textContent=money(inc-exp)
  $('debtTotal').textContent=money(debts.filter(x=>x.is_active).reduce((s,x)=>s+Number(x.outstanding_amount||0),0))
  $('budgetSpentDash').textContent=money(bsum.spent);$('budgetLimitDash').textContent=money(bsum.limit);$('budgetRemainDash').textContent=money(bsum.remain);$('budgetDailyDash').textContent='ใช้ได้เฉลี่ยวันละ '+money(bsum.daily)
+ $('homeBudgetStatus').textContent=!bsum.limit?'ยังไม่ได้ตั้งงบ · แตะเพื่อเริ่ม':bsum.spent>bsum.limit?'เกินงบ '+money(bsum.spent-bsum.limit):'เฉลี่ยได้อีกวันละ '+money(bsum.daily);
+ $('homeBudgetStatus').classList.toggle('is-over',bsum.spent>bsum.limit);
+ $('budgetRemainDash').textContent=bsum.limit?money(bsum.remain):'ยังไม่ตั้งงบ';
+ $('viewToday').onclick=()=>openInsightDetails('รายจ่ายวันนี้',[{label:fmtDate(today),rows:todayRows}],'รายการที่บันทึกวันนี้ ไม่รวมรายการยกเลิก');
  $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
 
  const quick=[
@@ -152,9 +156,15 @@ function renderDashboard(){
   ...bills.filter(x=>x.is_active).map(x=>({kind:'บิล',name:x.name,amount:Number(x.amount||0),due:billDue(x)})),
   ...debts.filter(x=>x.is_active&&Number(x.outstanding_amount||0)>0).map(x=>({kind:'บัตร/สินเชื่อ',name:x.name,amount:Number(x.installment_amount||0)||null,due:nextDueDate(x.due_day)}))
  ].filter(x=>x.due).sort((a,b)=>a.due-b.due).slice(0,5)
+ const next=upcoming[0];
+ $('nextBillName').textContent=next?next.name:'ยังไม่มีวันครบกำหนด';
+ $('nextBillAmount').textContent=next?(next.amount===null?'ยังไม่ระบุยอด':money(next.amount)):'—';
+ if(next){const days=Math.round((next.due-new Date(y,m,now.getDate()))/86400000);$('nextBillDate').textContent=(days<0?'เลยกำหนด '+Math.abs(days)+' วัน':days===0?'ครบกำหนดวันนี้':'อีก '+days+' วัน')+' · '+next.due.toLocaleDateString('th-TH',{day:'numeric',month:'short'});$('nextBillDate').classList.toggle('is-over',days<=0);}
+ else{$('nextBillDate').textContent='แตะเพื่อจัดการบิลและวันครบกำหนด';$('nextBillDate').classList.remove('is-over');}
+ $('nextBillCard').onclick=()=>showPage(next?.kind==='บัตร/สินเชื่อ'?'debts':'bills');
  $('upcomingList').innerHTML=upcoming.length?upcoming.map(x=>{const days=Math.ceil((x.due-new Date(y,m,now.getDate()))/86400000);return '<div class="upcoming-item"><div><b>'+esc(x.name)+'</b><div class="muted">'+x.kind+' · '+(days===0?'วันนี้':days<0?'เลยกำหนด '+Math.abs(days)+' วัน':'อีก '+days+' วัน')+'</div></div><div><b>'+(x.amount===null?'ยังไม่ระบุยอดรอบนี้':money(x.amount))+'</b><div class="muted">'+x.due.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+'</div></div></div>'}).join(''):'<div class="empty">ไม่มีรายการใกล้ครบกำหนด 🎉</div>'
 
- renderTxList($('recentList'),transactions.slice(0,8))
+ renderTxList($('recentList'),transactions.slice(0,5),true)
  const max=Math.max(1,...Object.values(sums));$('categoryChart').innerHTML=Object.keys(sums).length?sorted.slice(0,8).map(([n,v])=>'<div class="bar-row"><span>'+esc(n)+'</span><div class="barbg"><div class="barfill" style="width:'+Math.round(v/max*100)+'%"></div></div><b>'+money(v)+'</b></div>').join(''):'<div class="empty">ยังไม่มีรายจ่ายเดือนนี้</div>'
 }
 
@@ -174,7 +184,12 @@ function openInsightDetails(title,groups,note){
 
 function filteredTx(){let a=[...transactions],f=$('txFilterType').value,q=$('txSearch').value.trim().toLowerCase(),cat=$('txFilterCategory').value,mon=$('txFilterMonth').value;if(f!=='all')a=a.filter(x=>x.type===f);if(cat)a=a.filter(x=>x.category_id===cat);if(mon)a=a.filter(x=>String(x.transaction_date).slice(0,7)===mon);if(q)a=a.filter(x=>(x.description+' '+(x.categories?.name||'')+' '+(x.note||'')).toLowerCase().includes(q));return a}
 function renderTransactions(){const arr=filteredTx();renderTxList($('txList'),arr);$('txCount').textContent=arr.length+' รายการ'}
-function renderTxList(el,arr){el.innerHTML=arr.length?arr.map(x=>'<div class="item"><div><b>'+esc(x.categories?.icon||'🧾')+' '+esc(x.description)+'</b><span class="muted">'+fmtDate(x.transaction_date)+(x.status==='cancelled'?' · ยกเลิกแล้ว':x.status==='pending'?' · รอดำเนินการ':'')+' · '+esc(x.categories?.name||'ไม่ระบุหมวด')+(x.accounts?.name?' · '+esc(x.accounts.name):'')+'</span></div><span class="amount '+(x.type==='income'?'income':'expense')+'">'+(x.type==='income'?'+':'-')+money(x.amount)+'</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="'+x.id+'">แก้ไข</button><button class="btn small danger" data-del="transactions" data-id="'+x.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีรายการ</div>'}
+function renderTxList(el,arr,compact=false){
+ el.innerHTML=arr.length?arr.map(x=>{
+  const status=x.status==='cancelled'?'ยกเลิก':x.status==='pending'?'รอดำเนินการ':x.type==='income'?'รับแล้ว':'จ่ายแล้ว';
+  return '<div class="item transaction-row '+(compact?'compact-row ':'')+(x.status==='cancelled'?'is-cancelled':'')+'"><span class="transaction-icon" aria-hidden="true">'+esc(x.categories?.icon||'🧾')+'</span><div class="transaction-detail"><b>'+esc(x.description)+'</b><span class="muted">'+fmtDate(x.transaction_date)+' · '+esc(x.categories?.name||'ไม่ระบุหมวด')+(x.accounts?.name&&!compact?' · '+esc(x.accounts.name):'')+'</span><span class="tx-status status-'+esc(x.status||'paid')+'">'+status+'</span></div><span class="amount '+(x.type==='income'?'income':'expense')+'">'+(x.type==='income'?'+':'−')+money(x.amount)+'</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="'+x.id+'" aria-label="แก้ไข '+esc(x.description)+'">'+(compact?'ดู':'แก้ไข')+'</button>'+(compact?'':'<button class="btn small danger" data-del="transactions" data-id="'+x.id+'">ลบ</button>')+'</div></div>';
+ }).join(''):'<div class="empty"><b>ยังไม่มีรายการ</b><p>เริ่มจดรายการแรก แล้วกลับมาดูได้ตรงนี้</p><button class="btn soft" onclick="openTx()">＋ บันทึกรายการ</button></div>';
+}
 function renderCategories(){for(const type of ['expense','income']){const el=$(type==='expense'?'expenseCats':'incomeCats'),arr=categories.filter(c=>c.type===type);el.innerHTML=arr.length?arr.map(c=>'<div class="category-card"><div class="left"><span class="icon">'+esc(c.icon||'🏷️')+'</span><span class="name">'+esc(c.name)+'</span></div><div class="actions"><button class="btn small soft" data-edit="category" data-id="'+c.id+'">แก้</button><button class="btn small danger" data-del="categories" data-id="'+c.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีหมวด</div>'}}
 function renderAccounts(){$('accountList').innerHTML=accounts.length?accounts.map(a=>'<div class="item"><div><b>🏦 '+esc(a.name)+'</b><span class="muted">'+esc(a.account_type)+(a.note?' · '+esc(a.note):'')+'</span></div><span class="amount"><small class="muted">ยอดตั้งต้น</small> '+money(a.opening_balance)+'</span><div class="actions"><button class="btn small soft" data-edit="account" data-id="'+a.id+'">แก้ไข</button><button class="btn small danger" data-del="accounts" data-id="'+a.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีบัญชี</div>'}
 function renderBills(){$('billList').innerHTML=bills.length?bills.map(b=>'<div class="item"><div><b>📅 '+esc(b.name)+'</b><span class="muted">ทุกวันที่ '+(b.due_day||'-')+' · '+esc(b.categories?.name||'ไม่ระบุหมวด')+'</span></div><span class="amount expense">'+money(b.amount)+'</span><div class="actions"><button class="btn small soft" data-edit="bill" data-id="'+b.id+'">แก้ไข</button><button class="btn small danger" data-del="bills" data-id="'+b.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีบิล</div>'}
@@ -262,7 +277,13 @@ function renderCardPaymentSuggestions(){
   return '<button type="button" class="payment-pick" data-pay-debt="'+d.id+'"><span class="pay-icon">💳</span><span><b>'+esc(d.name)+'</b><small>ยอดคงเหลือ '+money(balance)+(due>0?' · รอบนี้ '+money(due):'')+'</small></span><strong>'+suggest+'</strong></button>'
  }).join(''):'<div class="empty">ยังไม่มีบัตร/สินเชื่อที่มียอดคงเหลือ</div>'
 }
+function syncTxType(){
+ document.querySelectorAll('[data-tx-type]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.txType===$('txType').value)));
+ $('txForm').classList.toggle('is-income',$('txType').value==='income');
+}
+document.querySelectorAll('[data-tx-type]').forEach(b=>b.onclick=()=>{$('txType').value=b.dataset.txType;fillTxSelectors()});
 function fillTxSelectors(){
+ syncTxType();
  const currentCat=$('txCategory').value,currentAccount=$('txAccount').value,currentFilter=$('txFilterCategory').value
  $('txCategory').innerHTML=categories.filter(c=>c.type===$('txType').value).map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')
  if(currentCat&&[...$('txCategory').options].some(o=>o.value===currentCat))$('txCategory').value=currentCat
@@ -312,18 +333,26 @@ function saveFavorite(row){
  try{localStorage.setItem(favoriteKey(),JSON.stringify(next.slice(0,12)));return true}catch{return false}
 }
 
-window.openTx=(id=null)=>{editing={type:'tx',id};$('txFavorite').checked=false;renderRepeatChoices();$('txDialog').showModal();$('txDate').value=bangkokDay();$('txAccount').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';fillTxSelectors();renderCardPaymentSuggestions();if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x))}}}
+window.openTx=(id=null)=>{
+ editing={type:'tx',id};$('txFavorite').checked=false;$('txError').classList.add('hidden');$('txExtra').open=false;$('txRepeatSection').open=false;
+ $('txDialogTitle').textContent=id?'แก้ไขรายการ':'บันทึกรายการ';
+ $('txDate').value=bangkokDay();$('txAccount').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
+ fillTxSelectors();renderRepeatChoices();
+ if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;}}
+ renderCardPaymentSuggestions();$('txDialog').showModal();$('txAmount').focus({preventScroll:true});
+}
+function txError(message){$('txError').textContent=message;$('txError').classList.remove('hidden');$('txError').scrollIntoView({block:'nearest'})}
 $('txForm').onsubmit=async e=>{
  e.preventDefault();const button=e.currentTarget.querySelector('button[type="submit"]');if(button.disabled)return;
  const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:transactions.find(x=>x.id===editing.id)?.status||'paid',note:$('txNote').value.trim()||null,source:transactions.find(x=>x.id===editing.id)?.source||'web'};
- if(!row.description||!Number.isFinite(row.amount)||row.amount<=0)return alert('กรอกรายละเอียดและยอดเงินให้ครบ');
- button.disabled=true;button.textContent='กำลังบันทึก…';
+ if(!row.description||!Number.isFinite(row.amount)||row.amount<=0)return txError('กรอกรายละเอียดและยอดเงินให้ครบ');
+ $('txError').classList.add('hidden');button.disabled=true;button.textContent='กำลังบันทึก…';
  try{
   const q=editing.id?supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id):supabase.from('transactions').insert(row);
   const r=await q.select('id').single();
   if(r.error)throw r.error;
   const favoriteSaved=saveFavorite(row);$('txDialog').close();showAppToast(favoriteSaved?'บันทึกแล้ว ✅':'บันทึกรายการแล้ว แต่เก็บรายการโปรดในเครื่องนี้ไม่ได้');await loadAll();
- }catch(error){alert('บันทึกไม่ได้: '+error.message)}finally{button.disabled=false;button.textContent='บันทึก'}
+ }catch(error){txError('บันทึกไม่ได้: '+error.message)}finally{button.disabled=false;button.textContent='บันทึก'}
 }
 
 window.openEntity=(type,id=null)=>{editing={type,id};const f=$('entityFields'),title=$('entityTitle');let x
@@ -359,3 +388,11 @@ const {data:{session}}=await supabase.auth.getSession();if(session?.user)await b
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn))}
 
 
+
+// VisualViewport follows the on-screen keyboard without moving the page navigation.
+function fitCaptureViewport(){
+ const viewport=window.visualViewport;
+ document.documentElement.style.setProperty('--capture-height',(viewport?viewport.height:window.innerHeight)+'px');
+}
+window.visualViewport?.addEventListener('resize',fitCaptureViewport);
+window.addEventListener('resize',fitCaptureViewport);fitCaptureViewport();
