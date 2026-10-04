@@ -9,9 +9,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
-<link rel="stylesheet" href="./style.css?v=20261004-theme3">
-<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261004-theme3" media="(prefers-color-scheme: dark)">
-<script src="./theme.js?v=20261004-theme3"></script>
+<link rel="stylesheet" href="./style.css?v=20261004-settings2">
+<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261004-settings2" media="(prefers-color-scheme: dark)">
+<script src="./theme.js?v=20261004-settings2"></script>
 <style>
 .insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 #insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -215,32 +215,70 @@
         <div class="page-head">
           <div>
             <h2>ตั้งค่า</h2>
-            <div class="muted">ปรับหน้าตาเว็บให้เข้ากับวิธีที่มิวใช้งาน</div>
+            <div class="muted">ทำให้ My Finance เข้ากับวิธีใช้ของมิวมากขึ้น</div>
           </div>
         </div>
-        <div class="card settings-card">
-          <div class="section-heading">
-            <div>
-              <h2>ธีมของเว็บไซต์</h2>
-              <p>ตอนนี้ใช้: <strong id="themeCurrentLabel">ตามเครื่อง</strong></p>
+
+        <div class="settings-grid">
+          <div class="card settings-card">
+            <div class="settings-title"><span>🎨</span><div><h3>หน้าตา</h3><p>ธีมและสีหลักของแอป</p></div></div>
+            <div class="theme-choice-grid section" role="group" aria-label="เลือกธีมเว็บไซต์">
+              <button type="button" class="theme-choice" data-theme-option="system" aria-pressed="false">
+                <span class="theme-preview system-preview"><i></i><i></i></span>
+                <span><b>ตามเครื่อง</b><small>เปลี่ยน Light / Dark ตามอุปกรณ์</small></span>
+              </button>
+              <button type="button" class="theme-choice" data-theme-option="light" aria-pressed="false">
+                <span class="theme-preview light-preview"><i></i></span>
+                <span><b>สว่าง</b><small>ใช้โทนสว่างตลอด</small></span>
+              </button>
+              <button type="button" class="theme-choice" data-theme-option="dark" aria-pressed="false">
+                <span class="theme-preview dark-preview"><i></i></span>
+                <span><b>มืด</b><small>ใช้ Minimal Dark ตลอด</small></span>
+              </button>
             </div>
-            <span class="section-mark" aria-hidden="true">◐</span>
+            <div class="setting-row">
+              <div><b>สี Accent</b><small>สีปุ่มและจุดเด่นของแอป</small></div>
+              <div class="accent-picks" id="accentPicks" role="group" aria-label="เลือกสี Accent">
+                <button type="button" data-accent="purple" class="accent-dot accent-purple" aria-label="ม่วง"></button>
+                <button type="button" data-accent="blue" class="accent-dot accent-blue" aria-label="ฟ้า"></button>
+                <button type="button" data-accent="green" class="accent-dot accent-green" aria-label="เขียว"></button>
+                <button type="button" data-accent="pink" class="accent-dot accent-pink" aria-label="ชมพู"></button>
+              </div>
+            </div>
           </div>
-          <div class="theme-choice-grid section" role="group" aria-label="เลือกธีมเว็บไซต์">
-            <button type="button" class="theme-choice" data-theme-option="system" aria-pressed="false">
-              <span class="theme-preview system-preview"><i></i><i></i></span>
-              <span><b>ตามเครื่อง</b><small>สว่างหรือมืดตามการตั้งค่าของอุปกรณ์</small></span>
-            </button>
-            <button type="button" class="theme-choice" data-theme-option="light" aria-pressed="false">
-              <span class="theme-preview light-preview"><i></i></span>
-              <span><b>สว่าง</b><small>ใช้หน้าตาเดิมโทนสว่างตลอดเวลา</small></span>
-            </button>
-            <button type="button" class="theme-choice" data-theme-option="dark" aria-pressed="false">
-              <span class="theme-preview dark-preview"><i></i></span>
-              <span><b>มืด</b><small>ใช้ Minimal Dark ตลอดเวลา</small></span>
-            </button>
+
+          <div class="card settings-card">
+            <div class="settings-title"><span>⚡</span><div><h3>การบันทึก</h3><p>ลดขั้นตอนเวลาจดรายรับรายจ่าย</p></div></div>
+            <label class="setting-row setting-select">
+              <div><b>บัญชีเริ่มต้น</b><small>เลือกให้อัตโนมัติเมื่อเพิ่มรายการใหม่</small></div>
+              <select id="defaultAccountSetting"><option value="">ไม่ระบุบัญชี</option></select>
+            </label>
+            <div class="setting-block">
+              <div class="setting-block-head"><div><b>Quick Add</b><small>เปิด/ปิด และเรียงรายการที่ใช้บ่อย</small></div></div>
+              <div id="quickSettingsList" class="quick-settings-list"></div>
+            </div>
           </div>
-          <div class="theme-note section">💡 ถ้าเลือก “ตามเครื่อง” เว็บจะเปลี่ยนให้อัตโนมัติเมื่อมือถือหรือคอมสลับ Light / Dark Mode</div>
+
+          <div class="card settings-card">
+            <div class="settings-title"><span>👁️</span><div><h3>ความเป็นส่วนตัว</h3><p>ใช้ตอนเปิดเว็บในที่สาธารณะ</p></div></div>
+            <label class="setting-row toggle-row">
+              <div><b>ซ่อนยอดเงิน</b><small>แสดงยอดเป็น •••• ทั่วหน้าเว็บ</small></div>
+              <span class="switch"><input id="privacySetting" type="checkbox"><span></span></span>
+            </label>
+          </div>
+
+          <div class="card settings-card">
+            <div class="settings-title"><span>🔔</span><div><h3>การเตือนในหน้าเว็บ</h3><p>ควบคุมสิ่งที่อยากให้หน้า Home ช่วยเตือน</p></div></div>
+            <label class="setting-row toggle-row">
+              <div><b>เตือนบิลและบัตรใกล้ครบกำหนด</b><small>แสดงรายการใกล้ถึงกำหนดบนหน้า Home</small></div>
+              <span class="switch"><input id="dueReminderSetting" type="checkbox"><span></span></span>
+            </label>
+            <label class="setting-row toggle-row">
+              <div><b>เตือนเมื่อใช้งบใกล้เต็ม</b><small>เน้นสถานะเมื่อใช้เกิน 80% ของงบ</small></div>
+              <span class="switch"><input id="budgetReminderSetting" type="checkbox"><span></span></span>
+            </label>
+            <div class="settings-help">การเตือนชุดนี้ทำงานภายในหน้าเว็บก่อน ยังไม่ส่ง Push Notification ออกจากเบราว์เซอร์</div>
+          </div>
         </div>
       </section>
     </main>
@@ -282,7 +320,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
-<script type="module" src="./app.js?v=20261004-theme3"></script>
-<script type="module" src="./app-nav.js?v=20261004-theme3"></script></body>
+<script type="module" src="./app.js?v=20261004-settings2"></script>
+<script type="module" src="./app-nav.js?v=20261004-settings2"></script></body>
 </html>
 
