@@ -2,6 +2,12 @@ import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from '.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
+// MINIMAL_DARK_CHART_DEFAULTS
+if(typeof Chart!=='undefined'){
+ Chart.defaults.color='#9aa6ba';
+ Chart.defaults.borderColor='rgba(148,163,184,.12)';
+ Chart.defaults.font.family='Inter, "Noto Sans Thai", system-ui, -apple-system, sans-serif';
+}
 const supabase=createClient(url,key)
 const $=id=>document.getElementById(id)
 const money=n=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
