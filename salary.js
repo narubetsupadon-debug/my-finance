@@ -1,4 +1,4 @@
-import {bangkokDay,readAll} from './finance-core.js?v=20261004-audit1';
+import {bangkokDay,readAll} from './finance-core.js?v=20261004-audit2';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const supabase=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');
 const $=id=>document.getElementById(id),money=n=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(n);
