@@ -2,7 +2,7 @@
 const homeApp=document.getElementById('app');
 const mount=homeApp||document.body;
 const primary=[['dashboard','📊','ภาพรวม'],['transactions','🧾','รายการ'],['budget','🎯','งบประมาณ'],['summary','📈','สรุป']];
-const secondary=[['salary','💰','เงินเดือน','./salary.html'],['bills','📅','บิลประจำ'],['debts','💳','บัตร/สินเชื่อ'],['car','🚗','ผ่อนรถ','./car.html'],['accounts','🏦','บัญชี'],['categories','🏷️','หมวดหมู่']];
+const secondary=[['salary','💰','เงินเดือน','./salary.html'],['bills','📅','บิลประจำ'],['debts','💳','บัตร/สินเชื่อ'],['car','🚗','ผ่อนรถ','./car.html'],['accounts','🏦','บัญชี'],['categories','🏷️','หมวดหมู่'],['settings','⚙️','ตั้งค่า']];
 const nav=document.createElement('nav');nav.className='mobile-app-nav';nav.setAttribute('aria-label','เมนูหลัก');
 const sheet=document.createElement('dialog');sheet.className='app-menu-sheet';sheet.setAttribute('aria-labelledby','appMenuTitle');
 sheet.innerHTML='<div class="app-menu-head"><div><div class="app-menu-eyebrow">MY FINANCE</div><h2 id="appMenuTitle">เพิ่มเติม</h2></div><button type="button" class="app-menu-close" aria-label="ปิดเมนู">✕</button></div><div class="app-menu-grid"></div>';
