@@ -483,7 +483,7 @@ function renderRepeatChoices(){
    $('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;
    $('txCategory').value=categories.some(c=>c.id===x.category_id&&c.type===x.type)?x.category_id:'';
    $('txAccount').value=accounts.some(a=>a.id===x.account_id&&a.is_active)?x.account_id:'';
-   $('txAmount').value='';$('txNote').value='';$('txFavorite').checked=!!x.favorite;renderCardPaymentSuggestions();$('txAmount').focus();$('txAmount').scrollIntoView({block:'center',behavior:'smooth'});
+   $('txAmount').value='';$('txNote').value='';$('txFavorite').checked=!!x.favorite;renderCardPaymentSuggestions();if(window.innerWidth>820){$('txAmount').focus();$('txAmount').scrollIntoView({block:'center',behavior:'smooth'});}
   };root.append(b);
  });
 }
