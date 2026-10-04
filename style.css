@@ -274,3 +274,19 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
 }
 @media(max-width:360px){.daily-amount{font-size:24px}.daily-panel{padding:14px 11px}.daily-label>span:first-child{display:none}.next-bill-amount{font-size:18px}.home-welcome h1{font-size:20px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* One local icon family for categories; no emoji font dependency. */
+.category-symbol{display:inline-grid!important;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:12px;background:var(--icon-paper);color:var(--icon-ink);vertical-align:middle}
+.category-symbol svg{display:block;width:25px;height:25px}
+.quick-btn>.category-symbol{width:44px;height:44px;margin:auto;border-radius:15px}
+.quick-btn>.category-symbol svg{width:27px;height:27px}
+.transaction-icon{background:transparent;width:auto;height:auto}
+.transaction-icon .category-symbol{width:34px;height:34px;border-radius:11px}
+.transaction-icon .category-symbol svg{width:22px;height:22px}
+.category-card .icon{display:flex;align-items:center}
+.category-icon-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.category-icon-picker button{border:1px solid #e7eaf1;border-radius:13px;background:#fff;padding:9px 4px;display:flex;flex-direction:column;align-items:center;gap:7px;color:#596174;font:inherit;font-size:11px;min-width:0}
+.category-icon-picker button[aria-pressed=true]{border:2px solid #7166c6;background:#f5f3ff;padding:8px 3px;color:#4f46a1}
+.category-icon-picker button:focus-visible{outline:3px solid #a5a0de;outline-offset:2px}
+@media(min-width:821px){.compact-row .transaction-icon{display:grid}.compact-row{grid-template-columns:34px minmax(0,1fr) auto auto}}
+@media(max-width:380px){.category-icon-picker{grid-template-columns:repeat(3,minmax(0,1fr))}.quick-btn>.category-symbol{width:38px;height:38px}}

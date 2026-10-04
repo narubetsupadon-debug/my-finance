@@ -1,7 +1,7 @@
 const {JSDOM}=require('jsdom');
 const fs=require('fs'),assert=require('node:assert/strict');
 const root=require('node:path').join(__dirname,'../');
-const core=fs.readFileSync(root+'finance-core.js','utf8').replaceAll('export ','');
+const core=fs.readFileSync(root+'finance-core.js','utf8').replaceAll('export ','')+'\n'+fs.readFileSync(root+'category-icons.js','utf8').replaceAll('export ','');
 function dbMock(data){
  const state={fail:false,writes:[]};
  const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
