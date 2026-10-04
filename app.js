@@ -186,7 +186,8 @@ function showAppToast(message){
 function quickCategoryMatch(label){
  const aliases={อาหาร:['อาหาร'],กาแฟ:['กาแฟ','อาหาร'],รถ:['รถยนต์','เดินทาง'],ซื้อของ:['ช้อปปิ้ง'],จ่ายบัตร:['หนี้/ผ่อน'],บิล:['บิล/สาธารณูปโภค']}
  const names=aliases[label]||[label]
- return categories.find(c=>c.type==='expense'&&names.includes(c.name))||categories.find(c=>c.type==='expense'&&c.name==='อื่นๆ')||null
+ for(const name of names){const match=categories.find(c=>c.type==='expense'&&c.name===name);if(match)return match}
+ return categories.find(c=>c.type==='expense'&&c.name==='อื่นๆ')||null
 }
 window.quickAdd=(label,desc='')=>{
  const cat=quickCategoryMatch(label); openTx(); $('txType').value='expense'; fillTxSelectors(); if(cat)$('txCategory').value=cat.id; $('txDesc').value=desc||label; renderCardPaymentSuggestions(); if(label==='จ่ายบัตร'&&debts.some(d=>d.is_active&&Number(d.outstanding_amount||0)>0))$('cardPaymentSuggest')?.scrollIntoView({behavior:'smooth',block:'center'}); else if(window.innerWidth>820)$('txAmount').focus()
