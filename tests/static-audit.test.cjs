@@ -49,7 +49,7 @@ assert.match(source['car.js'],/td\.dataset\.label=/,'Mobile car rows need data-l
 assert.match(source['car.html'],/id="carExpenseList"/,'car expense list missing');
 assert.match(source['car.js'],/from\('car_expenses'\)/,'car expense data source missing');
 assert.match(source['app.js'],/carExpenseTxIds/,'linked car transactions must be protected in the main editor');
-assert.match(source['app.js'],/pendingRealtime/,'realtime refresh must defer while editors are open');
+assert.match(source['app-data.js'],/isBlocked/,'realtime refresh coordinator must support deferred refresh while editors are open');
 assert.match(source['car.css'],/\/\* Mobile car installment cards \*\//,'mobile car card layout missing');
 assert.match(source['app.js'],/fetchFinanceData/,'main app must use shared data loader');
 assert.match(source['app.js'],/createRefreshCoordinator/,'main app must use shared refresh coordinator');
