@@ -44,5 +44,7 @@ for(const p of ['index.html','car.html','salary.html'])assert.match(source[p],/v
 // Car page inline styles must remain theme-safe and keep mobile content above the bottom nav.
 assert.equal(source['car.html'].includes('thead{background:#f5f5ff}'),false,'car inline styles must remain theme-safe');
 assert.match(source['car.html'],/padding:16px 10px calc\(190px \+ env\(safe-area-inset-bottom,0px\)\)/,'car mobile padding must clear bottom navigation');
+assert.match(source['car.js'],/td\.dataset\.label=/,'Mobile car rows need data-labels');
+assert.match(source['style.css'],/\/\* Mobile car installment cards \*\//,'mobile car card layout missing');
 
 console.log('PASS static audit: asset versions, DOM ids, keyboard regression, navigation, PWA, manifest, safe areas');
