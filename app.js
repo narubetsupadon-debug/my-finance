@@ -499,7 +499,7 @@ window.openTx=(id=null)=>{
  $('txDate').value=bangkokDay();$('txAccount').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
  fillTxSelectors();if(!id&&uiSettings.defaultAccount&&[...$('txAccount').options].some(o=>o.value===uiSettings.defaultAccount))$('txAccount').value=uiSettings.defaultAccount;renderRepeatChoices();
  if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;}}
- renderCardPaymentSuggestions();$('txDialog').showModal();$('txAmount').focus({preventScroll:true});
+ renderCardPaymentSuggestions();$('txDialog').showModal();requestAnimationFrame(()=>{$('txDialog').scrollTop=0;});
 }
 function txError(message){$('txError').textContent=message;$('txError').classList.remove('hidden');$('txError').scrollIntoView({block:'nearest'})}
 $('txForm').onsubmit=async e=>{
@@ -550,9 +550,20 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.se
 
 
 // VisualViewport follows the on-screen keyboard without moving the page navigation.
-function fitCaptureViewport(){
- const viewport=window.visualViewport;
- document.documentElement.style.setProperty('--capture-height',(viewport?viewport.height:window.innerHeight)+'px');
+
+
+// Keyboard-safe transaction dialog for iOS / mobile browsers.
+function syncKeyboardState(){
+ const dlg=$('txDialog'); if(!dlg?.open||!window.visualViewport)return;
+ const keyboardOpen=window.innerHeight-window.visualViewport.height>120;
+ dlg.classList.toggle('keyboard-open',keyboardOpen);
 }
-window.visualViewport?.addEventListener('resize',fitCaptureViewport);
-window.addEventListener('resize',fitCaptureViewport);fitCaptureViewport();
+window.visualViewport?.addEventListener('resize',syncKeyboardState);
+window.visualViewport?.addEventListener('scroll',syncKeyboardState);
+$('txDialog')?.addEventListener('close',()=>{$('txDialog').classList.remove('keyboard-open')});
+$('txDialog')?.addEventListener('focusin',e=>{
+ if(window.innerWidth>820)return;
+ const el=e.target;
+ if(!(el instanceof HTMLElement))return;
+ setTimeout(()=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'smooth'}),120);
+});
