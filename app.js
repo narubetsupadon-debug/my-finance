@@ -544,6 +544,14 @@ document.addEventListener('click',async e=>{const pay=e.target.closest('[data-pa
 let reloadTimer;function scheduleLoad(){clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>loadAll(),200)}
 function subscribe(){if(channel)supabase.removeChannel(channel);channel=supabase.channel('finance-live').on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'categories',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'bills',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'debts',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'budgets',filter:'user_id=eq.'+user.id},scheduleLoad).subscribe()}
 window.txDialog=$('txDialog');window.entityDialog=$('entityDialog');
+supabase.auth.onAuthStateChange((event,session)=>{
+ if(event==='SIGNED_OUT'){
+  if(channel){supabase.removeChannel(channel);channel=null}
+  user=null;location.reload();return;
+ }
+ if(event==='TOKEN_REFRESHED'&&session?.user)user=session.user;
+ if(event==='USER_UPDATED'&&session?.user){user=session.user;if($('userEmail'))$('userEmail').textContent=session.user.email||'';}
+});
 const {data:{session}}=await supabase.auth.getSession();if(session?.user)await boot(session.user)
 
 if('serviceWorker' in navigator){window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});void reg.update()}catch(e){console.warn(e)}})}
