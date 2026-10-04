@@ -39,7 +39,7 @@ async function page(html,js,data,expose){
  p.el('viewToday').click();assert.equal(p.el('insightDetailDialog').open,true);p.el('insightDetailDialog').close();
  p.el('nextBillCard').click();assert.equal(p.el('billsPage').classList.contains('hidden'),false);
  p.w.document.body.classList.add('privacy-mode');p.api.loadAll&&await p.api.loadAll();assert.match(p.el('todaySpent').textContent,/••••/);p.w.document.body.classList.remove('privacy-mode');await p.api.loadAll();
- p.w.openTx();assert.notEqual(p.w.document.activeElement.id,'txAmount');
+ p.el('txForm').scrollTop=120;p.w.openTx();assert.equal(p.el('txForm').scrollTop,0);assert.notEqual(p.w.document.activeElement.id,'txAmount');
  p.w.document.querySelector('[data-tx-type="income"]').click();
   assert.equal(p.el('txType').value,'income');assert.equal(p.el('txCategory').value,'');
  assert.equal(p.w.document.querySelector('[data-tx-type="income"]').getAttribute('aria-pressed'),'true');
