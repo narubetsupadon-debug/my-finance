@@ -344,3 +344,12 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
  .daily-overview:has(#nextBillCard.hidden){grid-template-columns:1fr 1fr}
 }
 
+
+
+/* Push notifications */
+.push-setting-box{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.push-setting-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.push-setting-head b{display:block;font-size:13px}.push-setting-head small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.5}
+.push-actions{justify-content:flex-start;margin-top:12px;flex-wrap:wrap}
+.push-actions .btn{min-height:39px}
+@media(max-width:520px){.push-setting-head{align-items:flex-start}.push-actions .btn{flex:1;min-width:120px}}
