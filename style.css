@@ -226,7 +226,7 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
 .status-pending{background:#fff2d7;color:#8c6107}.status-cancelled{background:#eef0f3;color:#6c7382}
 .is-cancelled .amount{text-decoration:line-through;color:#7c8391}.compact-row .actions{align-self:center}
 #txDialog{width:min(510px,calc(100% - 24px));border-radius:25px}
-#txDialog .capture-form{padding:22px;max-height:min(90dvh,var(--capture-height,90vh));scroll-padding:18px}
+#txDialog .capture-form{padding:22px;max-height:90dvh;scroll-padding:18px}
 .capture-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.capture-header h3{font-size:19px;margin:0}
 .icon-close{border:0;background:#f2f3f8;color:#5f687b;border-radius:50%;width:36px;height:36px;display:grid;place-items:center}
 .type-switch{display:flex;gap:5px;padding:4px;background:#f2f3f8;border-radius:13px}
