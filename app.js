@@ -1,4 +1,4 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261004-notify1';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261004-carfix1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
