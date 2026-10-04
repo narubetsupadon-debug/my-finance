@@ -4,7 +4,7 @@ const root=require('node:path').join(__dirname,'../');
 const core=fs.readFileSync(root+'finance-core.js','utf8').replaceAll('export ','');
 function dbMock(data){
  const state={fail:false,writes:[]};
- const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
+ const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),signOut:async()=>({error:null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
  db.from=table=>{
   let rows=[...(data[table]||[])],write=null;
   const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},
