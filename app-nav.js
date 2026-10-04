@@ -24,7 +24,7 @@ more.onclick=()=>{sheet.showModal();more.setAttribute('aria-expanded','true');};
 secondary.forEach(x=>sheet.querySelector('.app-menu-grid').append(makeButton(x,'app-menu-item')));
 sheet.querySelector('.app-menu-close').onclick=()=>sheet.close();
 sheet.addEventListener('close',()=>more.setAttribute('aria-expanded','false'));
-sheet.addEventListener('click',e=>{if(e.target===sheet){const r=sheet.getBoundingClientRect();if(e.clientY<r.top||e.clientX<r.left||e.clientX>r.right)sheet.close();}});
+sheet.addEventListener('click',e=>{if(e.target===sheet){const r=sheet.getBoundingClientRect();if(e.clientY<r.top||e.clientY>r.bottom||e.clientX<r.left||e.clientX>r.right)sheet.close();}});
 function active(page){
  buttons.forEach((b,key)=>{b.classList.toggle('is-active',key===page);if(key===page)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
  more.classList.toggle('is-active',secondary.some(x=>x[0]===page));
