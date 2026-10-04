@@ -32,7 +32,7 @@ async function page(html,js,data,expose){
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
  const p=await page('index.html','app.js',{categories,accounts,transactions},'loadAll,fillTxSelectors');
- assert.equal(p.el('txCount').textContent,'1201 รายการ');
+ assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.ok(p.el('pushDeviceSetting'));
  assert.equal(p.el('txList').querySelector('img'),null);
  assert.equal(p.el('recentList').querySelectorAll('.transaction-row').length,5);
  assert.match(p.el('txList').querySelector('.status-cancelled').textContent,/ยกเลิก/);
