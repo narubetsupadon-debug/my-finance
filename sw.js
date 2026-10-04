@@ -1,5 +1,5 @@
-const CACHE='my-finance-v13-push1';
-const SHELL=['./','./index.html','./style.css?v=20261004-push1','./minimal-dark.css?v=20261004-push1','./theme.js?v=20261004-push1','./app.js?v=20261004-push1','./finance-core.js?v=20261004-push1','./app-nav.js?v=20261004-push1','./manifest.webmanifest','./app-icon.svg'];
+const CACHE='my-finance-v14-iosfix1';
+const SHELL=['./','./index.html','./style.css?v=20261004-iosfix1','./minimal-dark.css?v=20261004-iosfix1','./theme.js?v=20261004-iosfix1','./app.js?v=20261004-iosfix1','./finance-core.js?v=20261004-iosfix1','./app-nav.js?v=20261004-iosfix1','./manifest.webmanifest','./app-icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
