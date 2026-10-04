@@ -349,7 +349,9 @@ function excelGroup(x){
  if(cat==='บิล/สาธารณูปโภค')return 'รายจ่ายประจำ'
  if(cat==='รถยนต์'){
   if(/ค่างวด|ผ่อนรถ|รถ – มิว|รถ - มิว/.test(text))return 'ค่างวดรถ'
-  if(/ซ่อม|ประกัน|ภาษี|น้ำมันเครื่อง|เช็คระยะ|บำรุง/.test(text))return 'ซ่อม/ประกัน/ภาษีรถ'
+  if(/น้ำมัน/.test(text))return 'น้ำมันรถ'
+  if(/ซ่อม|ประกัน|ภาษี|พ\.ร\.บ|เช็กระยะ|เช็คระยะ|บำรุง/.test(text))return 'ซ่อม/ประกัน/ภาษีรถ'
+  if(/ทางด่วน|ที่จอด|ล้างรถ/.test(text))return 'ค่าใช้รถอื่น ๆ'
   return 'รถยนต์อื่น ๆ'
  }
  return cat
@@ -371,7 +373,7 @@ function renderSummary(){
  $('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumBalance').textContent=money(inc-exp)
  const grouped=rows.filter(x=>x.type==='expense').reduce((o,x)=>{const g=excelGroup(x);o[g]=(o[g]||0)+Number(x.amount);return o},{})
  $('sumDebtPay').textContent=money(grouped['ชำระบัตร/สินเชื่อ']||0)
- $('sumHomeCar').textContent=money((grouped['ค่าห้อง']||0)+(grouped['ค่างวดรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0))
+ $('sumHomeCar').textContent=money((grouped['ค่าห้อง']||0)+(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0))
  $('sumRecurring').textContent=money(grouped['รายจ่ายประจำ']||0)
 
  const monthKeys=Array.from({length:12},(_,i)=>year+'-'+String(i+1).padStart(2,'0'))
@@ -385,7 +387,7 @@ function renderSummary(){
   {type:'line',label:'คงเหลือ',data:monthly.map(x=>x.balance),borderColor:'#4f46e5',backgroundColor:'#4f46e5',borderWidth:3,tension:.3,pointRadius:3}
  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{y:{ticks:{callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}},x:{grid:{display:false}}}}})
 
- const priority=['ค่าห้อง','ค่างวดรถ','ชำระบัตร/สินเชื่อ','รายจ่ายประจำ','ซ่อม/ประกัน/ภาษีรถ']
+ const priority=['ค่าห้อง','ค่างวดรถ','น้ำมันรถ','ซ่อม/ประกัน/ภาษีรถ','ค่าใช้รถอื่น ๆ','ชำระบัตร/สินเชื่อ','รายจ่ายประจำ']
  const other=[...new Set(base.filter(x=>x.type==='expense').map(excelGroup).filter(x=>!priority.includes(x)))].sort()
  const cats=[...priority,...other].filter(g=>base.some(x=>x.type==='expense'&&excelGroup(x)===g))
  const monthlyByCat=cats.map(g=>monthKeys.map(k=>base.filter(x=>x.type==='expense'&&String(x.transaction_date).slice(0,7)===k&&excelGroup(x)===g).reduce((s,x)=>s+Number(x.amount),0)))
