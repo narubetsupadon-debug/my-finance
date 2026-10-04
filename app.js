@@ -1,9 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261005-hotfix1';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261005-hotfix1';
-import {createSummaryRenderer} from './app-summary.js?v=20261005-hotfix1';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261005-hotfix1';
-import {createTransactionRenderer} from './app-transactions.js?v=20261005-hotfix1';
-import {createPlanningRenderer} from './app-planning.js?v=20261005-hotfix1';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261005-safety1';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261005-safety1';
+import {createSummaryRenderer} from './app-summary.js?v=20261005-safety1';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261005-safety1';
+import {createTransactionRenderer} from './app-transactions.js?v=20261005-safety1';
+import {createPlanningRenderer} from './app-planning.js?v=20261005-safety1';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261005-safety1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -18,7 +19,7 @@ const $=id=>document.getElementById(id)
 const money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
 const fmtDate=s=>s?new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'2-digit'}).format(new Date(s+'T00:00:00')):''
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
-let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set()
+let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),duplicateOverride=false,lastSyncAt=null
 
 const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
 const PUSH_ENDPOINT='https://mmvdhopogchcxwlstflk.supabase.co/functions/v1/push-reminders';
@@ -160,16 +161,29 @@ $('authBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('p
  else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user)}}catch(e){toast(e.message||'เกิดข้อผิดพลาด','err')}finally{$('authBtn').disabled=false}}
 $('logout').onclick=async()=>{await supabase.auth.signOut();location.reload()}
 
+function setSyncStatus(state,message=''){
+ const bar=$('syncStatusBar'),dot=$('syncStatusDot'),text=$('syncStatusText'),retry=$('syncRetryBtn');if(!bar||!dot||!text)return;
+ bar.dataset.state=state;dot.dataset.state=state;
+ if(state==='syncing')text.textContent=message||'กำลังซิงก์…';
+ else if(state==='ok'){lastSyncAt=new Date();text.textContent=message||('ซิงก์แล้ว · '+lastSyncAt.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}));}
+ else text.textContent=message||'ยังซิงก์ไม่ได้';
+ retry?.classList.toggle('hidden',state!=='error');
+}
+$('syncRetryBtn')?.addEventListener('click',()=>void loadAll());
+window.addEventListener('online',()=>{setSyncStatus('syncing','กลับมาออนไลน์แล้ว · กำลังอัปเดต…');void loadAll()});
+window.addEventListener('offline',()=>setSyncStatus('error','ออฟไลน์ · ข้อมูลอาจยังไม่ล่าสุด'));
+
 async function boot(u){user=u;$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();subscribe();showPage(location.hash.slice(1)||'dashboard')}
 async function performLoad(){
+ setSyncStatus('syncing');
  try{
   const data=await fetchFinanceData(supabase,user.id,readAll);
   categories=data.categories;accounts=data.accounts;transactions=data.transactions;
   bills=data.bills;debts=data.debts;budgets=data.budgets;carExpenseTxIds=data.carExpenseTxIds;
-  $('dataError').classList.add('hidden');renderAll();return true;
+  $('dataError').classList.add('hidden');setSyncStatus('ok');renderAll();return true;
  }catch(error){
   $('dataErrorText').textContent='โหลดข้อมูลล่าสุดไม่ได้ ข้อมูลที่เห็นอาจยังไม่ครบหรือไม่เป็นปัจจุบัน: '+error.message;
-  $('dataError').classList.remove('hidden');return false;
+  $('dataError').classList.remove('hidden');setSyncStatus('error','ซิงก์ไม่สำเร็จ · '+error.message);return false;
  }
 }
 function editorOpen(){return !!($('txDialog')?.open||$('entityDialog')?.open)}
@@ -434,6 +448,7 @@ function saveFavorite(row){
 }
 
 window.openTx=(id=null)=>{
+ duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden');
  editing={type:'tx',id};$('txFavorite').checked=false;$('txError').classList.add('hidden');$('txExtra').open=false;$('txRepeatSection').open=false;
  $('txDialogTitle').textContent=id?'แก้ไขรายการ':'บันทึกรายการ';
  $('txDate').value=bangkokDay();$('txAccount').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
@@ -447,6 +462,15 @@ $('txForm').onsubmit=async e=>{
  const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:transactions.find(x=>x.id===editing.id)?.status||'paid',note:$('txNote').value.trim()||null,source:transactions.find(x=>x.id===editing.id)?.source||'web'};
  if(!row.description||!Number.isFinite(row.amount)||row.amount<=0)return txError('กรอกรายละเอียดและยอดเงินให้ครบ');
  if(!row.category_id)return txError('เลือกหมวดหมู่ก่อนบันทึก');
+ if(!editing.id&&!duplicateOverride){
+  const duplicates=findDuplicateCandidates(row,transactions);
+  if(duplicates.length){
+   const first=duplicates[0],warning=$('txDuplicateWarning');
+   $('txDuplicateText').textContent='พบ '+duplicates.length+' รายการใกล้เคียง · '+fmtDate(first.transaction_date)+' · '+money(first.amount)+' · '+first.description;
+   warning?.classList.remove('hidden');warning?.scrollIntoView({block:'nearest'});return;
+  }
+ }
+ $('txDuplicateWarning')?.classList.add('hidden');
  $('txError').classList.add('hidden');button.disabled=true;button.textContent='กำลังบันทึก…';
  try{
   const q=editing.id?supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id):supabase.from('transactions').insert(row);
@@ -455,6 +479,33 @@ $('txForm').onsubmit=async e=>{
   const favoriteSaved=saveFavorite(row);$('txDialog').close();showAppToast(favoriteSaved?'บันทึกแล้ว ✅':'บันทึกรายการแล้ว แต่เก็บรายการโปรดในเครื่องนี้ไม่ได้');await loadAll();
  }catch(error){txError('บันทึกไม่ได้: '+error.message)}finally{button.disabled=false;button.textContent='บันทึก'}
 }
+$('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
+for(const id of ['txAmount','txDesc','txDate','txCategory','txAccount']){
+ $(id)?.addEventListener('input',()=>{duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden')});
+ $(id)?.addEventListener('change',()=>{duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden')});
+}
+
+async function refreshHealthCheck(){
+ const btn=$('runHealthCheck');if(!btn||!user)return;
+ btn.disabled=true;btn.textContent='กำลังตรวจ…';
+ try{
+  const result=await runDataHealthCheck({db:supabase,userId:user.id,transactions,readAll});
+  const set=(id,ok,bad)=>{const el=$(id);if(!el)return;el.textContent=ok?'ปกติ ✅':bad;el.classList.toggle('health-bad',!ok);};
+  set('healthSync',!!lastSyncAt,lastSyncAt?'':'ยังไม่เคยซิงก์สำเร็จ');
+  set('healthDuplicates',result.duplicateGroups===0,'พบ '+result.duplicateGroups+' กลุ่ม');
+  set('healthSalary',result.orphanSalary===0,'หลุด '+result.orphanSalary+' รายการ');
+  set('healthInstallments',result.orphanInstallments===0,'หลุด '+result.orphanInstallments+' รายการ');
+  set('healthCar',result.orphanCar===0,'หลุด '+result.orphanCar+' รายการ');
+  const pushSupported='Notification' in window&&'serviceWorker' in navigator&&'PushManager' in window;
+  const sub=pushSupported?await currentPushSubscription().catch(()=>null):null;
+  const pushOk=!!sub&&Notification.permission==='granted';
+  const push=$('healthPush');if(push){push.textContent=!pushSupported?'ไม่รองรับ':pushOk?'พร้อมใช้งาน ✅':'ยังไม่เปิด';push.classList.toggle('health-bad',pushSupported&&!pushOk);}
+  $('healthCheckedAt').textContent='ตรวจล่าสุด '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+ }catch(error){
+  $('healthCheckedAt').textContent='ตรวจไม่สำเร็จ: '+error.message;
+ }finally{btn.disabled=false;btn.textContent='ตรวจสอบอีกครั้ง'}
+}
+$('runHealthCheck')?.addEventListener('click',()=>void refreshHealthCheck());
 
 window.openEntity=(type,id=null)=>{editing={type,id};const f=$('entityFields'),title=$('entityTitle');let x
  if(type==='category'){x=id?categories.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'หมวดหมู่';f.innerHTML='<div class="field full"><label>ชื่อหมวด</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="type"><option value="expense" '+(x?.type!=='income'?'selected':'')+'>รายจ่าย</option><option value="income" '+(x?.type==='income'?'selected':'')+'>รายรับ</option></select></div><div class="field"><label>ไอคอน Emoji</label><input name="icon" value="'+esc(x?.icon||'🏷️')+'"></div>'}

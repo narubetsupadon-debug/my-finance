@@ -7,6 +7,7 @@ const appSummary=fs.readFileSync(root+'app-summary.js','utf8').replaceAll('expor
 const appDashboard=fs.readFileSync(root+'app-dashboard.js','utf8').replaceAll('export ','');
 const appTransactions=fs.readFileSync(root+'app-transactions.js','utf8').replaceAll('export ','');
 const appPlanning=fs.readFileSync(root+'app-planning.js','utf8').replaceAll('export ','');
+const appSafety=fs.readFileSync(root+'app-safety.js','utf8').replaceAll('export ','');
 function dbMock(data){
  const state={fail:false,writes:[]};
  const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),signOut:async()=>({error:null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
@@ -27,7 +28,7 @@ async function page(html,js,data,expose){
  w.HTMLElement.prototype.scrollIntoView=function(){};w.requestAnimationFrame=cb=>{cb();return 1};w.cancelAnimationFrame=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  const code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
- const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+code+'\nreturn {'+expose+'};})()');
+ const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+code+'\nreturn {'+expose+'};})()');
  return {w,api,state,close:()=>w.close(),el:id=>w.document.getElementById(id)};
 }
 (async()=>{
@@ -37,7 +38,7 @@ async function page(html,js,data,expose){
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
  const p=await page('index.html','app.js',{categories,accounts,transactions,car_expenses:[{id:'ce1',user_id:'user',transaction_id:'t1'}]},'loadAll,fillTxSelectors');
- assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.ok(p.el('pushDeviceSetting'));
+ assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.ok(p.el('pushDeviceSetting'));assert.match(p.el('syncStatusText').textContent,/ซิงก์แล้ว/);
  assert.equal(p.el('txList').querySelector('img'),null);
  assert.equal(p.el('recentList').querySelectorAll('.transaction-row').length,5);
  assert.match(p.el('txList').querySelector('.status-cancelled').textContent,/ยกเลิก/);
