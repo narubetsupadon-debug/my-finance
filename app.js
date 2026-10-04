@@ -26,9 +26,9 @@ async function pushSession(){
  const {data:{session}}=await supabase.auth.getSession();
  return session||null;
 }
-async function pushCall(action){
+async function pushCall(action,payload={}){
  const session=await pushSession();if(!session)throw new Error('กรุณาเข้าสู่ระบบใหม่');
- const r=await fetch(PUSH_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':key},body:JSON.stringify({action})});
+ const r=await fetch(PUSH_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':key},body:JSON.stringify({action,...payload})});
  const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'เรียกบริการแจ้งเตือนไม่สำเร็จ');return data;
 }
 async function currentPushSubscription(){
@@ -59,15 +59,14 @@ async function enablePush(){
  const reg=await navigator.serviceWorker.ready;
  let sub=await reg.pushManager.getSubscription();
  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64urlToUint8Array(cfg.publicKey)});
- const j=sub.toJSON(),session=await pushSession();
- const row={user_id:session.user.id,endpoint:sub.endpoint,p256dh:j.keys?.p256dh,auth:j.keys?.auth,enabled:true,updated_at:new Date().toISOString()};
- const {error}=await supabase.from('push_subscriptions').upsert(row,{onConflict:'endpoint'});if(error)throw error;
+ const j=sub.toJSON();
+ await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:j.keys||{}}});
  await refreshPushStatus();showAppToast('เปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว 🔔');
 }
 async function disablePush(){
  const sub=await currentPushSubscription();if(sub){
-  const endpoint=sub.endpoint;await sub.unsubscribe();
-  await supabase.from('push_subscriptions').delete().eq('endpoint',endpoint);
+  const endpoint=sub.endpoint;await pushCall('unsubscribe',{endpoint});
+  await sub.unsubscribe();
  }
  await refreshPushStatus();showAppToast('ปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว');
 }
