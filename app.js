@@ -438,6 +438,7 @@ const pageNodes=[...document.querySelectorAll('.page')];
 const pageByName=new Map(pageNodes.map(p=>[p.id.replace(/Page$/,''),p]));
 const navNodes=[...document.querySelectorAll('.navbtn[data-page]')];
 let activePageName=null;
+let lastNavigationAt=0;
 function resolvePage(name){
  const clean=pageByName.has(name)?name:'dashboard';
  return [clean,pageByName.get(clean)||$('dashboardPage')];
@@ -452,6 +453,7 @@ function showPage(name){
  void target.offsetWidth;
  target.classList.add('page-enter');
  activePageName=nextName;
+ lastNavigationAt=performance.now();
  for(const x of navNodes){
   const selected=x.dataset.page===nextName;
   if(x.classList.contains('active')!==selected)x.classList.toggle('active',selected);
@@ -581,7 +583,7 @@ $('entityForm').onsubmit=async e=>{
 }
 
 document.addEventListener('click',async e=>{const pay=e.target.closest('[data-pay-debt]');if(pay){const d=debts.find(x=>x.id===pay.dataset.payDebt);if(d){const cat=categories.find(c=>c.type==='expense'&&c.name==='หนี้/ผ่อน');$('txType').value='expense';fillTxSelectors();if(cat)$('txCategory').value=cat.id;$('txDesc').value='ชำระบัตร '+d.name;$('txAmount').value=Number(d.installment_amount||0)>0?Number(d.installment_amount):'';$('txNote').value='ยอดคงเหลือก่อนชำระ '+money(d.outstanding_amount||0);renderCardPaymentSuggestions();if(window.innerWidth>820)$('txAmount').focus()}return}const edit=e.target.closest('[data-edit]');if(edit){const t=edit.dataset.edit,id=edit.dataset.id;if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='car_installment'){location.href='./car.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='salary'){location.href='./salary.html';return}if(t==='tx')openTx(id);else openEntity(t,id);return}const del=e.target.closest('[data-del]');if(del){if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='car_installment'){alert('กรุณาจัดการรายการนี้ผ่านหน้าผ่อนรถ');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='salary'){alert('กรุณาจัดการรายการนี้ผ่านหน้าเงินเดือน');return}if(!confirm('ยืนยันลบรายการนี้?'))return;const {error}=await supabase.from(del.dataset.del).delete().eq('id',del.dataset.id).eq('user_id',user.id);if(error)alert('ลบไม่ได้: '+error.message);else await loadAll()}})
-let reloadTimer;function scheduleLoad(){clearTimeout(reloadTimer);reloadTimer=setTimeout(()=>loadAll(),200)}
+let reloadTimer;function scheduleLoad(){clearTimeout(reloadTimer);const elapsed=performance.now()-lastNavigationAt;const delay=Math.max(180,360-elapsed);reloadTimer=setTimeout(()=>loadAll(),delay)}
 function subscribe(){if(channel)supabase.removeChannel(channel);channel=supabase.channel('finance-live').on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'categories',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'bills',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'debts',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'budgets',filter:'user_id=eq.'+user.id},scheduleLoad).subscribe()}
 window.txDialog=$('txDialog');window.entityDialog=$('entityDialog');
 supabase.auth.onAuthStateChange((event,session)=>{
