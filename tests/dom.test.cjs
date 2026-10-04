@@ -41,7 +41,7 @@ async function page(html,js,data,expose){
  p.w.document.body.classList.add('privacy-mode');p.api.loadAll&&await p.api.loadAll();assert.match(p.el('todaySpent').textContent,/••••/);p.w.document.body.classList.remove('privacy-mode');await p.api.loadAll();
  p.w.openTx();assert.notEqual(p.w.document.activeElement.id,'txAmount');
  p.w.document.querySelector('[data-tx-type="income"]').click();
- assert.equal(p.el('txType').value,'income');assert.equal(p.el('txCategory').value,'inc');
+  assert.equal(p.el('txType').value,'income');assert.equal(p.el('txCategory').value,'');
  assert.equal(p.w.document.querySelector('[data-tx-type="income"]').getAttribute('aria-pressed'),'true');
  p.w.quickAdd('อาหาร');assert.equal(p.el('txType').value,'expense');assert.equal(p.el('txDesc').value,'อาหาร');assert.equal(p.el('txCategory').value,'cat');
  p.w.quickAdd('กาแฟ');assert.equal(p.el('txCategory').value,'coffee');
