@@ -432,7 +432,7 @@ function fillTxSelectors(){
  renderCardPaymentSuggestions()
 }
 
-function showPage(name){let target=$(name+'Page');if(!target||!target.classList.contains('page')){name='dashboard';target=$('dashboardPage');if(!target)return;}document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));target.classList.remove('hidden');document.querySelectorAll('.navbtn[data-page]').forEach(x=>{const selected=x.dataset.page===name;x.classList.toggle('active',selected);if(selected)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});history.replaceState(null,'','#'+name);window.dispatchEvent(new CustomEvent('finance:page',{detail:name}));window.scrollTo({top:0,behavior:'instant'})}
+function showPage(name){let target=$(name+'Page');if(!target||!target.classList.contains('page')){name='dashboard';target=$('dashboardPage');if(!target)return;}document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));target.classList.remove('hidden');document.querySelectorAll('.navbtn[data-page]').forEach(x=>{const selected=x.dataset.page===name;x.classList.toggle('active',selected);if(selected)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});history.replaceState(null,'','#'+name);window.dispatchEvent(new CustomEvent('finance:page',{detail:name}));window.scrollTo({top:0,behavior:'auto'})}
 window.addEventListener('finance:navigate',e=>showPage(e.detail));
 window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)||'dashboard'));
 document.querySelectorAll('.navbtn[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
