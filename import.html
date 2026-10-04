@@ -7,13 +7,14 @@ h1{color:#3730a3}.btn{border:0;border-radius:12px;padding:11px 15px;font-weight:
 </style></head><body><main class="wrap"><div class="card">
 <a class="btn soft" href="./">← กลับ My Finance</a>
 <h1>📥 นำเข้าข้อมูล r3</h1>
-<p class="muted">เลือกไฟล์ <b>บันทึกรายรับรายจ่าย_r3.xlsx</b> จากเครื่องของมิว ระบบจะล้างเฉพาะข้อมูลที่เคยนำเข้าจาก r3 แล้วนำเข้าใหม่ทั้งหมด โดยไม่ลบรายการที่มิวกรอกเอง</p>
+<p class="muted">เลือกไฟล์ <b>บันทึกรายรับรายจ่าย_r3.xlsx</b> จากเครื่องของมิว ระบบจะเพิ่มเฉพาะรายการใหม่ โดยไม่ลบหรือแก้ทับข้อมูลเดิม รายการวันที่ ประเภท ชื่อ และหมายเหตุตรงกันจะข้ามไว้ แม้ยอดในไฟล์เปลี่ยนไป ส่วนงวดรถและเงินเดือนที่มีหน้ารายละเอียดแล้ว ให้แก้ผ่านหน้านั้น</p>
 <input id="file" type="file" accept=".xlsx,.xls">
 <br><button id="go" class="btn">นำเข้าข้อมูล</button>
 <div id="log" class="log">รอเลือกไฟล์…</div>
 </div></main>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script type="module">
+import {readAll} from './finance-core.js?v=20261004-audit1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -22,17 +23,18 @@ const logEl=document.getElementById('log'),go=document.getElementById('go')
 const log=(s,c='')=>{logEl.textContent+=((logEl.textContent?'\n':'')+s); if(c)logEl.className='log '+c}
 const excelDate=v=>{if(v==null||v==='')return null;if(typeof v==='number'){const d=new Date(Date.UTC(1899,11,30)+v*86400000);return d.toISOString().slice(0,10)}const d=new Date(v);return isNaN(d)?String(v).slice(0,10):d.toISOString().slice(0,10)}
 const rows=(wb,name)=>XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,raw:true,defval:null})
-const chunks=(a,n)=>Array.from({length:Math.ceil(a.length/n)},(_,i)=>a.slice(i*n,i*n+n))
+
 go.onclick=async()=>{
-  const f=document.getElementById('file').files[0]; if(!f){logEl.textContent='กรุณาเลือกไฟล์ r3 ก่อน';return}
+  if(go.disabled)return;const f=document.getElementById('file').files[0]; if(!f){logEl.textContent='กรุณาเลือกไฟล์ r3 ก่อน';return}
   go.disabled=true;logEl.textContent='กำลังตรวจสอบการเข้าสู่ระบบ…'
   try{
     const {data:{user},error:ue}=await supabase.auth.getUser(); if(ue||!user)throw new Error('กรุณาล็อกอิน My Finance ก่อนนำเข้า')
+    if(!window.XLSX)throw new Error('โหลดเครื่องมือ Excel ไม่สำเร็จ กรุณารีเฟรช');
     const wb=XLSX.read(await f.arrayBuffer(),{type:'array'})
     const need=['รายรับ-เงินเดือน','รายจ่ายประจำ','ค่าห้อง','อินเทอร์เน็ต','ผ่อนรถ','ซ่อมบำรุง-ประกัน','บัตร-สินเชื่อ','บันทึกชำระ','บัญชีธนาคาร']
     for(const s of need)if(!wb.Sheets[s])throw new Error('ไม่พบชีต '+s+' กรุณาเลือกไฟล์ r3 ชุดที่ถูกต้อง')
     logEl.textContent='อ่านไฟล์สำเร็จ ✅\nกำลังเตรียมข้อมูล…'
-    const {data:cats,error:ce}=await supabase.from('categories').select('id,name,type');if(ce)throw ce
+    const cats=await readAll(()=>supabase.from('categories').select('id,name,type').eq('user_id',user.id).order('id'))
     const cat=(name,type)=>cats.find(x=>x.name===name&&x.type===type)?.id||null
     const tx=[]
     const salary=rows(wb,'รายรับ-เงินเดือน')
@@ -56,16 +58,10 @@ go.onclick=async()=>{
     const ds=rows(wb,'บัตร-สินเชื่อ')
     const debts=ds.slice(4,12).filter(r=>r[0]&&r[0]!=='รวม').map(r=>{const name=String(r[0]),m=String(r[5]||'').match(/(\d{1,2})/);return{user_id:user.id,name,debt_type:(name.includes('กดเงินสด')||name.toLowerCase().includes('cash'))?'loan':'credit_card',original_amount:Number(r[2]||0),outstanding_amount:Number(r[1]||0),installment_amount:0,due_day:m?Number(m[1]):28,is_active:true,note:'นำเข้าจาก r3'}})
     log('เตรียมได้ '+tx.length+' รายการ / '+accounts.length+' บัญชี / '+bills.length+' บิล / '+debts.length+' หนี้')
-    let e
-    ;({error:e}=await supabase.from('transactions').delete().eq('user_id',user.id).eq('source','import_r3_v2'));if(e)throw e
-    ;({error:e}=await supabase.from('accounts').delete().eq('user_id',user.id).like('note','นำเข้าจาก r3%'));if(e)throw e
-    ;({error:e}=await supabase.from('bills').delete().eq('user_id',user.id).like('note','นำเข้าจาก r3%'));if(e)throw e
-    ;({error:e}=await supabase.from('debts').delete().eq('user_id',user.id).like('note','นำเข้าจาก r3%'));if(e)throw e
-    for(const c of chunks(tx,50)){const {error}=await supabase.from('transactions').insert(c);if(error)throw error}
-    for(const c of chunks(accounts,50)){const {error}=await supabase.from('accounts').insert(c);if(error)throw error}
-    for(const c of chunks(bills,50)){const {error}=await supabase.from('bills').insert(c);if(error)throw error}
-    for(const c of chunks(debts,50)){const {error}=await supabase.from('debts').insert(c);if(error)throw error}
-    log('นำเข้าสำเร็จทั้งหมด ✅','ok')
+    if(!confirm('เพิ่มข้อมูลจากไฟล์นี้? ระบบจะข้ามรายการที่ตรงกับข้อมูลเดิม และไม่แก้ยอดเดิม')){log('ยกเลิกการนำเข้า');return}
+    const {data,error}=await supabase.rpc('import_r3_safe',{payload:{transactions:tx,accounts,bills,debts}});
+    if(error)throw error;
+    log('นำเข้าสำเร็จ ✅ เพิ่ม '+data.added+' รายการ · ข้ามรายการเดิม/รายการที่จัดการผ่านหน้าเฉพาะ '+data.skipped+' รายการ','ok')
     log('กลับหน้า My Finance แล้วรีเฟรชเพื่อดูข้อมูลได้เลย')
   }catch(err){log('เกิดข้อผิดพลาด: '+(err.message||err),'err')}finally{go.disabled=false}
 }

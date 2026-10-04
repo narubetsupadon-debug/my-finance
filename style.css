@@ -169,3 +169,12 @@ dialog{overflow:hidden}.modal{padding:22px}.modal h3{font-size:20px}.modal-actio
 .repeat-choice:focus-visible{outline:2px solid #6366f1}.repeat-favorite{display:flex;gap:10px;align-items:center;margin-top:16px;font-size:13px;color:#505975}
 .repeat-favorite input{width:19px;height:19px;accent-color:#4f46e5}.repeat-favorite small{display:block;color:#8991a3;margin-top:3px}
 #txAmount{font-size:24px;font-weight:750;color:#4338ca}#txForm button:disabled{opacity:.65;cursor:wait}
+
+
+/* Keep long forms reachable with desktop windows and mobile keyboards. */
+dialog > .modal{box-sizing:border-box;max-height:90vh;max-height:90dvh;overflow:auto}
+#dataError{margin:12px;white-space:normal}
+@media(max-width:820px){
+ body .salary-wrap,body .car-wrap{padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))}
+ body .salary-net{bottom:calc(90px + env(safe-area-inset-bottom,0px))}
+}
