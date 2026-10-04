@@ -47,6 +47,8 @@ assert.match(source['car.html'],/padding:16px 10px calc\(190px \+ env\(safe-area
 assert.match(source['car.js'],/td\.dataset\.label=/,'Mobile car rows need data-labels');
 assert.match(source['car.html'],/id="carExpenseList"/,'car expense list missing');
 assert.match(source['car.js'],/from\('car_expenses'\)/,'car expense data source missing');
+assert.match(source['app.js'],/carExpenseTxIds/,'linked car transactions must be protected in the main editor');
+assert.match(source['app.js'],/pendingRealtime/,'realtime refresh must defer while editors are open');
 assert.match(source['style.css'],/\/\* Mobile car installment cards \*\//,'mobile car card layout missing');
 
 console.log('PASS static audit: asset versions, DOM ids, keyboard regression, navigation, PWA, manifest, safe areas');
