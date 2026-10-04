@@ -499,7 +499,7 @@ window.openTx=(id=null)=>{
  $('txDate').value=bangkokDay();$('txAccount').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
  fillTxSelectors();if(!id&&uiSettings.defaultAccount&&[...$('txAccount').options].some(o=>o.value===uiSettings.defaultAccount))$('txAccount').value=uiSettings.defaultAccount;renderRepeatChoices();
  if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;}}
- renderCardPaymentSuggestions();$('txDialog').showModal();requestAnimationFrame(()=>{$('txDialog').scrollTop=0;});
+ renderCardPaymentSuggestions();$('txDialog').showModal();requestAnimationFrame(()=>{$('txForm').scrollTop=0;});
 }
 function txError(message){$('txError').textContent=message;$('txError').classList.remove('hidden');$('txError').scrollIntoView({block:'nearest'})}
 $('txForm').onsubmit=async e=>{
