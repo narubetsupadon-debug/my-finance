@@ -64,6 +64,7 @@
         <div class="nav-group-label">จัดการข้อมูล</div>
         <button class="navbtn" data-page="accounts"><span class="nav-icon" aria-hidden="true">🏦</span><span>บัญชี</span></button>
         <button class="navbtn" data-page="categories"><span class="nav-icon" aria-hidden="true">🏷️</span><span>หมวดหมู่</span></button>
+        <button class="navbtn" data-page="settings"><span class="nav-icon" aria-hidden="true">⚙️</span><span>ตั้งค่า</span></button>
       </div>
     </aside>
 
@@ -207,6 +208,39 @@
         </div>
         <div class="card section"><h3>ตารางสรุปรายเดือน</h3><div id="summaryTable"></div></div>
         <div class="card section"><h3>ตารางรายจ่ายแยกหมวด × เดือน</h3><div id="categoryMonthTable"></div></div>
+      </section>
+
+      <section id="settingsPage" class="page hidden">
+        <div class="page-head">
+          <div>
+            <h2>ตั้งค่า</h2>
+            <div class="muted">ปรับหน้าตาเว็บให้เข้ากับวิธีที่มิวใช้งาน</div>
+          </div>
+        </div>
+        <div class="card settings-card">
+          <div class="section-heading">
+            <div>
+              <h2>ธีมของเว็บไซต์</h2>
+              <p>ตอนนี้ใช้: <strong id="themeCurrentLabel">ตามเครื่อง</strong></p>
+            </div>
+            <span class="section-mark" aria-hidden="true">◐</span>
+          </div>
+          <div class="theme-choice-grid section" role="group" aria-label="เลือกธีมเว็บไซต์">
+            <button type="button" class="theme-choice" data-theme-option="system" aria-pressed="false">
+              <span class="theme-preview system-preview"><i></i><i></i></span>
+              <span><b>ตามเครื่อง</b><small>สว่างหรือมืดตามการตั้งค่าของอุปกรณ์</small></span>
+            </button>
+            <button type="button" class="theme-choice" data-theme-option="light" aria-pressed="false">
+              <span class="theme-preview light-preview"><i></i></span>
+              <span><b>สว่าง</b><small>ใช้หน้าตาเดิมโทนสว่างตลอดเวลา</small></span>
+            </button>
+            <button type="button" class="theme-choice" data-theme-option="dark" aria-pressed="false">
+              <span class="theme-preview dark-preview"><i></i></span>
+              <span><b>มืด</b><small>ใช้ Minimal Dark ตลอดเวลา</small></span>
+            </button>
+          </div>
+          <div class="theme-note section">💡 ถ้าเลือก “ตามเครื่อง” เว็บจะเปลี่ยนให้อัตโนมัติเมื่อมือถือหรือคอมสลับ Light / Dark Mode</div>
+        </div>
       </section>
     </main>
   </div>
