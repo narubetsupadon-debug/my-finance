@@ -272,3 +272,11 @@ dialog::backdrop{background:rgba(2,4,8,.72);backdrop-filter:blur(3px)}
   :root{color-scheme:dark}
 }
 
+/* Theme settings in Minimal Dark */
+.theme-choice{background:#121722;border-color:#293141;color:#f4f6fb}
+.theme-choice:hover{border-color:#5f4b89;box-shadow:0 10px 26px rgba(0,0,0,.24)}
+.theme-choice.active{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(139,92,246,.13)}
+.theme-note{background:#171d28;color:#9da8ba}
+.system-preview{border-color:#303849}
+.system-preview:after{background:#251b40;color:#ddd6fe}
+
