@@ -434,10 +434,39 @@ function fillTxSelectors(){
  renderCardPaymentSuggestions()
 }
 
-function showPage(name){let target=$(name+'Page');if(!target||!target.classList.contains('page')){name='dashboard';target=$('dashboardPage');if(!target)return;}document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));target.classList.remove('hidden');document.querySelectorAll('.navbtn[data-page]').forEach(x=>{const selected=x.dataset.page===name;x.classList.toggle('active',selected);if(selected)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});history.replaceState(null,'','#'+name);window.dispatchEvent(new CustomEvent('finance:page',{detail:name}));window.scrollTo({top:0,behavior:'auto'})}
+const pageNodes=[...document.querySelectorAll('.page')];
+const pageByName=new Map(pageNodes.map(p=>[p.id.replace(/Page$/,''),p]));
+const navNodes=[...document.querySelectorAll('.navbtn[data-page]')];
+let activePageName=null;
+function resolvePage(name){
+ const clean=pageByName.has(name)?name:'dashboard';
+ return [clean,pageByName.get(clean)||$('dashboardPage')];
+}
+function showPage(name){
+ const [nextName,target]=resolvePage(name);if(!target)return;
+ if(activePageName===nextName&&!target.classList.contains('hidden'))return;
+ const previous=activePageName?pageByName.get(activePageName):pageNodes.find(p=>!p.classList.contains('hidden'));
+ if(previous&&previous!==target)previous.classList.add('hidden');
+ target.classList.remove('hidden');
+ target.classList.remove('page-enter');
+ void target.offsetWidth;
+ target.classList.add('page-enter');
+ activePageName=nextName;
+ for(const x of navNodes){
+  const selected=x.dataset.page===nextName;
+  if(x.classList.contains('active')!==selected)x.classList.toggle('active',selected);
+  if(selected){if(x.getAttribute('aria-current')!=='page')x.setAttribute('aria-current','page');}
+  else if(x.hasAttribute('aria-current'))x.removeAttribute('aria-current');
+ }
+ const nextHash='#'+nextName;
+ if(location.hash!==nextHash)history.replaceState(null,'',nextHash);
+ window.dispatchEvent(new CustomEvent('finance:page',{detail:nextName}));
+ if(window.scrollY!==0)window.scrollTo({top:0,behavior:'auto'});
+}
 window.addEventListener('finance:navigate',e=>showPage(e.detail));
 window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)||'dashboard'));
-document.querySelectorAll('.navbtn[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
+navNodes.forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
 
 $('pushDeviceSetting')?.addEventListener('change',async e=>{
  const toggle=e.currentTarget;toggle.disabled=true;
