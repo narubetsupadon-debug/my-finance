@@ -10,7 +10,7 @@ if(typeof Chart!=='undefined'){
 }
 const supabase=createClient(url,key)
 const $=id=>document.getElementById(id)
-const money=n=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
+const money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
 const fmtDate=s=>s?new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'2-digit'}).format(new Date(s+'T00:00:00')):''
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},trendChart=null,categoryChart2=null,pieChart=null
@@ -377,7 +377,7 @@ function renderSummary(){
  const monthKeys=Array.from({length:12},(_,i)=>year+'-'+String(i+1).padStart(2,'0'))
  const monthLabels=monthKeys.map(k=>new Date(Number(k.slice(0,4)),Number(k.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'short'}))
  const monthly=monthKeys.map(k=>{const r=base.filter(x=>String(x.transaction_date).slice(0,7)===k);const income=r.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),expense=r.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0);return{income,expense,balance:income-expense,count:r.length}})
- const moneyFmt=v=>new Intl.NumberFormat('th-TH',{maximumFractionDigits:0}).format(v)
+ const moneyFmt=v=>document.body?.classList.contains('privacy-mode')?'••••':new Intl.NumberFormat('th-TH',{maximumFractionDigits:0}).format(v)
  if(trendChart)trendChart.destroy()
  if(typeof Chart!=='undefined')trendChart=new Chart($('monthlyTrendChart'),{data:{labels:monthLabels,datasets:[
   {type:'bar',label:'รายรับ',data:monthly.map(x=>x.income),backgroundColor:'rgba(16,185,129,.72)',borderRadius:7},
@@ -441,7 +441,7 @@ $('enablePushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b
 $('disablePushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;try{await disablePush()}catch(err){showAppToast('ปิดแจ้งเตือนไม่ได้: '+err.message)}finally{b.disabled=false}});
 $('testPushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;try{await testPush()}catch(err){showAppToast('ทดสอบไม่ได้: '+err.message)}finally{b.disabled=false}});
 $('defaultAccountSetting')?.addEventListener('change',e=>{writeUiSettings({defaultAccount:e.target.value});showAppToast('ตั้งบัญชีเริ่มต้นแล้ว ✅')});
-$('privacySetting')?.addEventListener('change',e=>{writeUiSettings({privacy:e.target.checked});showAppToast(e.target.checked?'ซ่อนยอดเงินแล้ว 👁️':'แสดงยอดเงินแล้ว')});
+$('privacySetting')?.addEventListener('change',e=>{writeUiSettings({privacy:e.target.checked});renderDashboard();renderTransactions();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary();showAppToast(e.target.checked?'ซ่อนยอดเงินแล้ว 👁️':'แสดงยอดเงินแล้ว')});
 $('dueReminderSetting')?.addEventListener('change',e=>{writeUiSettings({dueReminder:e.target.checked});renderDashboard()});
 $('budgetReminderSetting')?.addEventListener('change',e=>{writeUiSettings({budgetReminder:e.target.checked});renderDashboard()});
 document.addEventListener('click',e=>{
