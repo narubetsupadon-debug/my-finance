@@ -260,6 +260,7 @@ const renderDashboard=createDashboardRenderer({
  billDue,
  nextDueDate,
  getTransactions:()=>transactions,
+ getBills:()=>bills,
  getDebts:()=>debts,
  getUiSettings:()=>uiSettings,
  budgetTotals,
