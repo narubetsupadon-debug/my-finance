@@ -93,3 +93,33 @@ begin
 end $$;
 revoke all on function public.import_r3_safe(jsonb) from public,anon;
 grant execute on function public.import_r3_safe(jsonb) to authenticated;
+
+
+-- Preserve historical meaning: categories/accounts that have been used cannot be deleted.
+create or replace function public.protect_finance_dimension_delete() returns trigger
+language plpgsql security invoker set search_path='' as $$
+begin
+ if auth.uid() is null or old.user_id<>auth.uid() then raise exception 'Unauthorized'; end if;
+ if tg_table_name='categories' then
+  if exists(select 1 from public.transactions where category_id=old.id)
+   or exists(select 1 from public.bills where category_id=old.id)
+   or exists(select 1 from public.salary_records where category_id=old.id)
+   or exists(select 1 from public.car_installments where category_id=old.id)
+   or exists(select 1 from public.budgets where user_id=old.user_id and old.name=any(category_names))
+  then raise exception 'หมวดนี้มีประวัติใช้งานแล้ว กรุณาเก็บไว้เพื่อไม่ให้ข้อมูลย้อนหลังเสียหมวด'; end if;
+ elsif tg_table_name='accounts' then
+  if exists(select 1 from public.transactions where account_id=old.id)
+   or exists(select 1 from public.bills where account_id=old.id)
+   or exists(select 1 from public.salary_records where account_id=old.id)
+   or exists(select 1 from public.car_installments where account_id=old.id)
+  then raise exception 'บัญชีนี้มีประวัติใช้งานแล้ว กรุณาเก็บไว้เพื่อไม่ให้ข้อมูลย้อนหลังเสียบัญชี'; end if;
+ end if;
+ return old;
+end $$;
+revoke all on function public.protect_finance_dimension_delete() from public,anon;
+drop trigger if exists protect_category_delete on public.categories;
+create trigger protect_category_delete before delete on public.categories
+ for each row execute function public.protect_finance_dimension_delete();
+drop trigger if exists protect_account_delete on public.accounts;
+create trigger protect_account_delete before delete on public.accounts
+ for each row execute function public.protect_finance_dimension_delete();
