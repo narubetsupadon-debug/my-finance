@@ -7,7 +7,7 @@ function dbMock(data){
  const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),signOut:async()=>({error:null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
  db.from=table=>{
   let rows=[...(data[table]||[])],write=null;
-  const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},
+  const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},not(k,op,v){if(op==='is'&&v===null)rows=rows.filter(r=>r[k]!==null&&r[k]!==undefined);return q},
   insert(row){write=row;state.writes.push({table,row});return q},update(row){write=row;state.writes.push({table,row});return q},
   single:async()=>{if(state.fail)return {error:{message:'offline'}};if(state.failAfterWrite)state.fail=true;return {data:{id:'saved'}}},
   range:async(a,b)=>state.fail?{error:{message:'offline'}}:{data:rows.slice(a,b+1)},
@@ -31,7 +31,7 @@ async function page(html,js,data,expose){
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
- const p=await page('index.html','app.js',{categories,accounts,transactions},'loadAll,fillTxSelectors');
+ const p=await page('index.html','app.js',{categories,accounts,transactions,car_expenses:[{id:'ce1',user_id:'user',transaction_id:'t1'}]},'loadAll,fillTxSelectors');
  assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.ok(p.el('pushDeviceSetting'));
  assert.equal(p.el('txList').querySelector('img'),null);
  assert.equal(p.el('recentList').querySelectorAll('.transaction-row').length,5);
@@ -52,6 +52,8 @@ async function page(html,js,data,expose){
  assert.equal(p.w.document.querySelector('[data-tx-type="income"]').getAttribute('aria-pressed'),'true');
  p.w.quickAdd('อาหาร');assert.equal(p.el('txType').value,'expense');assert.equal(p.el('txDesc').value,'อาหาร');assert.equal(p.el('txCategory').value,'cat');
  p.w.quickAdd('กาแฟ');assert.equal(p.el('txCategory').value,'coffee');
+ // linked car transaction must route to car management instead of opening the generic editor
+ const linkedEdit=p.w.document.querySelector('[data-edit="tx"][data-id="t1"]');if(linkedEdit)linkedEdit.click();
  assert.equal(p.el('txAmount').value,'');p.el('txDialog').close();
  p.el('txFilterCategory').value='cat';p.w.openTx('t0');p.el('txAccount').value='acc';await p.api.loadAll();
  assert.equal(p.el('txFilterCategory').value,'cat');assert.equal(p.el('txAccount').value,'acc');
