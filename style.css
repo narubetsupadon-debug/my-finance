@@ -442,3 +442,46 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
 .push-time-note{margin-top:9px;color:var(--muted);font-size:11px}
 .push-actions{margin-top:10px}
 .home-notification-block .setting-row:last-child{border-bottom:0}
+
+
+/* Mobile car installment cards */
+@media(max-width:650px){
+  .car-table{overflow:visible}
+  .car-table table{display:block;white-space:normal}
+  .car-table thead{display:none}
+  .car-table tbody{display:grid;gap:12px}
+  .car-table tr{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:var(--shadow-soft);
+  }
+  .car-table td{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:4px;
+    min-width:0;
+    padding:11px 12px;
+    text-align:left!important;
+    border-bottom:1px solid var(--line);
+  }
+  .car-table td::before{
+    content:attr(data-label);
+    font-size:10px;
+    color:var(--muted);
+    font-weight:700;
+    letter-spacing:.01em;
+  }
+  .car-table td:nth-last-child(2),
+  .car-table td:last-child{border-bottom:0}
+  .car-table td:last-child{
+    grid-column:1/-1;
+    background:color-mix(in srgb,var(--card) 86%,var(--primary) 14%);
+  }
+  .car-table td:last-child .btn{width:100%}
+}
