@@ -16,6 +16,65 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},trendChart=null,categoryChart2=null,pieChart=null
 
 const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
+const PUSH_ENDPOINT='https://mmvdhopogchcxwlstflk.supabase.co/functions/v1/push-reminders';
+function b64urlToUint8Array(base64String){
+ const padding='='.repeat((4-base64String.length%4)%4);
+ const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+ const raw=atob(base64);return Uint8Array.from([...raw].map(ch=>ch.charCodeAt(0)));
+}
+async function pushSession(){
+ const {data:{session}}=await supabase.auth.getSession();
+ return session||null;
+}
+async function pushCall(action){
+ const session=await pushSession();if(!session)throw new Error('กรุณาเข้าสู่ระบบใหม่');
+ const r=await fetch(PUSH_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':key},body:JSON.stringify({action})});
+ const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'เรียกบริการแจ้งเตือนไม่สำเร็จ');return data;
+}
+async function currentPushSubscription(){
+ if(!('serviceWorker' in navigator)||!('PushManager' in window))return null;
+ const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription();
+}
+async function refreshPushStatus(){
+ const text=$('pushStatusText'),badge=$('pushStatusBadge'),on=$('enablePushBtn'),test=$('testPushBtn'),off=$('disablePushBtn');
+ if(!text||!badge)return;
+ if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window)){
+  text.textContent='อุปกรณ์หรือเบราว์เซอร์นี้ยังไม่รองรับ Web Push';badge.textContent='ไม่รองรับ';
+  on?.classList.add('hidden');test?.classList.add('hidden');off?.classList.add('hidden');return;
+ }
+ const sub=await currentPushSubscription().catch(()=>null);
+ if(sub&&Notification.permission==='granted'){
+  text.textContent='เปิดอยู่บนอุปกรณ์นี้';badge.textContent='เปิดอยู่';badge.classList.add('income');
+  on?.classList.add('hidden');test?.classList.remove('hidden');off?.classList.remove('hidden');
+ }else{
+  text.textContent=Notification.permission==='denied'?'ถูกบล็อกโดยเบราว์เซอร์ กรุณาเปิดสิทธิ์ Notification ในการตั้งค่า':'ยังไม่ได้อนุญาตการแจ้งเตือนบนอุปกรณ์นี้';
+  badge.textContent=Notification.permission==='denied'?'ถูกบล็อก':'ยังไม่เปิด';badge.classList.remove('income');
+  on?.classList.toggle('hidden',Notification.permission==='denied');test?.classList.add('hidden');off?.classList.add('hidden');
+ }
+}
+async function enablePush(){
+ if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window))throw new Error('อุปกรณ์นี้ยังไม่รองรับ Web Push');
+ const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('ยังไม่ได้อนุญาต Notification');
+ const cfg=await pushCall('config');
+ const reg=await navigator.serviceWorker.ready;
+ let sub=await reg.pushManager.getSubscription();
+ if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64urlToUint8Array(cfg.publicKey)});
+ const j=sub.toJSON(),session=await pushSession();
+ const row={user_id:session.user.id,endpoint:sub.endpoint,p256dh:j.keys?.p256dh,auth:j.keys?.auth,enabled:true,updated_at:new Date().toISOString()};
+ const {error}=await supabase.from('push_subscriptions').upsert(row,{onConflict:'endpoint'});if(error)throw error;
+ await refreshPushStatus();showAppToast('เปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว 🔔');
+}
+async function disablePush(){
+ const sub=await currentPushSubscription();if(sub){
+  const endpoint=sub.endpoint;await sub.unsubscribe();
+  await supabase.from('push_subscriptions').delete().eq('endpoint',endpoint);
+ }
+ await refreshPushStatus();showAppToast('ปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว');
+}
+async function testPush(){
+ const r=await pushCall('test');showAppToast(r.sent?'ส่งแจ้งเตือนทดสอบแล้ว 🔔':'ยังไม่พบ subscription ของอุปกรณ์นี้');
+}
+
 const QUICK_DEFAULT=[
  {icon:'🍜',label:'อาหาร',desc:'อาหาร'},
  {icon:'☕',label:'กาแฟ',desc:'กาแฟ'},
@@ -121,7 +180,7 @@ async function loadAll(){
  }
 }
 $('retryData').onclick=()=>loadAll();
-function renderAll(){fillTxSelectors();renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary();renderSettings();applyUiSettings()}
+function renderAll(){fillTxSelectors();renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary();renderSettings();applyUiSettings();void refreshPushStatus()}
 function showAppToast(message){
  const el=$('appToast'); if(!el)return; el.textContent=message; el.classList.remove('hidden'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>el.classList.add('hidden'),2200)
 }
@@ -378,6 +437,9 @@ window.addEventListener('finance:navigate',e=>showPage(e.detail));
 window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)||'dashboard'));
 document.querySelectorAll('.navbtn[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
 
+$('enablePushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;try{await enablePush()}catch(err){showAppToast('เปิดแจ้งเตือนไม่ได้: '+err.message)}finally{b.disabled=false}});
+$('disablePushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;try{await disablePush()}catch(err){showAppToast('ปิดแจ้งเตือนไม่ได้: '+err.message)}finally{b.disabled=false}});
+$('testPushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;try{await testPush()}catch(err){showAppToast('ทดสอบไม่ได้: '+err.message)}finally{b.disabled=false}});
 $('defaultAccountSetting')?.addEventListener('change',e=>{writeUiSettings({defaultAccount:e.target.value});showAppToast('ตั้งบัญชีเริ่มต้นแล้ว ✅')});
 $('privacySetting')?.addEventListener('change',e=>{writeUiSettings({privacy:e.target.checked});showAppToast(e.target.checked?'ซ่อนยอดเงินแล้ว 👁️':'แสดงยอดเงินแล้ว')});
 $('dueReminderSetting')?.addEventListener('change',e=>{writeUiSettings({dueReminder:e.target.checked});renderDashboard()});
