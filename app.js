@@ -445,7 +445,7 @@ $('privacySetting')?.addEventListener('change',e=>{writeUiSettings({privacy:e.ta
 $('dueReminderSetting')?.addEventListener('change',e=>{writeUiSettings({dueReminder:e.target.checked});renderDashboard()});
 $('budgetReminderSetting')?.addEventListener('change',e=>{writeUiSettings({budgetReminder:e.target.checked});renderDashboard()});
 document.addEventListener('click',e=>{
- const accent=e.target.closest('[data-accent]');
+ const accent=e.target.closest('#accentPicks button[data-accent]');
  if(accent){writeUiSettings({accent:accent.dataset.accent});showAppToast('เปลี่ยนสี Accent แล้ว ✨');return;}
  const up=e.target.closest('[data-quick-up]');if(up){moveQuick(up.dataset.quickUp,-1);return;}
  const down=e.target.closest('[data-quick-down]');if(down){moveQuick(down.dataset.quickDown,1);return;}
