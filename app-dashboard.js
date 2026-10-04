@@ -1,11 +1,11 @@
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
- getTransactions,getDebts,getUiSettings,budgetTotals,orderedQuickItems,
+ getTransactions,getBills,getDebts,getUiSettings,budgetTotals,orderedQuickItems,
  showPage,renderTxList,refreshDailyGreeting
 }){
 function renderDashboard(){
- const transactions=getTransactions(),debts=getDebts(),uiSettings=getUiSettings();
+ const transactions=getTransactions(),bills=getBills(),debts=getDebts(),uiSettings=getUiSettings();
  refreshDailyGreeting();
  const now=bangkokDate(),today=bangkokDay(),y=now.getFullYear(),m=now.getMonth()
  const monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
