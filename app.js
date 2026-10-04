@@ -36,20 +36,20 @@ async function currentPushSubscription(){
  const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription();
 }
 async function refreshPushStatus(){
- const text=$('pushStatusText'),badge=$('pushStatusBadge'),on=$('enablePushBtn'),test=$('testPushBtn'),off=$('disablePushBtn');
+ const text=$('pushStatusText'),badge=$('pushStatusBadge'),on=$('enablePushBtn'),test=$('testPushBtn'),off=$('disablePushBtn'),toggle=$('pushDeviceSetting');
  if(!text||!badge)return;
  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window)){
-  text.textContent='อุปกรณ์หรือเบราว์เซอร์นี้ยังไม่รองรับ Web Push';badge.textContent='ไม่รองรับ';
+  text.textContent='อุปกรณ์หรือเบราว์เซอร์นี้ยังไม่รองรับ';badge.textContent='ไม่รองรับ';if(toggle){toggle.checked=false;toggle.disabled=true;}
   on?.classList.add('hidden');test?.classList.add('hidden');off?.classList.add('hidden');return;
  }
  const sub=await currentPushSubscription().catch(()=>null);
  if(sub&&Notification.permission==='granted'){
-  text.textContent='เปิดอยู่บนอุปกรณ์นี้';badge.textContent='เปิดอยู่';badge.classList.add('income');
+  text.textContent='เปิดอยู่บนอุปกรณ์นี้';badge.textContent='เปิดอยู่';badge.classList.add('income');if(toggle){toggle.checked=true;toggle.disabled=false;}
   on?.classList.add('hidden');test?.classList.remove('hidden');off?.classList.remove('hidden');
  }else{
-  text.textContent=Notification.permission==='denied'?'ถูกบล็อกโดยเบราว์เซอร์ กรุณาเปิดสิทธิ์ Notification ในการตั้งค่า':'ยังไม่ได้อนุญาตการแจ้งเตือนบนอุปกรณ์นี้';
-  badge.textContent=Notification.permission==='denied'?'ถูกบล็อก':'ยังไม่เปิด';badge.classList.remove('income');
-  on?.classList.toggle('hidden',Notification.permission==='denied');test?.classList.add('hidden');off?.classList.add('hidden');
+  text.textContent=Notification.permission==='denied'?'ถูกบล็อกในตั้งค่าของเบราว์เซอร์':'ปิดอยู่บนอุปกรณ์นี้';
+  badge.textContent=Notification.permission==='denied'?'ถูกบล็อก':'ปิดอยู่';badge.classList.remove('income');if(toggle){toggle.checked=false;toggle.disabled=Notification.permission==='denied';}
+  on?.classList.add('hidden');test?.classList.add('hidden');off?.classList.add('hidden');
  }
 }
 async function enablePush(){
@@ -437,6 +437,15 @@ window.addEventListener('finance:navigate',e=>showPage(e.detail));
 window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)||'dashboard'));
 document.querySelectorAll('.navbtn[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
 
+$('pushDeviceSetting')?.addEventListener('change',async e=>{
+ const toggle=e.currentTarget;toggle.disabled=true;
+ try{
+  if(toggle.checked)await enablePush();else await disablePush();
+ }catch(err){
+  await refreshPushStatus();
+  showAppToast((toggle.checked?'เปิด':'ปิด')+'แจ้งเตือนไม่ได้: '+err.message);
+ }finally{toggle.disabled=false;}
+});
 $('enablePushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;try{await enablePush()}catch(err){showAppToast('เปิดแจ้งเตือนไม่ได้: '+err.message)}finally{b.disabled=false}});
 $('disablePushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;try{await disablePush()}catch(err){showAppToast('ปิดแจ้งเตือนไม่ได้: '+err.message)}finally{b.disabled=false}});
 $('testPushBtn')?.addEventListener('click',async e=>{const b=e.currentTarget;b.disabled=true;try{await testPush()}catch(err){showAppToast('ทดสอบไม่ได้: '+err.message)}finally{b.disabled=false}});
