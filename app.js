@@ -15,6 +15,79 @@ const fmtDate=s=>s?new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},trendChart=null,categoryChart2=null,pieChart=null
 
+const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
+const QUICK_DEFAULT=[
+ {icon:'🍜',label:'อาหาร',desc:'อาหาร'},
+ {icon:'☕',label:'กาแฟ',desc:'กาแฟ'},
+ {icon:'🚗',label:'รถ',desc:'รถ'},
+ {icon:'🛍️',label:'ซื้อของ',desc:'ซื้อของ'},
+ {icon:'💳',label:'จ่ายบัตร',desc:'จ่ายบัตร'},
+ {icon:'🧾',label:'บิล',desc:'บิล'}
+];
+const UI_DEFAULTS={accent:'purple',privacy:false,defaultAccount:'',dueReminder:true,budgetReminder:true,quickOrder:QUICK_DEFAULT.map(x=>x.label),quickHidden:[]};
+function readUiSettings(){
+ try{
+  const raw=JSON.parse(localStorage.getItem(UI_SETTINGS_KEY)||'{}');
+  return {...UI_DEFAULTS,...raw,
+   quickOrder:Array.isArray(raw.quickOrder)?raw.quickOrder:UI_DEFAULTS.quickOrder,
+   quickHidden:Array.isArray(raw.quickHidden)?raw.quickHidden:[]
+  };
+ }catch{return {...UI_DEFAULTS}}
+}
+let uiSettings=readUiSettings();
+function writeUiSettings(patch){
+ uiSettings={...uiSettings,...patch};
+ localStorage.setItem(UI_SETTINGS_KEY,JSON.stringify(uiSettings));
+ applyUiSettings();
+}
+function applyUiSettings(){
+ const palettes={
+  purple:['#7c3aed','#a78bfa'],
+  blue:['#2563eb','#60a5fa'],
+  green:['#059669','#34d399'],
+  pink:['#db2777','#f472b6']
+ };
+ const accent=palettes[uiSettings.accent]||palettes.purple;
+ document.documentElement.dataset.accent=uiSettings.accent||'purple';
+ document.documentElement.style.setProperty('--primary',accent[0]);
+ document.documentElement.style.setProperty('--primary2',accent[1]);
+ document.body?.classList.toggle('privacy-mode',!!uiSettings.privacy);
+ document.querySelectorAll('[data-accent]').forEach(b=>b.classList.toggle('active',b.dataset.accent===uiSettings.accent));
+}
+function orderedQuickItems(){
+ const byLabel=new Map(QUICK_DEFAULT.map(x=>[x.label,x]));
+ const order=[...uiSettings.quickOrder,...QUICK_DEFAULT.map(x=>x.label).filter(x=>!uiSettings.quickOrder.includes(x))];
+ return order.map(x=>byLabel.get(x)).filter(Boolean);
+}
+function renderSettings(){
+ const account=$('defaultAccountSetting');
+ if(account){
+  const selected=uiSettings.defaultAccount||'';
+  account.innerHTML='<option value="">ไม่ระบุบัญชี</option>'+accounts.map(a=>'<option value="'+a.id+'">'+esc(a.name)+'</option>').join('');
+  if([...account.options].some(o=>o.value===selected))account.value=selected;else account.value='';
+ }
+ const privacy=$('privacySetting');if(privacy)privacy.checked=!!uiSettings.privacy;
+ const due=$('dueReminderSetting');if(due)due.checked=uiSettings.dueReminder!==false;
+ const budget=$('budgetReminderSetting');if(budget)budget.checked=uiSettings.budgetReminder!==false;
+ document.querySelectorAll('[data-accent]').forEach(b=>b.classList.toggle('active',b.dataset.accent===uiSettings.accent));
+ const root=$('quickSettingsList');
+ if(root){
+  const items=orderedQuickItems();
+  root.innerHTML=items.map((item,i)=>{
+   const hidden=uiSettings.quickHidden.includes(item.label);
+   return '<div class="quick-setting-row" data-quick-label="'+esc(item.label)+'"><label><input type="checkbox" '+(hidden?'':'checked')+' data-quick-visible="'+esc(item.label)+'"><span>'+item.icon+' <b>'+esc(item.label)+'</b></span></label><div class="quick-order-actions"><button type="button" class="btn small ghost" data-quick-up="'+esc(item.label)+'" '+(i===0?'disabled':'')+' aria-label="เลื่อน '+esc(item.label)+' ขึ้น">↑</button><button type="button" class="btn small ghost" data-quick-down="'+esc(item.label)+'" '+(i===items.length-1?'disabled':'')+' aria-label="เลื่อน '+esc(item.label)+' ลง">↓</button></div></div>';
+  }).join('');
+ }
+}
+function moveQuick(label,delta){
+ const order=orderedQuickItems().map(x=>x.label),i=order.indexOf(label),j=i+delta;
+ if(i<0||j<0||j>=order.length)return;
+ [order[i],order[j]]=[order[j],order[i]];
+ writeUiSettings({quickOrder:order});renderSettings();renderDashboard();
+}
+applyUiSettings();
+
+
 function toast(t,type=''){const e=$('authMsg');if(!e)return;e.textContent=t;e.className='notice '+type;e.classList.remove('hidden')}
 function setAuthMode(m){mode=m;$('tabLogin').classList.toggle('active',m==='login');$('tabSignup').classList.toggle('active',m==='signup');$('authBtn').textContent=m==='login'?'เข้าสู่ระบบ':'สร้างบัญชี';$('password').autocomplete=m==='login'?'current-password':'new-password';$('authMsg').classList.add('hidden')}
 $('tabLogin').onclick=()=>setAuthMode('login');$('tabSignup').onclick=()=>setAuthMode('signup')
@@ -48,7 +121,7 @@ async function loadAll(){
  }
 }
 $('retryData').onclick=()=>loadAll();
-function renderAll(){fillTxSelectors();renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary()}
+function renderAll(){fillTxSelectors();renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary();renderSettings();applyUiSettings()}
 function showAppToast(message){
  const el=$('appToast'); if(!el)return; el.textContent=message; el.classList.remove('hidden'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>el.classList.add('hidden'),2200)
 }
@@ -124,6 +197,9 @@ function renderDashboard(){
  const prevExp=previous.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
  const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=todayRows.reduce((s,x)=>s+Number(x.amount),0)
  const bsum=budgetTotals(),dailyLeft=bsum.daily,pct=bsum.limit?Math.min(100,bsum.spent/bsum.limit*100):0
+ $('nextBillCard')?.classList.toggle('hidden',uiSettings.dueReminder===false);
+ $('upcomingList')?.closest('details')?.classList.toggle('hidden',uiSettings.dueReminder===false);
+ document.querySelector('.budget-panel')?.classList.toggle('budget-panel-warning',uiSettings.budgetReminder!==false&&bsum.limit>0&&bsum.spent/bsum.limit>=.8);
  $('todayLabel').textContent=now.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
  $('monthLabel').textContent=now.toLocaleDateString('th-TH',{month:'long',year:'numeric'})
  $('todaySpent').textContent=money(todaySpent);$('todayCount').textContent=todayRows.length+' รายการ'
@@ -137,10 +213,8 @@ function renderDashboard(){
  $('viewToday').onclick=()=>openInsightDetails('รายจ่ายวันนี้',[{label:fmtDate(today),rows:todayRows}],'รายการที่บันทึกวันนี้ ไม่รวมรายการยกเลิก');
  $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
 
- const quick=[
-  ['🍜','อาหาร','อาหาร'],['☕','กาแฟ','กาแฟ'],['🚗','รถ','รถ'],['🛍️','ซื้อของ','ซื้อของ'],['💳','จ่ายบัตร','จ่ายบัตร'],['🧾','บิล','บิล']
- ]
- $('quickAdd').innerHTML=quick.map(([ico,label,desc])=>'<button class="quick-btn" onclick="quickAdd(\''+label+'\',\''+desc+'\')"><span>'+ico+'</span><b>'+label+'</b></button>').join('')+'<button class="quick-btn more" onclick="openTx()"><span>＋</span><b>อื่น ๆ</b></button>'
+ const quick=orderedQuickItems().filter(x=>!uiSettings.quickHidden.includes(x.label))
+ $('quickAdd').innerHTML=quick.map(({icon,label,desc})=>'<button class="quick-btn" onclick="quickAdd(\''+label+'\',\''+desc+'\')"><span>'+icon+'</span><b>'+label+'</b></button>').join('')+'<button class="quick-btn more" onclick="openTx()"><span>＋</span><b>อื่น ๆ</b></button>'
 
  const sums={};monthly.filter(x=>x.type==='expense').forEach(x=>{const n=x.categories?.name||'อื่นๆ';sums[n]=(sums[n]||0)+Number(x.amount)})
  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]),top=sorted[0]
@@ -303,6 +377,24 @@ function showPage(name){const target=$(name+'Page');if(!target||!target.classLis
 window.addEventListener('finance:navigate',e=>showPage(e.detail));
 window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)||'dashboard'));
 document.querySelectorAll('.navbtn[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
+
+$('defaultAccountSetting')?.addEventListener('change',e=>{writeUiSettings({defaultAccount:e.target.value});showAppToast('ตั้งบัญชีเริ่มต้นแล้ว ✅')});
+$('privacySetting')?.addEventListener('change',e=>{writeUiSettings({privacy:e.target.checked});showAppToast(e.target.checked?'ซ่อนยอดเงินแล้ว 👁️':'แสดงยอดเงินแล้ว')});
+$('dueReminderSetting')?.addEventListener('change',e=>{writeUiSettings({dueReminder:e.target.checked});renderDashboard()});
+$('budgetReminderSetting')?.addEventListener('change',e=>{writeUiSettings({budgetReminder:e.target.checked});renderDashboard()});
+document.addEventListener('click',e=>{
+ const accent=e.target.closest('[data-accent]');
+ if(accent){writeUiSettings({accent:accent.dataset.accent});showAppToast('เปลี่ยนสี Accent แล้ว ✨');return;}
+ const up=e.target.closest('[data-quick-up]');if(up){moveQuick(up.dataset.quickUp,-1);return;}
+ const down=e.target.closest('[data-quick-down]');if(down){moveQuick(down.dataset.quickDown,1);return;}
+});
+document.addEventListener('change',e=>{
+ const input=e.target.closest('[data-quick-visible]');if(!input)return;
+ const label=input.dataset.quickVisible;
+ const hidden=new Set(uiSettings.quickHidden);
+ if(input.checked)hidden.delete(label);else hidden.add(label);
+ writeUiSettings({quickHidden:[...hidden]});renderSettings();renderDashboard();
+});
 for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=fillTxSelectors;$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary
 
 
@@ -343,7 +435,7 @@ window.openTx=(id=null)=>{
  editing={type:'tx',id};$('txFavorite').checked=false;$('txError').classList.add('hidden');$('txExtra').open=false;$('txRepeatSection').open=false;
  $('txDialogTitle').textContent=id?'แก้ไขรายการ':'บันทึกรายการ';
  $('txDate').value=bangkokDay();$('txAccount').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
- fillTxSelectors();renderRepeatChoices();
+ fillTxSelectors();if(!id&&uiSettings.defaultAccount&&[...$('txAccount').options].some(o=>o.value===uiSettings.defaultAccount))$('txAccount').value=uiSettings.defaultAccount;renderRepeatChoices();
  if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;}}
  renderCardPaymentSuggestions();$('txDialog').showModal();$('txAmount').focus({preventScroll:true});
 }
