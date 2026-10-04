@@ -1,7 +1,9 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261004-structure3';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261004-structure3';
-import {createSummaryRenderer} from './app-summary.js?v=20261004-structure3';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261004-structure3';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261005-structure4';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261005-structure4';
+import {createSummaryRenderer} from './app-summary.js?v=20261005-structure4';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261005-structure4';
+import {createTransactionRenderer} from './app-transactions.js?v=20261005-structure4';
+import {createPlanningRenderer} from './app-planning.js?v=20261005-structure4';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -267,27 +269,33 @@ const renderDashboard=createDashboardRenderer({
  refreshDailyGreeting
 });
 
-function filteredTx(){let a=[...transactions],f=$('txFilterType').value,q=$('txSearch').value.trim().toLowerCase(),cat=$('txFilterCategory').value,mon=$('txFilterMonth').value;if(f!=='all')a=a.filter(x=>x.type===f);if(cat)a=a.filter(x=>x.category_id===cat);if(mon)a=a.filter(x=>String(x.transaction_date).slice(0,7)===mon);if(q)a=a.filter(x=>(x.description+' '+(x.categories?.name||'')+' '+(x.note||'')).toLowerCase().includes(q));return a}
-function renderTransactions(){const arr=filteredTx();renderTxList($('txList'),arr);$('txCount').textContent=arr.length+' รายการ'}
-function renderTxList(el,arr,compact=false){
- el.innerHTML=arr.length?arr.map(x=>{
-  const status=x.status==='cancelled'?'ยกเลิก':x.status==='pending'?'รอดำเนินการ':x.type==='income'?'รับแล้ว':'จ่ายแล้ว';
-  return '<div class="item transaction-row '+(compact?'compact-row ':'')+(x.status==='cancelled'?'is-cancelled':'')+'"><span class="transaction-icon" aria-hidden="true">'+esc(x.categories?.icon||'🧾')+'</span><div class="transaction-detail"><b>'+esc(x.description)+'</b><span class="muted">'+fmtDate(x.transaction_date)+' · '+esc(x.categories?.name||'ไม่ระบุหมวด')+(x.accounts?.name&&!compact?' · '+esc(x.accounts.name):'')+'</span><span class="tx-status status-'+esc(x.status||'paid')+'">'+status+'</span></div><span class="amount '+(x.type==='income'?'income':'expense')+'">'+(x.type==='income'?'+':'−')+money(x.amount)+'</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="'+x.id+'" aria-label="แก้ไข '+esc(x.description)+'">'+(compact?'ดู':'แก้ไข')+'</button>'+(compact?'':'<button class="btn small danger" data-del="transactions" data-id="'+x.id+'">ลบ</button>')+'</div></div>';
- }).join(''):'<div class="empty"><b>ยังไม่มีรายการ</b><p>เริ่มจดรายการแรก แล้วกลับมาดูได้ตรงนี้</p><button class="btn soft" onclick="openTx()">＋ บันทึกรายการ</button></div>';
-}
+const transactionRenderer=createTransactionRenderer({
+ $,
+ money,
+ fmtDate,
+ esc,
+ getTransactions:()=>transactions
+});
+function filteredTx(){return transactionRenderer.filteredTx()}
+function renderTransactions(){return transactionRenderer.renderTransactions()}
+function renderTxList(el,arr,compact=false){return transactionRenderer.renderTxList(el,arr,compact)}
 function renderCategories(){for(const type of ['expense','income']){const el=$(type==='expense'?'expenseCats':'incomeCats'),arr=categories.filter(c=>c.type===type);el.innerHTML=arr.length?arr.map(c=>'<div class="category-card"><div class="left"><span class="icon">'+esc(c.icon||'🏷️')+'</span><span class="name">'+esc(c.name)+'</span></div><div class="actions"><button class="btn small soft" data-edit="category" data-id="'+c.id+'">แก้</button><button class="btn small danger" data-del="categories" data-id="'+c.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีหมวด</div>'}}
 function renderAccounts(){$('accountList').innerHTML=accounts.length?accounts.map(a=>'<div class="item"><div><b>🏦 '+esc(a.name)+'</b><span class="muted">'+esc(a.account_type)+(a.note?' · '+esc(a.note):'')+'</span></div><span class="amount"><small class="muted">ยอดตั้งต้น</small> '+money(a.opening_balance)+'</span><div class="actions"><button class="btn small soft" data-edit="account" data-id="'+a.id+'">แก้ไข</button><button class="btn small danger" data-del="accounts" data-id="'+a.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีบัญชี</div>'}
-function renderBills(){$('billList').innerHTML=bills.length?bills.map(b=>'<div class="item"><div><b>📅 '+esc(b.name)+'</b><span class="muted">ทุกวันที่ '+(b.due_day||'-')+' · '+esc(b.categories?.name||'ไม่ระบุหมวด')+'</span></div><span class="amount expense">'+money(b.amount)+'</span><div class="actions"><button class="btn small soft" data-edit="bill" data-id="'+b.id+'">แก้ไข</button><button class="btn small danger" data-del="bills" data-id="'+b.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีบิล</div>'}
-function renderDebts(){$('debtList').innerHTML=debts.length?debts.map(d=>{const limit=Number(d.original_amount||0),used=Number(d.outstanding_amount||0),available=Math.max(0,limit-used),pct=limit?Math.min(100,used/limit*100):0;return '<div class="card credit-card"><div class="row"><div><b>💳 '+esc(d.name)+'</b><div class="muted">ครบกำหนดวันที่ '+(d.due_day||'-')+(Number(d.installment_amount||0)>0?' · จ่ายรอบนี้ '+money(d.installment_amount):'')+'</div></div><div class="actions"><button class="btn small soft" data-edit="debt" data-id="'+d.id+'">แก้ไข</button><button class="btn small danger" data-del="debts" data-id="'+d.id+'">ลบ</button></div></div><div class="credit-stats"><div><span>ยอดคงเหลือบัตร</span><b class="expense">'+money(used)+'</b></div><div><span>วงเงิน</span><b>'+money(limit)+'</b></div><div><span>วงเงินเหลือใช้</span><b class="income">'+money(available)+'</b></div></div><div class="budget-progress"><div class="credit-used" style="width:'+pct+'%"></div></div><div class="muted" style="margin-top:7px">ใช้วงเงินไป '+pct.toFixed(0)+'%</div></div>'}).join(''):'<div class="empty">ยังไม่มีบัตรหรือสินเชื่อ</div>'}
-function budgetSpent(b){
- const ym=bangkokDay().slice(0,7),names=b.category_names||[]
- return transactions.filter(x=>x.type==='expense'&&x.status!=='cancelled'&&String(x.transaction_date).slice(0,7)===ym&&names.includes(x.categories?.name||'')).reduce((s,x)=>s+Number(x.amount||0),0)
-}
-function budgetTotals(){return budgetSummary(budgets,transactions)}
-function renderBudget(){
- const t=budgetTotals();$('budgetLimitTotal').textContent=money(t.limit);$('budgetSpentTotal').textContent=money(t.spent);$('budgetRemainTotal').textContent=money(t.remain);$('budgetDailyTotal').textContent='ใช้ได้วันละ '+money(t.daily)+' จนจบเดือน'
- $('budgetList').innerHTML=budgets.length?budgets.map(b=>{const spent=budgetSpent(b),limit=Number(b.monthly_limit||0),remain=Math.max(0,limit-spent),pct=limit?Math.min(100,spent/limit*100):0,status=spent>limit?'เกินงบ '+money(spent-limit):'เหลือ '+money(remain);return '<div class="card budget-card"><div class="row"><div><h3 style="margin:0">'+esc(b.name)+'</h3><div class="muted">'+esc((b.category_names||[]).join(' · '))+'</div></div><div class="actions"><button class="btn small soft" data-edit="budget" data-id="'+b.id+'">แก้ไข</button><button class="btn small danger" data-del="budgets" data-id="'+b.id+'">ลบ</button></div></div><div class="budget-numbers"><b>'+money(spent)+'</b><span>/ '+money(limit)+'</span></div><div class="budget-progress"><div class="budget-progress-fill '+(spent>limit?'over':'')+'" style="width:'+pct+'%"></div></div><div class="'+(spent>limit?'expense':'income')+'" style="font-weight:800;margin-top:8px">'+status+'</div></div>'}).join(''):'<div class="card empty">ยังไม่มีงบประมาณ</div>'
-}
+const planningRenderer=createPlanningRenderer({
+ $,
+ money,
+ esc,
+ bangkokDay,
+ budgetSummary,
+ getBills:()=>bills,
+ getDebts:()=>debts,
+ getBudgets:()=>budgets,
+ getTransactions:()=>transactions
+});
+function renderBills(){return planningRenderer.renderBills()}
+function renderDebts(){return planningRenderer.renderDebts()}
+function renderBudget(){return planningRenderer.renderBudget()}
+function budgetTotals(){return planningRenderer.budgetTotals()}
 const renderSummary=createSummaryRenderer({
  $,
  money,
