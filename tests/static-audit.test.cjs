@@ -3,7 +3,7 @@ const path=require('node:path');
 const assert=require('node:assert/strict');
 const root=path.join(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const files=['index.html','app.js','style.css','minimal-dark.css','theme.js','app-nav.js','sw.js','car.html','car.js','salary.html','salary.js','import.html','finance-core.js','manifest.webmanifest'];
+const files=['index.html','app.js','app-data.js','style.css','car.css','minimal-dark.css','theme.js','app-nav.js','sw.js','car.html','car.js','salary.html','salary.js','import.html','finance-core.js','manifest.webmanifest'];
 const source=Object.fromEntries(files.map(p=>[p,read(p)]));
 
 // All cache-busted first-party assets must move as one release.
@@ -41,14 +41,17 @@ JSON.parse(source['manifest.webmanifest']);
 // iPhone safe-area support on interactive pages.
 for(const p of ['index.html','car.html','salary.html'])assert.match(source[p],/viewport-fit=cover/,p+' missing viewport-fit=cover');
 
-// Car page inline styles must remain theme-safe and keep mobile content above the bottom nav.
-assert.equal(source['car.html'].includes('thead{background:#f5f5ff}'),false,'car inline styles must remain theme-safe');
-assert.match(source['car.html'],/padding:16px 10px calc\(190px \+ env\(safe-area-inset-bottom,0px\)\)/,'car mobile padding must clear bottom navigation');
+// Car styles live in one page-specific stylesheet and keep mobile content above the bottom nav.
+assert.equal(source['car.html'].includes('<style>'),false,'car.html must not contain inline styles');
+assert.match(source['car.html'],/car\.css\?v=/,'car.html must load car.css');
+assert.match(source['car.css'],/padding:16px 10px calc\(190px \+ env\(safe-area-inset-bottom,0px\)\)/,'car mobile padding must clear bottom navigation');
 assert.match(source['car.js'],/td\.dataset\.label=/,'Mobile car rows need data-labels');
 assert.match(source['car.html'],/id="carExpenseList"/,'car expense list missing');
 assert.match(source['car.js'],/from\('car_expenses'\)/,'car expense data source missing');
 assert.match(source['app.js'],/carExpenseTxIds/,'linked car transactions must be protected in the main editor');
-assert.match(source['app.js'],/pendingRealtime/,'realtime refresh must defer while editors are open');
-assert.match(source['style.css'],/\/\* Mobile car installment cards \*\//,'mobile car card layout missing');
+assert.match(source['app-data.js'],/isBlocked/,'realtime refresh coordinator must support deferred refresh while editors are open');
+assert.match(source['car.css'],/\/\* Mobile car installment cards \*\//,'mobile car card layout missing');
+assert.match(source['app.js'],/fetchFinanceData/,'main app must use shared data loader');
+assert.match(source['app.js'],/createRefreshCoordinator/,'main app must use shared refresh coordinator');
 
 console.log('PASS static audit: asset versions, DOM ids, keyboard regression, navigation, PWA, manifest, safe areas');
