@@ -425,3 +425,20 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
   font-weight:750;
   letter-spacing:.02em;
 }
+
+
+/* Clear notification settings */
+.notification-settings{display:flex;flex-direction:column;gap:14px}
+.notification-block{border:1px solid var(--line);border-radius:16px;padding:14px 16px;background:var(--card)}
+.notification-block-title{display:flex;align-items:center;gap:10px;padding-bottom:10px}
+.notification-block-title>span{width:34px;height:34px;border-radius:10px;background:#f3f5fa;display:grid;place-items:center;font-size:17px}
+.notification-block-title b{display:block;font-size:14px}
+.notification-block-title small{display:block;color:var(--muted);font-size:11px;margin-top:2px;line-height:1.45}
+.push-master-row{border-top:1px solid var(--line);border-bottom:0;padding-bottom:10px}
+.push-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:13px;background:#f7f8fc}
+.push-summary>div{display:flex;align-items:center;gap:9px}
+.push-summary b{display:block;font-size:12px}
+.push-summary small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.push-time-note{margin-top:9px;color:var(--muted);font-size:11px}
+.push-actions{margin-top:10px}
+.home-notification-block .setting-row:last-child{border-bottom:0}
