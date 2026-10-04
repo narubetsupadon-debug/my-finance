@@ -267,28 +267,38 @@
             </label>
           </div>
 
-          <div class="card settings-card">
-            <div class="settings-title"><span>🔔</span><div><h3>การแจ้งเตือน</h3><p>เตือนทั้งในหน้าเว็บและบนอุปกรณ์</p></div></div>
-            <label class="setting-row toggle-row">
-              <div><b>เตือนบิลและบัตรใกล้ครบกำหนด</b><small>แสดงรายการใกล้ถึงกำหนดบนหน้า Home</small></div>
-              <span class="switch"><input id="dueReminderSetting" type="checkbox"><span></span></span>
-            </label>
-            <label class="setting-row toggle-row">
-              <div><b>เตือนเมื่อใช้งบใกล้เต็ม</b><small>เน้นสถานะเมื่อใช้เกิน 80% ของงบ</small></div>
-              <span class="switch"><input id="budgetReminderSetting" type="checkbox"><span></span></span>
-            </label>
-            <div class="push-setting-box">
-              <div class="push-setting-head">
-                <div><b>แจ้งเตือนบนอุปกรณ์นี้</b><small id="pushStatusText">กำลังตรวจสอบ…</small></div>
+          <div class="card settings-card notification-settings">
+            <div class="settings-title"><span>🔔</span><div><h3>การแจ้งเตือน</h3><p>แยกชัด ๆ ระหว่างแจ้งเตือนมือถือกับข้อความบนหน้า Home</p></div></div>
+
+            <div class="notification-block">
+              <div class="notification-block-title"><span>📱</span><div><b>แจ้งเตือนบนมือถือ</b><small id="pushStatusText">กำลังตรวจสอบสถานะ…</small></div></div>
+              <label class="setting-row toggle-row push-master-row">
+                <div><b>เปิด Push Notification</b><small>เด้งแจ้งเตือนแม้ไม่ได้เปิด My Finance อยู่</small></div>
+                <span class="switch"><input id="pushDeviceSetting" type="checkbox" aria-label="เปิดแจ้งเตือนบนมือถือ"><span></span></span>
+              </label>
+              <div class="push-summary">
+                <div><span>💳</span><div><b>บิลและบัตรเครดิต</b><small>เตือนเมื่อครบกำหนดวันนี้หรือพรุ่งนี้</small></div></div>
                 <span id="pushStatusBadge" class="pill">ยังไม่เปิด</span>
               </div>
+              <div class="push-time-note">⏰ ส่งเวลา <b>08:00 น.</b> ตามเวลาไทย</div>
               <div class="row push-actions">
-                <button id="enablePushBtn" type="button" class="btn primary">🔔 เปิดแจ้งเตือน</button>
-                <button id="testPushBtn" type="button" class="btn soft hidden">ส่งทดสอบ</button>
-                <button id="disablePushBtn" type="button" class="btn ghost hidden">ปิดบนเครื่องนี้</button>
+                <button id="testPushBtn" type="button" class="btn soft hidden">🔔 ทดสอบแจ้งเตือน</button>
               </div>
+              <button id="enablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">เปิดแจ้งเตือน</button>
+              <button id="disablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">ปิดแจ้งเตือน</button>
             </div>
-            <div class="settings-help">เมื่อเปิดแล้ว My Finance จะเตือนบิล/บัตรที่ครบกำหนดวันนี้หรือพรุ่งนี้ เวลา 08:00 น. ตามเวลาไทย แม้ไม่ได้เปิดหน้าเว็บอยู่</div>
+
+            <div class="notification-block home-notification-block">
+              <div class="notification-block-title"><span>🏠</span><div><b>การเตือนในหน้า Home</b><small>เป็นข้อความที่เห็นตอนเปิดเว็บไซต์ ไม่ใช่ Push</small></div></div>
+              <label class="setting-row toggle-row">
+                <div><b>รายการใกล้ครบกำหนด</b><small>แสดงบิลและบัตรที่กำลังจะถึงกำหนด</small></div>
+                <span class="switch"><input id="dueReminderSetting" type="checkbox"><span></span></span>
+              </label>
+              <label class="setting-row toggle-row">
+                <div><b>งบใกล้เต็ม</b><small>เน้นสถานะเมื่อใช้เกิน 80% ของงบ</small></div>
+                <span class="switch"><input id="budgetReminderSetting" type="checkbox"><span></span></span>
+              </label>
+            </div>
           </div>
         </div>
       </section>
