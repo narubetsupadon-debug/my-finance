@@ -250,8 +250,52 @@ window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)||'dashb
 document.querySelectorAll('.navbtn[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
 for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=fillTxSelectors;$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary
 
-window.openTx=(id=null)=>{editing={type:'tx',id};$('txDialog').showModal();$('txDate').value=new Date().toISOString().slice(0,10);$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';fillTxSelectors();renderCardPaymentSuggestions();if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||''}}}
-$('txForm').onsubmit=async e=>{e.preventDefault();const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:'paid',note:$('txNote').value.trim()||null,source:'web'};let r=editing.id?await supabase.from('transactions').update(row).eq('id',editing.id):await supabase.from('transactions').insert(row);if(r.error)return alert(r.error.message);$('txDialog').close();showAppToast('บันทึกแล้ว ✅');await loadAll()}
+
+function favoriteKey(){return 'finance-favorites-v1:'+user.id}
+function readFavorites(){try{const v=JSON.parse(localStorage.getItem(favoriteKey())||'[]');return Array.isArray(v)?v.filter(x=>x&&typeof x.description==='string'&&['income','expense'].includes(x.type)).slice(0,12):[]}catch{return []}}
+function templateKey(x){return JSON.stringify([x.type,x.description.trim(),x.category_id||'',x.account_id||''])}
+function repeatChoices(){
+ const favorites=readFavorites(),seen=new Set(favorites.map(templateKey)),groups=new Map();
+ for(const x of transactions){
+  if(x.type!=='expense'||x.status==='cancelled'||['salary','car_installment'].includes(x.source)||/ค่างวดรถ|ชำระบัตร|เงินเดือน/.test(x.description||''))continue;
+  const key=templateKey(x);const g=groups.get(key);if(g)g.count++;else groups.set(key,{...x,count:1});
+ }
+ return [...favorites.map(x=>({...x,favorite:true})),...[...groups.values()].filter(x=>x.count>=2&&!seen.has(templateKey(x))).sort((a,b)=>b.count-a.count)].slice(0,8);
+}
+function renderRepeatChoices(){
+ const root=$('txRepeatList');root.replaceChildren();
+ const choices=repeatChoices();$('txRepeatSection').classList.toggle('hidden',!!editing.id);
+ if(!choices.length){root.textContent='บันทึกรายการแล้วเลือก “เก็บเป็นรายการโปรด” ครั้งต่อไปแตะใช้ได้เลย';return;}
+ choices.forEach(x=>{
+  const b=document.createElement('button');b.type='button';b.className='repeat-choice';
+  const title=document.createElement('b');title.textContent=(x.favorite?'★ ':'↻ ')+x.description;
+  const hint=document.createElement('small');hint.textContent=(categories.find(c=>c.id===x.category_id)?.name||'เลือกหมวดใหม่')+' · '+(accounts.find(a=>a.id===x.account_id)?.name||'ไม่ระบุบัญชี');
+  b.append(title,hint);b.onclick=()=>{
+   $('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;
+   $('txCategory').value=categories.some(c=>c.id===x.category_id&&c.type===x.type)?x.category_id:'';
+   $('txAccount').value=accounts.some(a=>a.id===x.account_id&&a.is_active)?x.account_id:'';
+   $('txAmount').value='';$('txNote').value='';$('txFavorite').checked=!!x.favorite;renderCardPaymentSuggestions();$('txAmount').focus();$('txAmount').scrollIntoView({block:'center',behavior:'smooth'});
+  };root.append(b);
+ });
+}
+function saveFavorite(row){
+ const list=readFavorites(),key=templateKey(row),next=list.filter(x=>templateKey(x)!==key);
+ if($('txFavorite').checked)next.unshift({type:row.type,description:row.description,category_id:row.category_id,account_id:row.account_id});
+ try{localStorage.setItem(favoriteKey(),JSON.stringify(next.slice(0,12)));return true}catch{return false}
+}
+
+window.openTx=(id=null)=>{editing={type:'tx',id};$('txFavorite').checked=false;renderRepeatChoices();$('txDialog').showModal();$('txDate').value=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';fillTxSelectors();renderCardPaymentSuggestions();if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x))}}}
+$('txForm').onsubmit=async e=>{
+ e.preventDefault();const button=e.currentTarget.querySelector('button[type="submit"]');if(button.disabled)return;
+ const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:'paid',note:$('txNote').value.trim()||null,source:'web'};
+ if(!row.description||!Number.isFinite(row.amount)||row.amount<=0)return alert('กรอกรายละเอียดและยอดเงินให้ครบ');
+ button.disabled=true;button.textContent='กำลังบันทึก…';
+ try{
+  const r=editing.id?await supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id):await supabase.from('transactions').insert(row);
+  if(r.error)throw r.error;
+  const favoriteSaved=saveFavorite(row);$('txDialog').close();showAppToast(favoriteSaved?'บันทึกแล้ว ✅':'บันทึกรายการแล้ว แต่เก็บรายการโปรดในเครื่องนี้ไม่ได้');await loadAll();
+ }catch(error){alert('บันทึกไม่ได้: '+error.message)}finally{button.disabled=false;button.textContent='บันทึก'}
+}
 
 window.openEntity=(type,id=null)=>{editing={type,id};const f=$('entityFields'),title=$('entityTitle');let x
  if(type==='category'){x=id?categories.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'หมวดหมู่';f.innerHTML='<div class="field full"><label>ชื่อหมวด</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="type"><option value="expense" '+(x?.type!=='income'?'selected':'')+'>รายจ่าย</option><option value="income" '+(x?.type==='income'?'selected':'')+'>รายรับ</option></select></div><div class="field"><label>ไอคอน Emoji</label><input name="icon" value="'+esc(x?.icon||'🏷️')+'"></div>'}

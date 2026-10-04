@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
-<link rel="stylesheet" href="./style.css?v=20261003-nav2">
+<link rel="stylesheet" href="./style.css?v=20261004-quick1">
 </head>
 <body>
 <div id="authScreen" class="auth-screen">
@@ -216,18 +216,18 @@
 
 <dialog id="txDialog">
 <form id="txForm" class="modal">
-  <h3>บันทึกรายรับ / รายจ่าย</h3>
+  <h3>บันทึกรายรับ / รายจ่าย</h3><div id="txRepeatSection" class="repeat-section"><b>ใช้รายการเดิมให้ไวขึ้น</b><p class="muted">แตะรายการ → ใส่ยอด → บันทึก</p><div id="txRepeatList" class="repeat-list"></div></div>
   <div class="fields">
     <div class="field"><label>วันที่</label><input id="txDate" type="date" required></div>
     <div class="field"><label>ประเภท</label><select id="txType"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select></div>
     <div class="field full"><label>รายละเอียด</label><input id="txDesc" required placeholder="เช่น ค่าอาหาร"></div>
-    <div class="field"><label>จำนวนเงิน</label><input id="txAmount" type="number" min="0.01" step="0.01" required></div>
+    <div class="field"><label>จำนวนเงิน</label><input id="txAmount" inputmode="decimal" type="number" min="0.01" step="0.01" required></div>
     <div class="field"><label>หมวดหมู่</label><select id="txCategory"></select></div>
     <div id="cardPaymentSuggest" class="field full hidden"><label>💳 เลือกบัตร/สินเชื่อที่จะจ่าย</label><div id="cardPaymentList" class="payment-suggest-grid"></div><div class="muted">แตะรายการเพื่อใส่ชื่อและยอดที่ต้องจ่ายรอบนี้ให้อัตโนมัติ</div></div>
     <div class="field full"><label>บัญชีที่ใช้จ่าย</label><select id="txAccount"></select></div>
     <div class="field full"><label>หมายเหตุ</label><textarea id="txNote" placeholder="ไม่บังคับ"></textarea></div>
   </div>
-  <div class="modal-actions"><button type="button" class="btn ghost" onclick="txDialog.close()">ยกเลิก</button><button class="btn primary">บันทึก</button></div>
+  <label class="repeat-favorite"><input id="txFavorite" type="checkbox"><span>★ เก็บเป็นรายการโปรด <small>จำชื่อ หมวด และบัญชีไว้ในเครื่องนี้</small></span></label><div class="modal-actions"><button type="button" class="btn ghost" onclick="txDialog.close()">ยกเลิก</button><button type="submit" class="btn primary">บันทึก</button></div>
 </form>
 </dialog>
 
@@ -241,6 +241,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <div id="appToast" class="app-toast hidden"></div>
-<script type="module" src="./app.js"></script>
+<script type="module" src="./app.js?v=20261004-quick1"></script>
 <script type="module" src="./app-nav.js?v=20261003-nav2"></script></body>
 </html>
