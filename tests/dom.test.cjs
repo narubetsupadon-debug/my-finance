@@ -42,6 +42,9 @@ async function page(html,js,data,expose){
   p.el('appToast').classList.add('hidden');
   p.w.document.querySelector('[data-page="dashboard"]').click();
   assert.equal(p.el('appToast').classList.contains('hidden'),true);
+  // same-page navigation should stay stable and keep one visible page
+  p.w.document.querySelector('[data-page="dashboard"]').click();
+  assert.equal([...p.w.document.querySelectorAll('.page')].filter(x=>!x.classList.contains('hidden')).length,1);
  p.w.document.body.classList.add('privacy-mode');p.api.loadAll&&await p.api.loadAll();assert.match(p.el('todaySpent').textContent,/••••/);p.w.document.body.classList.remove('privacy-mode');await p.api.loadAll();
  p.el('txForm').scrollTop=120;p.w.openTx();assert.equal(p.el('txForm').scrollTop,0);assert.notEqual(p.w.document.activeElement.id,'txAmount');
  p.w.document.querySelector('[data-tx-type="income"]').click();
