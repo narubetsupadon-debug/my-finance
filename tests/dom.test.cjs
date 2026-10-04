@@ -19,7 +19,7 @@ function dbMock(data){
 async function page(html,js,data,expose){
  const dom=new JSDOM(fs.readFileSync(root+html,'utf8'),{url:'https://finance.test/',runScripts:'outside-only'});
  const w=dom.window,{db,state}=dbMock(data);w.createClient=()=>db;w.alerts=[];w.alert=x=>w.alerts.push(x);w.confirm=()=>true;w.scrollTo=()=>{};w.setInterval=()=>0;
- w.HTMLElement.prototype.scrollIntoView=function(){};
+ w.HTMLElement.prototype.scrollIntoView=function(){};w.requestAnimationFrame=cb=>{cb();return 1};w.cancelAnimationFrame=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  const code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
  const api=await w.eval('(async()=>{'+core+'\n'+code+'\nreturn {'+expose+'};})()');
