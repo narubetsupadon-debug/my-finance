@@ -1,5 +1,5 @@
-const CACHE='my-finance-v12-settings3';
-const SHELL=['./','./index.html','./style.css?v=20261004-settings3','./minimal-dark.css?v=20261004-settings3','./theme.js?v=20261004-settings3','./app.js?v=20261004-settings3','./finance-core.js?v=20261004-settings3','./app-nav.js?v=20261004-settings3','./manifest.webmanifest','./app-icon.svg'];
+const CACHE='my-finance-v13-push1';
+const SHELL=['./','./index.html','./style.css?v=20261004-push1','./minimal-dark.css?v=20261004-push1','./theme.js?v=20261004-push1','./app.js?v=20261004-push1','./finance-core.js?v=20261004-push1','./app-nav.js?v=20261004-push1','./manifest.webmanifest','./app-icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
@@ -15,3 +15,20 @@ self.addEventListener('fetch',e=>{
  }));
 });
 
+
+self.addEventListener('push',event=>{
+ let data={title:'💙 My Finance',body:'มีรายการที่อยากเตือนมิว',url:'./',tag:'my-finance'};
+ try{if(event.data)data={...data,...event.data.json()}}catch{}
+ event.waitUntil(self.registration.showNotification(data.title,{
+  body:data.body,icon:'./app-icon.svg',badge:'./app-icon.svg',tag:data.tag||'my-finance',
+  data:{url:data.url||'./'},renotify:false
+ }));
+});
+self.addEventListener('notificationclick',event=>{
+ event.notification.close();
+ const target=new URL(event.notification.data?.url||'./',self.registration.scope).href;
+ event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{
+  for(const c of list){if('focus' in c){c.navigate(target);return c.focus();}}
+  return clients.openWindow?clients.openWindow(target):undefined;
+ }));
+});
