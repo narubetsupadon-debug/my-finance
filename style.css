@@ -266,10 +266,8 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
  .transaction-row .amount{font-size:13px}.transaction-row b{font-size:13px}
  .compact-row .transaction-detail{grid-row:span 2}.compact-row .transaction-icon{grid-row:span 2}.compact-row .actions .btn{min-height:30px;padding:3px 11px;font-size:11px}
  .compact-row{row-gap:1px}.home-detail .grid4{grid-template-columns:1fr 1fr}.home-detail .metric .value{font-size:19px}
- #txDialog{width:100%;max-width:none;max-height:var(--capture-height,100dvh);margin:auto 0 0;border-radius:24px 24px 0 0}
- #txDialog .capture-form{padding:18px 16px calc(14px + env(safe-area-inset-bottom,0px));max-height:calc(var(--capture-height,100dvh) - 10px)}
  .capture-header{margin-bottom:14px}.capture-amount{margin:14px 0 10px}.capture-fields{grid-template-columns:1fr 1fr}
- .capture-fields .full{grid-column:1/-1}.capture-actions{bottom:calc(-14px - env(safe-area-inset-bottom,0px));padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+ .capture-fields .full{grid-column:1/-1}
  .capture-fields .field{min-width:0}.capture-fields select{padding-right:4px}.capture-fields .date-field{display:grid;grid-template-columns:50px minmax(0,1fr);align-items:center}
 }
 @media(max-width:360px){.daily-amount{font-size:24px}.daily-panel{padding:14px 11px}.daily-label>span:first-child{display:none}.next-bill-amount{font-size:18px}.home-welcome h1{font-size:20px}}
@@ -403,4 +401,27 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
     border-top:1px solid var(--line);
     z-index:5;
   }
+}
+
+
+/* Privacy hardening */
+.privacy-mode .metric .value,
+.privacy-mode .daily-amount,
+.privacy-mode .next-bill-amount,
+.privacy-mode .credit-stats strong,
+.privacy-mode .salary-net .value{
+  font-size:0!important;
+  color:transparent!important;
+  letter-spacing:0!important;
+}
+.privacy-mode .metric .value::after,
+.privacy-mode .daily-amount::after,
+.privacy-mode .next-bill-amount::after,
+.privacy-mode .credit-stats strong::after,
+.privacy-mode .salary-net .value::after{
+  content:"฿ ••••";
+  font-size:clamp(16px,2.4vw,31px)!important;
+  color:var(--text)!important;
+  font-weight:750;
+  letter-spacing:.02em;
 }
