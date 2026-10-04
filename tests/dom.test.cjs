@@ -27,7 +27,7 @@ async function page(html,js,data,expose){
 }
 (async()=>{
  const day=new Date().toISOString().slice(0,10);
- const categories=[{id:'cat',user_id:'user',name:'food',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
+ const categories=[{id:'cat',user_id:'user',name:'อาหาร',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'coffee',user_id:'user',name:'กาแฟ',type:'expense',icon:'☕'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
@@ -42,7 +42,8 @@ async function page(html,js,data,expose){
  p.w.document.querySelector('[data-tx-type="income"]').click();
  assert.equal(p.el('txType').value,'income');assert.equal(p.el('txCategory').value,'inc');
  assert.equal(p.w.document.querySelector('[data-tx-type="income"]').getAttribute('aria-pressed'),'true');
- p.w.quickAdd('อาหาร');assert.equal(p.el('txType').value,'expense');assert.equal(p.el('txDesc').value,'อาหาร');
+ p.w.quickAdd('อาหาร');assert.equal(p.el('txType').value,'expense');assert.equal(p.el('txDesc').value,'อาหาร');assert.equal(p.el('txCategory').value,'cat');
+ p.w.quickAdd('กาแฟ');assert.equal(p.el('txCategory').value,'coffee');
  assert.equal(p.el('txAmount').value,'');p.el('txDialog').close();
  p.el('txFilterCategory').value='cat';p.w.openTx('t0');p.el('txAccount').value='acc';await p.api.loadAll();
  assert.equal(p.el('txFilterCategory').value,'cat');assert.equal(p.el('txAccount').value,'acc');
