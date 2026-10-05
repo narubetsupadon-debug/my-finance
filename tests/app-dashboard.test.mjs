@@ -3,7 +3,7 @@ import {createDashboardRenderer} from '../app-dashboard.js';
 
 function fakeEl(){
   return {
-    textContent:'',innerHTML:'',onclick:null,style:{width:''},
+    textContent:'',innerHTML:'',onclick:null,style:{width:'',setProperty(){}},
     classList:{toggle(){},add(){},remove(){}},
     closest(){return fakeEl()},
     replaceChildren(){},

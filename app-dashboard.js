@@ -29,6 +29,10 @@ function renderDashboard(){
  $('homeBudgetStatus').textContent=!bsum.limit?'ยังไม่ได้ตั้งงบ · แตะเพื่อเริ่ม':bsum.spent>bsum.limit?'เกินงบ '+money(bsum.spent-bsum.limit):'เฉลี่ยได้อีกวันละ '+money(bsum.daily);
  $('homeBudgetStatus').classList.toggle('is-over',bsum.spent>bsum.limit);
  $('budgetRemainDash').textContent=bsum.limit?money(bsum.remain):'ยังไม่ตั้งงบ';
+ for(const id of ['todaySpent','budgetRemainDash']){
+  const amount=$(id);
+  amount.style.setProperty('--amount-chars',Math.max(1,Array.from(amount.textContent).length));
+ }
  $('viewToday').onclick=()=>openInsightDetails('รายจ่ายวันนี้',[{label:fmtDate(today),rows:todayRows}],'รายการที่บันทึกวันนี้ ไม่รวมรายการยกเลิก');
  $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
 
