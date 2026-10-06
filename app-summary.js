@@ -4,7 +4,7 @@ export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,Ch
 
 function excelGroup(x){
  const cat=x.categories?.name||'อื่นๆ',text=((x.description||'')+' '+(x.note||'')).toLowerCase()
- if(cat==='ที่พัก')return 'ค่าห้อง'
+ if(['ที่พัก','ห้องเช่า','บ้าน','ห้องเช่า','ค่าเช่า'].includes(cat))return 'ห้องเช่า'
  if(cat==='หนี้/ผ่อน')return 'ชำระบัตร/สินเชื่อ'
  if(cat==='บิล/สาธารณูปโภค')return 'รายจ่ายประจำ'
  if(cat==='รถยนต์'){
@@ -70,7 +70,7 @@ function renderSummary(){
 
  const grouped=rows.filter(x=>x.type==='expense').reduce((o,x)=>{const g=excelGroup(x);o[g]=(o[g]||0)+Number(x.amount);return o},{})
  $('sumDebtPay').textContent=money(grouped['ชำระบัตร/สินเชื่อ']||0)
- const rentTotal=grouped['ค่าห้อง']||0
+ const rentTotal=grouped['ห้องเช่า']||0
  const carTotal=(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0)
  $('sumRent').textContent=money(rentTotal)
  $('sumCar').textContent=money(carTotal)
@@ -92,7 +92,7 @@ function renderSummary(){
   {type:'line',label:'คงเหลือ',data:timeline.map(x=>x.balance),borderColor:'#4f46e5',backgroundColor:'#4f46e5',borderWidth:3,tension:.3,pointRadius:3}
  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{y:{ticks:{callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}},x:{title:{display:config.mode==='days',text:config.mode==='days'?'วันที่':''},grid:{display:false}}}}})
 
- const priority=['ค่าห้อง','ค่างวดรถ','น้ำมันรถ','ซ่อม/ประกัน/ภาษีรถ','ค่าใช้รถอื่น ๆ','ชำระบัตร/สินเชื่อ','รายจ่ายประจำ']
+ const priority=['ห้องเช่า','ค่างวดรถ','น้ำมันรถ','ซ่อม/ประกัน/ภาษีรถ','ค่าใช้รถอื่น ๆ','ชำระบัตร/สินเชื่อ','รายจ่ายประจำ']
  const other=[...new Set(rows.filter(x=>x.type==='expense').map(excelGroup).filter(x=>!priority.includes(x)))].sort()
  const cats=[...priority,...other].filter(g=>rows.some(x=>x.type==='expense'&&excelGroup(x)===g))
  const timelineByCat=cats.map(g=>timelineKeys.map(k=>rows.filter(x=>x.type==='expense'&&(config.mode==='days'?String(x.transaction_date).slice(0,10)===k:String(x.transaction_date).slice(0,7)===k)&&excelGroup(x)===g).reduce((s,x)=>s+Number(x.amount),0)))
