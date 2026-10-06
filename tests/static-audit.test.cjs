@@ -97,7 +97,8 @@ assert.match(source['index.html'],/id="summaryPeriodText"/,'summary period label
 assert.match(source['index.html'],/id="summaryTrendTitle"/,'summary trend title missing');
 assert.match(source['index.html'],/id="summaryCategoryTitle"/,'summary category title missing');
 assert.match(source['app-summary.js'],/timelineKeys/,'summary charts must follow the selected period');
-assert.match(source['app-summary.js'],/รายรับ vs รายจ่ายรายวัน/,'monthly selection must switch trend to daily view');
+assert.match(source['app-summary.js'],/badge:'รายวัน'/,'single-month Summary must use daily detail');
+assert.match(source['app-summary.js'],/badge:'รายเดือน'/,'multi-month Summary must use monthly detail');
 
 assert.match(source['app-summary.js'],/expensePercent/,'expense share chart must calculate percentages');
 assert.match(source['app-summary.js'],/generateLabels/,'expense share legend must render percentage labels');
