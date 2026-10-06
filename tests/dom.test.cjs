@@ -33,7 +33,7 @@ async function page(html,js,data,expose){
 }
 (async()=>{
  const day=new Date().toISOString().slice(0,10);
- const categories=[{id:'cat',user_id:'user',name:'อาหาร',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'coffee',user_id:'user',name:'กาแฟ',type:'expense',icon:'☕'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
+ const categories=[{id:'cat',user_id:'user',name:'อาหาร',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'coffee',user_id:'user',name:'กาแฟ',type:'expense',icon:'☕'},{id:'utilities',user_id:'user',name:'บิล/สาธารณูปโภค',type:'expense',icon:'🧾'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
@@ -78,7 +78,21 @@ async function page(html,js,data,expose){
  p.api.checkDailyRollover();
  assert.notEqual(p.el('todayLabel').textContent,oldLabel);
  assert.equal(p.el('todayCount').textContent,'0 รายการ');
+ // New bills default to utilities so Summary classifies them as recurring expenses.
+ p.w.openEntity('bill');assert.equal(p.el('entityFields').querySelector('[name=category_id]').value,'utilities');p.el('entityDialog').close();
  p.close();
+
+ // One-tap recurring bill payment creates an expense transaction and marks paid months.
+ const bill={id:'bill1',user_id:'user',name:'ค่าเน็ต',amount:599,due_day:5,category_id:'utilities',account_id:'acc',is_active:true,categories:{name:'บิล/สาธารณูปโภค'},accounts:{name:'bank'}};
+ const billsPage=await page('index.html','app.js',{categories,accounts,transactions:[],bills:[bill]},'loadAll');
+ const payButton=billsPage.el('billList').querySelector('[data-pay-bill="bill1"]');assert.ok(payButton);billsPage.w.confirm=()=>true;payButton.click();
+ await new Promise(r=>setTimeout(r,0));
+ const billWrite=billsPage.state.writes.find(x=>x.table==='transactions');
+ assert.equal(billWrite.row.description,'ค่าเน็ต');assert.equal(billWrite.row.amount,599);assert.equal(billWrite.row.category_id,'utilities');assert.equal(billWrite.row.account_id,'acc');assert.equal(billWrite.row.source,'bill_payment:bill1');
+ billsPage.close();
+ const paidTx={id:'paidbill',user_id:'user',type:'expense',status:'paid',source:'bill_payment:bill1',transaction_date:day,description:'ค่าเน็ต',amount:599,category_id:'utilities',account_id:'acc',categories:categories[2],accounts:accounts[0]};
+ const paidBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[paidTx],bills:[bill]},'loadAll');
+ assert.match(paidBillsPage.el('billList').textContent,/จ่ายแล้วเดือนนี้/);assert.equal(paidBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);paidBillsPage.close();
  const s=await page('salary.html','salary.js',{categories,accounts,transactions:[]},'reset');
  assert.equal(s.el('category_id').value,'inc');
  s.el('base_salary').value='1000';s.el('account_id').value='acc';
