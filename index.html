@@ -199,7 +199,7 @@
 
       <section id="summaryPage" class="page hidden">
         <div class="page-head">
-          <div><h2>สรุปการเงิน</h2><div class="muted">กราฟและตารางสรุปรายเดือนแบบเดียวกับแนวคิดในไฟล์ Excel</div></div>
+          <div><h2>สรุปการเงิน</h2><div id="summaryPeriodText" class="muted">เลือกเดือนและปีเพื่อดูข้อมูลตามช่วงที่ต้องการ</div></div>
           <div class="filters"><select id="summaryYear"></select><select id="summaryMonth"><option value="all">ทุกเดือน</option></select></div>
         </div>
         <div class="grid3">
@@ -213,11 +213,11 @@
           <div class="card metric"><div class="label">รายจ่ายประจำ</div><div id="sumRecurring" class="value balance money">฿0</div></div>
         </div>
         <div class="card section">
-          <div class="row"><div><h3 style="margin:0">รายรับ vs รายจ่ายรายเดือน</h3><div class="muted">ดูแนวโน้มเงินเข้า เงินออก และคงเหลือ</div></div></div>
+          <div class="row"><div><h3 id="summaryTrendTitle" style="margin:0">รายรับ vs รายจ่าย</h3><div class="muted">ดูแนวโน้มเงินเข้า เงินออก และคงเหลือตามช่วงที่เลือก</div></div></div>
           <div class="chart-box"><canvas id="monthlyTrendChart"></canvas></div>
         </div>
         <div class="card section">
-          <div class="row"><div><h3 style="margin:0">รายจ่ายแยกหมวดหมู่รายเดือน</h3><div class="muted">ค่าห้อง · ค่างวดรถ · บัตร/สินเชื่อ · รายจ่ายประจำ · ซ่อม/ประกัน/ภาษีรถ · อื่น ๆ</div></div></div>
+          <div class="row"><div><h3 id="summaryCategoryTitle" style="margin:0">รายจ่ายแยกหมวดหมู่</h3><div class="muted">ค่าห้อง · ค่างวดรถ · บัตร/สินเชื่อ · รายจ่ายประจำ · ซ่อม/ประกัน/ภาษีรถ · อื่น ๆ</div></div></div>
           <div class="chart-box tall"><canvas id="monthlyCategoryChart"></canvas></div>
         </div>
         <div class="card section">
