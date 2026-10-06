@@ -151,7 +151,7 @@
       </section>
 
       <section id="transactionsPage" class="page hidden">
-        <div class="page-head"><div><h2>รายรับ‑รายจ่าย</h2><div id="txCount" class="muted"></div></div><button class="btn primary" onclick="openTx()">+ เพิ่มรายการ</button></div>
+        <div class="page-head"><div><h2>รายรับ‑รายจ่าย</h2><div id="txCount" class="muted"></div></div><button class="btn primary" onclick="openTx()">+ เพิ่มรายการ</button></div><div class="notice">💡 <b>รายการทั่วไปบันทึกที่นี่</b> · รถ บิลประจำ และเงินเดือนที่บันทึกผ่านเมนูของตัวเองจะเชื่อมรายการให้อัตโนมัติ จึงไม่ต้องบันทึกซ้ำ</div>
         <div class="card">
           <div class="filters">
             <input id="txSearch" placeholder="ค้นหารายการ...">
@@ -175,7 +175,7 @@
       </section>
 
       <section id="billsPage" class="page hidden">
-        <div class="page-head"><div><h2>บิลประจำ</h2><div class="muted">ค่าเน็ต ค่าหอ Subscription และค่าใช้จ่ายประจำ</div></div><button class="btn primary" onclick="openEntity('bill')">+ เพิ่มบิล</button></div>
+        <div class="page-head"><div><h2>บิลประจำ</h2><div class="muted">ค่าเน็ต ค่าหอ Subscription และค่าใช้จ่ายประจำ</div></div><button class="btn primary" onclick="openEntity('bill')">+ เพิ่มบิล</button></div><div class="notice">💡 <b>เมื่อชำระบิลผ่านเมนูนี้ ระบบจะสร้างรายจ่ายให้อัตโนมัติ</b> · ไม่ต้องไปลงซ้ำในรายรับ‑รายจ่าย</div>
         <div id="billList" class="card list"></div>
       </section>
 
