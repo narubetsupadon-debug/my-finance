@@ -81,3 +81,8 @@ assert.match(source['app.js'],/authSplash.*classList\.add\('hidden'\)/s,'auth sp
 assert.match(source['index.html'],/id="settingsLogout"/,'settings logout button missing');
 assert.match(source['app.js'],/confirm\('ออกจากระบบ My Finance บนอุปกรณ์นี้หรือไม่\?'\)/,'logout must require confirmation');
 assert.match(source['app.js'],/settingsLogout.*requestLogout/s,'settings logout must share the confirmed logout flow');
+
+assert.match(source['app-planning.js'],/data-pay-bill/,'recurring bills must expose a paid action');
+assert.match(source['app-planning.js'],/จ่ายแล้วเดือนนี้/,'paid recurring bills must show monthly status');
+assert.match(source['app.js'],/bill_payment:/,'bill payments must use a traceable transaction source');
+assert.match(source['app.js'],/บิล\/สาธารณูปโภค/,'bill payments must support recurring-expense summary grouping');

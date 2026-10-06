@@ -491,3 +491,7 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
 .session-row{align-items:center}
 .session-row .btn.danger{white-space:nowrap}
 @media(max-width:520px){.session-row{align-items:flex-start;flex-direction:column}.session-row .btn.danger{width:100%}}
+
+.bill-item .actions{flex-wrap:wrap;justify-content:flex-end}
+.bill-paid-btn{opacity:.78;cursor:default}
+@media(max-width:620px){.bill-item .actions{justify-content:flex-start}}
