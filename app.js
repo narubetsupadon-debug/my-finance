@@ -160,11 +160,15 @@ $('authBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('p
  $('authBtn').disabled=true
  try{if(mode==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name:'มิว'}}});if(error)throw error;if(!data.session){toast('สมัครแล้ว ✅ กรุณายืนยันอีเมลก่อน','ok');return}await boot(data.user)}
  else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user)}}catch(e){toast(e.message||'เกิดข้อผิดพลาด','err')}finally{$('authBtn').disabled=false}}
-$('logout').onclick=async()=>{
- const button=$('logout');if(button.disabled)return;button.disabled=true;
+async function requestLogout(button){
+ if(!button||button.disabled)return;
+ if(!confirm('ออกจากระบบ My Finance บนอุปกรณ์นี้หรือไม่?'))return;
+ button.disabled=true;
  try{const {error}=await supabase.auth.signOut();if(error)throw error;clearSessionUI();location.reload()}
  catch(error){showAppToast('ออกจากระบบไม่สำเร็จ: '+error.message)}finally{button.disabled=false}
 }
+$('logout').onclick=()=>void requestLogout($('logout'));
+$('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settingsLogout')));
 function clearSessionUI(){
  sessionRevision++;user=null;refreshCoordinator.dispose();
  if(channel){supabase.removeChannel(channel);channel=null}
