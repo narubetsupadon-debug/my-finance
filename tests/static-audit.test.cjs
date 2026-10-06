@@ -102,3 +102,12 @@ assert.match(source['app-summary.js'],/รายรับ vs รายจ่า�
 assert.match(source['app-summary.js'],/expensePercent/,'expense share chart must calculate percentages');
 assert.match(source['app-summary.js'],/generateLabels/,'expense share legend must render percentage labels');
 assert.match(source['app-summary.js'],/label\+' '\+expensePercent\(ds\.data\[i\]\)\.toFixed\(1\)\+'%'/,'expense share legend must show one-decimal percentages');
+
+assert.match(source['index.html'],/data-summary-range="month"/,'Summary must offer current-month shortcut');
+assert.match(source['index.html'],/data-summary-range="3m"/,'Summary must offer 3-month shortcut');
+assert.match(source['index.html'],/data-summary-range="6m"/,'Summary must offer 6-month shortcut');
+assert.match(source['index.html'],/data-summary-range="year"/,'Summary must offer current-year shortcut');
+assert.match(source['index.html'],/data-summary-range="custom"/,'Summary must offer custom period selection');
+assert.match(source['app-summary.js'],/monthKeyOffset/,'rolling Summary ranges must support crossing year boundaries');
+assert.match(source['app-summary.js'],/renderSummary\.setRange/,'Summary range shortcuts must rerender the dashboard');
+assert.match(source['index.html'],/summary-details/,'dense Summary tables should be collapsible on mobile');
