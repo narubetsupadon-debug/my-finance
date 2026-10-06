@@ -9,8 +9,9 @@ const appTransactions=fs.readFileSync(root+'app-transactions.js','utf8').replace
 const appPlanning=fs.readFileSync(root+'app-planning.js','utf8').replaceAll('export ','');
 const appSafety=fs.readFileSync(root+'app-safety.js','utf8').replaceAll('export ','');
 function dbMock(data){
- const state={fail:false,writes:[]};
+ const state={fail:false,writes:[],rpcs:[]};
  const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:callback=>{state.authChange=callback;return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>({error:state.signOutError||null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
+ db.rpc=async(name,args)=>{state.rpcs.push({name,args});return state.fail?{error:{message:'offline'}}:{data:'rpc-saved',error:null};};
  db.from=table=>{
   let rows=[...(data[table]||[])],write=null;
   const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},not(k,op,v){if(op==='is'&&v===null)rows=rows.filter(r=>r[k]!==null&&r[k]!==undefined);return q},
@@ -82,13 +83,17 @@ async function page(html,js,data,expose){
  p.w.openEntity('bill');assert.equal(p.el('entityFields').querySelector('[name=category_id]').value,'utilities');p.el('entityDialog').close();
  p.close();
 
- // One-tap recurring bill payment creates an expense transaction and marks paid months.
- const bill={id:'bill1',user_id:'user',name:'ค่าเน็ต',amount:599,due_day:5,category_id:'utilities',account_id:'acc',is_active:true,categories:{name:'บิล/สาธารณูปโภค'},accounts:{name:'bank'}};
- const billsPage=await page('index.html','app.js',{categories,accounts,transactions:[],bills:[bill]},'loadAll');
+ // One-tap recurring bill payment uses the atomic RPC and can target a credit card.
+ const debt={id:'kplus',user_id:'user',name:'K PLUS',debt_type:'credit_card',outstanding_amount:1000,is_active:true};
+ const bill={id:'bill1',user_id:'user',name:'ค่าเน็ต',amount:599,due_day:5,category_id:'utilities',account_id:'acc',debt_id:null,is_active:true,categories:{name:'บิล/สาธารณูปโภค'},accounts:{name:'bank'}};
+ const billsPage=await page('index.html','app.js',{categories,accounts,transactions:[],bills:[bill],debts:[debt]},'loadAll');
  const payButton=billsPage.el('billList').querySelector('[data-pay-bill="bill1"]');assert.ok(payButton);billsPage.w.confirm=()=>true;payButton.click();
  await new Promise(r=>setTimeout(r,0));
- const billWrite=billsPage.state.writes.find(x=>x.table==='transactions');
- assert.equal(billWrite.row.description,'ค่าเน็ต');assert.equal(billWrite.row.amount,599);assert.equal(billWrite.row.category_id,'utilities');assert.equal(billWrite.row.account_id,'acc');assert.equal(billWrite.row.source,'bill_payment:bill1');
+ assert.equal(billsPage.state.rpcs.at(-1).name,'pay_recurring_bill');assert.equal(billsPage.state.rpcs.at(-1).args.p_bill_id,'bill1');
+ billsPage.w.openEntity('bill','bill1');assert.equal(billsPage.el('entityFields').querySelector('[name=payment_source]').value,'account:acc');billsPage.el('entityDialog').close();
+ const cardBill={...bill,id:'bill2',name:'Spotify',account_id:null,debt_id:'kplus',accounts:null};
+ const cardPage=await page('index.html','app.js',{categories,accounts,transactions:[],bills:[cardBill],debts:[debt]},'loadAll');
+ assert.match(cardPage.el('billList').textContent,/K PLUS/);cardPage.w.openEntity('bill','bill2');assert.equal(cardPage.el('entityFields').querySelector('[name=payment_source]').value,'debt:kplus');cardPage.el('entityDialog').close();cardPage.close();
  billsPage.close();
  const paidTx={id:'paidbill',user_id:'user',type:'expense',status:'paid',source:'bill_payment:bill1',transaction_date:day,description:'ค่าเน็ต',amount:599,category_id:'utilities',account_id:'acc',categories:categories[2],accounts:accounts[0]};
  const paidBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[paidTx],bills:[bill]},'loadAll');
