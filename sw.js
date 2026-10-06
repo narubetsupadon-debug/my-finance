@@ -1,5 +1,5 @@
-const CACHE='my-finance-v32-amount1';
-const SHELL=['./','./index.html','./style.css?v=20261005-amount1','./minimal-dark.css?v=20261005-amount1','./theme.js?v=20261005-amount1','./app.js?v=20261005-amount1','./app-data.js?v=20261005-amount1','./app-summary.js?v=20261005-amount1','./app-dashboard.js?v=20261005-amount1','./app-transactions.js?v=20261005-amount1','./app-planning.js?v=20261005-amount1','./app-safety.js?v=20261005-amount1','./finance-core.js?v=20261005-amount1','./app-nav.js?v=20261005-amount1','./car.html','./car.css?v=20261005-amount1','./car.js?v=20261005-amount1','./salary.html','./salary.js?v=20261005-amount1','./import.html','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261005-amount1','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+const CACHE='my-finance-v33-audit1';
+const SHELL=['./','./index.html','./style.css?v=20261006-audit1','./minimal-dark.css?v=20261006-audit1','./theme.js?v=20261006-audit1','./app.js?v=20261006-audit1','./app-data.js?v=20261006-audit1','./app-summary.js?v=20261006-audit1','./app-dashboard.js?v=20261006-audit1','./app-transactions.js?v=20261006-audit1','./app-planning.js?v=20261006-audit1','./app-safety.js?v=20261006-audit1','./finance-core.js?v=20261006-audit1','./app-nav.js?v=20261006-audit1','./car.html','./car.css?v=20261006-audit1','./car.js?v=20261006-audit1','./salary.html','./salary.js?v=20261006-audit1','./import.html','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261006-audit1','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
@@ -32,3 +32,4 @@ self.addEventListener('notificationclick',event=>{
   return clients.openWindow?clients.openWindow(target):undefined;
  }));
 });
+

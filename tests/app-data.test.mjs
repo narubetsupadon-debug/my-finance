@@ -31,3 +31,13 @@ await Promise.all([first,second]);
 assert.equal(concurrentRuns,2,'overlapping refresh requests should coalesce into one follow-up run');
 coordinator.dispose();coalesced.dispose();
 console.log('PASS app-data: deferred realtime refresh and overlapping refresh coalescing');
+
+
+// An editor may open after the debounce was scheduled.
+blocked=false;coordinator.schedule();blocked=true;
+await new Promise(r=>setTimeout(r,10));
+assert.equal(runs,1,'opening an editor during debounce must defer the refresh');
+assert.equal(coordinator.pending,true);
+blocked=false;coordinator.flush();
+await new Promise(r=>setTimeout(r,10));
+assert.equal(runs,2);coordinator.dispose();

@@ -1,10 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261005-amount1';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261005-amount1';
-import {createSummaryRenderer} from './app-summary.js?v=20261005-amount1';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261005-amount1';
-import {createTransactionRenderer} from './app-transactions.js?v=20261005-amount1';
-import {createPlanningRenderer} from './app-planning.js?v=20261005-amount1';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261005-amount1';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261006-audit1';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-audit1';
+import {createSummaryRenderer} from './app-summary.js?v=20261006-audit1';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261006-audit1';
+import {createTransactionRenderer} from './app-transactions.js?v=20261006-audit1';
+import {createPlanningRenderer} from './app-planning.js?v=20261006-audit1';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261006-audit1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -259,9 +259,16 @@ function refreshDailyGreeting() {
  if (heading) heading.textContent = dailyMessages[ordinal % dailyMessages.length];
  dailyGreetingDate = dayKey;
 }
-setInterval(refreshDailyGreeting, 60000);
+let dashboardDay=bangkokDay();
+function checkDailyRollover(){
+ refreshDailyGreeting();
+ const day=bangkokDay();
+ if(!user||day===dashboardDay||editorOpen())return;
+ renderDashboard();renderBudget();renderSummary();dashboardDay=day;
+}
+setInterval(checkDailyRollover, 60000);
 document.addEventListener('visibilitychange', () => {
- if (!document.hidden) refreshDailyGreeting();
+ if (!document.hidden) checkDailyRollover();
 });
 
 const renderDashboard=createDashboardRenderer({
@@ -489,6 +496,7 @@ async function refreshHealthCheck(){
  const btn=$('runHealthCheck');if(!btn||!user)return;
  btn.disabled=true;btn.textContent='กำลังตรวจ…';
  try{
+  if(!await loadAll())throw new Error('ซิงก์ข้อมูลล่าสุดไม่สำเร็จ กรุณาลองใหม่');
   const result=await runDataHealthCheck({db:supabase,userId:user.id,transactions,readAll});
   const set=(id,ok,bad)=>{const el=$(id);if(!el)return;el.textContent=ok?'ปกติ ✅':bad;el.classList.toggle('health-bad',!ok);};
   set('healthSync',!!lastSyncAt,lastSyncAt?'':'ยังไม่เคยซิงก์สำเร็จ');
@@ -502,6 +510,7 @@ async function refreshHealthCheck(){
   const push=$('healthPush');if(push){push.textContent=!pushSupported?'ไม่รองรับ':pushOk?'พร้อมใช้งาน ✅':'ยังไม่เปิด';push.classList.toggle('health-bad',pushSupported&&!pushOk);}
   $('healthCheckedAt').textContent='ตรวจล่าสุด '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
  }catch(error){
+  $('healthSync').textContent='ตรวจข้อมูลล่าสุดไม่สำเร็จ';$('healthSync').classList.add('health-bad');
   $('healthCheckedAt').textContent='ตรวจไม่สำเร็จ: '+error.message;
  }finally{btn.disabled=false;btn.textContent='ตรวจสอบอีกครั้ง'}
 }
@@ -566,3 +575,4 @@ $('txDialog')?.addEventListener('focusin',e=>{
  if(!(el instanceof HTMLElement))return;
  setTimeout(()=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'smooth'}),120);
 });
+

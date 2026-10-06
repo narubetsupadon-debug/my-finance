@@ -37,7 +37,7 @@ async function page(html,js,data,expose){
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
- const p=await page('index.html','app.js',{categories,accounts,transactions,car_expenses:[{id:'ce1',user_id:'user',transaction_id:'t1'}]},'loadAll,fillTxSelectors');
+ const p=await page('index.html','app.js',{categories,accounts,transactions,car_expenses:[{id:'ce1',user_id:'user',transaction_id:'t1'}]},'loadAll,fillTxSelectors,checkDailyRollover,refreshHealthCheck');
  assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.ok(p.el('pushDeviceSetting'));assert.match(p.el('syncStatusText').textContent,/ซิงก์แล้ว/);
  assert.equal(p.el('txList').querySelector('img'),null);
  assert.equal(p.el('recentList').querySelectorAll('.transaction-row').length,5);
@@ -68,7 +68,16 @@ async function page(html,js,data,expose){
  p.w.openEntity('debt');p.el('entityFields').querySelector('[name=name]').value='card';
  await p.el('entityForm').onsubmit({preventDefault(){},currentTarget:p.el('entityForm')});
  assert.equal(p.state.writes.at(-1).table,'debts');assert.equal(p.state.writes.at(-1).row.due_day,null);assert.equal(p.w.alerts.length,0);
- p.state.fail=true;await p.api.loadAll();assert.equal(p.el('dataError').classList.contains('hidden'),false);assert.equal(p.el('txCount').textContent,'1201 รายการ');
+ await p.api.refreshHealthCheck();assert.match(p.el('healthSync').textContent,/ปกติ/);
+ p.state.fail=true;await p.api.refreshHealthCheck();assert.match(p.el('healthSync').textContent,/ไม่สำเร็จ/);
+ await p.api.loadAll();assert.equal(p.el('dataError').classList.contains('hidden'),false);assert.equal(p.el('txCount').textContent,'1201 รายการ');
+ // Opening the app after midnight must refresh date-dependent totals.
+ const oldLabel=p.el('todayLabel').textContent,OriginalDate=p.w.Date;
+ const tomorrow=Date.now()+86400000;
+ p.w.Date=class extends OriginalDate{constructor(...args){super(...(args.length?args:[tomorrow]))}};
+ p.api.checkDailyRollover();
+ assert.notEqual(p.el('todayLabel').textContent,oldLabel);
+ assert.equal(p.el('todayCount').textContent,'0 รายการ');
  p.close();
  const s=await page('salary.html','salary.js',{categories,accounts,transactions:[]},'reset');
  assert.equal(s.el('category_id').value,'inc');
@@ -82,5 +91,13 @@ async function page(html,js,data,expose){
  c.api.open({id:'car',installment_no:1,status:'pending'});c.state.fail=true;
  await c.el('carForm').onsubmit({preventDefault(){}});
  assert.match(c.el('carFormMessage').textContent,/offline/);assert.equal(c.el('carDialog').open,true);c.close();
+ const expense=await page('car.html','car.js',{categories,accounts,car_installments:[]},'openExpense');
+ expense.api.openExpense();expense.el('carExpenseAmount').value='500';expense.state.failAfterWrite=true;
+ await expense.el('carExpenseForm').onsubmit({preventDefault(){}});
+ assert.equal(expense.state.writes.length,1);
+ assert.match(expense.el('carMessage').textContent,/บันทึกสำเร็จแล้ว/);
+ assert.equal(expense.el('carApp').classList.contains('hidden'),true);
+ assert.equal(expense.el('carExpenseDialog').open,false);expense.close();
  console.log('PASS DOM fixtures: full paginated dashboard, XSS escaping, category/account retention, transaction edit status/source, debt save with blank due date, load failure retains data, salary category/reset/save, empty car schedule and visible modal errors');
 })().catch(e=>{console.error(e);process.exit(1)});
+

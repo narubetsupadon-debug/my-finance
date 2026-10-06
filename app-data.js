@@ -37,7 +37,11 @@ export function createRefreshCoordinator({refresh,isBlocked=()=>false,getDelay=(
     clearTimeout(timer);
     if(isBlocked()){pending=true;return;}
     const delay=Math.max(0,Number(getDelay())||0);
-    timer=setTimeout(()=>{pending=false;void run()},delay);
+    timer=setTimeout(()=>{
+      timer=null;
+      if(isBlocked()){pending=true;return;}
+      pending=false;void run();
+    },delay);
   }
 
   function flush(){
@@ -53,3 +57,4 @@ export function createRefreshCoordinator({refresh,isBlocked=()=>false,getDelay=(
 
   return {run,schedule,flush,dispose,get pending(){return pending}};
 }
+
