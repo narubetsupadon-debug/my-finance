@@ -562,3 +562,16 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
  .credit-card>.row{grid-template-columns:1fr}
  .credit-card>.row>.actions{grid-template-columns:1fr 1fr;width:100%}
 }
+
+
+/* Credit / loan cards — compact premium mobile UI */
+.credit-card{padding:20px;border-radius:24px}.credit-card>.row{position:relative;z-index:1}.credit-card>.row>div:first-child>b{font-size:18px;letter-spacing:-.015em}.credit-card>.row>div:first-child>.muted{margin-top:5px;font-size:11px}.credit-card>.row>.actions{align-items:center}.credit-card>.row>.actions .btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.08);box-shadow:none}.credit-card>.row>.actions .btn.danger{color:#ffc2cb;background:rgba(255,102,133,.08)}
+.credit-stats{grid-template-columns:1.15fr 1fr 1fr;margin-top:18px;gap:8px}.credit-stats>div{padding:12px 13px;border-radius:14px}.credit-stats span{font-size:10px;letter-spacing:.01em}.credit-stats b{font-size:18px;letter-spacing:-.025em}.credit-card>.budget-progress{height:7px;margin-top:16px;background:rgba(255,255,255,.13)}.credit-card>.budget-progress+.muted{font-size:10px!important;margin-top:6px!important}
+@media(max-width:620px){
+ .credit-card{padding:17px 16px;border-radius:21px;margin-bottom:10px}
+ .credit-card>.row{display:flex;gap:8px}.credit-card>.row>div:first-child>b{font-size:17px;line-height:1.28;padding-right:4px}.credit-card>.row>div:first-child>.muted{font-size:11px}
+ .credit-card>.row>.actions{display:flex;gap:4px}.credit-card>.row>.actions .btn{min-width:0;min-height:34px;padding:6px 8px;font-size:10px;border-radius:9px}.credit-card>.row>.actions .btn.danger{width:34px;font-size:0}.credit-card>.row>.actions .btn.danger:after{content:'×';font-size:18px;line-height:1}
+ .credit-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:15px}.credit-stats>div{padding:11px 12px;min-width:0}.credit-stats>div:first-child{grid-column:1/-1;background:rgba(255,255,255,.12)}.credit-stats span{font-size:10px;margin-bottom:3px}.credit-stats b{font-size:17px;white-space:nowrap}
+ .credit-card>.budget-progress{margin-top:13px}
+}
+@media(max-width:370px){.credit-stats{grid-template-columns:1fr}.credit-stats>div:first-child{grid-column:auto}.credit-card>.row{align-items:flex-start}.credit-card>.row>.actions{flex-direction:column}}
