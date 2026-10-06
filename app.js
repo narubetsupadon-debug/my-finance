@@ -441,6 +441,7 @@ document.addEventListener('change',e=>{
  writeUiSettings({quickHidden:[...hidden]});renderSettings();renderDashboard();
 });
 for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=fillTxSelectors;$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary
+document.addEventListener('click',e=>{const range=e.target.closest('[data-summary-range]');if(range){renderSummary.setRange?.(range.dataset.summaryRange)}})
 
 
 function favoriteKey(){return 'finance-favorites-v1:'+user.id}
