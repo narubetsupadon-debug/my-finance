@@ -86,3 +86,9 @@ assert.match(source['app-planning.js'],/data-pay-bill/,'recurring bills must exp
 assert.match(source['app-planning.js'],/จ่ายแล้วเดือนนี้/,'paid recurring bills must show monthly status');
 assert.match(source['app.js'],/bill_payment:/,'bill payments must use a traceable transaction source');
 assert.match(source['app.js'],/บิล\/สาธารณูปโภค/,'bill payments must support recurring-expense summary grouping');
+
+assert.match(source['app.js'],/name="payment_source"/,'recurring bills must expose a payment source selector');
+assert.match(source['app.js'],/pay_recurring_bill/,'recurring bill payments must use the atomic RPC');
+assert.match(source['app.js'],/debt_id/,'recurring bills must support linked credit cards');
+assert.match(source['app-planning.js'],/paymentLabel/,'bill list must show the configured payment source');
+assert.match(source['app.js'],/bill_payment:.*หน้าบิลประจำ/s,'bill-generated transactions must be protected from generic editing/deletion');
