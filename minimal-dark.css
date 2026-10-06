@@ -290,3 +290,9 @@ dialog::backdrop{background:rgba(2,4,8,.72);backdrop-filter:blur(3px)}
 .settings-help{background:#171d28;color:#9ca7b9}
 .accent-dot.active{border-color:#121722;outline-color:#f4f6fb}
 
+
+
+/* UI System v7 — dark companion */
+:root{--bg:#0d1017;--card:#141923;--surface:#181e29;--line:#252c38;--shadow-soft:0 5px 18px rgba(0,0,0,.16);--shadow-lift:0 9px 28px rgba(0,0,0,.22)}
+body{background:#0d1017}.topbar{background:rgba(13,16,23,.90);box-shadow:none}.sidebar,.card,.daily-panel{box-shadow:var(--shadow-soft)}.card:hover{box-shadow:var(--shadow-lift)}.nav-icon{background:#1b212c}.btn.soft{background:#211b35}.btn.ghost{background:#1b212c}.field input,.field select,.field textarea,.filters input,.filters select{background:#10151e;border-color:#29303d}.flow-note{background:#171525;border-color:#2d2942}.quick-btn{background:#171d27}.insight-card{background:#171525}.summary-range-chips{background:#121722;border-color:#29303d}.summary-range-chip.active{background:var(--primary)}.summary-card-badge{background:#211b35}.settings-title>span{background:#1a202b}.auth-screen{background:#0d1017}.hero{background:linear-gradient(145deg,#211d42,#433991);box-shadow:0 12px 30px rgba(0,0,0,.25)}
+@media(max-width:820px){body{background:#0d1017}.topbar{background:rgba(13,16,23,.94)}.mobile-app-nav{background:rgba(17,22,32,.95)!important;border-color:#29303d!important;box-shadow:0 14px 40px rgba(0,0,0,.40)!important}.app-nav-tab.is-active{background:#251d3d!important;color:#c4b5fd!important}.card{box-shadow:0 3px 12px rgba(0,0,0,.14)}}
