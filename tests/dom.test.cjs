@@ -79,13 +79,12 @@ async function page(html,js,data,expose){
  p.api.checkDailyRollover();
  assert.notEqual(p.el('todayLabel').textContent,oldLabel);
  assert.equal(p.el('todayCount').textContent,'0 รายการ');
- // Summary filters must update the whole page to the chosen month/year.
- p.el('summaryYear').value=day.slice(0,4);p.el('summaryMonth').value=day.slice(5,7);p.el('summaryMonth').onchange();
- assert.match(p.el('summaryPeriodText').textContent,/กำลังแสดงข้อมูล/);
- assert.match(p.el('summaryTrendTitle').textContent,/รายวัน/);
- assert.match(p.el('summaryCategoryTitle').textContent,/รายวัน/);
- p.el('summaryMonth').value='all';p.el('summaryMonth').onchange();
- assert.match(p.el('summaryTrendTitle').textContent,/รายเดือน/);
+ // Summary range shortcuts must drive the whole dashboard.
+ assert.match(p.el('summaryPeriodText').textContent,/กำลังดู/);assert.equal(p.el('summaryTrendBadge').textContent,'รายวัน');
+ p.w.document.querySelector('[data-summary-range="6m"]').click();assert.equal(p.el('summaryTrendBadge').textContent,'รายเดือน');assert.match(p.el('summaryPeriodText').textContent,/6 เดือนล่าสุด/);
+ p.w.document.querySelector('[data-summary-range="custom"]').click();assert.equal(p.el('summaryCustomFilters').classList.contains('hidden'),false);
+ p.el('summaryYear').value=day.slice(0,4);p.el('summaryMonth').value=day.slice(5,7);p.el('summaryMonth').onchange();assert.equal(p.el('summaryTrendBadge').textContent,'รายวัน');
+ p.el('summaryMonth').value='all';p.el('summaryMonth').onchange();assert.equal(p.el('summaryTrendBadge').textContent,'รายเดือน');
  // New bills default to utilities so Summary classifies them as recurring expenses.
  p.w.openEntity('bill');assert.equal(p.el('entityFields').querySelector('[name=category_id]').value,'utilities');p.el('entityDialog').close();
  p.close();
