@@ -1,10 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue} from './finance-core.js?v=20261006-audit1';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-audit1';
-import {createSummaryRenderer} from './app-summary.js?v=20261006-audit1';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261006-audit1';
-import {createTransactionRenderer} from './app-transactions.js?v=20261006-audit1';
-import {createPlanningRenderer} from './app-planning.js?v=20261006-audit1';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261006-audit1';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261006-audit2';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-audit2';
+import {createSummaryRenderer} from './app-summary.js?v=20261006-audit2';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261006-audit2';
+import {createTransactionRenderer} from './app-transactions.js?v=20261006-audit2';
+import {createPlanningRenderer} from './app-planning.js?v=20261006-audit2';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261006-audit2';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -19,7 +19,7 @@ const $=id=>document.getElementById(id)
 const money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
 const fmtDate=s=>s?new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'2-digit'}).format(new Date(s+'T00:00:00')):''
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
-let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),duplicateOverride=false,lastSyncAt=null
+let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),duplicateOverride=false,lastSyncAt=null,sessionRevision=0
 
 const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
 const PUSH_ENDPOINT='https://mmvdhopogchcxwlstflk.supabase.co/functions/v1/push-reminders';
@@ -39,7 +39,7 @@ async function pushCall(action,payload={}){
 }
 async function currentPushSubscription(){
  if(!('serviceWorker' in navigator)||!('PushManager' in window))return null;
- const reg=await navigator.serviceWorker.ready;return reg.pushManager.getSubscription();
+ const reg=await navigator.serviceWorker.getRegistration();return reg?reg.pushManager.getSubscription():null;
 }
 async function refreshPushStatus(){
  const text=$('pushStatusText'),badge=$('pushStatusBadge'),on=$('enablePushBtn'),test=$('testPushBtn'),off=$('disablePushBtn'),toggle=$('pushDeviceSetting');
@@ -62,7 +62,8 @@ async function enablePush(){
  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window))throw new Error('อุปกรณ์นี้ยังไม่รองรับ Web Push');
  const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('ยังไม่ได้อนุญาต Notification');
  const cfg=await pushCall('config');
- const reg=await navigator.serviceWorker.ready;
+ const reg=await navigator.serviceWorker.getRegistration();
+ if(!reg?.active)throw new Error('ระบบแจ้งเตือนยังไม่พร้อม กรุณารีเฟรชแล้วลองใหม่');
  let sub=await reg.pushManager.getSubscription();
  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64urlToUint8Array(cfg.publicKey)});
  const j=sub.toJSON();
@@ -159,7 +160,18 @@ $('authBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('p
  $('authBtn').disabled=true
  try{if(mode==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name:'มิว'}}});if(error)throw error;if(!data.session){toast('สมัครแล้ว ✅ กรุณายืนยันอีเมลก่อน','ok');return}await boot(data.user)}
  else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user)}}catch(e){toast(e.message||'เกิดข้อผิดพลาด','err')}finally{$('authBtn').disabled=false}}
-$('logout').onclick=async()=>{await supabase.auth.signOut();location.reload()}
+$('logout').onclick=async()=>{
+ const button=$('logout');if(button.disabled)return;button.disabled=true;
+ try{const {error}=await supabase.auth.signOut();if(error)throw error;clearSessionUI();location.reload()}
+ catch(error){showAppToast('ออกจากระบบไม่สำเร็จ: '+error.message)}finally{button.disabled=false}
+}
+function clearSessionUI(){
+ sessionRevision++;user=null;refreshCoordinator.dispose();
+ if(channel){supabase.removeChannel(channel);channel=null}
+ categories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();lastSyncAt=null;
+ document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());
+ $('app').classList.add('hidden');$('authScreen').classList.remove('hidden');$('password').value='';
+} 
 
 function setSyncStatus(state,message=''){
  const bar=$('syncStatusBar'),dot=$('syncStatusDot'),text=$('syncStatusText'),retry=$('syncRetryBtn');if(!bar||!dot||!text)return;
@@ -170,18 +182,23 @@ function setSyncStatus(state,message=''){
  retry?.classList.toggle('hidden',state!=='error');
 }
 $('syncRetryBtn')?.addEventListener('click',()=>void loadAll());
-window.addEventListener('online',()=>{setSyncStatus('syncing','กลับมาออนไลน์แล้ว · กำลังอัปเดต…');void loadAll()});
+window.addEventListener('online',()=>{if(!user)return;setSyncStatus('syncing','กลับมาออนไลน์แล้ว · กำลังอัปเดต…');void loadAll()});
 window.addEventListener('offline',()=>setSyncStatus('error','ออฟไลน์ · ข้อมูลอาจยังไม่ล่าสุด'));
 
-async function boot(u){user=u;$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();subscribe();showPage(location.hash.slice(1)||'dashboard')}
+async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();showPage(location.hash.slice(1)||'dashboard')}
 async function performLoad(){
+ if(!user)return false;
+ const loadingUser=user.id,revision=sessionRevision;
  setSyncStatus('syncing');
  try{
-  const data=await fetchFinanceData(supabase,user.id,readAll);
+  const data=await fetchFinanceData(supabase,loadingUser,readAll);
+  if(user?.id!==loadingUser||sessionRevision!==revision)return false;
+  if(editorOpen()){scheduleLoad();return false;}
   categories=data.categories;accounts=data.accounts;transactions=data.transactions;
   bills=data.bills;debts=data.debts;budgets=data.budgets;carExpenseTxIds=data.carExpenseTxIds;
   $('dataError').classList.add('hidden');setSyncStatus('ok');renderAll();return true;
  }catch(error){
+  if(user?.id!==loadingUser||sessionRevision!==revision)return false;
   $('dataErrorText').textContent='โหลดข้อมูลล่าสุดไม่ได้ ข้อมูลที่เห็นอาจยังไม่ครบหรือไม่เป็นปัจจุบัน: '+error.message;
   $('dataError').classList.remove('hidden');setSyncStatus('error','ซิงก์ไม่สำเร็จ · '+error.message);return false;
  }
@@ -209,6 +226,7 @@ function quickCategoryMatch(label){
  return categories.find(c=>c.type==='expense'&&c.name==='อื่นๆ')||null
 }
 window.quickAdd=(label,desc='')=>{
+ if($('txForm').querySelector('button[type=submit]').disabled)return;
  const cat=quickCategoryMatch(label); openTx(); $('txType').value='expense'; fillTxSelectors(); if(cat)$('txCategory').value=cat.id; $('txDesc').value=desc||label; renderCardPaymentSuggestions(); if(label==='จ่ายบัตร'&&debts.some(d=>d.is_active&&Number(d.outstanding_amount||0)>0))$('cardPaymentSuggest')?.scrollIntoView({behavior:'smooth',block:'center'}); else if(window.innerWidth>820)$('txAmount').focus()
 }
 const nextDueDate=monthlyDue;
@@ -455,6 +473,7 @@ function saveFavorite(row){
 }
 
 window.openTx=(id=null)=>{
+ if(!user||$('txForm').querySelector('button[type=submit]').disabled)return;
  duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden');
  editing={type:'tx',id};$('txFavorite').checked=false;$('txError').classList.add('hidden');$('txExtra').open=false;$('txRepeatSection').open=false;
  $('txDialogTitle').textContent=id?'แก้ไขรายการ':'บันทึกรายการ';
@@ -478,13 +497,14 @@ $('txForm').onsubmit=async e=>{
   }
  }
  $('txDuplicateWarning')?.classList.add('hidden');
- $('txError').classList.add('hidden');button.disabled=true;button.textContent='กำลังบันทึก…';
+ $('txError').classList.add('hidden');const unlock=lockFinanceForm($('txForm'),$('txDialog'));
+ button.disabled=true;button.textContent='กำลังบันทึก…';
  try{
   const q=editing.id?supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id):supabase.from('transactions').insert(row);
   const r=await q.select('id').single();
   if(r.error)throw r.error;
   const favoriteSaved=saveFavorite(row);$('txDialog').close();showAppToast(favoriteSaved?'บันทึกแล้ว ✅':'บันทึกรายการแล้ว แต่เก็บรายการโปรดในเครื่องนี้ไม่ได้');await loadAll();
- }catch(error){txError('บันทึกไม่ได้: '+error.message)}finally{button.disabled=false;button.textContent='บันทึก'}
+ }catch(error){txError('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
 }
 $('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
 for(const id of ['txAmount','txDesc','txDate','txCategory','txAccount']){
@@ -516,11 +536,11 @@ async function refreshHealthCheck(){
 }
 $('runHealthCheck')?.addEventListener('click',()=>void refreshHealthCheck());
 
-window.openEntity=(type,id=null)=>{editing={type,id};const f=$('entityFields'),title=$('entityTitle');let x
+window.openEntity=(type,id=null)=>{if(!user||$('entityForm').querySelector('button[type=submit]').disabled)return;editing={type,id};const f=$('entityFields'),title=$('entityTitle');let x
  if(type==='category'){x=id?categories.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'หมวดหมู่';f.innerHTML='<div class="field full"><label>ชื่อหมวด</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="type"><option value="expense" '+(x?.type!=='income'?'selected':'')+'>รายจ่าย</option><option value="income" '+(x?.type==='income'?'selected':'')+'>รายรับ</option></select></div><div class="field"><label>ไอคอน Emoji</label><input name="icon" value="'+esc(x?.icon||'🏷️')+'"></div>'}
  if(type==='account'){x=id?accounts.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'บัญชี';f.innerHTML='<div class="field full"><label>ชื่อบัญชี</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="account_type">'+['bank','cash','credit_card','e_wallet','other'].map(v=>'<option value="'+v+'" '+(x?.account_type===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div class="field"><label>ยอดตั้งต้น</label><input name="opening_balance" type="number" step="0.01" value="'+(x?.opening_balance||0)+'"></div><div class="field full"><label>หมายเหตุ</label><input name="note" value="'+esc(x?.note||'')+'"></div>'}
  if(type==='bill'){x=id?bills.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'บิล';f.innerHTML='<div class="field full"><label>ชื่อบิล</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>จำนวนเงิน</label><input name="amount" type="number" step="0.01" min="0" value="'+(x?.amount||0)+'"></div><div class="field"><label>ครบกำหนดวันที่</label><input name="due_day" type="number" min="1" max="31" value="'+(x?.due_day??'')+'"></div><div class="field full"><label>หมวด</label><select name="category_id">'+categories.filter(c=>c.type==='expense').map(c=>'<option value="'+c.id+'" '+(x?.category_id===c.id?'selected':'')+'>'+esc((c.icon||'')+' '+c.name)+'</option>').join('')+'</select></div>'}
- if(type==='budget'){x=id?budgets.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'งบประมาณ';const ex=x?.category_names||[];f.innerHTML='<div class="field full"><label>ชื่องบ</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field full"><label>งบต่อเดือน</label><input name="monthly_limit" type="number" min="0" step="100" required value="'+(x?.monthly_limit||4000)+'"></div><div class="field full"><label>หมวดที่นับรวมในงบ</label><div class="budget-checks">'+categories.filter(c=>c.type==='expense').map(c=>'<label class="check"><input type="checkbox" name="category_names" value="'+esc(c.name)+'" '+(ex.includes(c.name)?'checked':'')+'><span>'+esc((c.icon||'')+' '+c.name)+'</span></label>').join('')+'</div></div>'}
+ if(type==='budget'){x=id?budgets.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'งบประมาณ';const ex=x?.category_names||[];f.innerHTML='<div class="field full"><label>ชื่องบ</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field full"><label>งบต่อเดือน</label><input name="monthly_limit" type="number" min="0" step="100" required value="'+(x?.monthly_limit??4000)+'"></div><div class="field full"><label>หมวดที่นับรวมในงบ</label><div class="budget-checks">'+categories.filter(c=>c.type==='expense').map(c=>'<label class="check"><input type="checkbox" name="category_names" value="'+esc(c.name)+'" '+(ex.includes(c.name)?'checked':'')+'><span>'+esc((c.icon||'')+' '+c.name)+'</span></label>').join('')+'</div></div>'}
  if(type==='debt'){x=id?debts.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'บัตร/สินเชื่อ';f.innerHTML='<div class="field full"><label>ชื่อบัตร/สินเชื่อ</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="debt_type">'+['credit_card','loan','car','mortgage','other'].map(v=>'<option value="'+v+'" '+(x?.debt_type===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div class="field"><label>วงเงิน</label><input name="original_amount" type="number" min="0" step="0.01" value="'+(x?.original_amount||0)+'"></div><div class="field"><label>ยอดคงเหลือบัตร / ยอดใช้ไป</label><input name="outstanding_amount" type="number" min="0" step="0.01" value="'+(x?.outstanding_amount||0)+'"></div><div class="field"><label>ยอดที่ต้องจ่ายรอบนี้</label><input name="installment_amount" type="number" min="0" step="0.01" value="'+(x?.installment_amount||0)+'"></div><div class="field"><label>ครบกำหนดวันที่</label><input name="due_day" type="number" min="1" max="31" value="'+(x?.due_day??'')+'"></div>'}
  $('entityDialog').showModal()}
 $('entityForm').onsubmit=async e=>{
@@ -532,12 +552,12 @@ $('entityForm').onsubmit=async e=>{
  else for(const k of ['opening_balance','amount','due_day','original_amount','outstanding_amount','installment_amount'])if(k in fd)fd[k]=k==='due_day'&&fd[k]===''?null:Number(fd[k]||0);
  if('category_id' in fd)fd.category_id=fd.category_id||null;
  if(!editing.id){if(editing.type==='category')fd.sort_order=0;else fd.is_active=true;if(editing.type==='bill')fd.frequency='monthly'}
- button.disabled=true;
+ const unlock=lockFinanceForm($('entityForm'),$('entityDialog'));button.disabled=true;
  try{
   const q=editing.id?supabase.from(table).update(fd).eq('id',editing.id).eq('user_id',user.id):supabase.from(table).insert(fd);
   const {error}=await q.select('id').single();if(error)throw error;
   $('entityDialog').close();showAppToast('บันทึกแล้ว ✅');await loadAll();
- }catch(error){alert('บันทึกไม่ได้: '+error.message)}finally{button.disabled=false}
+ }catch(error){alert('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false}
 }
 
 document.addEventListener('click',async e=>{const pay=e.target.closest('[data-pay-debt]');if(pay){const d=debts.find(x=>x.id===pay.dataset.payDebt);if(d){const cat=categories.find(c=>c.type==='expense'&&c.name==='หนี้/ผ่อน');$('txType').value='expense';fillTxSelectors();if(cat)$('txCategory').value=cat.id;$('txDesc').value='ชำระบัตร '+d.name;$('txAmount').value=Number(d.installment_amount||0)>0?Number(d.installment_amount):'';$('txNote').value='ยอดคงเหลือก่อนชำระ '+money(d.outstanding_amount||0);renderCardPaymentSuggestions();if(window.innerWidth>820)$('txAmount').focus()}return}const edit=e.target.closest('[data-edit]');if(edit){const t=edit.dataset.edit,id=edit.dataset.id;if(t==='tx'&&(transactions.find(x=>x.id===id)?.source==='car_installment'||transactions.find(x=>x.id===id)?.source==='car_expense'||carExpenseTxIds.has(id))){location.href='./car.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='salary'){location.href='./salary.html';return}if(t==='tx')openTx(id);else openEntity(t,id);return}const del=e.target.closest('[data-del]');if(del){if(del.dataset.del==='transactions'&&(transactions.find(x=>x.id===del.dataset.id)?.source==='car_installment'||transactions.find(x=>x.id===del.dataset.id)?.source==='car_expense'||carExpenseTxIds.has(del.dataset.id))){alert('กรุณาจัดการรายการนี้ผ่านหน้ารถของฉัน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='salary'){alert('กรุณาจัดการรายการนี้ผ่านหน้าเงินเดือน');return}if(!confirm('ยืนยันลบรายการนี้?'))return;const {error}=await supabase.from(del.dataset.del).delete().eq('id',del.dataset.id).eq('user_id',user.id);if(error)alert('ลบไม่ได้: '+error.message);else await loadAll()}})
@@ -545,15 +565,21 @@ function subscribe(){if(channel)supabase.removeChannel(channel);channel=supabase
 window.txDialog=$('txDialog');window.entityDialog=$('entityDialog');
 supabase.auth.onAuthStateChange((event,session)=>{
  if(event==='SIGNED_OUT'){
-  if(channel){supabase.removeChannel(channel);channel=null}
-  user=null;location.reload();return;
+  clearSessionUI();location.reload();return;
  }
+ if(session?.user&&user&&session.user.id!==user.id){clearSessionUI();location.reload();return;}
  if(event==='TOKEN_REFRESHED'&&session?.user)user=session.user;
  if(event==='USER_UPDATED'&&session?.user){user=session.user;if($('userEmail'))$('userEmail').textContent=session.user.email||'';}
 });
 const {data:{session}}=await supabase.auth.getSession();if(session?.user)await boot(session.user)
 
-if('serviceWorker' in navigator){window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});void reg.update()}catch(e){console.warn(e)}})}
+async function registerFinanceWorker(){
+ try{const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});void reg.update().catch(e=>console.warn(e))}catch(e){console.warn(e)}
+}
+if('serviceWorker' in navigator){
+ if(document.readyState==='complete')void registerFinanceWorker();
+ else window.addEventListener('load',registerFinanceWorker,{once:true});
+}
 
 
 

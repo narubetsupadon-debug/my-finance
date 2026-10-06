@@ -1,4 +1,4 @@
-import {bangkokDay,readAll} from './finance-core.js?v=20261006-audit1';
+import {bangkokDay,readAll,lockFinanceForm} from './finance-core.js?v=20261006-audit2';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');const $=id=>document.getElementById(id),money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0)),date=s=>new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});let user,rows=[],expenseRows=[],editing,editingExpense=null,accounts=[],categories=[];
 function msg(s){$('carMessage').textContent=s;if($('carDialog').open)$('carFormMessage').textContent=s;}
@@ -48,6 +48,7 @@ function defaultCarCategory(){
  return categories.find(x=>x.name==='รถยนต์')?.id||categories.find(x=>x.name==='อื่นๆ')?.id||categories[0]?.id||'';
 }
 function openExpense(row=null){
+ if($('saveCarExpense').disabled||$('deleteCarExpense').disabled)return;
  editingExpense=row;$('carExpenseMessage').textContent='';$('carExpenseTitle').textContent=row?'แก้ไขค่าใช้จ่ายรถ':'เพิ่มค่าใช้จ่ายรถ';
  $('carExpenseType').value=row?.expense_type||'fuel';$('carExpenseAmount').value=row?.amount??'';$('carExpenseDate').value=row?.expense_date||bangkokDay();
  $('carExpenseOdo').value=row?.odometer_km??'';$('carExpenseLiters').value=row?.liters??'';$('carExpenseVendor').value=row?.vendor||'';$('carExpenseNote').value=row?.note||'';
@@ -57,12 +58,12 @@ function openExpense(row=null){
 function syncExpenseFields(){$('carLitersField').classList.toggle('hidden',$('carExpenseType').value!=='fuel');}
 
 function requirements(){const paid=$('carStatus').value==='paid';for(const id of ['carPaymentDate','carMy','carPartner'])$(id).required=paid;}
-function open(r){editing=r;$('carFormMessage').textContent='';$('carTitle').textContent='ค่างวดรถ · งวดที่ '+r.installment_no;$('carStatus').value='paid';$('carPaymentDate').value=r.payment_date||bangkokDay();$('carMy').value=r.my_amount??'';$('carPartner').value=r.partner_amount??'';$('carAccount').value=r.account_id||'';$('carCategory').value=r.category_id||[...$('carCategory').options].find(o=>o.textContent==='รถยนต์')?.value||'';$('carNote').value=r.note||'';requirements();$('carDialog').showModal();}
+function open(r){if($('saveCar').disabled)return;editing=r;$('carFormMessage').textContent='';$('carTitle').textContent='ค่างวดรถ · งวดที่ '+r.installment_no;$('carStatus').value='paid';$('carPaymentDate').value=r.payment_date||bangkokDay();$('carMy').value=r.my_amount??'';$('carPartner').value=r.partner_amount??'';$('carAccount').value=r.account_id||'';$('carCategory').value=r.category_id||[...$('carCategory').options].find(o=>o.textContent==='รถยนต์')?.value||'';$('carNote').value=r.note||'';requirements();$('carDialog').showModal();}
 $('carFilter').onchange=render;$('carExpenseFilter').onchange=renderExpenses;$('addCarExpense').onclick=()=>openExpense();$('closeCarExpense').onclick=$('cancelCarExpense').onclick=()=>$('carExpenseDialog').close();$('carExpenseType').onchange=syncExpenseFields;$('carStatus').onchange=requirements;$('closeCar').onclick=()=>$('carDialog').close();
-$('carForm').onsubmit=async e=>{e.preventDefault();const b=$('saveCar');if(b.disabled)return;b.disabled=true;let committed=false;try{const row={status:$('carStatus').value,payment_date:$('carPaymentDate').value||null,my_amount:$('carMy').value===''?null:Math.round(Number($('carMy').value)*100)/100,partner_amount:$('carPartner').value===''?null:Math.round(Number($('carPartner').value)*100)/100,account_id:$('carAccount').value||null,category_id:$('carCategory').value,note:$('carNote').value.trim()||null};const r=await db.from('car_installments').update(row).eq('id',editing.id).eq('user_id',user.id).select('id').single();if(r.error)throw r.error;committed=true;$('carDialog').close();await load();msg('บันทึกแล้ว ✅ รายจ่ายส่วนมิวอัปเดตตามกัน');}catch(e){if(committed){$('carApp').classList.add('hidden');msg('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else msg('บันทึกไม่ได้: '+e.message);}finally{b.disabled=false;}};
+$('carForm').onsubmit=async e=>{e.preventDefault();const b=$('saveCar');if(b.disabled)return;const unlock=lockFinanceForm($('carForm'),$('carDialog'));b.disabled=true;let committed=false;try{const row={status:$('carStatus').value,payment_date:$('carPaymentDate').value||null,my_amount:$('carMy').value===''?null:Math.round(Number($('carMy').value)*100)/100,partner_amount:$('carPartner').value===''?null:Math.round(Number($('carPartner').value)*100)/100,account_id:$('carAccount').value||null,category_id:$('carCategory').value,note:$('carNote').value.trim()||null};const r=await db.from('car_installments').update(row).eq('id',editing.id).eq('user_id',user.id).select('id').single();if(r.error)throw r.error;committed=true;$('carDialog').close();await load();msg('บันทึกแล้ว ✅ รายจ่ายส่วนมิวอัปเดตตามกัน');}catch(e){if(committed){$('carApp').classList.add('hidden');msg('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else msg('บันทึกไม่ได้: '+e.message);}finally{unlock();b.disabled=false;}};
 
 $('carExpenseForm').onsubmit=async e=>{
- e.preventDefault();const b=$('saveCarExpense');if(b.disabled)return;b.disabled=true;$('carExpenseMessage').textContent='';let committed=false;
+ e.preventDefault();const b=$('saveCarExpense');if(b.disabled)return;const unlock=lockFinanceForm($('carExpenseForm'),$('carExpenseDialog'));b.disabled=true;$('carExpenseMessage').textContent='';let committed=false;
  try{
   const row={user_id:user.id,expense_date:$('carExpenseDate').value,expense_type:$('carExpenseType').value,amount:Math.round(Number($('carExpenseAmount').value)*100)/100,
    odometer_km:$('carExpenseOdo').value===''?null:Number($('carExpenseOdo').value),liters:$('carExpenseType').value==='fuel'&&$('carExpenseLiters').value!==''?Number($('carExpenseLiters').value):null,
@@ -71,13 +72,13 @@ $('carExpenseForm').onsubmit=async e=>{
   const q=editingExpense?db.from('car_expenses').update(row).eq('id',editingExpense.id).eq('user_id',user.id):db.from('car_expenses').insert(row);
   const r=await q.select('id').single();if(r.error)throw r.error;committed=true;
   $('carExpenseDialog').close();await load();msg(editingExpense?'แก้ไขค่าใช้จ่ายรถแล้ว ✅':'เพิ่มค่าใช้จ่ายรถแล้ว ✅');
- }catch(err){if(committed){$('carApp').classList.add('hidden');msg('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else{$('carExpenseMessage').textContent='บันทึกไม่ได้: '+err.message;}}finally{b.disabled=false;}
+ }catch(err){if(committed){$('carApp').classList.add('hidden');msg('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else{$('carExpenseMessage').textContent='บันทึกไม่ได้: '+err.message;}}finally{unlock();b.disabled=false;}
 };
 $('deleteCarExpense').onclick=async()=>{
  if(!editingExpense||!confirm('ลบค่าใช้จ่ายรถรายการนี้? รายการรายจ่ายที่เชื่อมจะถูกลบด้วย'))return;
- const b=$('deleteCarExpense');if(b.disabled)return;b.disabled=true;let committed=false;
+ const b=$('deleteCarExpense');if(b.disabled)return;const unlock=lockFinanceForm($('carExpenseForm'),$('carExpenseDialog'));b.disabled=true;let committed=false;
  try{const r=await db.from('car_expenses').delete().eq('id',editingExpense.id).eq('user_id',user.id);if(r.error)throw r.error;committed=true;$('carExpenseDialog').close();await load();msg('ลบค่าใช้จ่ายรถแล้ว');}
- catch(err){if(committed){$('carApp').classList.add('hidden');msg('ลบสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else{$('carExpenseMessage').textContent='ลบไม่ได้: '+err.message;}}finally{b.disabled=false;}
+ catch(err){if(committed){$('carApp').classList.add('hidden');msg('ลบสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else{$('carExpenseMessage').textContent='ลบไม่ได้: '+err.message;}}finally{unlock();b.disabled=false;}
 };
 
 $('exportCar').onclick=()=>{if(!window.XLSX)return msg('โหลด Excel ไม่สำเร็จ กรุณารีเฟรช');if(!rows.length)return msg('ยังไม่มีข้อมูล');const data=rows.map(r=>({'งวด':r.installment_no,'กำหนดชำระ':r.due_date,'ค่างวดตามสัญญา':Number(r.scheduled_amount),'หาร 2 (อ้างอิง)':Number(r.scheduled_amount)/2,'บุ๋มบิ๋ม':r.partner_amount===null?null:Number(r.partner_amount),'มิว':r.my_amount===null?null:Number(r.my_amount),'สถานะ':r.status==='paid'?'จ่ายแล้ว':'ยังไม่จ่าย','วันที่จ่ายจริง':r.payment_date||'','หมายเหตุ':r.note||''}));const w=XLSX.utils.book_new(),s=XLSX.utils.json_to_sheet(data);s['!cols']=Object.keys(data[0]).map(()=>({wch:22}));XLSX.utils.book_append_sheet(w,s,'ผ่อนรถ');XLSX.writeFile(w,'My_Finance_Car.xlsx');};

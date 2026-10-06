@@ -18,3 +18,13 @@ const none=findDuplicateCandidates({transaction_date:'2026-10-05',type:'expense'
 assert.equal(none.length,0);
 
 console.log('PASS app-safety: duplicate candidates are high-confidence and non-blocking');
+
+
+// A paid installment with zero personal contribution legitimately has no expense.
+const {runDataHealthCheck}=await import('../app-safety.js');
+const health=await runDataHealthCheck({
+ db:{from:table=>({select(){return this},eq(){return this},order(){return {table}}})},
+ userId:'fixture',transactions:[],
+ readAll:async makeQuery=>makeQuery().table==='car_installments'?[{status:'paid',my_amount:0,transaction_id:null},{status:'paid',my_amount:50,transaction_id:null}]:[]
+});
+assert.equal(health.orphanInstallments,1);

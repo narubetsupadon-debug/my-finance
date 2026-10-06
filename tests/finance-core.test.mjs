@@ -24,3 +24,11 @@ assert.equal((await core.readAll(()=>({range:async(a,b)=>({data:input.slice(a,b+
 let calls=0;
 await assert.rejects(core.readAll(()=>({range:async()=>++calls===1?{data:input.slice(0,500)}:{error:new Error('offline')}})),/offline/);
 console.log('PASS core: Thai dates, year boundary, overlapping budgets, cancelled expenses, daily allowance, month-end due dates, >1000 rows, failed page');
+
+
+const importHtml=readFileSync(new URL('../import.html',import.meta.url),'utf8');
+const adapter=importHtml.match(/const excelDate=([^\n]+)/)[1];
+const importDate=new Function('excelDay','return '+adapter)(core.excelDay);
+assert.equal(importDate('06/10/2569'),'2026-10-06');
+assert.equal(importDate('2026-10-06'),'2026-10-06');
+assert.throws(()=>importDate('31/02/2026'));

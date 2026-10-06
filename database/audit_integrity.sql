@@ -123,3 +123,119 @@ create trigger protect_category_delete before delete on public.categories
 drop trigger if exists protect_account_delete on public.accounts;
 create trigger protect_account_delete before delete on public.accounts
  for each row execute function public.protect_finance_dimension_delete();
+
+
+-- 2026-10-06: preserve linked identities and delete car transactions after the parent row.
+BEGIN;
+CREATE OR REPLACE FUNCTION public.protect_car_expense()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
+begin
+ if pg_trigger_depth()=1 and (exists(select 1 from public.car_installments where transaction_id=old.id) or exists(select 1 from public.car_expenses where transaction_id=old.id)) then raise exception 'กรุณาแก้ไขรายการนี้ผ่านหน้าผ่อนรถ'; end if;return new;
+end $function$;
+
+CREATE OR REPLACE FUNCTION public.sync_salary_record()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
+declare net numeric; tx uuid;
+begin
+ if auth.uid() is null or new.user_id<>auth.uid() then raise exception 'Unauthorized'; end if;
+ if tg_op='UPDATE' and (new.user_id is distinct from old.user_id or new.transaction_id is distinct from old.transaction_id) then raise exception 'Cannot change linked transaction'; end if;
+ if not exists(select 1 from public.categories where id=new.category_id and user_id=auth.uid() and type='income') then raise exception 'Invalid income category'; end if;
+ if not exists(select 1 from public.accounts where id=new.account_id and user_id=auth.uid()) then raise exception 'Invalid account'; end if;
+ net:=new.base_salary+new.overtime+new.allowance+new.bonus+new.other_income-new.social_security-new.tax-new.provident_fund-new.other_deductions;
+ if net<=0 then raise exception 'Net salary must be positive'; end if;
+ if new.transaction_id is null then
+ insert into public.transactions(user_id,transaction_date,type,category_id,account_id,description,amount,status,source,note)
+ values(new.user_id,new.payment_date,'income',new.category_id,new.account_id,'เงินเดือน '||to_char(new.salary_month,'YYYY-MM'),net,'paid','salary',new.note) returning id into tx;
+ new.transaction_id:=tx;
+ else
+ if not exists(select 1 from public.transactions where id=new.transaction_id and user_id=auth.uid() and type='income' and status<>'cancelled') then raise exception 'Invalid existing income'; end if;
+ if tg_op='INSERT' and exists(select 1 from public.salary_records where transaction_id=new.transaction_id) then raise exception 'Income already linked'; end if;
+ update public.transactions set transaction_date=new.payment_date,category_id=new.category_id,account_id=new.account_id,description='เงินเดือน '||to_char(new.salary_month,'YYYY-MM'),amount=net,status='paid',source='salary',note=new.note where id=new.transaction_id and user_id=auth.uid();
+ end if;
+ new.updated_at:=now(); return new;
+end $function$;
+
+CREATE OR REPLACE FUNCTION public.sync_car_expense_transaction()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
+declare
+  tx_id uuid;
+  type_label text;
+  tx_desc text;
+begin
+  if tg_op <> 'DELETE' then
+    if auth.uid() is null or new.user_id <> auth.uid() then raise exception 'Unauthorized'; end if;
+    if new.account_id is not null and not exists(
+      select 1 from public.accounts where id=new.account_id and user_id=new.user_id
+    ) then raise exception 'บัญชีที่เลือกไม่ถูกต้อง'; end if;
+    if new.category_id is null or not exists(
+      select 1 from public.categories where id=new.category_id and user_id=new.user_id and type='expense'
+    ) then raise exception 'กรุณาเลือกหมวดรายจ่ายที่ถูกต้อง'; end if;
+
+    type_label:=case new.expense_type
+      when 'fuel' then 'น้ำมัน'
+      when 'repair' then 'ซ่อม/อะไหล่'
+      when 'maintenance' then 'เช็กระยะ'
+      when 'insurance' then 'ประกันรถ'
+      when 'act' then 'พ.ร.บ.'
+      when 'tax' then 'ภาษีรถ'
+      when 'wash' then 'ล้างรถ'
+      when 'parking' then 'ที่จอดรถ'
+      when 'toll' then 'ทางด่วน'
+      when 'installment' then 'ค่างวดรถ'
+      else 'ค่าใช้จ่ายรถอื่น ๆ'
+    end;
+    tx_desc:=type_label || case when coalesce(trim(new.vendor),'')<>'' then ' · '||trim(new.vendor) else '' end;
+  end if;
+
+  if tg_op='INSERT' then
+    insert into public.transactions(
+      user_id,transaction_date,type,category_id,account_id,description,amount,status,note,source
+    ) values(
+      new.user_id,new.expense_date,'expense',new.category_id,new.account_id,tx_desc,new.amount,'paid',
+      concat_ws(' · ',nullif(trim(new.note),''),case when new.odometer_km is not null then 'เลขไมล์ '||new.odometer_km||' km' end,case when new.liters is not null then 'น้ำมัน '||new.liters||' L' end),
+      'car_expense'
+    ) returning id into tx_id;
+    new.transaction_id:=tx_id;
+    new.updated_at:=now();
+    return new;
+  elsif tg_op='UPDATE' then
+    if new.user_id is distinct from old.user_id or new.transaction_id is distinct from old.transaction_id then raise exception 'Cannot change linked car transaction'; end if;
+    if new.transaction_id is null then raise exception 'รายการรถไม่มี Transaction ที่เชื่อมอยู่'; end if;
+    update public.transactions set
+      transaction_date=new.expense_date,
+      category_id=new.category_id,
+      account_id=new.account_id,
+      description=tx_desc,
+      amount=new.amount,
+      status='paid',
+      note=concat_ws(' · ',nullif(trim(new.note),''),case when new.odometer_km is not null then 'เลขไมล์ '||new.odometer_km||' km' end,case when new.liters is not null then 'น้ำมัน '||new.liters||' L' end),
+      source='car_expense'
+    where id=new.transaction_id and user_id=new.user_id;
+    if not found then raise exception 'ไม่พบ Transaction ที่เชื่อมกับค่าใช้จ่ายรถ'; end if;
+    new.updated_at:=now();
+    return new;
+  else
+    if auth.uid() is null or old.user_id <> auth.uid() then raise exception 'Unauthorized'; end if;
+    if old.transaction_id is not null then
+      delete from public.transactions where id=old.transaction_id and user_id=old.user_id;
+    end if;
+    return old;
+  end if;
+end $function$;
+
+DROP TRIGGER IF EXISTS sync_car_expense_transaction ON public.car_expenses;
+CREATE TRIGGER sync_car_expense_transaction BEFORE INSERT OR UPDATE ON public.car_expenses FOR EACH ROW EXECUTE FUNCTION public.sync_car_expense_transaction();
+DROP TRIGGER IF EXISTS delete_car_expense_transaction ON public.car_expenses;
+CREATE TRIGGER delete_car_expense_transaction AFTER DELETE ON public.car_expenses FOR EACH ROW EXECUTE FUNCTION public.sync_car_expense_transaction();
+
+COMMIT;
+

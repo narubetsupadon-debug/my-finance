@@ -10,13 +10,13 @@ const appPlanning=fs.readFileSync(root+'app-planning.js','utf8').replaceAll('exp
 const appSafety=fs.readFileSync(root+'app-safety.js','utf8').replaceAll('export ','');
 function dbMock(data){
  const state={fail:false,writes:[]};
- const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}}),signOut:async()=>({error:null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
+ const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:callback=>{state.authChange=callback;return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>({error:state.signOutError||null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
  db.from=table=>{
   let rows=[...(data[table]||[])],write=null;
   const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},not(k,op,v){if(op==='is'&&v===null)rows=rows.filter(r=>r[k]!==null&&r[k]!==undefined);return q},
   insert(row){write=row;state.writes.push({table,row});return q},update(row){write=row;state.writes.push({table,row});return q},
-  single:async()=>{if(state.fail)return {error:{message:'offline'}};if(state.failAfterWrite)state.fail=true;return {data:{id:'saved'}}},
-  range:async(a,b)=>state.fail?{error:{message:'offline'}}:{data:rows.slice(a,b+1)},
+  single:async()=>{if(state.writeGate)await state.writeGate;if(state.fail)return {error:{message:'offline'}};if(state.failAfterWrite)state.fail=true;return {data:{id:'saved'}}},
+  range:async(a,b)=>{if(state.readGate)await state.readGate;return state.fail?{error:{message:'offline'}}:{data:rows.slice(a,b+1)}},
   then(resolve,reject){return Promise.resolve(state.fail?{error:{message:'offline'}}:{data:rows}).then(resolve,reject)}
   };return q;
  };
@@ -98,6 +98,34 @@ async function page(html,js,data,expose){
  assert.match(expense.el('carMessage').textContent,/บันทึกสำเร็จแล้ว/);
  assert.equal(expense.el('carApp').classList.contains('hidden'),true);
  assert.equal(expense.el('carExpenseDialog').open,false);expense.close();
+
+ // Freeze form controls until save completes, including Escape/cancel.
+ const pending=await page('index.html','app.js',{categories,accounts,transactions:[],budgets:[{id:'zero',user_id:'user',name:'zero',monthly_limit:0,category_names:[],is_active:true}]},'currentPushSubscription');
+ pending.w.openEntity('budget','zero');assert.equal(pending.el('entityFields').querySelector('[name=monthly_limit]').value,'0');pending.el('entityDialog').close();
+ let finishWrite;pending.state.writeGate=new Promise(r=>finishWrite=r);
+ pending.w.openTx();pending.el('txDesc').value='test';pending.el('txAmount').value='1';pending.el('txCategory').value='cat';
+ const save=pending.el('txForm').onsubmit({preventDefault(){},currentTarget:pending.el('txForm')});
+ assert.equal(pending.el('txDesc').disabled,true);
+ const cancel=new pending.w.Event('cancel',{cancelable:true});pending.el('txDialog').dispatchEvent(cancel);assert.equal(cancel.defaultPrevented,true);
+ pending.w.quickAdd('กาแฟ');assert.equal(pending.el('txDesc').value,'test');
+ finishWrite();await save;assert.equal(pending.el('txDesc').disabled,false);
+ pending.state.signOutError={message:'network failed'};await pending.el('logout').onclick();
+ assert.equal(pending.el('app').classList.contains('hidden'),false);assert.match(pending.el('appToast').textContent,/ออกจากระบบไม่สำเร็จ/);
+ // No service-worker registration must return promptly instead of waiting forever.
+ Object.defineProperty(pending.w.navigator,'serviceWorker',{value:{getRegistration:async()=>undefined,ready:new Promise(()=>{})},configurable:true});pending.w.PushManager=function(){};
+ assert.equal(await pending.api.currentPushSubscription(),null);pending.close();
+ // A request started before an editor opens must not replace its selectors.
+ const raceData={categories:[...categories],accounts,transactions};
+ const race=await page('index.html','app.js',raceData,'loadAll,clearSessionUI,refreshCoordinator,getTransactionCount:()=>transactions.length');
+ let finishRead;race.state.readGate=new Promise(r=>finishRead=r);raceData.categories=[];
+ const loading=race.api.loadAll();race.w.openTx();race.el('txCategory').value='cat';finishRead();await loading;
+ assert.equal(race.el('txCategory').value,'cat');assert.equal(race.api.refreshCoordinator.pending,true);
+ race.el('txDialog').close();race.state.readGate=null;await race.api.loadAll();
+ assert.equal(race.el('txCategory').value,'');
+ // A sign-out invalidates requests already in flight.
+ race.state.readGate=new Promise(r=>finishRead=r);const oldRequest=race.api.loadAll();race.api.clearSessionUI();finishRead();await oldRequest;
+ assert.equal(race.api.getTransactionCount(),0);assert.equal(race.el('app').classList.contains('hidden'),true);race.close();
+ console.log('PASS deep regressions: save locks, zero budget, logout failure, push readiness and stale request guards');
  console.log('PASS DOM fixtures: full paginated dashboard, XSS escaping, category/account retention, transaction edit status/source, debt save with blank due date, load failure retains data, salary category/reset/save, empty car schedule and visible modal errors');
 })().catch(e=>{console.error(e);process.exit(1)});
 

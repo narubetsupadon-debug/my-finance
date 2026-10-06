@@ -61,3 +61,14 @@ export function excelDay(value) {
   if(Number.isNaN(dt.getTime()))return null;
   return out(dt.getFullYear(),dt.getMonth()+1,dt.getDate());
 }
+
+
+// Lock a submitted form until its request settles, preserving prior disabled states.
+export function lockFinanceForm(form,dialog=null){
+ const controls=[...form.querySelectorAll('input,select,textarea,button')];
+ const states=controls.map(el=>el.disabled);
+ controls.forEach(el=>el.disabled=true);
+ const preventCancel=event=>event.preventDefault();
+ dialog?.addEventListener('cancel',preventCancel);
+ return ()=>{controls.forEach((el,i)=>el.disabled=states[i]);dialog?.removeEventListener('cancel',preventCancel)};
+}

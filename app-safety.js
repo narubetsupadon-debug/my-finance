@@ -25,7 +25,7 @@ export async function runDataHealthCheck({db,userId,transactions,readAll}){
   const [carExpenses,salaries,installments]=await Promise.all([
     readAll(()=>db.from('car_expenses').select('id,transaction_id').eq('user_id',userId).order('id')),
     readAll(()=>db.from('salary_records').select('id,transaction_id').eq('user_id',userId).order('id')),
-    readAll(()=>db.from('car_installments').select('id,status,transaction_id').eq('user_id',userId).order('id'))
+    readAll(()=>db.from('car_installments').select('id,status,my_amount,transaction_id').eq('user_id',userId).order('id'))
   ]);
   const exact=new Map();
   for(const x of tx){
@@ -36,7 +36,7 @@ export async function runDataHealthCheck({db,userId,transactions,readAll}){
   const duplicateGroups=[...exact.values()].filter(n=>n>1).length;
   const orphanCar=carExpenses.filter(x=>!x.transaction_id||!ids.has(x.transaction_id)).length;
   const orphanSalary=salaries.filter(x=>!x.transaction_id||!ids.has(x.transaction_id)).length;
-  const orphanInstallments=installments.filter(x=>x.status==='paid'&&(!x.transaction_id||!ids.has(x.transaction_id))).length;
+  const orphanInstallments=installments.filter(x=>x.status==='paid'&&Number(x.my_amount)>0&&(!x.transaction_id||!ids.has(x.transaction_id))).length;
   return {
     duplicateGroups,
     orphanCar,
@@ -45,3 +45,4 @@ export async function runDataHealthCheck({db,userId,transactions,readAll}){
     ok:duplicateGroups===0&&orphanCar===0&&orphanSalary===0&&orphanInstallments===0
   };
 }
+
