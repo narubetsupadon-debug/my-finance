@@ -70,7 +70,11 @@ function renderSummary(){
 
  const grouped=rows.filter(x=>x.type==='expense').reduce((o,x)=>{const g=excelGroup(x);o[g]=(o[g]||0)+Number(x.amount);return o},{})
  $('sumDebtPay').textContent=money(grouped['ชำระบัตร/สินเชื่อ']||0)
- $('sumHomeCar').textContent=money((grouped['ค่าห้อง']||0)+(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0))
+ const rentTotal=grouped['ค่าห้อง']||0
+ const carTotal=(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0)
+ $('sumRent').textContent=money(rentTotal)
+ $('sumCar').textContent=money(carTotal)
+ $('sumHomeCar').textContent=money(rentTotal+carTotal)
  $('sumRecurring').textContent=money(grouped['รายจ่ายประจำ']||0)
 
  const timelineKeys=config.mode==='days'
