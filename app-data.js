@@ -3,7 +3,7 @@ export async function fetchFinanceData(db,userId,readAll){
   const query=(table,select='*')=>db.from(table).select(select).eq('user_id',userId);
   const [categories,accounts,transactions,bills,debts,budgets,carExpenses]=await Promise.all([
     readAll(()=>query('categories').order('sort_order').order('name').order('id')),
-    readAll(()=>query('accounts').order('created_at').order('id')),
+    readAll(()=>query('accounts').eq('is_active',true).order('display_order').order('created_at').order('id')),
     readAll(()=>query('transactions','*,categories(name,icon),accounts(name)').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).order('id')),
     readAll(()=>query('bills','*,categories(name),accounts(name)').order('due_day').order('id')),
     readAll(()=>query('debts').order('created_at').order('id')),
