@@ -1,10 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261006-audit2';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-audit2';
-import {createSummaryRenderer} from './app-summary.js?v=20261006-audit2';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261006-audit2';
-import {createTransactionRenderer} from './app-transactions.js?v=20261006-audit2';
-import {createPlanningRenderer} from './app-planning.js?v=20261006-audit2';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261006-audit2';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261006-auth1';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-auth1';
+import {createSummaryRenderer} from './app-summary.js?v=20261006-auth1';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261006-auth1';
+import {createTransactionRenderer} from './app-transactions.js?v=20261006-auth1';
+import {createPlanningRenderer} from './app-planning.js?v=20261006-auth1';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261006-auth1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -170,7 +170,7 @@ function clearSessionUI(){
  if(channel){supabase.removeChannel(channel);channel=null}
  categories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();lastSyncAt=null;
  document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());
- $('app').classList.add('hidden');$('authScreen').classList.remove('hidden');$('password').value='';
+ $('authSplash')?.classList.add('hidden');$('app').classList.add('hidden');$('authScreen').classList.remove('hidden');$('password').value='';
 } 
 
 function setSyncStatus(state,message=''){
@@ -185,7 +185,7 @@ $('syncRetryBtn')?.addEventListener('click',()=>void loadAll());
 window.addEventListener('online',()=>{if(!user)return;setSyncStatus('syncing','กลับมาออนไลน์แล้ว · กำลังอัปเดต…');void loadAll()});
 window.addEventListener('offline',()=>setSyncStatus('error','ออฟไลน์ · ข้อมูลอาจยังไม่ล่าสุด'));
 
-async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();showPage(location.hash.slice(1)||'dashboard')}
+async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authSplash')?.classList.add('hidden');$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();showPage(location.hash.slice(1)||'dashboard')}
 async function performLoad(){
  if(!user)return false;
  const loadingUser=user.id,revision=sessionRevision;
@@ -571,7 +571,16 @@ supabase.auth.onAuthStateChange((event,session)=>{
  if(event==='TOKEN_REFRESHED'&&session?.user)user=session.user;
  if(event==='USER_UPDATED'&&session?.user){user=session.user;if($('userEmail'))$('userEmail').textContent=session.user.email||'';}
 });
-const {data:{session}}=await supabase.auth.getSession();if(session?.user)await boot(session.user)
+try{
+ const {data:{session},error}=await supabase.auth.getSession();
+ if(error)throw error;
+ if(session?.user)await boot(session.user);
+ else{$('authSplash')?.classList.add('hidden');$('authScreen').classList.remove('hidden');}
+}catch(error){
+ console.warn('Session restore failed',error);
+ $('authSplash')?.classList.add('hidden');$('authScreen').classList.remove('hidden');
+ toast('ตรวจสอบการเข้าสู่ระบบไม่สำเร็จ กรุณาเข้าสู่ระบบอีกครั้ง','err');
+}
 
 async function registerFinanceWorker(){
  try{const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});void reg.update().catch(e=>console.warn(e))}catch(e){console.warn(e)}

@@ -72,3 +72,8 @@ assert.match(source['index.html'],/id="runHealthCheck"/,'health check UI missing
 assert.match(source['index.html'],/id="txDuplicateWarning"/,'duplicate warning UI missing');
 assert.match(source['app.js'],/findDuplicateCandidates/,'duplicate guardrail must be wired');
 assert.match(source['app.js'],/runDataHealthCheck/,'health check must be wired');
+
+assert.match(source['index.html'],/id="authSplash"/,'auth loading splash missing');
+assert.match(source['index.html'],/id="authScreen" class="auth-screen hidden"/,'login screen must start hidden until session resolution');
+assert.match(source['app.js'],/if\(session\?\.user\)await boot\(session\.user\)/,'restored sessions must boot directly');
+assert.match(source['app.js'],/authSplash.*classList\.add\('hidden'\)/s,'auth splash must be dismissed after session resolution');
