@@ -73,8 +73,10 @@ function renderSummary(){
  if(ChartCtor)categoryChart2=new ChartCtor($('monthlyCategoryChart'),{type:'bar',data:{labels:timelineLabels,datasets:cats.map((g,idx)=>({label:g,data:timelineByCat[idx],backgroundColor:palette[idx%palette.length],borderRadius:4}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{x:{stacked:true,title:{display:month!=='all',text:month==='all'?'':'วันที่'},grid:{display:false}},y:{stacked:true,ticks:{callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}}}}})
 
  const pieCats=Object.entries(grouped).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1])
+ const expenseTotal=pieCats.reduce((sum,[,value])=>sum+Number(value),0)
+ const expensePercent=value=>expenseTotal>0?(Number(value)/expenseTotal*100):0
  if(pieChart)pieChart.destroy()
- if(ChartCtor)pieChart=new ChartCtor($('categoryPieChart'),{type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+((c.raw/(exp||1))*100).toFixed(1)+'%)'}}}}})
+ if(ChartCtor)pieChart=new ChartCtor($('categoryPieChart'),{type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{generateLabels:chart=>{const ds=chart.data.datasets[0]||{data:[]};return chart.data.labels.map((label,i)=>({text:label+' '+expensePercent(ds.data[i]).toFixed(1)+'%',fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,hidden:!chart.getDataVisibility(i),index:i}))}}},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+expensePercent(c.raw).toFixed(1)+'%)'}}}}})
 
  const visibleMonths=month==='all'?monthKeys:[year+'-'+month]
  const visibleMonthly=visibleMonths.map(k=>{const idx=monthKeys.indexOf(k);return [k,monthly[idx]]})

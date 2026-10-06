@@ -98,3 +98,7 @@ assert.match(source['index.html'],/id="summaryTrendTitle"/,'summary trend title 
 assert.match(source['index.html'],/id="summaryCategoryTitle"/,'summary category title missing');
 assert.match(source['app-summary.js'],/timelineKeys/,'summary charts must follow the selected period');
 assert.match(source['app-summary.js'],/รายรับ vs รายจ่ายรายวัน/,'monthly selection must switch trend to daily view');
+
+assert.match(source['app-summary.js'],/expensePercent/,'expense share chart must calculate percentages');
+assert.match(source['app-summary.js'],/generateLabels/,'expense share legend must render percentage labels');
+assert.match(source['app-summary.js'],/label\+' '\+expensePercent\(ds\.data\[i\]\)\.toFixed\(1\)\+'%'/,'expense share legend must show one-decimal percentages');
