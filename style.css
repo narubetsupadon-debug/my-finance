@@ -548,3 +548,17 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
  .filters{grid-template-columns:1fr}.notice{line-height:1.5}
  .topin{padding-inline:12px}.brand{font-size:17px}
 }
+
+
+/* Credit card mobile title fix */
+.credit-card>.row{align-items:flex-start}.credit-card>.row>div:first-child{min-width:0;flex:1}.credit-card>.row>div:first-child>b{display:block;line-height:1.35;overflow-wrap:anywhere}.credit-card>.row>.actions{display:flex;gap:6px;flex:0 0 auto}
+@media(max-width:620px){
+ .credit-card>.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}
+ .credit-card>.row>div:first-child>b{font-size:clamp(16px,5vw,20px);line-height:1.32;word-break:normal;overflow-wrap:break-word}
+ .credit-card>.row>.actions{display:grid;grid-template-columns:1fr;gap:5px}
+ .credit-card>.row>.actions .btn{min-width:64px;min-height:40px;padding:8px 10px}
+}
+@media(max-width:390px){
+ .credit-card>.row{grid-template-columns:1fr}
+ .credit-card>.row>.actions{grid-template-columns:1fr 1fr;width:100%}
+}
