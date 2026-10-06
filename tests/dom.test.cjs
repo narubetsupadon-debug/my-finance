@@ -79,6 +79,13 @@ async function page(html,js,data,expose){
  p.api.checkDailyRollover();
  assert.notEqual(p.el('todayLabel').textContent,oldLabel);
  assert.equal(p.el('todayCount').textContent,'0 รายการ');
+ // Summary filters must update the whole page to the chosen month/year.
+ p.el('summaryYear').value=day.slice(0,4);p.el('summaryMonth').value=day.slice(5,7);p.el('summaryMonth').onchange();
+ assert.match(p.el('summaryPeriodText').textContent,/กำลังแสดงข้อมูล/);
+ assert.match(p.el('summaryTrendTitle').textContent,/รายวัน/);
+ assert.match(p.el('summaryCategoryTitle').textContent,/รายวัน/);
+ p.el('summaryMonth').value='all';p.el('summaryMonth').onchange();
+ assert.match(p.el('summaryTrendTitle').textContent,/รายเดือน/);
  // New bills default to utilities so Summary classifies them as recurring expenses.
  p.w.openEntity('bill');assert.equal(p.el('entityFields').querySelector('[name=category_id]').value,'utilities');p.el('entityDialog').close();
  p.close();
