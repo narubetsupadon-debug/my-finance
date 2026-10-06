@@ -1,5 +1,5 @@
 import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261006-summary3';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-summary3';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-accounts1';
 import {createSummaryRenderer} from './app-summary.js?v=20261006-summary3';
 import {createDashboardRenderer} from './app-dashboard.js?v=20261006-summary3';
 import {createTransactionRenderer} from './app-transactions.js?v=20261006-summary3';
@@ -18,6 +18,14 @@ const supabase=createClient(url,key)
 const $=id=>document.getElementById(id)
 const money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
 const fmtDate=s=>s?new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'2-digit'}).format(new Date(s+'T00:00:00')):''
+const formatAccountNumber=value=>{
+ const n=String(value||'').replace(/\D/g,'');if(!n)return '';
+ if(n.length===10)return n.slice(0,3)+'-'+n.slice(3,4)+'-'+n.slice(4,9)+'-'+n.slice(9);
+ if(n.length===11)return n.slice(0,3)+'-'+n.slice(3,6)+'-'+n.slice(6);
+ if(n.length===12)return n.slice(0,3)+'-'+n.slice(3,4)+'-'+n.slice(4,9)+'-'+n.slice(9);
+ return n;
+};
+function accountLabel(a){return String(a?.name||'')+(a?.account_number?' · '+formatAccountNumber(a.account_number):'')}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),duplicateOverride=false,lastSyncAt=null,sessionRevision=0
 
@@ -128,7 +136,7 @@ function renderSettings(){
  const account=$('defaultAccountSetting');
  if(account){
   const selected=uiSettings.defaultAccount||'';
-  account.innerHTML='<option value="">ไม่ระบุบัญชี</option>'+accounts.map(a=>'<option value="'+a.id+'">'+esc(a.name)+'</option>').join('');
+  account.innerHTML='<option value="">ไม่ระบุบัญชี</option>'+accounts.filter(a=>a.is_active!==false).map(a=>'<option value="'+a.id+'">'+esc(accountLabel(a))+'</option>').join('');
   if([...account.options].some(o=>o.value===selected))account.value=selected;else account.value='';
  }
  const privacy=$('privacySetting');if(privacy)privacy.checked=!!uiSettings.privacy;
@@ -324,7 +332,7 @@ function filteredTx(){return transactionRenderer.filteredTx()}
 function renderTransactions(){return transactionRenderer.renderTransactions()}
 function renderTxList(el,arr,compact=false){return transactionRenderer.renderTxList(el,arr,compact)}
 function renderCategories(){for(const type of ['expense','income']){const el=$(type==='expense'?'expenseCats':'incomeCats'),arr=categories.filter(c=>c.type===type);el.innerHTML=arr.length?arr.map(c=>'<div class="category-card"><div class="left"><span class="icon">'+esc(c.icon||'🏷️')+'</span><span class="name">'+esc(c.name)+'</span></div><div class="actions"><button class="btn small soft" data-edit="category" data-id="'+c.id+'">แก้</button><button class="btn small danger" data-del="categories" data-id="'+c.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีหมวด</div>'}}
-function renderAccounts(){$('accountList').innerHTML=accounts.length?accounts.map(a=>'<div class="item"><div><b>🏦 '+esc(a.name)+'</b><span class="muted">'+esc(a.account_type)+(a.note?' · '+esc(a.note):'')+'</span></div><span class="amount"><small class="muted">ยอดตั้งต้น</small> '+money(a.opening_balance)+'</span><div class="actions"><button class="btn small soft" data-edit="account" data-id="'+a.id+'">แก้ไข</button><button class="btn small danger" data-del="accounts" data-id="'+a.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีบัญชี</div>'}
+function renderAccounts(){const active=accounts.filter(a=>a.is_active!==false);$('accountList').innerHTML=active.length?active.map(a=>'<div class="item"><div><b>🏦 '+esc(a.name)+'</b><span class="muted">'+(a.account_number?'เลขที่บัญชี '+esc(formatAccountNumber(a.account_number))+' · ':'')+esc(a.account_type)+(a.note?' · '+esc(a.note):'')+'</span></div><span class="amount"><small class="muted">ยอดตั้งต้น</small> '+money(a.opening_balance)+'</span><div class="actions"><button class="btn small soft" data-edit="account" data-id="'+a.id+'">แก้ไข</button><button class="btn small danger" data-del="accounts" data-id="'+a.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีบัญชี</div>'}
 const planningRenderer=createPlanningRenderer({
  $,
  money,
@@ -369,7 +377,7 @@ function fillTxSelectors(){
  const currentCat=$('txCategory').value,currentAccount=$('txAccount').value,currentFilter=$('txFilterCategory').value
  $('txCategory').innerHTML='<option value="">เลือกหมวด</option>'+categories.filter(c=>c.type===$('txType').value).map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')
  if(currentCat&&[...$('txCategory').options].some(o=>o.value===currentCat))$('txCategory').value=currentCat
- $('txAccount').innerHTML='<option value="">ไม่ระบุบัญชี</option>'+accounts.map(a=>'<option value="'+a.id+'">'+esc(a.name)+'</option>').join('')
+ $('txAccount').innerHTML='<option value="">ไม่ระบุบัญชี</option>'+accounts.filter(a=>a.is_active!==false).map(a=>'<option value="'+a.id+'">'+esc(accountLabel(a))+'</option>').join('')
  $('txFilterCategory').innerHTML='<option value="">ทุกหมวด</option>'+categories.map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')
  $('txAccount').value=currentAccount; $('txFilterCategory').value=currentFilter;
  renderCardPaymentSuggestions()
@@ -543,7 +551,7 @@ $('runHealthCheck')?.addEventListener('click',()=>void refreshHealthCheck());
 
 window.openEntity=(type,id=null)=>{if(!user||$('entityForm').querySelector('button[type=submit]').disabled)return;editing={type,id};const f=$('entityFields'),title=$('entityTitle');let x
  if(type==='category'){x=id?categories.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'หมวดหมู่';f.innerHTML='<div class="field full"><label>ชื่อหมวด</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="type"><option value="expense" '+(x?.type!=='income'?'selected':'')+'>รายจ่าย</option><option value="income" '+(x?.type==='income'?'selected':'')+'>รายรับ</option></select></div><div class="field"><label>ไอคอน Emoji</label><input name="icon" value="'+esc(x?.icon||'🏷️')+'"></div>'}
- if(type==='account'){x=id?accounts.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'บัญชี';f.innerHTML='<div class="field full"><label>ชื่อบัญชี</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="account_type">'+['bank','cash','credit_card','e_wallet','other'].map(v=>'<option value="'+v+'" '+(x?.account_type===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div class="field"><label>ยอดตั้งต้น</label><input name="opening_balance" type="number" step="0.01" value="'+(x?.opening_balance||0)+'"></div><div class="field full"><label>หมายเหตุ</label><input name="note" value="'+esc(x?.note||'')+'"></div>'}
+ if(type==='account'){x=id?accounts.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'บัญชี';f.innerHTML='<div class="field full"><label>ชื่อบัญชี / ชื่อสมุด</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ตัวย่อธนาคาร</label><input name="bank_code" maxlength="20" value="'+esc(x?.bank_code||'')+'" placeholder="เช่น KBANK"></div><div class="field"><label>เลขที่บัญชี</label><input name="account_number" inputmode="numeric" value="'+esc(x?.account_number||'')+'" placeholder="กรอกเฉพาะตัวเลข"></div><div class="field"><label>ประเภท</label><select name="account_type">'+['bank','cash','credit_card','e_wallet','other'].map(v=>'<option value="'+v+'" '+(x?.account_type===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div class="field"><label>ยอดตั้งต้น</label><input name="opening_balance" type="number" step="0.01" value="'+(x?.opening_balance||0)+'"></div><div class="field full"><label>หมายเหตุ</label><input name="note" value="'+esc(x?.note||'')+'"></div>'}
  if(type==='bill'){x=id?bills.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'บิล';const defaultBillCategory=x?.category_id||categories.find(c=>c.type==='expense'&&c.name==='บิล/สาธารณูปโภค')?.id||'',paymentSource=x?.debt_id?('debt:'+x.debt_id):x?.account_id?('account:'+x.account_id):(uiSettings.defaultAccount?('account:'+uiSettings.defaultAccount):'');f.innerHTML='<div class="field full"><label>ชื่อบิล</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>จำนวนเงิน</label><input name="amount" type="number" step="0.01" min="0" value="'+(x?.amount||0)+'"></div><div class="field"><label>ครบกำหนดวันที่</label><input name="due_day" type="number" min="1" max="31" value="'+(x?.due_day??'')+'"></div><div class="field full"><label>หมวด</label><select name="category_id">'+categories.filter(c=>c.type==='expense').map(c=>'<option value="'+c.id+'" '+(defaultBillCategory===c.id?'selected':'')+'>'+esc((c.icon||'')+' '+c.name)+'</option>').join('')+'</select></div><div class="field full"><label>ชำระผ่าน</label><select name="payment_source"><option value="">ไม่ระบุ</option><optgroup label="บัญชี / เงินสด">'+accounts.filter(a=>a.is_active!==false).map(a=>'<option value="account:'+a.id+'" '+(paymentSource==='account:'+a.id?'selected':'')+'>🏦 '+esc(a.name)+'</option>').join('')+'</optgroup><optgroup label="บัตรเครดิต / สินเชื่อ">'+debts.filter(d=>d.is_active!==false).map(d=>'<option value="debt:'+d.id+'" '+(paymentSource==='debt:'+d.id?'selected':'')+'>💳 '+esc(d.name)+'</option>').join('')+'</optgroup></select><small class="muted">ถ้าเลือกบัตร ระบบจะเพิ่มยอดคงเหลือบัตรเมื่อกด “จ่ายแล้ว”</small></div>'}
  if(type==='budget'){x=id?budgets.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'งบประมาณ';const ex=x?.category_names||[];f.innerHTML='<div class="field full"><label>ชื่องบ</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field full"><label>งบต่อเดือน</label><input name="monthly_limit" type="number" min="0" step="100" required value="'+(x?.monthly_limit??4000)+'"></div><div class="field full"><label>หมวดที่นับรวมในงบ</label><div class="budget-checks">'+categories.filter(c=>c.type==='expense').map(c=>'<label class="check"><input type="checkbox" name="category_names" value="'+esc(c.name)+'" '+(ex.includes(c.name)?'checked':'')+'><span>'+esc((c.icon||'')+' '+c.name)+'</span></label>').join('')+'</div></div>'}
  if(type==='debt'){x=id?debts.find(v=>v.id===id):null;title.textContent=(id?'แก้ไข':'เพิ่ม')+'บัตร/สินเชื่อ';f.innerHTML='<div class="field full"><label>ชื่อบัตร/สินเชื่อ</label><input name="name" required value="'+esc(x?.name||'')+'"></div><div class="field"><label>ประเภท</label><select name="debt_type">'+['credit_card','loan','car','mortgage','other'].map(v=>'<option value="'+v+'" '+(x?.debt_type===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div><div class="field"><label>วงเงิน</label><input name="original_amount" type="number" min="0" step="0.01" value="'+(x?.original_amount||0)+'"></div><div class="field"><label>ยอดคงเหลือบัตร / ยอดใช้ไป</label><input name="outstanding_amount" type="number" min="0" step="0.01" value="'+(x?.outstanding_amount||0)+'"></div><div class="field"><label>ยอดที่ต้องจ่ายรอบนี้</label><input name="installment_amount" type="number" min="0" step="0.01" value="'+(x?.installment_amount||0)+'"></div><div class="field"><label>ครบกำหนดวันที่</label><input name="due_day" type="number" min="1" max="31" value="'+(x?.due_day??'')+'"></div>'}
@@ -552,7 +560,7 @@ $('entityForm').onsubmit=async e=>{
  e.preventDefault();const button=e.currentTarget.querySelector('button[type="submit"]');if(button.disabled)return;
  const form=new FormData(e.currentTarget),fd=Object.fromEntries(form.entries());
  const table={category:'categories',account:'accounts',bill:'bills',budget:'budgets',debt:'debts'}[editing.type];
- fd.user_id=user.id;fd.name=fd.name.trim();if(!fd.name)return alert('กรุณากรอกชื่อ');
+ fd.user_id=user.id;fd.name=fd.name.trim();if(!fd.name)return alert('กรุณากรอกชื่อ');if(editing.type==='account'){fd.bank_code=String(fd.bank_code||'').trim()||null;fd.account_number=String(fd.account_number||'').replace(/\\D/g,'')||null;}
  if(editing.type==='budget'){fd.monthly_limit=Number(fd.monthly_limit||0);fd.category_names=form.getAll('category_names')}
  else for(const k of ['opening_balance','amount','due_day','original_amount','outstanding_amount','installment_amount'])if(k in fd)fd[k]=k==='due_day'&&fd[k]===''?null:Number(fd[k]||0);
  if('category_id' in fd)fd.category_id=fd.category_id||null;
