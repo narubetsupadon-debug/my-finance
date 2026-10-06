@@ -1,6 +1,6 @@
 import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261006-summary3';
 import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-accounts1';
-import {createSummaryRenderer} from './app-summary.js?v=20261006-rentcar1';
+import {createSummaryRenderer} from './app-summary.js?v=20261006-rentcar2';
 import {createDashboardRenderer} from './app-dashboard.js?v=20261006-summary3';
 import {createTransactionRenderer} from './app-transactions.js?v=20261006-summary3';
 import {createPlanningRenderer} from './app-planning.js?v=20261006-summary3';
