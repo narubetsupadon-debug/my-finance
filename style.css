@@ -495,3 +495,33 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #81
 .bill-item .actions{flex-wrap:wrap;justify-content:flex-end}
 .bill-paid-btn{opacity:.78;cursor:default}
 @media(max-width:620px){.bill-item .actions{justify-content:flex-start}}
+
+/* Summary review */
+.summary-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px}
+.summary-hero h2{font-size:30px;letter-spacing:-.03em;margin:3px 0 5px}
+.summary-eyebrow{font-size:10px;font-weight:800;letter-spacing:.16em;color:#7c3aed}
+.summary-period-picker{display:flex;flex-direction:column;align-items:flex-end;gap:10px;min-width:0}
+.summary-range-chips{display:flex;gap:6px;padding:5px;border:1px solid #e7e9f2;background:rgba(255,255,255,.75);border-radius:16px;overflow-x:auto;max-width:100%}
+.summary-range-chip{border:0;background:transparent;color:#697386;font:inherit;font-size:12px;font-weight:700;white-space:nowrap;padding:9px 12px;border-radius:11px;cursor:pointer}
+.summary-range-chip.active{background:#6d3df5;color:#fff;box-shadow:0 5px 14px rgba(109,61,245,.22)}
+.summary-custom-filters{display:flex;gap:8px}.summary-custom-filters select{min-width:110px}
+.summary-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.summary-kpi{display:flex;align-items:center;gap:14px;padding:18px;min-width:0}
+.summary-kpi-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:#f3f1ff;font-size:20px;flex:0 0 auto}
+.summary-kpi .value{font-size:24px;margin-top:3px;overflow-wrap:anywhere}.summary-kpi small{display:block;color:#8a93a5;font-size:11px;margin-top:4px}
+.income-kpi .summary-kpi-icon{background:#e9fbf4;color:#059669}.expense-kpi .summary-kpi-icon{background:#fff0f0;color:#dc2626}.balance-kpi .summary-kpi-icon{background:#f0efff;color:#5b46e8}
+.summary-breakdown-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.summary-mini{display:flex;align-items:center;gap:12px;padding:15px 17px}.summary-mini>span{font-size:21px}.summary-mini .value{font-size:18px;margin-top:2px}
+.summary-main-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.75fr);gap:14px}
+.summary-chart-card{padding:18px}.summary-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}.summary-card-head h3{margin:0;font-size:17px}.summary-card-head p{margin:4px 0 0;color:#8a93a5;font-size:12px}
+.summary-card-badge{font-size:10px;font-weight:800;color:#6d3df5;background:#f2efff;padding:6px 9px;border-radius:999px;white-space:nowrap}
+.summary-trend-chart{height:300px}.summary-donut{height:300px}
+.summary-details{padding:0;overflow:hidden}.summary-details>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 18px;cursor:pointer;list-style:none}.summary-details>summary::-webkit-details-marker{display:none}.summary-details>summary span:first-child{display:flex;flex-direction:column;gap:3px}.summary-details>summary small{color:#8a93a5;font-size:11px;font-weight:400}.summary-detail-body{padding:0 18px 18px;border-top:1px solid #edf0f5}.summary-detail-body h3{font-size:15px}
+@media(max-width:760px){
+ .summary-hero{align-items:stretch;flex-direction:column}.summary-period-picker{align-items:stretch}.summary-range-chips{width:100%;box-sizing:border-box}.summary-range-chip{flex:0 0 auto}
+ .summary-custom-filters{display:grid;grid-template-columns:1fr 1fr}.summary-custom-filters.hidden{display:none}
+ .summary-kpi-grid{grid-template-columns:1fr 1fr}.summary-kpi:last-child{grid-column:1/-1}.summary-kpi{padding:15px}.summary-kpi .value{font-size:21px}
+ .summary-breakdown-grid{grid-template-columns:1fr}.summary-mini{padding:13px 15px}
+ .summary-main-grid{grid-template-columns:1fr}.summary-chart-card{padding:15px}.summary-trend-chart{height:270px}.summary-donut{height:330px}
+}
+@media(max-width:430px){.summary-hero h2{font-size:27px}.summary-range-chip{padding:8px 10px}.summary-kpi-grid{gap:8px}.summary-kpi{gap:10px}.summary-kpi-icon{width:36px;height:36px;border-radius:12px}.summary-kpi .value{font-size:18px}}
