@@ -20,7 +20,16 @@
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 </head>
 <body>
-<div id="authScreen" class="auth-screen">
+<div id="authSplash" class="auth-splash" role="status" aria-live="polite">
+  <div class="auth-splash-card">
+    <img src="./app-icon.svg?v=20261006-audit2" width="72" height="72" alt="">
+    <h1>My Finance</h1>
+    <p>กำลังเปิดกระเป๋าของมิว…</p>
+    <span class="auth-splash-spinner" aria-hidden="true"></span>
+  </div>
+</div>
+
+<div id="authScreen" class="auth-screen hidden">
   <div class="auth-card">
     <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261006-audit2" width="56" height="56" alt="">My Finance</h1>
     <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และยอดคงเหลือบัตรในที่เดียว</p>
