@@ -112,3 +112,6 @@ assert.match(source['index.html'],/data-summary-range="custom"/,'Summary must of
 assert.match(source['app-summary.js'],/monthKeyOffset/,'rolling Summary ranges must support crossing year boundaries');
 assert.match(source['app-summary.js'],/renderSummary\.setRange/,'Summary range shortcuts must rerender the dashboard');
 assert.match(source['index.html'],/summary-details/,'dense Summary tables should be collapsible on mobile');
+
+assert.match(source['style.css'],/\.summary-kpi \.value\{[^}]*white-space:nowrap/,'Summary KPI amounts must stay on one line');
+assert.match(source['style.css'],/font-variant-numeric:tabular-nums/,'Summary KPI amounts should use stable numeric widths');
