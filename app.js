@@ -167,7 +167,7 @@ async function requestLogout(button){
  try{const {error}=await supabase.auth.signOut();if(error)throw error;clearSessionUI();location.reload()}
  catch(error){showAppToast('ออกจากระบบไม่สำเร็จ: '+error.message)}finally{button.disabled=false}
 }
-$('logout').onclick=()=>void requestLogout($('logout'));
+$('logout').onclick=()=>requestLogout($('logout'));
 $('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settingsLogout')));
 function clearSessionUI(){
  sessionRevision++;user=null;refreshCoordinator.dispose();
