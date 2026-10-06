@@ -77,3 +77,7 @@ assert.match(source['index.html'],/id="authSplash"/,'auth loading splash missing
 assert.match(source['index.html'],/id="authScreen" class="auth-screen hidden"/,'login screen must start hidden until session resolution');
 assert.match(source['app.js'],/if\(session\?\.user\)await boot\(session\.user\)/,'restored sessions must boot directly');
 assert.match(source['app.js'],/authSplash.*classList\.add\('hidden'\)/s,'auth splash must be dismissed after session resolution');
+
+assert.match(source['index.html'],/id="settingsLogout"/,'settings logout button missing');
+assert.match(source['app.js'],/confirm\('ออกจากระบบ My Finance บนอุปกรณ์นี้หรือไม่\?'\)/,'logout must require confirmation');
+assert.match(source['app.js'],/settingsLogout.*requestLogout/s,'settings logout must share the confirmed logout flow');
