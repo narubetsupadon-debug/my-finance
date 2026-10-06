@@ -1,10 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261006-auth1';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-auth1';
-import {createSummaryRenderer} from './app-summary.js?v=20261006-auth1';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261006-auth1';
-import {createTransactionRenderer} from './app-transactions.js?v=20261006-auth1';
-import {createPlanningRenderer} from './app-planning.js?v=20261006-auth1';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261006-auth1';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261006-logout1';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261006-logout1';
+import {createSummaryRenderer} from './app-summary.js?v=20261006-logout1';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261006-logout1';
+import {createTransactionRenderer} from './app-transactions.js?v=20261006-logout1';
+import {createPlanningRenderer} from './app-planning.js?v=20261006-logout1';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261006-logout1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -160,11 +160,15 @@ $('authBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('p
  $('authBtn').disabled=true
  try{if(mode==='signup'){const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name:'มิว'}}});if(error)throw error;if(!data.session){toast('สมัครแล้ว ✅ กรุณายืนยันอีเมลก่อน','ok');return}await boot(data.user)}
  else{const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;await boot(data.user)}}catch(e){toast(e.message||'เกิดข้อผิดพลาด','err')}finally{$('authBtn').disabled=false}}
-$('logout').onclick=async()=>{
- const button=$('logout');if(button.disabled)return;button.disabled=true;
+async function requestLogout(button){
+ if(!button||button.disabled)return;
+ if(!confirm('ออกจากระบบ My Finance บนอุปกรณ์นี้หรือไม่?'))return;
+ button.disabled=true;
  try{const {error}=await supabase.auth.signOut();if(error)throw error;clearSessionUI();location.reload()}
  catch(error){showAppToast('ออกจากระบบไม่สำเร็จ: '+error.message)}finally{button.disabled=false}
 }
+$('logout').onclick=()=>requestLogout($('logout'));
+$('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settingsLogout')));
 function clearSessionUI(){
  sessionRevision++;user=null;refreshCoordinator.dispose();
  if(channel){supabase.removeChannel(channel);channel=null}
