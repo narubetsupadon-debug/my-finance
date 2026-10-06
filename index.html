@@ -198,34 +198,62 @@
       </section>
 
       <section id="summaryPage" class="page hidden">
-        <div class="page-head">
-          <div><h2>สรุปการเงิน</h2><div id="summaryPeriodText" class="muted">เลือกเดือนและปีเพื่อดูข้อมูลตามช่วงที่ต้องการ</div></div>
-          <div class="filters"><select id="summaryYear"></select><select id="summaryMonth"><option value="all">ทุกเดือน</option></select></div>
+        <div class="summary-hero">
+          <div>
+            <div class="summary-eyebrow">FINANCIAL REVIEW</div>
+            <h2>สรุปการเงิน</h2>
+            <div id="summaryPeriodText" class="muted">ดูภาพรวมและแนวโน้มตามช่วงเวลาที่เลือก</div>
+          </div>
+          <div class="summary-period-picker" aria-label="เลือกช่วงเวลาสรุป">
+            <div class="summary-range-chips" id="summaryRangeChips">
+              <button type="button" class="summary-range-chip active" data-summary-range="month">เดือนนี้</button>
+              <button type="button" class="summary-range-chip" data-summary-range="3m">3 เดือน</button>
+              <button type="button" class="summary-range-chip" data-summary-range="6m">6 เดือน</button>
+              <button type="button" class="summary-range-chip" data-summary-range="year">ปีนี้</button>
+              <button type="button" class="summary-range-chip" data-summary-range="custom">กำหนดเอง</button>
+            </div>
+            <div id="summaryCustomFilters" class="summary-custom-filters hidden">
+              <select id="summaryYear" aria-label="เลือกปี"></select>
+              <select id="summaryMonth" aria-label="เลือกเดือน"><option value="all">ทั้งปี</option></select>
+            </div>
+          </div>
         </div>
-        <div class="grid3">
-          <div class="card metric"><div class="label">รายรับตามช่วงที่เลือก</div><div id="sumIncome" class="value income money">฿0</div></div>
-          <div class="card metric"><div class="label">รายจ่ายตามช่วงที่เลือก</div><div id="sumExpense" class="value expense money">฿0</div></div>
-          <div class="card metric"><div class="label">คงเหลือตามช่วงที่เลือก</div><div id="sumBalance" class="value balance money">฿0</div></div>
+
+        <div class="summary-kpi-grid">
+          <div class="card summary-kpi income-kpi"><div class="summary-kpi-icon">↙</div><div><div class="label">รายรับ</div><div id="sumIncome" class="value income money">฿0</div><small id="sumIncomeHint">ช่วงที่เลือก</small></div></div>
+          <div class="card summary-kpi expense-kpi"><div class="summary-kpi-icon">↗</div><div><div class="label">รายจ่าย</div><div id="sumExpense" class="value expense money">฿0</div><small id="sumExpenseHint">ช่วงที่เลือก</small></div></div>
+          <div class="card summary-kpi balance-kpi"><div class="summary-kpi-icon">◎</div><div><div class="label">เงินเหลือสุทธิ</div><div id="sumBalance" class="value balance money">฿0</div><small id="sumBalanceHint">รายรับ − รายจ่าย</small></div></div>
         </div>
-        <div class="grid3 section">
-          <div class="card metric"><div class="label">ชำระบัตร/สินเชื่อ</div><div id="sumDebtPay" class="value expense money">฿0</div></div>
-          <div class="card metric"><div class="label">ค่าห้อง + รถ</div><div id="sumHomeCar" class="value warning money">฿0</div></div>
-          <div class="card metric"><div class="label">รายจ่ายประจำ</div><div id="sumRecurring" class="value balance money">฿0</div></div>
+
+        <div class="summary-breakdown-grid section">
+          <div class="card summary-mini"><span>💳</span><div><div class="label">บัตร/สินเชื่อ</div><div id="sumDebtPay" class="value expense money">฿0</div></div></div>
+          <div class="card summary-mini"><span>🏠</span><div><div class="label">บ้าน + รถ</div><div id="sumHomeCar" class="value warning money">฿0</div></div></div>
+          <div class="card summary-mini"><span>🔁</span><div><div class="label">รายจ่ายประจำ</div><div id="sumRecurring" class="value balance money">฿0</div></div></div>
         </div>
-        <div class="card section">
-          <div class="row"><div><h3 id="summaryTrendTitle" style="margin:0">รายรับ vs รายจ่าย</h3><div class="muted">ดูแนวโน้มเงินเข้า เงินออก และคงเหลือตามช่วงที่เลือก</div></div></div>
-          <div class="chart-box"><canvas id="monthlyTrendChart"></canvas></div>
+
+        <div class="summary-main-grid section">
+          <div class="card summary-chart-card">
+            <div class="summary-card-head"><div><h3 id="summaryTrendTitle">กระแสเงินสด</h3><p>รายรับ รายจ่าย และเงินเหลือในช่วงที่เลือก</p></div><span class="summary-card-badge" id="summaryTrendBadge">รายวัน</span></div>
+            <div class="chart-box summary-trend-chart"><canvas id="monthlyTrendChart"></canvas></div>
+          </div>
+          <div class="card summary-chart-card summary-share-card">
+            <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดไหนกินสัดส่วนมากที่สุด</p></div><span class="summary-card-badge">100%</span></div>
+            <div class="chart-box donut summary-donut"><canvas id="categoryPieChart"></canvas></div>
+          </div>
         </div>
-        <div class="card section">
-          <div class="row"><div><h3 id="summaryCategoryTitle" style="margin:0">รายจ่ายแยกหมวดหมู่</h3><div class="muted">ค่าห้อง · ค่างวดรถ · บัตร/สินเชื่อ · รายจ่ายประจำ · ซ่อม/ประกัน/ภาษีรถ · อื่น ๆ</div></div></div>
+
+        <div class="card section summary-chart-card">
+          <div class="summary-card-head"><div><h3 id="summaryCategoryTitle">รายจ่ายแยกหมวดหมู่</h3><p>เปรียบเทียบพฤติกรรมการใช้เงินตามช่วงเวลา</p></div><span class="summary-card-badge" id="summaryCategoryBadge">รายวัน</span></div>
           <div class="chart-box tall"><canvas id="monthlyCategoryChart"></canvas></div>
         </div>
-        <div class="card section">
-          <div class="row"><div><h3 style="margin:0">สัดส่วนรายจ่าย</h3><div class="muted">ตามช่วงที่เลือก</div></div></div>
-          <div class="chart-box donut"><canvas id="categoryPieChart"></canvas></div>
-        </div>
-        <div class="card section"><h3>ตารางสรุปรายเดือน</h3><div id="summaryTable"></div></div>
-        <div class="card section"><h3>ตารางรายจ่ายแยกหมวด × เดือน</h3><div id="categoryMonthTable"></div></div>
+
+        <details class="card section summary-details">
+          <summary><span><b>รายละเอียดตัวเลข</b><small>ตารางสรุปและรายจ่ายแยกหมวด</small></span><span aria-hidden="true">⌄</span></summary>
+          <div class="summary-detail-body">
+            <div><h3>สรุปตามช่วงเวลา</h3><div id="summaryTable"></div></div>
+            <div class="section"><h3>รายจ่ายแยกหมวด</h3><div id="categoryMonthTable"></div></div>
+          </div>
+        </details>
       </section>
 
       <section id="settingsPage" class="page hidden">
