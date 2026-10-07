@@ -4,6 +4,12 @@ const keyLabels={base_salary:'เงินเดือนพื้นฐาน',
 const clean=s=>String(s).normalize('NFKC').replace(/\s+/g,'').toLowerCase();
 const amount=s=>/^\d{1,3}(?:,\d{3})*\.\d{2}$|^\d+\.\d{2}$/.test(s.trim())?Math.round(Number(s.replaceAll(',',''))*100):null;
 
+// This payroll font maps mai tho/mai ek to ASCII glyphs in extracted text.
+// Repair only those observed Thai vowel contexts; preserve real punctuation.
+export function normalizePayslipLabel(text){
+ return String(text).replace(/([ีืํ])</g,'$1้').replace(/([ีื])-(?=[ก-๙]|\s|$)/g,'$1่').replace(/ํ([่้๊๋]?)า/g,'$1ำ').normalize('NFC');
+}
+
 export function validatePayslipDraft(draft){
  const values=Object.fromEntries([...earningKeys,...deductionKeys].map(k=>[k,0]));
  let valid=true;
@@ -41,7 +47,7 @@ export function parsePayslipTokens(tokens){
    const column=kind==='earning'?headers[0].x:headers[1].x;
    const cell=row.tokens.filter(t=>t.x>=left&&t.x<right);
    const numbers=cell.filter(t=>t.x>=column-3*scale&&amount(t.text)!==null);
-   const label=cell.filter(t=>t.x<column-3*scale&&amount(t.text)===null).sort((a,b)=>a.x-b.x).map(t=>t.text).join(' ').trim();
+   const label=normalizePayslipLabel(cell.filter(t=>t.x<column-3*scale&&amount(t.text)===null).sort((a,b)=>a.x-b.x).map(t=>t.text).join(' ').trim());
    if(!label||!numbers.length)continue;
    if(numbers.length!==1)throw new Error('พบตัวเลขหลายยอดในแถวเดียว กรุณาตรวจสลิป');
    const normalized=clean(label);
@@ -98,11 +104,22 @@ export function setupPayslipImport({document,canRead,canApply,onApply,onBusy,rea
  function check(){const result=validatePayslipDraft(draft);apply.disabled=!result.matches;status.textContent=result.matches?'ยอดรายได้ รายการหัก และรับสุทธิตรงกับสลิป ตรวจรายละเอียดแล้วกดนำไปกรอกได้':'ยอดยังไม่ตรงกับสลิป กรุณาตรวจจำนวนเงินทุกแถวก่อนนำไปกรอก';$('payslipTotals').textContent=`รายได้ ${money(result.gross)} · หัก ${money(result.deductions)} · สุทธิ ${money(result.net)} บาท`;return result;}
  function render(){
   table.replaceChildren();
-  for(const row of draft.rows){
-   const tr=document.createElement('tr'),label=document.createElement('td'),value=document.createElement('td'),destination=document.createElement('td');
-   label.textContent=row.label;const input=document.createElement('input');input.type='number';input.min='0';input.max='999999999999.99';input.step='0.01';input.value=(row.cents/100).toFixed(2);input.setAttribute('aria-label','จำนวนเงิน '+row.label);
-   input.oninput=()=>{row.cents=input.value.trim()&&input.validity.valid&&Number.isFinite(Number(input.value))?Math.round(Number(input.value)*100):NaN;check();};value.append(input);
-   const select=document.createElement('select');select.setAttribute('aria-label','กรอกในช่อง '+row.label);for(const key of row.kind==='earning'?earningKeys:deductionKeys){const option=document.createElement('option');option.value=key;option.textContent=keyLabels[key];select.append(option);}select.value=row.key;select.onchange=()=>{row.key=select.value;check();};destination.append(select);tr.append(label,value,destination);table.append(tr);
+  for(const kind of ['earning','deduction']){
+   const group=document.createElement('section');group.className='payslip-group';group.dataset.kind=kind;
+   const heading=document.createElement('h4');heading.className='payslip-group-title';heading.textContent=kind==='earning'?'รายได้':'รายการหัก';group.append(heading);
+   const extra=document.createElement('details'),summary=document.createElement('summary');extra.className='payslip-zero-rows';const zeroRows=draft.rows.filter(row=>row.kind===kind&&row.cents===0);summary.textContent='รายการเพิ่มเติม ('+zeroRows.length+' รายการ · ยอดเริ่มต้น 0 บาท)';extra.append(summary);
+   for(const [index,row] of draft.rows.entries()){
+    if(row.kind!==kind)continue;
+    const card=document.createElement('div');card.className='payslip-row';const title=document.createElement('p');title.className='payslip-row-title';title.textContent=normalizePayslipLabel(row.label);card.append(title);
+    const controls=document.createElement('div');controls.className='payslip-row-controls';
+    const value=document.createElement('div');value.className='field payslip-control';const amountLabel=document.createElement('label');amountLabel.htmlFor='payslip-amount-'+index;amountLabel.textContent='จำนวนเงิน (บาท)';
+    const input=document.createElement('input');input.id=amountLabel.htmlFor;input.type='number';input.inputMode='decimal';input.min='0';input.max='999999999999.99';input.step='0.01';input.value=(row.cents/100).toFixed(2);input.setAttribute('aria-label','จำนวนเงิน '+title.textContent);
+    input.oninput=()=>{row.cents=input.value.trim()&&input.validity.valid&&Number.isFinite(Number(input.value))?Math.round(Number(input.value)*100):NaN;check();};value.append(amountLabel,input);
+    const destination=document.createElement('div');destination.className='field payslip-control';const selectLabel=document.createElement('label');selectLabel.htmlFor='payslip-key-'+index;selectLabel.textContent='กรอกในช่อง';
+    const select=document.createElement('select');select.id=selectLabel.htmlFor;select.setAttribute('aria-label','กรอกในช่อง '+title.textContent);for(const key of row.kind==='earning'?earningKeys:deductionKeys){const option=document.createElement('option');option.value=key;option.textContent=keyLabels[key];select.append(option);}select.value=row.key;select.onchange=()=>{row.key=select.value;check();};destination.append(selectLabel,select);controls.append(value,destination);card.append(controls);
+    if(row.cents===0)extra.append(card);else group.append(card);
+   }
+   if(zeroRows.length)group.append(extra);table.append(group);
   }
   $('payslipDate').textContent='วันที่จ่าย '+draft.paymentDate+' · เดือนที่จะกรอก '+draft.month+' (แก้ได้ในฟอร์ม)';
   $('payslipSourceTotals').textContent=`ยอดในสลิป: รายได้ ${money(draft.expected.gross)} · หัก ${money(draft.expected.deductions)} · สุทธิ ${money(draft.expected.net)} บาท`;
