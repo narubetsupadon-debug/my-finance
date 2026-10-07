@@ -1,5 +1,6 @@
-const CACHE='my-finance-v57-ui14';
-const SHELL=['./','./index.html','./style.css?v=20261007-ui14','./minimal-dark.css?v=20261007-ui14','./theme.js?v=20261007-ui14','./app.js?v=20261007-ui14','./app-data.js?v=20261007-ui14','./app-summary.js?v=20261007-ui14','./app-dashboard.js?v=20261007-ui14','./app-transactions.js?v=20261007-ui14','./app-planning.js?v=20261007-ui14','./app-safety.js?v=20261007-ui14','./finance-core.js?v=20261007-ui14','./finance-backup.js?v=20261007-ui14','./app-nav.js?v=20261007-ui14','./rent.html','./rent.css?v=20261007-ui14','./rent.js?v=20261007-ui14','./rent-core.js?v=20261007-ui14','./car.html','./car.css?v=20261007-ui14','./car.js?v=20261007-ui14','./salary.html','./salary.js?v=20261007-ui14','./salary-payslip.js?v=20261007-ui14','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261007-ui14','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+const CACHE='my-finance-v58-analysis15';
+const SHELL=['./','./index.html','./style.css?v=20261007-analysis15','./minimal-dark.css?v=20261007-analysis15','./theme.js?v=20261007-analysis15','./app.js?v=20261007-analysis15','./app-data.js?v=20261007-analysis15','./app-summary.js?v=20261007-analysis15','./app-dashboard.js?v=20261007-analysis15','./app-transactions.js?v=20261007-analysis15','./app-planning.js?v=20261007-analysis15','./app-safety.js?v=20261007-analysis15','./finance-core.js?v=20261007-analysis15','./finance-backup.js?v=20261007-analysis15','./app-nav.js?v=20261007-analysis15','./rent.html','./rent.css?v=20261007-analysis15','./rent.js?v=20261007-analysis15','./rent-core.js?v=20261007-analysis15','./car.html','./car.css?v=20261007-analysis15','./car.js?v=20261007-analysis15','./salary.html','./salary.js?v=20261007-analysis15','./salary-payslip.js?v=20261007-analysis15','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261007-analysis15','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+SHELL.push('./expense-analysis.js?v=20261007-analysis15');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
@@ -34,4 +35,3 @@ self.addEventListener('notificationclick',event=>{
   return clients.openWindow?clients.openWindow(target):undefined;
  }));
 });
-

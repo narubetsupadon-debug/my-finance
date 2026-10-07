@@ -21,7 +21,7 @@ export function rentShareTotals(rows,records=[]){
  },{shareCents:0,fullCents:0});
 }
 // Summary page renderer. Keeps summary grouping and chart state out of app.js.
-export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,getRentRecords=()=>[],ChartCtor=null}){
+export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,getRentRecords=()=>[],getBudgets=()=>[],renderAnalysis=null,ChartCtor=null}){
  let trendChart=null,categoryChart2=null,pieChart=null;
 
 function excelGroup(x){
@@ -101,6 +101,7 @@ function renderSummary(){
  $('sumCarInstallment').textContent=money(grouped['ค่างวดรถ']||0)
  $('sumCarOther').textContent=money(carTotal-(grouped['ค่างวดรถ']||0))
  $('sumRecurring').textContent=money(grouped['รายจ่ายประจำ']||0)
+ if(renderAnalysis)renderAnalysis({transactions,budgets:getBudgets(),config,today:bangkokDay(),label:config.label,groupBy:excelGroup,rentTotals:rentRows=>rentShareTotals(rentRows,getRentRecords())});
 
  const timelineKeys=summaryTimelineKeys(config,bangkokDay(),rows)
  const timelineLabels=config.mode==='days'
