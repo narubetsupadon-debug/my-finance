@@ -8,6 +8,7 @@ const appDashboard=fs.readFileSync(root+'app-dashboard.js','utf8').replaceAll('e
 const appTransactions=fs.readFileSync(root+'app-transactions.js','utf8').replaceAll('export ','');
 const appPlanning=fs.readFileSync(root+'app-planning.js','utf8').replaceAll('export ','');
 const appSafety=fs.readFileSync(root+'app-safety.js','utf8').replaceAll('export ','');
+const rentCore=fs.readFileSync(root+'rent-core.js','utf8').replaceAll('export ','');
 const payslip=fs.readFileSync(root+'salary-payslip.js','utf8').replaceAll('export ','');
 function dbMock(data){
  const state={fail:false,writes:[],rpcs:[]};
@@ -31,7 +32,7 @@ async function page(html,js,data,expose){
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  let code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
  if(js==='salary.js')code=code.replace('document,canRead:', 'document,readPdf:async()=>window.mockPayslipDraft,canRead:');
- const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+code+'\nreturn {'+expose+'};})()');
+ const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+rentCore+'\n'+code+'\nreturn {'+expose+'};})()');
  return {w,api,state,close:()=>w.close(),el:id=>w.document.getElementById(id)};
 }
 (async()=>{
@@ -164,6 +165,17 @@ async function page(html,js,data,expose){
  // A sign-out invalidates requests already in flight.
  race.state.readGate=new Promise(r=>finishRead=r);const oldRequest=race.api.loadAll();race.api.clearSessionUI();finishRead();await oldRequest;
  assert.equal(race.api.getTransactionCount(),0);assert.equal(race.el('app').classList.contains('hidden'),true);race.close();
+ const rentData={categories:[{id:'rentcat',name:'ห้องเช่า',type:'expense',user_id:'user'}],accounts:[{id:'acc',name:'Bank',is_active:true,user_id:'user'}],transactions:[{id:'old',user_id:'user',type:'expense',status:'paid',source:'web',transaction_date:'2026-10-05',amount:2000,category_id:'rentcat',account_id:'acc',categories:{name:'ห้องเช่า'},description:'test'}],rent_records:[]};
+ const rent=await page('rent.html','rent.js',rentData,'open');
+ rent.el('rentMonth').value='2026-09';rent.el('rentFull').value='2000';rent.el('rentFull').oninput();assert.equal(rent.el('rentMy').value,'1000.00');
+ rent.el('rentMy').value='800';rent.el('rentMy').oninput();rent.el('rentFull').value='2200';rent.el('rentFull').oninput();assert.equal(rent.el('rentMy').value,'800');
+ rent.el('rentExisting').value='old';rent.el('rentExisting').onchange();assert.equal(rent.el('rentDate').value,'2026-10-05');assert.equal(rent.el('rentFull').value,'2000');assert.equal(rent.el('rentAccount').value,'acc');
+ await rent.el('rentForm').onsubmit({preventDefault(){}});const saved=rent.state.writes.at(-1).row;assert.equal(saved.bill_month,'2026-09-01');assert.equal(saved.payment_date,'2026-10-05');assert.equal(saved.full_amount,2000);assert.equal(saved.my_amount,1000);assert.equal(saved.transaction_id,'old');assert.equal(rent.state.writes.length,1,'only bill write; database creates/links payment atomically');
+ rent.api.open({id:'bill',bill_month:'2026-09-01',payment_date:'2026-10-05',full_amount:2000,my_amount:800,status:'paid',transaction_id:'old',category_id:'rentcat',account_id:'acc'});assert.equal(rent.el('rentExisting').disabled,true);assert.equal(rent.el('rentMy').value,'800');
+ rent.el('rentStatus').value='pending';rent.el('rentStatus').onchange();assert.equal(rent.el('rentDate').required,false);assert.equal(rent.el('rentDate').disabled,true);await rent.el('rentForm').onsubmit({preventDefault(){}});assert.equal(rent.state.writes.at(-1).row.payment_date,null);assert.equal(rent.state.writes.at(-1).row.status,'pending');
+ rentData.rent_records.push({id:'existingbill',user_id:'user',bill_month:'2026-09-01',full_amount:2000,my_amount:1000,status:'pending'});rent.close();
+ const dupe=await page('rent.html','rent.js',rentData,'open');dupe.el('rentMonth').value='2026-09';dupe.el('rentFull').value='2000';dupe.el('rentMy').value='1000';await dupe.el('rentForm').onsubmit({preventDefault(){}});assert.equal(dupe.state.writes.length,0);assert.match(dupe.el('rentError').textContent,/เดือนนี้มีบิลแล้ว/);dupe.close();
+ console.log('PASS rent DOM: half default, editable share, existing payment, bill month vs payment date, pending status, linked edit and duplicate-month guard');
  console.log('PASS deep regressions: save locks, zero budget, logout failure, push readiness and stale request guards');
  console.log('PASS DOM fixtures: full paginated dashboard, XSS escaping, category/account retention, transaction edit status/source, debt save with blank due date, load failure retains data, salary category/reset/save, empty car schedule and visible modal errors');
 })().catch(e=>{console.error(e);process.exit(1)});

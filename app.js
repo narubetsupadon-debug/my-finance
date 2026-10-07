@@ -1,10 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-rentfix8';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-rentfix8';
-import {createSummaryRenderer} from './app-summary.js?v=20261007-rentfix8';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261007-rentfix8';
-import {createTransactionRenderer} from './app-transactions.js?v=20261007-rentfix8';
-import {createPlanningRenderer} from './app-planning.js?v=20261007-rentfix8';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-rentfix8';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-rententry9';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-rententry9';
+import {createSummaryRenderer} from './app-summary.js?v=20261007-rententry9';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261007-rententry9';
+import {createTransactionRenderer} from './app-transactions.js?v=20261007-rententry9';
+import {createPlanningRenderer} from './app-planning.js?v=20261007-rententry9';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-rententry9';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -27,7 +27,7 @@ const formatAccountNumber=value=>{
 };
 function accountLabel(a){return String(a?.name||'')+(a?.account_number?' · '+formatAccountNumber(a.account_number):'')}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
-let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),duplicateOverride=false,lastSyncAt=null,sessionRevision=0
+let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),rentRecords=[],duplicateOverride=false,lastSyncAt=null,sessionRevision=0
 
 const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
 const PUSH_ENDPOINT='https://mmvdhopogchcxwlstflk.supabase.co/functions/v1/push-reminders';
@@ -180,7 +180,7 @@ $('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settings
 function clearSessionUI(){
  sessionRevision++;user=null;refreshCoordinator.dispose();
  if(channel){supabase.removeChannel(channel);channel=null}
- categories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();lastSyncAt=null;
+ categories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();rentRecords=[];lastSyncAt=null;
  document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());
  $('authSplash')?.classList.add('hidden');$('app').classList.add('hidden');$('authScreen').classList.remove('hidden');$('password').value='';
 } 
@@ -207,7 +207,7 @@ async function performLoad(){
   if(user?.id!==loadingUser||sessionRevision!==revision)return false;
   if(editorOpen()){scheduleLoad();return false;}
   categories=data.categories;accounts=data.accounts;transactions=data.transactions;
-  bills=data.bills;debts=data.debts;budgets=data.budgets;carExpenseTxIds=data.carExpenseTxIds;
+  bills=data.bills;debts=data.debts;budgets=data.budgets;carExpenseTxIds=data.carExpenseTxIds;rentRecords=data.rentRecords;
   $('dataError').classList.add('hidden');setSyncStatus('ok');renderAll();return true;
  }catch(error){
   if(user?.id!==loadingUser||sessionRevision!==revision)return false;
@@ -366,6 +366,7 @@ const renderSummary=createSummaryRenderer({
  esc,
  bangkokDay,
  getTransactions:()=>transactions,
+ getRentRecords:()=>rentRecords,
  ChartCtor:typeof Chart==='undefined'?null:Chart
 });
 function renderCardPaymentSuggestions(){
@@ -470,7 +471,7 @@ function templateKey(x){return JSON.stringify([x.type,x.description.trim(),x.cat
 function repeatChoices(){
  const favorites=readFavorites(),seen=new Set(favorites.map(templateKey)),groups=new Map();
  for(const x of transactions){
-  if(x.type!=='expense'||x.status==='cancelled'||['salary','car_installment'].includes(x.source)||/ค่างวดรถ|ชำระบัตร|เงินเดือน/.test(x.description||''))continue;
+  if(x.type!=='expense'||x.status==='cancelled'||['salary','car_installment','rent'].includes(x.source)||/ค่างวดรถ|ชำระบัตร|เงินเดือน/.test(x.description||''))continue;
   const key=templateKey(x);const g=groups.get(key);if(g)g.count++;else groups.set(key,{...x,count:1});
  }
  return [...favorites.map(x=>({...x,favorite:true})),...[...groups.values()].filter(x=>x.count>=2&&!seen.has(templateKey(x))).sort((a,b)=>b.count-a.count)].slice(0,8);
@@ -612,7 +613,7 @@ async function payRecurringBill(bill,button){
  finally{if(button?.isConnected){button.disabled=false;button.textContent=originalText;}}
 }
 
-document.addEventListener('click',async e=>{const payBill=e.target.closest('[data-pay-bill]');if(payBill){const bill=bills.find(x=>x.id===payBill.dataset.payBill);if(bill)await payRecurringBill(bill,payBill);return;}const pay=e.target.closest('[data-pay-debt]');if(pay){const d=debts.find(x=>x.id===pay.dataset.payDebt);if(d){const cat=categories.find(c=>c.type==='expense'&&c.name==='หนี้/ผ่อน');$('txType').value='expense';fillTxSelectors();if(cat)$('txCategory').value=cat.id;$('txDesc').value='ชำระบัตร '+d.name;$('txAmount').value=Number(d.installment_amount||0)>0?Number(d.installment_amount):'';$('txNote').value='ยอดคงเหลือก่อนชำระ '+money(d.outstanding_amount||0);renderCardPaymentSuggestions();if(window.innerWidth>820)$('txAmount').focus()}return}const edit=e.target.closest('[data-edit]');if(edit){const t=edit.dataset.edit,id=edit.dataset.id;if(t==='tx'&&(transactions.find(x=>x.id===id)?.source==='car_installment'||transactions.find(x=>x.id===id)?.source==='car_expense'||carExpenseTxIds.has(id))){location.href='./car.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='salary'){location.href='./salary.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source?.startsWith('bill_payment:')){showPage('bills');showAppToast('รายการนี้มาจากบิลประจำ กรุณาจัดการที่หน้าบิลประจำ');return}if(t==='tx')openTx(id);else openEntity(t,id);return}const del=e.target.closest('[data-del]');if(del){if(del.dataset.del==='transactions'&&(transactions.find(x=>x.id===del.dataset.id)?.source==='car_installment'||transactions.find(x=>x.id===del.dataset.id)?.source==='car_expense'||carExpenseTxIds.has(del.dataset.id))){alert('กรุณาจัดการรายการนี้ผ่านหน้ารถของฉัน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='salary'){alert('กรุณาจัดการรายการนี้ผ่านหน้าเงินเดือน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source?.startsWith('bill_payment:')){alert('รายการนี้มาจากบิลประจำ เพื่อให้ยอดบัตรตรงกัน กรุณาจัดการผ่านหน้าบิลประจำ');return}if(!confirm('ยืนยันลบรายการนี้?'))return;const {error}=await supabase.from(del.dataset.del).delete().eq('id',del.dataset.id).eq('user_id',user.id);if(error)alert('ลบไม่ได้: '+error.message);else await loadAll()}})
+document.addEventListener('click',async e=>{const payBill=e.target.closest('[data-pay-bill]');if(payBill){const bill=bills.find(x=>x.id===payBill.dataset.payBill);if(bill)await payRecurringBill(bill,payBill);return;}const pay=e.target.closest('[data-pay-debt]');if(pay){const d=debts.find(x=>x.id===pay.dataset.payDebt);if(d){const cat=categories.find(c=>c.type==='expense'&&c.name==='หนี้/ผ่อน');$('txType').value='expense';fillTxSelectors();if(cat)$('txCategory').value=cat.id;$('txDesc').value='ชำระบัตร '+d.name;$('txAmount').value=Number(d.installment_amount||0)>0?Number(d.installment_amount):'';$('txNote').value='ยอดคงเหลือก่อนชำระ '+money(d.outstanding_amount||0);renderCardPaymentSuggestions();if(window.innerWidth>820)$('txAmount').focus()}return}const edit=e.target.closest('[data-edit]');if(edit){const t=edit.dataset.edit,id=edit.dataset.id;if(t==='tx'&&(transactions.find(x=>x.id===id)?.source==='car_installment'||transactions.find(x=>x.id===id)?.source==='car_expense'||carExpenseTxIds.has(id))){location.href='./car.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='salary'){location.href='./salary.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source?.startsWith('bill_payment:')){showPage('bills');showAppToast('รายการนี้มาจากบิลประจำ กรุณาจัดการที่หน้าบิลประจำ');return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='rent'){location.href='./rent.html';return}if(t==='tx')openTx(id);else openEntity(t,id);return}const del=e.target.closest('[data-del]');if(del){if(del.dataset.del==='transactions'&&(transactions.find(x=>x.id===del.dataset.id)?.source==='car_installment'||transactions.find(x=>x.id===del.dataset.id)?.source==='car_expense'||carExpenseTxIds.has(del.dataset.id))){alert('กรุณาจัดการรายการนี้ผ่านหน้ารถของฉัน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='salary'){alert('กรุณาจัดการรายการนี้ผ่านหน้าเงินเดือน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source?.startsWith('bill_payment:')){alert('รายการนี้มาจากบิลประจำ เพื่อให้ยอดบัตรตรงกัน กรุณาจัดการผ่านหน้าบิลประจำ');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='rent'){alert('กรุณาจัดการรายการนี้ผ่านหน้าค่าห้องเช่า');return}if(!confirm('ยืนยันลบรายการนี้?'))return;const {error}=await supabase.from(del.dataset.del).delete().eq('id',del.dataset.id).eq('user_id',user.id);if(error)alert('ลบไม่ได้: '+error.message);else await loadAll()}})
 function subscribe(){if(channel)supabase.removeChannel(channel);channel=supabase.channel('finance-live').on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'categories',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'bills',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'debts',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'budgets',filter:'user_id=eq.'+user.id},scheduleLoad).subscribe()}
 window.txDialog=$('txDialog');window.entityDialog=$('entityDialog');
 supabase.auth.onAuthStateChange((event,session)=>{

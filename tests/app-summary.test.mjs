@@ -39,3 +39,5 @@ try{
  assert.equal($('sumRent').textContent,'1000');assert.equal($('sumExpense').textContent,'2250');
 }finally{globalThis.document=previousDocument;}
 console.log('PASS summary: current and historical dates, recorded future entries, cancelled exclusion, daily net and monthly range');
+
+assert.deepEqual(rentShareTotals([{id:"rent",amount:2000,status:"paid",source:"rent"}],[{transaction_id:"rent",my_amount:800}]),{shareCents:80000,fullCents:200000});

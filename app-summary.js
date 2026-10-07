@@ -10,22 +10,24 @@ export function summaryTimelineKeys(config,today,rows=[]){
  return Array.from({length:count},(_,i)=>config.monthKey+'-'+String(i+1).padStart(2,'0'));
 }
 // Excel rent imports already contain the user's half, not the full bill.
-export function rentShareTotals(rows){
+export function rentShareTotals(rows,records=[]){
+ const linked=new Map(records.map(r=>[r.transaction_id,r]));
  return rows.filter(x=>x.status!=='cancelled').reduce((out,x)=>{
   const cents=Math.round(Number(x.amount||0)*100);
   const importedShare=x.source==='import_r3_v2';
-  out.shareCents+=importedShare?cents:Math.round(cents/2);
+  out.shareCents+=linked.has(x.id)?Math.round(Number(linked.get(x.id).my_amount)*100):importedShare?cents:Math.round(cents/2);
   out.fullCents+=importedShare?cents*2:cents;
   return out;
  },{shareCents:0,fullCents:0});
 }
 // Summary page renderer. Keeps summary grouping and chart state out of app.js.
-export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,ChartCtor=null}){
+export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,getRentRecords=()=>[],ChartCtor=null}){
  let trendChart=null,categoryChart2=null,pieChart=null;
 
 function excelGroup(x){
+ if(x.source==='rent')return 'ห้องเช่า'
  const cat=x.categories?.name||'อื่นๆ',text=((x.description||'')+' '+(x.note||'')).toLowerCase()
- if(['ที่พัก','ห้องเช่า','บ้าน','ห้องเช่า','ค่าเช่า'].includes(cat))return 'ห้องเช่า'
+ if(['ที่พัก','ห้องเช่า','บ้าน','ค่าห้องเช่า','ค่าห้อง','ค่าเช่า'].includes(cat))return 'ห้องเช่า'
  if(cat==='หนี้/ผ่อน')return 'ชำระบัตร/สินเชื่อ'
  if(cat==='บิล/สาธารณูปโภค')return 'รายจ่ายประจำ'
  if(cat==='รถยนต์'){
@@ -91,7 +93,7 @@ function renderSummary(){
 
  const grouped=rows.filter(x=>x.type==='expense').reduce((o,x)=>{const g=excelGroup(x);o[g]=(o[g]||0)+Number(x.amount);return o},{})
  $('sumDebtPay').textContent=money(grouped['ชำระบัตร/สินเชื่อ']||0)
- const rent=rentShareTotals(rows.filter(x=>x.type==='expense'&&excelGroup(x)==='ห้องเช่า'))
+ const rent=rentShareTotals(rows.filter(x=>x.type==='expense'&&excelGroup(x)==='ห้องเช่า'),getRentRecords())
  const carTotal=(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0)
  $('sumRent').textContent=money(rent.shareCents/100)
  $('sumRentFull').textContent=money(rent.fullCents/100)

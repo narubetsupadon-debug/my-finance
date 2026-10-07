@@ -3,7 +3,7 @@ const path=require('node:path');
 const assert=require('node:assert/strict');
 const root=path.join(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const files=['index.html','app.js','app-data.js','app-summary.js','app-dashboard.js','app-transactions.js','app-planning.js','app-safety.js','style.css','car.css','minimal-dark.css','theme.js','app-nav.js','sw.js','car.html','car.js','salary.html','salary.js','salary-payslip.js','import.html','finance-core.js','manifest.webmanifest'];
+const files=['rent.html','rent.js','rent-core.js','rent.css','index.html','app.js','app-data.js','app-summary.js','app-dashboard.js','app-transactions.js','app-planning.js','app-safety.js','style.css','car.css','minimal-dark.css','theme.js','app-nav.js','sw.js','car.html','car.js','salary.html','salary.js','salary-payslip.js','import.html','finance-core.js','manifest.webmanifest'];
 const source=Object.fromEntries(files.map(p=>[p,read(p)]));
 
 // All cache-busted first-party assets must move as one release.
@@ -57,7 +57,7 @@ assert.match(source['app-nav.js'],/e\.clientY>r\.bottom/,'mobile menu backdrop m
 JSON.parse(source['manifest.webmanifest']);
 
 // iPhone safe-area support on interactive pages.
-for(const p of ['index.html','car.html','salary.html'])assert.match(source[p],/viewport-fit=cover/,p+' missing viewport-fit=cover');
+for(const p of ['index.html','car.html','salary.html','rent.html'])assert.match(source[p],/viewport-fit=cover/,p+' missing viewport-fit=cover');
 
 // Car styles live in one page-specific stylesheet and keep mobile content above the bottom nav.
 assert.equal(source['car.html'].includes('<style>'),false,'car.html must not contain inline styles');

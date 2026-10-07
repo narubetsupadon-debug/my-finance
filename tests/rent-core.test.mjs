@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {rentAmounts,duplicateRentMonth,availableRentPayments} from '../rent-core.js';
+assert.deepEqual(rentAmounts('2000','800'),{full_amount:2000,my_amount:800});
+assert.deepEqual(rentAmounts('100.01','50.01'),{full_amount:100.01,my_amount:50.01});
+for(const [full,my] of [['',''],['0','0'],['100','101'],['100','-1'],['NaN','1'],['100',''],['Infinity','1']])assert.throws(()=>rentAmounts(full,my));
+const bills=[{id:'bill',bill_month:'2026-09-01',transaction_id:'linked'}];
+assert.equal(duplicateRentMonth(bills,'2026-09').id,'bill');assert.equal(duplicateRentMonth(bills,'2026-09','bill'),undefined);
+const payment={type:'expense',status:'paid',source:'web',categories:{name:'ห้องเช่า'}};
+assert.deepEqual(availableRentPayments([{...payment,id:'available'},{...payment,id:'linked'},{...payment,id:'import',source:'import_r3_v2'},{...payment,id:'cancelled',status:'cancelled'},{...payment,id:'holiday',categories:{name:'ท่องเที่ยว'}}],bills).map(t=>t.id),['available']);
+console.log('PASS rent core: money limits, editable share, duplicate months and safe existing-payment selection');
