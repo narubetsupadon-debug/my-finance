@@ -9,20 +9,20 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
-<link rel="stylesheet" href="./style.css?v=20261007-chart5">
-<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261007-chart5" media="(prefers-color-scheme: dark)">
-<script src="./theme.js?v=20261007-chart5"></script>
+<link rel="stylesheet" href="./style.css?v=20261007-split6">
+<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261007-split6" media="(prefers-color-scheme: dark)">
+<script src="./theme.js?v=20261007-split6"></script>
 <style>
 .insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 #insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261007-chart5">
+</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261007-split6">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
   <div class="auth-splash-card">
-    <img src="./app-icon.svg?v=20261007-chart5" width="72" height="72" alt="">
+    <img src="./app-icon.svg?v=20261007-split6" width="72" height="72" alt="">
     <h1>My Finance</h1>
     <p>กำลังเปิดกระเป๋าของมิว…</p>
     <span class="auth-splash-spinner" aria-hidden="true"></span>
@@ -31,7 +31,7 @@
 
 <div id="authScreen" class="auth-screen hidden">
   <div class="auth-card">
-    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261007-chart5" width="56" height="56" alt="">My Finance</h1>
+    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261007-split6" width="56" height="56" alt="">My Finance</h1>
     <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และยอดคงเหลือบัตรในที่เดียว</p>
     <div class="auth-tabs">
       <button id="tabLogin" class="active">เข้าสู่ระบบ</button>
@@ -52,7 +52,7 @@
   </div>
   <header class="topbar">
     <div class="topin">
-      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261007-chart5" width="36" height="36" alt="">My Finance</div><div class="muted">Supabase Cloud Sync</div></div>
+      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261007-split6" width="36" height="36" alt="">My Finance</div><div class="muted">Supabase Cloud Sync</div></div>
       <div class="userbox">
         <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings">⚙️ ตั้งค่า</button>
         <a class="btn small soft" href="./import.html">📥 นำเข้า r3</a>
@@ -227,7 +227,8 @@
 
         <div class="summary-breakdown-grid section">
           <div class="card summary-mini"><span>💳</span><div><div class="label">บัตร/สินเชื่อ</div><div id="sumDebtPay" class="value expense money">฿0</div></div></div>
-          <div class="card summary-mini summary-home-car"><span>🏠</span><div><div class="label">ห้องเช่า + รถ</div><div id="sumHomeCar" class="value warning money">฿0</div><small class="muted">🏠 ห้องเช่า <b id="sumRent">฿0</b> · 🚗 รถยนต์ <b id="sumCar">฿0</b></small></div></div>
+          <div class="card summary-mini"><span aria-hidden="true">🏠</span><div><div class="label">ค่าเช่าห้อง</div><div id="sumRent" class="value warning money">฿0</div><small class="muted">ยอดจ่ายตามรายการที่บันทึก</small></div></div>
+          <div class="card summary-mini"><span aria-hidden="true">🚗</span><div><div class="label">ค่าใช้จ่ายรถ</div><div id="sumCar" class="value warning money">฿0</div><small class="muted">ค่างวด <b id="sumCarInstallment">฿0</b><br>ค่าใช้รถอื่น ๆ <b id="sumCarOther">฿0</b></small></div></div>
           <div class="card summary-mini"><span>🔁</span><div><div class="label">รายจ่ายประจำ</div><div id="sumRecurring" class="value balance money">฿0</div></div></div>
         </div>
 
@@ -416,8 +417,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
-<script type="module" src="./app.js?v=20261007-chart5"></script>
-<script type="module" src="./app-nav.js?v=20261007-chart5"></script></body>
+<script type="module" src="./app.js?v=20261007-split6"></script>
+<script type="module" src="./app-nav.js?v=20261007-split6"></script></body>
 </html>
 
 

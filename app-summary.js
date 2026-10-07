@@ -85,7 +85,8 @@ function renderSummary(){
  const carTotal=(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0)
  $('sumRent').textContent=money(rentTotal)
  $('sumCar').textContent=money(carTotal)
- $('sumHomeCar').textContent=money(rentTotal+carTotal)
+ $('sumCarInstallment').textContent=money(grouped['ค่างวดรถ']||0)
+ $('sumCarOther').textContent=money(carTotal-(grouped['ค่างวดรถ']||0))
  $('sumRecurring').textContent=money(grouped['รายจ่ายประจำ']||0)
 
  const timelineKeys=summaryTimelineKeys(config,bangkokDay(),rows)
