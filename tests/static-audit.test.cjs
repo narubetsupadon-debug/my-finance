@@ -3,7 +3,7 @@ const path=require('node:path');
 const assert=require('node:assert/strict');
 const root=path.join(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const files=['index.html','app.js','app-data.js','app-summary.js','app-dashboard.js','app-transactions.js','app-planning.js','app-safety.js','style.css','car.css','minimal-dark.css','theme.js','app-nav.js','sw.js','car.html','car.js','salary.html','salary.js','import.html','finance-core.js','manifest.webmanifest'];
+const files=['index.html','app.js','app-data.js','app-summary.js','app-dashboard.js','app-transactions.js','app-planning.js','app-safety.js','style.css','car.css','minimal-dark.css','theme.js','app-nav.js','sw.js','car.html','car.js','salary.html','salary.js','salary-payslip.js','import.html','finance-core.js','manifest.webmanifest'];
 const source=Object.fromEntries(files.map(p=>[p,read(p)]));
 
 // All cache-busted first-party assets must move as one release.

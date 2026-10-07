@@ -8,6 +8,7 @@ const appDashboard=fs.readFileSync(root+'app-dashboard.js','utf8').replaceAll('e
 const appTransactions=fs.readFileSync(root+'app-transactions.js','utf8').replaceAll('export ','');
 const appPlanning=fs.readFileSync(root+'app-planning.js','utf8').replaceAll('export ','');
 const appSafety=fs.readFileSync(root+'app-safety.js','utf8').replaceAll('export ','');
+const payslip=fs.readFileSync(root+'salary-payslip.js','utf8').replaceAll('export ','');
 function dbMock(data){
  const state={fail:false,writes:[],rpcs:[]};
  const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:callback=>{state.authChange=callback;return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>({error:state.signOutError||null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
@@ -28,8 +29,9 @@ async function page(html,js,data,expose){
  const w=dom.window,{db,state}=dbMock(data);w.createClient=()=>db;w.alerts=[];w.alert=x=>w.alerts.push(x);w.confirm=()=>true;w.scrollTo=()=>{};w.setInterval=()=>0;
  w.HTMLElement.prototype.scrollIntoView=function(){};w.requestAnimationFrame=cb=>{cb();return 1};w.cancelAnimationFrame=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
- const code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
- const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+code+'\nreturn {'+expose+'};})()');
+ let code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
+ if(js==='salary.js')code=code.replace('document,canRead:', 'document,readPdf:async()=>window.mockPayslipDraft,canRead:');
+ const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+code+'\nreturn {'+expose+'};})()');
  return {w,api,state,close:()=>w.close(),el:id=>w.document.getElementById(id)};
 }
 (async()=>{
@@ -105,6 +107,11 @@ async function page(html,js,data,expose){
  const paidBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[paidTx],bills:[bill]},'loadAll');
  assert.match(paidBillsPage.el('billList').textContent,/จ่ายแล้วเดือนนี้/);assert.equal(paidBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);paidBillsPage.close();
  const s=await page('salary.html','salary.js',{categories,accounts,transactions:[]},'reset');
+ s.w.mockPayslipDraft={rows:[{kind:'earning',label:'เงินเดือน',key:'base_salary',cents:200000},{kind:'earning',label:'OT',key:'overtime',cents:10000}],expected:{gross:210000,deductions:0,net:210000},month:'2026-09',paymentDate:'2026-09-30'};
+ Object.defineProperty(s.el('payslipFile'),'files',{value:[{name:'mock.pdf'}]});
+ await s.el('readPayslip').onclick();assert.equal(s.el('saveSalary').disabled,false);assert.equal(s.state.writes.length,0);
+ s.el('applyPayslip').click();assert.equal(s.el('base_salary').value,'2000.00');assert.equal(s.el('overtime').value,'100.00');assert.equal(s.el('salary_month').value,'2026-09');assert.equal(s.state.writes.length,0);s.api.reset();
+
  assert.equal(s.el('category_id').value,'inc');
  s.el('base_salary').value='1000';s.el('account_id').value='acc';
  await s.el('salaryForm').onsubmit({preventDefault(){}});
@@ -153,4 +160,3 @@ async function page(html,js,data,expose){
  console.log('PASS deep regressions: save locks, zero budget, logout failure, push readiness and stale request guards');
  console.log('PASS DOM fixtures: full paginated dashboard, XSS escaping, category/account retention, transaction edit status/source, debt save with blank due date, load failure retains data, salary category/reset/save, empty car schedule and visible modal errors');
 })().catch(e=>{console.error(e);process.exit(1)});
-
