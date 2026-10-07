@@ -109,19 +109,24 @@ async function page(html,js,data,expose){
  const paidBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[paidTx],bills:[bill]},'loadAll');
  assert.match(paidBillsPage.el('billList').textContent,/จ่ายแล้วเดือนนี้/);assert.equal(paidBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);paidBillsPage.close();
  const s=await page('salary.html','salary.js',{categories,accounts,transactions:[]},'reset');
+ assert.equal(s.el('salarySavedLink').hidden,true);assert.equal(s.el('salaryOtherDetails').open,false);assert.equal(s.el('salaryDeductionDetails').open,false);
+ assert.equal(s.el('bonus').closest('details').id,'salaryOtherDetails');assert.equal(s.el('allowance').closest('details').id,'salaryOtherDetails');assert.notEqual(s.el('bonus'),s.el('allowance'));
+ s.el('salaryExpandAll').click();for(const id of ['salaryOtherDetails','salaryDeductionDetails','salaryAdvancedDetails'])assert.equal(s.el(id).open,true);
+ s.el('salaryExpandAll').click();assert.equal(s.el('salaryDeductionDetails').open,false);
+ s.el('tax').value='';s.el('tax').dispatchEvent(new s.w.Event('invalid',{cancelable:true}));assert.equal(s.el('salaryDeductionDetails').open,true);s.api.reset();
  s.w.mockPayslipDraft={rows:[{kind:'earning',label:'เงินเดือน',key:'base_salary',cents:200000},{kind:'earning',label:'OT',key:'overtime',cents:10000}],expected:{gross:210000,deductions:0,net:210000},month:'2026-09',paymentDate:'2026-09-30'};
  Object.defineProperty(s.el('payslipFile'),'files',{value:[{name:'mock.pdf'}]});
  await s.el('readPayslip').onclick();assert.equal(s.el('saveSalary').disabled,false);assert.equal(s.state.writes.length,0);
- s.el('applyPayslip').click();assert.equal(s.el('base_salary').value,'2000.00');assert.equal(s.el('overtime').value,'100.00');assert.equal(s.el('salary_month').value,'2026-09');assert.equal(s.state.writes.length,0);s.api.reset();
+ s.el('applyPayslip').click();assert.equal(s.el('salaryOtherDetails').open,true);assert.equal(s.el('salaryDeductionDetails').open,true);assert.equal(s.el('base_salary').value,'2000.00');assert.equal(s.el('overtime').value,'100.00');assert.equal(s.el('salary_month').value,'2026-09');assert.equal(s.state.writes.length,0);s.api.reset();
 
  assert.equal(s.el('category_id').value,'inc');
  s.el('base_salary').value='1000';s.el('account_id').value='acc';
  await s.el('salaryForm').onsubmit({preventDefault(){}});
- assert.equal(s.state.writes.at(-1).row.base_salary,1000);assert.equal(s.el('category_id').value,'inc');
+ assert.equal(s.state.writes.at(-1).row.base_salary,1000);assert.equal(s.el('category_id').value,'inc');assert.equal(s.el('salarySavedLink').hidden,false);assert.equal(s.el('salaryStep3').getAttribute('aria-current'),'step');s.el('bonus').dispatchEvent(new s.w.Event('input',{bubbles:true}));assert.equal(s.el('salarySavedLink').hidden,true);assert.equal(s.el('salaryStep2').getAttribute('aria-current'),'step');
  s.el('base_salary').value='1000';s.el('account_id').value='acc';s.state.failAfterWrite=true;
  await s.el('salaryForm').onsubmit({preventDefault(){}});assert.match(s.el('salaryMessage').textContent,/บันทึกสำเร็จแล้ว/);assert.equal(s.el('salaryApp').classList.contains('hidden'),true);s.close();
  const c=await page('car.html','car.js',{categories,accounts,car_installments:[]},'open');
- assert.equal(c.el('nextNo').textContent,'ยังไม่มีตารางผ่อน');
+ assert.equal(c.el('nextNo').textContent,'ยังไม่มีตารางผ่อน');assert.equal(c.el('carSavedLink').hidden,true);assert.equal(c.el('carInstallmentDetails').open,false);assert.equal(c.el('carRows').closest('details').id,'carInstallmentDetails');c.el('carInstallmentDetails').open=true;assert.equal(c.el('carRows').isConnected,true);
  c.api.open({id:'car',installment_no:1,status:'pending'});c.state.fail=true;
  await c.el('carForm').onsubmit({preventDefault(){}});
  assert.match(c.el('carFormMessage').textContent,/offline/);assert.equal(c.el('carDialog').open,true);c.close();
