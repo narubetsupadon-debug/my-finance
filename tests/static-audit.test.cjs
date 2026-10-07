@@ -133,3 +133,8 @@ assert.match(source['index.html'],/summary-details/,'dense Summary tables should
 
 assert.match(source['style.css'],/\.summary-kpi \.value\{[^}]*white-space:nowrap/,'Summary KPI amounts must stay on one line');
 assert.match(source['style.css'],/font-variant-numeric:tabular-nums/,'Summary KPI amounts should use stable numeric widths');
+
+// The initial r3 importer is retired; historical source flags stay intact.
+assert.equal(source['index.html'].includes('href="./import.html"'),false);
+assert.equal(shell.includes('./import.html'),false);
+assert.equal(/createClient|type="file"|from\('transactions'\)/.test(source['import.html']),false);
