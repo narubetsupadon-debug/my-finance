@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import {summaryTimelineKeys,createSummaryRenderer} from '../app-summary.js';
+import {summaryTimelineKeys,createSummaryRenderer,rentShareTotals} from '../app-summary.js';
 
+assert.deepEqual(rentShareTotals([{amount:1000,source:'import_r3_v2',status:'paid'},{amount:2000,source:'web',status:'paid'},{amount:9999,source:'import_r3_v2',status:'cancelled'}]),{shareCents:200000,fullCents:400000});
 const config={mode:'days',monthKey:'2026-10'};
 assert.equal(summaryTimelineKeys(config,'2026-10-07').length,7);
 assert.equal(summaryTimelineKeys({...config,monthKey:'2026-09'},'2026-10-07').length,30);

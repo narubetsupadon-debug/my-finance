@@ -9,6 +9,16 @@ export function summaryTimelineKeys(config,today,rows=[]){
  }
  return Array.from({length:count},(_,i)=>config.monthKey+'-'+String(i+1).padStart(2,'0'));
 }
+// Excel rent imports already contain the user's half, not the full bill.
+export function rentShareTotals(rows){
+ return rows.filter(x=>x.status!=='cancelled').reduce((out,x)=>{
+  const cents=Math.round(Number(x.amount||0)*100);
+  const importedShare=x.source==='import_r3_v2';
+  out.shareCents+=importedShare?cents:Math.round(cents/2);
+  out.fullCents+=importedShare?cents*2:cents;
+  return out;
+ },{shareCents:0,fullCents:0});
+}
 // Summary page renderer. Keeps summary grouping and chart state out of app.js.
 export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,ChartCtor=null}){
  let trendChart=null,categoryChart2=null,pieChart=null;
@@ -81,10 +91,10 @@ function renderSummary(){
 
  const grouped=rows.filter(x=>x.type==='expense').reduce((o,x)=>{const g=excelGroup(x);o[g]=(o[g]||0)+Number(x.amount);return o},{})
  $('sumDebtPay').textContent=money(grouped['ชำระบัตร/สินเชื่อ']||0)
- const rentTotal=grouped['ห้องเช่า']||0
+ const rent=rentShareTotals(rows.filter(x=>x.type==='expense'&&excelGroup(x)==='ห้องเช่า'))
  const carTotal=(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0)
- $('sumRent').textContent=money(Math.round(rentTotal*100/2)/100)
- $('sumRentFull').textContent=money(rentTotal)
+ $('sumRent').textContent=money(rent.shareCents/100)
+ $('sumRentFull').textContent=money(rent.fullCents/100)
  $('sumCar').textContent=money(carTotal)
  $('sumCarInstallment').textContent=money(grouped['ค่างวดรถ']||0)
  $('sumCarOther').textContent=money(carTotal-(grouped['ค่างวดรถ']||0))
