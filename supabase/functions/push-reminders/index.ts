@@ -2,6 +2,7 @@ import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL");
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const CLIENT_KEY=Deno.env.get("SUPABASE_ANON_KEY");
 const admin=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 const headers={"Content-Type":"application/json","Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization,apikey,content-type,x-cron-secret","Access-Control-Allow-Methods":"POST,OPTIONS"};
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers});
@@ -15,17 +16,17 @@ function dueIso(day){const n=bkk(),y=n.getUTCFullYear(),m=n.getUTCMonth(),d=n.ge
 function diff(s){const n=bkk(),a=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()),p=s.split("-").map(Number);return Math.round((Date.UTC(p[0],p[1]-1,p[2])-a)/86400000)}
 function money(n){return new Intl.NumberFormat("th-TH",{style:"currency",currency:"THB",maximumFractionDigits:0}).format(Number(n||0))}
 async function runReminders(cfg){const rs=await Promise.all([admin.from("bills").select("user_id,name,amount,due_day,next_due_date").eq("is_active",true),admin.from("debts").select("user_id,name,outstanding_amount,installment_amount,due_day").eq("is_active",true).gt("outstanding_amount",0)]);if(rs[0].error)throw rs[0].error;if(rs[1].error)throw rs[1].error;const map=new Map();const add=(u,t)=>{const a=map.get(u)||[];a.push(t);map.set(u,a)};for(const b of rs[0].data||[]){let s=b.next_due_date||null;if(s&&diff(s)<0&&b.due_day)s=dueIso(Number(b.due_day));if(!s&&b.due_day)s=dueIso(Number(b.due_day));if(!s)continue;const x=diff(s);if(x<0||x>1)continue;add(b.user_id,b.name+" · "+(x===0?"วันนี้":"พรุ่งนี้")+" · "+money(b.amount));}for(const d of rs[1].data||[]){if(!d.due_day)continue;const x=diff(dueIso(Number(d.due_day)));if(x<0||x>1)continue;const a=Number(d.installment_amount||0);add(d.user_id,d.name+" · "+(x===0?"วันนี้":"พรุ่งนี้")+(a?" · "+money(a):""));}let users=0,notifications=0;const dk=iso(bkk());for(const [uid,items] of map){const key="due:"+dk+":"+items.join("|");const {data:claimed,error}=await admin.rpc("claim_push_notification",{p_user_id:uid,p_key:key});if(error||!claimed)continue;const body=items.slice(0,3).join("\n")+(items.length>3?"\nและอีก "+(items.length-3)+" รายการ":"");const sent=await sendUser(uid,{title:"💙 My Finance",body,url:"./#bills",tag:"due-reminder"},cfg);if(sent){users++;notifications+=sent;}else{await admin.rpc("release_push_notification",{p_user_id:uid,p_key:key});}}return {users,notifications};}
-Deno.serve(async(req)=>{if(req.method==="OPTIONS")return json({ok:true});if(req.method!=="POST")return json({error:"method_not_allowed"},405);try{const body=await req.json().catch(()=>({}));const action=body?.action||"";const cfg=await config();if(action==="config"){const user=await authUser(req);if(!user)return json({error:"unauthorized"},401);return json({publicKey:cfg.vapid_public});}if(action==="subscribe"){
-      const user=await authUser(req);if(!user)return json({error:"unauthorized"},401);
+Deno.serve(async(req)=>{if(req.method==="OPTIONS")return json({ok:true});if(req.method!=="POST")return json({error:"method_not_allowed"},405);try{const body=await req.json().catch(()=>({}));const action=body?.action||"";if(!["config","subscribe","unsubscribe","test","run"].includes(action))return json({error:"unknown_action"},400);const user=action==="run"?null:await authUser(req);if(action!=="run"&&!user)return json({error:"unauthorized"},401);const scoped=["subscribe","unsubscribe"].includes(action)?createClient(SUPABASE_URL,CLIENT_KEY,{global:{headers:{Authorization:req.headers.get("authorization")||""}},auth:{persistSession:false,autoRefreshToken:false}}):null;const cfg=await config();if(action==="config"){return json({publicKey:cfg.vapid_public});}if(action==="subscribe"){
+      
       const s=body?.subscription||{},keys=s?.keys||{};
       if(typeof s.endpoint!=="string"||!s.endpoint.startsWith("https://")||typeof keys.p256dh!=="string"||typeof keys.auth!=="string")return json({error:"invalid_subscription"},400);
-      const {error}=await admin.from("push_subscriptions").upsert({user_id:user.id,endpoint:s.endpoint,p256dh:keys.p256dh,auth:keys.auth,enabled:true,updated_at:new Date().toISOString()},{onConflict:"endpoint"});
+      const {error}=await scoped.from("push_subscriptions").upsert({user_id:user.id,endpoint:s.endpoint,p256dh:keys.p256dh,auth:keys.auth,enabled:true,updated_at:new Date().toISOString()},{onConflict:"endpoint"});
       if(error)throw error;return json({ok:true});
     }
     if(action==="unsubscribe"){
-      const user=await authUser(req);if(!user)return json({error:"unauthorized"},401);
+      
       const endpoint=body?.endpoint;if(typeof endpoint!=="string")return json({error:"invalid_endpoint"},400);
-      const {error}=await admin.from("push_subscriptions").delete().eq("user_id",user.id).eq("endpoint",endpoint);
+      const {error}=await scoped.from("push_subscriptions").delete().eq("user_id",user.id).eq("endpoint",endpoint);
       if(error)throw error;return json({ok:true});
     }
-    if(action==="test"){const user=await authUser(req);if(!user)return json({error:"unauthorized"},401);const sent=await sendUser(user.id,{title:"🔔 ทดสอบ My Finance",body:"การแจ้งเตือนบนอุปกรณ์นี้ทำงานแล้ว 🎉",url:"./#settings",tag:"push-test"},cfg);return json({ok:true,sent});}if(action==="run"){const got=req.headers.get("x-cron-secret")||"";if(!got||got!==cfg.cron_secret)return json({error:"unauthorized"},401);return json({ok:true,...await runReminders(cfg)});}return json({error:"unknown_action"},400);}catch(e){console.error(e);return json({error:String(e?.message||e)},500);}});
+    if(action==="test"){const sent=await sendUser(user.id,{title:"🔔 ทดสอบ My Finance",body:"การแจ้งเตือนบนอุปกรณ์นี้ทำงานแล้ว 🎉",url:"./#settings",tag:"push-test"},cfg);return json({ok:true,sent});}if(action==="run"){const got=req.headers.get("x-cron-secret")||"";if(!got||got!==cfg.cron_secret)return json({error:"unauthorized"},401);return json({ok:true,...await runReminders(cfg)});}return json({error:"unknown_action"},400);}catch(e){console.error(e);return json({error:"server_error"},500);}});

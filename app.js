@@ -1,10 +1,11 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-detail12';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-detail12';
-import {createSummaryRenderer} from './app-summary.js?v=20261007-detail12';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261007-detail12';
-import {createTransactionRenderer} from './app-transactions.js?v=20261007-detail12';
-import {createPlanningRenderer} from './app-planning.js?v=20261007-detail12';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-detail12';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261007-backend13';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-backend13';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-backend13';
+import {createSummaryRenderer} from './app-summary.js?v=20261007-backend13';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261007-backend13';
+import {createTransactionRenderer} from './app-transactions.js?v=20261007-backend13';
+import {createPlanningRenderer} from './app-planning.js?v=20261007-backend13';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-backend13';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -552,16 +553,20 @@ async function refreshHealthCheck(){
   const set=(id,ok,bad)=>{const el=$(id);if(!el)return;el.textContent=ok?'ปกติ ✅':bad;el.classList.toggle('health-bad',!ok);};
   set('healthSync',!!lastSyncAt,lastSyncAt?'':'ยังไม่เคยซิงก์สำเร็จ');
   set('healthDuplicates',result.duplicateGroups===0,'พบ '+result.duplicateGroups+' กลุ่ม');
-  set('healthSalary',result.orphanSalary===0,'หลุด '+result.orphanSalary+' รายการ');
-  set('healthInstallments',result.orphanInstallments===0,'หลุด '+result.orphanInstallments+' รายการ');
-  set('healthCar',result.orphanCar===0,'หลุด '+result.orphanCar+' รายการ');
+  set('healthSalary',result.orphanSalary+result.mismatchSalary===0,'ต้องตรวจ '+(result.orphanSalary+result.mismatchSalary)+' รายการ');
+  set('healthInstallments',result.orphanInstallments+result.mismatchInstallments===0,'ต้องตรวจ '+(result.orphanInstallments+result.mismatchInstallments)+' รายการ');
+  set('healthCar',result.orphanCar+result.mismatchCar===0,'ต้องตรวจ '+(result.orphanCar+result.mismatchCar)+' รายการ');
+  set('healthRent',result.orphanRent+result.mismatchRent===0,'ต้องตรวจ '+(result.orphanRent+result.mismatchRent)+' รายการ');
+  set('healthBills',result.orphanBills+result.billDuplicateGroups===0,'ต้องตรวจ '+(result.orphanBills+result.billDuplicateGroups)+' รายการ');
+  set('healthLinks',result.brokenSourceLinks+result.invalidDimensions===0,'ต้องตรวจ '+(result.brokenSourceLinks+result.invalidDimensions)+' รายการ');
   const pushSupported='Notification' in window&&'serviceWorker' in navigator&&'PushManager' in window;
   const sub=pushSupported?await currentPushSubscription().catch(()=>null):null;
   const pushOk=!!sub&&Notification.permission==='granted';
   const push=$('healthPush');if(push){push.textContent=!pushSupported?'ไม่รองรับ':pushOk?'พร้อมใช้งาน ✅':'ยังไม่เปิด';push.classList.toggle('health-bad',pushSupported&&!pushOk);}
-  $('healthCheckedAt').textContent='ตรวจล่าสุด '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  $('healthCheckedAt').textContent=(result.ok?'ตรวจล่าสุด ':'พบจุดที่ต้องตรวจสอบ · ตรวจล่าสุด ')+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
  }catch(error){
   $('healthSync').textContent='ตรวจข้อมูลล่าสุดไม่สำเร็จ';$('healthSync').classList.add('health-bad');
+  for(const id of ['healthDuplicates','healthSalary','healthInstallments','healthCar','healthRent','healthBills','healthLinks']){const el=$(id);if(el){el.textContent='ยังตรวจไม่ได้';el.classList.remove('health-bad');}}
   $('healthCheckedAt').textContent='ตรวจไม่สำเร็จ: '+error.message;
  }finally{btn.disabled=false;btn.textContent='ตรวจสอบอีกครั้ง'}
 }
@@ -667,3 +672,10 @@ $('txDialog')?.addEventListener('focusin',e=>{
  setTimeout(()=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'smooth'}),120);
 });
 
+
+$('exportFinanceBackup').onclick=async()=>{
+ const button=$('exportFinanceBackup');if(!user||button.disabled)return;button.disabled=true;button.textContent='กำลังสำรอง…';
+ try{const {data,error}=await supabase.rpc('export_finance_backup');if(error)throw error;const content=serializeFinanceBackup(data),url=URL.createObjectURL(new Blob([content],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='My_Finance_Backup_'+bangkokDay()+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showAppToast('สร้างไฟล์สำรองข้อมูลการเงินแล้ว กรุณาเก็บไฟล์ไว้ในที่ปลอดภัย');}
+ catch(error){showAppToast('สำรองข้อมูลไม่ได้: '+error.message);}
+ finally{button.disabled=false;button.textContent='ดาวน์โหลดข้อมูลสำรอง JSON';}
+};

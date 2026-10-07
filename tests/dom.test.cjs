@@ -8,12 +8,13 @@ const appDashboard=fs.readFileSync(root+'app-dashboard.js','utf8').replaceAll('e
 const appTransactions=fs.readFileSync(root+'app-transactions.js','utf8').replaceAll('export ','');
 const appPlanning=fs.readFileSync(root+'app-planning.js','utf8').replaceAll('export ','');
 const appSafety=fs.readFileSync(root+'app-safety.js','utf8').replaceAll('export ','');
+const backupCore=fs.readFileSync(root+'finance-backup.js','utf8').replaceAll('export ','');
 const rentCore=fs.readFileSync(root+'rent-core.js','utf8').replaceAll('export ','');
 const payslip=fs.readFileSync(root+'salary-payslip.js','utf8').replaceAll('export ','');
 function dbMock(data){
  const state={fail:false,writes:[],rpcs:[]};
  const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:callback=>{state.authChange=callback;return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>({error:state.signOutError||null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
- db.rpc=async(name,args)=>{state.rpcs.push({name,args});return state.fail?{error:{message:'offline'}}:{data:'rpc-saved',error:null};};
+ db.rpc=async(name,args)=>{state.rpcs.push({name,args});return state.fail?{error:{message:'offline'}}:{data:name==='export_finance_backup'?state.backupPayload:name==='finance_health_check'?(state.healthCounts||Object.fromEntries(['duplicateGroups','orphanCar','orphanSalary','orphanInstallments','orphanRent','mismatchCar','mismatchSalary','mismatchInstallments','mismatchRent','brokenSourceLinks','invalidDimensions','billDuplicateGroups','orphanBills'].map(k=>[k,0]))):'rpc-saved',error:null};};
  db.from=table=>{
   let rows=[...(data[table]||[])],write=null;
   const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},not(k,op,v){if(op==='is'&&v===null)rows=rows.filter(r=>r[k]!==null&&r[k]!==undefined);return q},
@@ -32,7 +33,7 @@ async function page(html,js,data,expose){
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  let code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
  if(js==='salary.js')code=code.replace('document,canRead:', 'document,readPdf:async()=>window.mockPayslipDraft,canRead:');
- const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+rentCore+'\n'+code+'\nreturn {'+expose+'};})()');
+ const api=await w.eval('(async()=>{'+core+'\n'+appData+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+rentCore+'\n'+backupCore+'\n'+code+'\nreturn {'+expose+'};})()');
  return {w,api,state,close:()=>w.close(),el:id=>w.document.getElementById(id)};
 }
 (async()=>{
@@ -74,8 +75,9 @@ async function page(html,js,data,expose){
  p.w.openEntity('debt');p.el('entityFields').querySelector('[name=name]').value='card';
  await p.el('entityForm').onsubmit({preventDefault(){},currentTarget:p.el('entityForm')});
  assert.equal(p.state.writes.at(-1).table,'debts');assert.equal(p.state.writes.at(-1).row.due_day,null);assert.equal(p.w.alerts.length,0);
- await p.api.refreshHealthCheck();assert.match(p.el('healthSync').textContent,/ปกติ/);
- p.state.fail=true;await p.api.refreshHealthCheck();assert.match(p.el('healthSync').textContent,/ไม่สำเร็จ/);
+ await p.api.refreshHealthCheck();assert.match(p.el('healthSync').textContent,/ปกติ/);assert.match(p.el('healthRent').textContent,/ปกติ/);
+ p.state.healthCounts=Object.fromEntries(['duplicateGroups','orphanCar','orphanSalary','orphanInstallments','orphanRent','mismatchCar','mismatchSalary','mismatchInstallments','mismatchRent','brokenSourceLinks','invalidDimensions','billDuplicateGroups','orphanBills'].map(k=>[k,0]));p.state.healthCounts.mismatchRent=1;await p.api.refreshHealthCheck();assert.match(p.el('healthRent').textContent,/ต้องตรวจ 1/);delete p.state.healthCounts;
+ p.state.fail=true;await p.api.refreshHealthCheck();assert.match(p.el('healthSync').textContent,/ไม่สำเร็จ/);assert.match(p.el('healthRent').textContent,/ยังตรวจไม่ได้/);
  await p.api.loadAll();assert.equal(p.el('dataError').classList.contains('hidden'),false);assert.equal(p.el('txCount').textContent,'1201 รายการ');
  // Opening the app after midnight must refresh date-dependent totals.
  const oldLabel=p.el('todayLabel').textContent,OriginalDate=p.w.Date;
@@ -193,6 +195,8 @@ async function page(html,js,data,expose){
  const firstExcel=lazy.api.loadExcelTools(),sameExcel=lazy.api.loadExcelTools();assert.equal(firstExcel,sameExcel);const firstScript=lazy.w.document.querySelector('script[src*=sheetjs]');assert.equal(firstScript.async,true);firstScript.onerror();await assert.rejects(firstExcel,/Excel/);assert.equal(lazy.w.document.querySelector('script[src*=sheetjs]'),null);
  const retryExcel=lazy.api.loadExcelTools();const retryScript=lazy.w.document.querySelector('script[src*=sheetjs]');lazy.w.XLSX={utils:{}};retryScript.onload();assert.equal(await retryExcel,lazy.w.XLSX);lazy.close();
  console.log('PASS detail loading: no blocking Excel script, one shared download, failure cleanup/retry, ready status');
+ const backupPage=await page('index.html','app.js',{categories,accounts,transactions:[]},'');backupPage.state.backupPayload={format:'my-finance-backup',version:1,owner_id:'user',exported_at:'2026-10-07T05:00:00Z',data:Object.fromEntries(['categories','accounts','transactions','bills','debts','budgets','salary_records','car_installments','car_expenses','rent_records'].map(t=>[t,[]]))};let downloaded='';backupPage.w.URL.createObjectURL=blob=>{assert.equal(blob.type,'application/json');return 'blob:fixture';};backupPage.w.URL.revokeObjectURL=()=>{};backupPage.w.HTMLAnchorElement.prototype.click=function(){downloaded=this.download;};await backupPage.el('exportFinanceBackup').onclick();assert.match(downloaded,/^My_Finance_Backup_.*\.json$/);assert.equal(backupPage.el('exportFinanceBackup').disabled,false);assert.equal(backupPage.state.rpcs.at(-1).name,'export_finance_backup');backupPage.state.fail=true;await backupPage.el('exportFinanceBackup').onclick();assert.match(backupPage.el('appToast').textContent,/สำรองข้อมูลไม่ได้/);backupPage.close();
+ console.log('PASS backup download: owner snapshot RPC, JSON file, no duplicate click and clear network failure');
  console.log('PASS deep regressions: save locks, zero budget, logout failure, push readiness and stale request guards');
  console.log('PASS DOM fixtures: full paginated dashboard, XSS escaping, category/account retention, transaction edit status/source, debt save with blank due date, load failure retains data, salary category/reset/save, empty car schedule and visible modal errors');
 })().catch(e=>{console.error(e);process.exit(1)});

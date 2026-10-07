@@ -93,6 +93,7 @@ begin
     new.updated_at:=now();
     return new;
   elsif tg_op='UPDATE' then
+    if new.user_id is distinct from old.user_id or new.transaction_id is distinct from old.transaction_id then raise exception 'Cannot change linked car transaction'; end if;
     if new.transaction_id is null then raise exception 'รายการรถไม่มี Transaction ที่เชื่อมอยู่'; end if;
     update public.transactions set
       transaction_date=new.expense_date,
@@ -121,5 +122,8 @@ revoke all on function public.sync_car_expense_transaction() from public, anon;
 
 drop trigger if exists sync_car_expense_transaction on public.car_expenses;
 create trigger sync_car_expense_transaction
-before insert or update or delete on public.car_expenses
+before insert or update on public.car_expenses
 for each row execute function public.sync_car_expense_transaction();
+
+drop trigger if exists delete_car_expense_transaction on public.car_expenses;
+create trigger delete_car_expense_transaction after delete on public.car_expenses for each row execute function public.sync_car_expense_transaction();

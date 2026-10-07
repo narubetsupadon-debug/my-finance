@@ -2,7 +2,7 @@
   "name": "my-finance",
   "private": true,
   "scripts": {
-    "test": "node tests/finance-core.test.mjs && node tests/rent-core.test.mjs && node tests/app-data.test.mjs && node tests/app-dashboard.test.mjs && node tests/app-summary.test.mjs && node tests/app-safety.test.mjs && node tests/dom.test.cjs && node tests/static-audit.test.cjs && node tests/sw-cache.test.cjs && node tests/salary-payslip.test.mjs"
+    "test": "node tests/finance-core.test.mjs && node tests/rent-core.test.mjs && node tests/finance-backup.test.mjs && node tests/app-data.test.mjs && node tests/app-dashboard.test.mjs && node tests/app-summary.test.mjs && node tests/app-safety.test.mjs && node tests/dom.test.cjs && node tests/static-audit.test.cjs && node tests/sw-cache.test.cjs && node tests/edge-services.test.cjs && node tests/salary-payslip.test.mjs"
   },
   "devDependencies": {
     "jsdom": "26.1.0"

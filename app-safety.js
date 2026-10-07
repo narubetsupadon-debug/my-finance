@@ -19,30 +19,11 @@ export function findDuplicateCandidates(row,transactions,editingId=null){
     .slice(0,3);
 }
 
-export async function runDataHealthCheck({db,userId,transactions,readAll}){
-  const tx=Array.isArray(transactions)?transactions:[];
-  const ids=new Set(tx.map(x=>x.id));
-  const [carExpenses,salaries,installments]=await Promise.all([
-    readAll(()=>db.from('car_expenses').select('id,transaction_id').eq('user_id',userId).order('id')),
-    readAll(()=>db.from('salary_records').select('id,transaction_id').eq('user_id',userId).order('id')),
-    readAll(()=>db.from('car_installments').select('id,status,my_amount,transaction_id').eq('user_id',userId).order('id'))
-  ]);
-  const exact=new Map();
-  for(const x of tx){
-    if(x.status==='cancelled')continue;
-    const key=[x.transaction_date,x.type,x.category_id||'',x.account_id||'',normText(x.description),Number(x.amount||0).toFixed(2)].join('|');
-    exact.set(key,(exact.get(key)||0)+1);
-  }
-  const duplicateGroups=[...exact.values()].filter(n=>n>1).length;
-  const orphanCar=carExpenses.filter(x=>!x.transaction_id||!ids.has(x.transaction_id)).length;
-  const orphanSalary=salaries.filter(x=>!x.transaction_id||!ids.has(x.transaction_id)).length;
-  const orphanInstallments=installments.filter(x=>x.status==='paid'&&Number(x.my_amount)>0&&(!x.transaction_id||!ids.has(x.transaction_id))).length;
-  return {
-    duplicateGroups,
-    orphanCar,
-    orphanSalary,
-    orphanInstallments,
-    ok:duplicateGroups===0&&orphanCar===0&&orphanSalary===0&&orphanInstallments===0
-  };
+// The RPC checks one database snapshot, avoiding mismatched reads during a save.
+export async function runDataHealthCheck({db}){
+ const {data,error}=await db.rpc('finance_health_check');
+ if(error)throw error;
+ const counters=['duplicateGroups','orphanCar','orphanSalary','orphanInstallments','orphanRent','mismatchCar','mismatchSalary','mismatchInstallments','mismatchRent','brokenSourceLinks','invalidDimensions','billDuplicateGroups','orphanBills'];
+ if(!data||counters.some(k=>!Number.isSafeInteger(data[k])||data[k]<0))throw new Error('ผลตรวจระบบไม่ครบ กรุณาลองใหม่');
+ return {...data,ok:counters.every(k=>data[k]===0)};
 }
-

@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {financialBackupTables,serializeFinanceBackup} from '../finance-backup.js';
+const backup={format:'my-finance-backup',version:1,owner_id:'fixture-owner',exported_at:'2026-10-07T05:00:00Z',data:Object.fromEntries(financialBackupTables.map(t=>[t,[]]))};
+backup.data.transactions=[{id:'tx',user_id:'fixture-owner',amount:100.01,status:'cancelled',source:'import_r3_v2',note:'historical'}];
+backup.data.rent_records=[{id:'bill',user_id:'fixture-owner',full_amount:2000,my_amount:800,bill_month:'2026-09-01',payment_date:'2026-10-05',transaction_id:'tx'}];
+assert.deepEqual(JSON.parse(serializeFinanceBackup(backup)),backup);
+const wrongOwner=structuredClone(backup);wrongOwner.data.transactions[0].user_id='other';assert.throws(()=>serializeFinanceBackup(wrongOwner),/เจ้าของ/);
+const missing=structuredClone(backup);delete missing.data.accounts;assert.throws(()=>serializeFinanceBackup(missing),/ไม่ครบ/);
+const duplicate=structuredClone(backup);duplicate.data.transactions.push(duplicate.data.transactions[0]);assert.throws(()=>serializeFinanceBackup(duplicate),/ไม่ครบ/);
+const secrets=structuredClone(backup);secrets.data.push_subscriptions=[];assert.throws(()=>serializeFinanceBackup(secrets),/ไม่ครบ/);
+console.log('PASS backup: all financial tables, cancelled/legacy provenance, bill/payment dates, exact JSON round trip, ownership, completeness and duplicate ids');

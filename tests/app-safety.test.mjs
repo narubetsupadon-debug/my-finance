@@ -20,11 +20,13 @@ assert.equal(none.length,0);
 console.log('PASS app-safety: duplicate candidates are high-confidence and non-blocking');
 
 
-// A paid installment with zero personal contribution legitimately has no expense.
 const {runDataHealthCheck}=await import('../app-safety.js');
-const health=await runDataHealthCheck({
- db:{from:table=>({select(){return this},eq(){return this},order(){return {table}}})},
- userId:'fixture',transactions:[],
- readAll:async makeQuery=>makeQuery().table==='car_installments'?[{status:'paid',my_amount:0,transaction_id:null},{status:'paid',my_amount:50,transaction_id:null}]:[]
-});
-assert.equal(health.orphanInstallments,1);
+const counts=Object.fromEntries(['duplicateGroups','orphanCar','orphanSalary','orphanInstallments','orphanRent','mismatchCar','mismatchSalary','mismatchInstallments','mismatchRent','brokenSourceLinks','invalidDimensions','billDuplicateGroups','orphanBills'].map(k=>[k,0]));
+const calls=[];
+const db={rpc:async name=>{calls.push(name);return {data:counts,error:null};}};
+assert.equal((await runDataHealthCheck({db})).ok,true);assert.deepEqual(calls,['finance_health_check']);
+counts.mismatchRent=1;assert.equal((await runDataHealthCheck({db})).ok,false);counts.mismatchRent=0;
+counts.orphanInstallments=1;assert.equal((await runDataHealthCheck({db})).orphanInstallments,1);
+await assert.rejects(runDataHealthCheck({db:{rpc:async()=>({error:new Error('offline')})}}),/offline/);
+await assert.rejects(runDataHealthCheck({db:{rpc:async()=>({data:{}})}}),/ไม่ครบ/);
+console.log('PASS health check: one atomic RPC, linked amount/status issues, failed calls and incomplete results cannot report healthy');
