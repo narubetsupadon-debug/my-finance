@@ -1,3 +1,14 @@
+// Current-month charts end at today; retain any explicitly recorded later date.
+export function summaryTimelineKeys(config,today,rows=[]){
+ if(config.mode!=='days')return config.keys;
+ const lastDay=new Date(Number(config.monthKey.slice(0,4)),Number(config.monthKey.slice(5,7)),0).getDate();
+ let count=lastDay;
+ if(config.monthKey===today.slice(0,7)){
+  const recordedDays=rows.filter(x=>x.status!=='cancelled'&&String(x.transaction_date).slice(0,7)===config.monthKey).map(x=>Number(String(x.transaction_date).slice(8,10))).filter(n=>Number.isInteger(n)&&n>=1&&n<=lastDay);
+  count=Math.max(Number(today.slice(8,10)),...recordedDays);
+ }
+ return Array.from({length:count},(_,i)=>config.monthKey+'-'+String(i+1).padStart(2,'0'));
+}
 // Summary page renderer. Keeps summary grouping and chart state out of app.js.
 export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,ChartCtor=null}){
  let trendChart=null,categoryChart2=null,pieChart=null;
@@ -77,9 +88,7 @@ function renderSummary(){
  $('sumHomeCar').textContent=money(rentTotal+carTotal)
  $('sumRecurring').textContent=money(grouped['รายจ่ายประจำ']||0)
 
- const timelineKeys=config.mode==='days'
-  ?Array.from({length:new Date(Number(config.monthKey.slice(0,4)),Number(config.monthKey.slice(5,7)),0).getDate()},(_,i)=>config.monthKey+'-'+String(i+1).padStart(2,'0'))
-  :config.keys
+ const timelineKeys=summaryTimelineKeys(config,bangkokDay(),rows)
  const timelineLabels=config.mode==='days'
   ?timelineKeys.map(k=>String(Number(k.slice(8,10))))
   :timelineKeys.map(k=>new Date(Number(k.slice(0,4)),Number(k.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'short',year:config.keys.some(x=>x.slice(0,4)!==config.keys[0].slice(0,4))?'2-digit':undefined}))
@@ -87,10 +96,10 @@ function renderSummary(){
  const moneyFmt=v=>document.body?.classList.contains('privacy-mode')?'••••':new Intl.NumberFormat('th-TH',{maximumFractionDigits:0}).format(v)
  if(trendChart)trendChart.destroy()
  if(ChartCtor)trendChart=new ChartCtor($('monthlyTrendChart'),{data:{labels:timelineLabels,datasets:[
-  {type:'bar',label:'รายรับ',data:timeline.map(x=>x.income),backgroundColor:'rgba(16,185,129,.72)',borderRadius:7},
-  {type:'bar',label:'รายจ่าย',data:timeline.map(x=>x.expense),backgroundColor:'rgba(239,68,68,.70)',borderRadius:7},
-  {type:'line',label:'คงเหลือ',data:timeline.map(x=>x.balance),borderColor:'#4f46e5',backgroundColor:'#4f46e5',borderWidth:3,tension:.3,pointRadius:3}
- ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{y:{ticks:{callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}},x:{title:{display:config.mode==='days',text:config.mode==='days'?'วันที่':''},grid:{display:false}}}}})
+  {type:'bar',label:'รายรับ',data:timeline.map(x=>x.income),backgroundColor:'rgba(16,185,129,.72)',borderRadius:4,maxBarThickness:16,pointStyle:'rect'},
+  {type:'bar',label:'รายจ่าย',data:timeline.map(x=>x.expense),backgroundColor:'rgba(239,68,68,.70)',borderRadius:4,maxBarThickness:16,pointStyle:'rect'},
+  {type:'line',label:config.mode==='days'?'สุทธิรายวัน':'สุทธิรายเดือน',data:timeline.map(x=>x.balance),borderColor:'#4f46e5',backgroundColor:'#4f46e5',borderWidth:2,tension:0,pointRadius:0,pointHoverRadius:4,pointHitRadius:12,pointStyle:'line'}
+ ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,boxHeight:10,padding:14}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{y:{ticks:{callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}},x:{title:{display:config.mode==='days',text:config.mode==='days'?'วันที่':''},ticks:{autoSkip:true,maxTicksLimit:6,maxRotation:0,minRotation:0},grid:{display:false}}}}})
 
  const priority=['ห้องเช่า','ค่างวดรถ','น้ำมันรถ','ซ่อม/ประกัน/ภาษีรถ','ค่าใช้รถอื่น ๆ','ชำระบัตร/สินเชื่อ','รายจ่ายประจำ']
  const other=[...new Set(rows.filter(x=>x.type==='expense').map(excelGroup).filter(x=>!priority.includes(x)))].sort()
