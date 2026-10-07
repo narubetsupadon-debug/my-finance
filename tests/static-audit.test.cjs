@@ -14,6 +14,24 @@ for(const [file,text] of Object.entries(source)){
 const versions=[...new Set(refs.map(x=>x.version))];
 assert.equal(versions.length,1,'first-party asset versions diverged: '+JSON.stringify(refs));
 
+// A fresh installation must precache the exact URLs requested by every page.
+// Matching version counts alone cannot detect an omitted or misspelled asset.
+const vm=require('node:vm');
+const shell=vm.runInNewContext(source['sw.js']+'\nSHELL',{
+ self:{addEventListener(){}}
+});
+const precached=new Set(shell.map(url=>new URL(url,'https://example.test/my-finance/').href));
+for(const file of [...files,'summary.html'].filter(p=>/\.(html|js)$/.test(p)&&p!=='sw.js')){
+ const text=source[file]||read(file);
+ for(const match of text.matchAll(/["']((?:\.\/)?[a-zA-Z0-9_-]+\.(?:js|css|svg)\?v=[A-Za-z0-9_-]+)["']/g)){
+  assert.ok(precached.has(new URL(match[1],'https://example.test/my-finance/').href),file+' asset missing from offline cache: '+match[1]);
+ }
+}
+for(const url of shell){
+ const local=url.split('?')[0];
+ assert.ok(fs.existsSync(path.join(root,local)), 'precache file does not exist: '+url);
+}
+
 // Main HTML must not contain duplicate ids, and app.js DOM shortcuts must point to real elements.
 const html=source['index.html'];
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
