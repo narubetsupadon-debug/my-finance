@@ -1,10 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-rententry9';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-rententry9';
-import {createSummaryRenderer} from './app-summary.js?v=20261007-rententry9';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261007-rententry9';
-import {createTransactionRenderer} from './app-transactions.js?v=20261007-rententry9';
-import {createPlanningRenderer} from './app-planning.js?v=20261007-rententry9';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-rententry9';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-menu10';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-menu10';
+import {createSummaryRenderer} from './app-summary.js?v=20261007-menu10';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261007-menu10';
+import {createTransactionRenderer} from './app-transactions.js?v=20261007-menu10';
+import {createPlanningRenderer} from './app-planning.js?v=20261007-menu10';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-menu10';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -197,7 +197,7 @@ $('syncRetryBtn')?.addEventListener('click',()=>void loadAll());
 window.addEventListener('online',()=>{if(!user)return;setSyncStatus('syncing','กลับมาออนไลน์แล้ว · กำลังอัปเดต…');void loadAll()});
 window.addEventListener('offline',()=>setSyncStatus('error','ออฟไลน์ · ข้อมูลอาจยังไม่ล่าสุด'));
 
-async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authSplash')?.classList.add('hidden');$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();showPage(location.hash.slice(1)||'dashboard')}
+async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authSplash')?.classList.add('hidden');$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();handleNavigationRoute()}
 async function performLoad(){
  if(!user)return false;
  const loadingUser=user.id,revision=sessionRevision;
@@ -428,7 +428,10 @@ function showPage(name){
  if(window.scrollY!==0)window.scrollTo({top:0,behavior:'auto'});
 }
 window.addEventListener('finance:navigate',e=>showPage(e.detail));
-window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)||'dashboard'));
+window.addEventListener('hashchange',handleNavigationRoute);
+function handleNavigationRoute(){const route=location.hash.slice(1);if(route==='capture-income'||route==='capture-expense'){showPage('transactions');captureTransaction(route.slice(8));}else showPage(route||'dashboard');}
+function captureTransaction(type){if(!user||$('txForm').querySelector('button[type=submit]').disabled||$('txDialog').open)return;openTx();$('txType').value=type==='income'?'income':'expense';fillTxSelectors();renderCardPaymentSuggestions();}
+window.addEventListener('finance:capture',e=>captureTransaction(e.detail));
 navNodes.forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
 

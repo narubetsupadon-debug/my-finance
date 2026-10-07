@@ -176,6 +176,18 @@ async function page(html,js,data,expose){
  rentData.rent_records.push({id:'existingbill',user_id:'user',bill_month:'2026-09-01',full_amount:2000,my_amount:1000,status:'pending'});rent.close();
  const dupe=await page('rent.html','rent.js',rentData,'open');dupe.el('rentMonth').value='2026-09';dupe.el('rentFull').value='2000';dupe.el('rentMy').value='1000';await dupe.el('rentForm').onsubmit({preventDefault(){}});assert.equal(dupe.state.writes.length,0);assert.match(dupe.el('rentError').textContent,/เดือนนี้มีบิลแล้ว/);dupe.close();
  console.log('PASS rent DOM: half default, editable share, existing payment, bill month vs payment date, pending status, linked edit and duplicate-month guard');
+ const menu=await page('index.html','app.js',{categories,accounts,transactions:[]},'handleNavigationRoute');
+ menu.w.eval(fs.readFileSync(root+'app-nav.js','utf8'));
+ assert.deepEqual([...menu.w.document.querySelectorAll('.mobile-app-nav button')].map(b=>b.dataset.destination),['dashboard','transactions','capture','summary','more']);
+ const allSheets=menu.w.document.querySelectorAll('.app-menu-sheet'),moreSheet=allSheets[0],captureSheet=allSheets[1];
+ assert.deepEqual([...moreSheet.querySelectorAll('h3')].map(h=>h.textContent),['วางแผนเงิน','บันทึกเฉพาะเรื่อง','จัดการข้อมูล']);
+ menu.w.document.querySelector('.mobile-app-nav [data-destination=capture]').click();assert.equal(captureSheet.open,true);
+ captureSheet.querySelector('[data-destination=income]').click();assert.equal(captureSheet.open,false);assert.equal(menu.el('txDialog').open,true);assert.equal(menu.el('txType').value,'income');
+ menu.el('txDialog').close();menu.w.document.querySelector('[data-open-capture]').click();captureSheet.querySelector('[data-destination=expense]').click();assert.equal(menu.el('txType').value,'expense');menu.el('txDialog').close();
+ menu.w.history.replaceState(null,'','#capture-income');menu.api.handleNavigationRoute();assert.equal(menu.el('txDialog').open,true);assert.equal(menu.el('txType').value,'income');assert.equal(menu.w.location.hash,'#transactions');menu.el('txDialog').close();
+ menu.w.document.querySelector('.mobile-app-nav [data-destination=more]').click();assert.equal(moreSheet.open,true);moreSheet.querySelector('[data-destination=budget]').click();assert.equal(moreSheet.open,false);assert.equal(menu.el('budgetPage').classList.contains('hidden'),false);assert.equal(menu.w.document.querySelector('.mobile-app-nav [data-destination=more]').classList.contains('is-active'),true);
+ assert.deepEqual([...captureSheet.querySelectorAll('a,button[data-destination]')].map(b=>b.dataset.destination),['income','expense','salary','rent','car']);menu.close();
+ console.log('PASS menu: primary order, grouped destinations, desktop/mobile capture, income/expense form selection, cross-page capture route and budget navigation');
  console.log('PASS deep regressions: save locks, zero budget, logout failure, push readiness and stale request guards');
  console.log('PASS DOM fixtures: full paginated dashboard, XSS escaping, category/account retention, transaction edit status/source, debt save with blank due date, load failure retains data, salary category/reset/save, empty car schedule and visible modal errors');
 })().catch(e=>{console.error(e);process.exit(1)});

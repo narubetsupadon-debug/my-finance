@@ -637,3 +637,10 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 
 .summary-breakdown-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:820px){.summary-breakdown-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* Grouped navigation and primary capture action. */
+.app-menu-sheet{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
+.app-menu-group+.app-menu-group{margin-top:22px}.app-menu-group-title{font-size:13px;color:var(--muted);margin:0 0 10px;font-weight:650}.app-menu-item{min-width:0}.app-menu-item span:last-child{overflow-wrap:anywhere}
+.app-nav-capture .app-nav-icon{display:grid;place-items:center;width:36px;min-height:36px!important;border-radius:12px;background:var(--primary);color:#fff;font-size:26px!important;box-shadow:0 4px 12px color-mix(in srgb,var(--primary) 25%,transparent)}
+.nav-capture{color:var(--primary);font-weight:750}.app-nav-capture{color:var(--primary)}
+@media(max-width:380px){.app-nav-tab{font-size:9px}.app-menu-sheet{padding:18px}.app-menu-item{padding:10px;gap:6px;font-size:13px}.app-menu-item .app-nav-icon{min-width:27px}}
