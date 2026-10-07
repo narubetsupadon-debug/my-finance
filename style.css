@@ -644,3 +644,8 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 .app-nav-capture .app-nav-icon{display:grid;place-items:center;width:36px;min-height:36px!important;border-radius:12px;background:var(--primary);color:#fff;font-size:26px!important;box-shadow:0 4px 12px color-mix(in srgb,var(--primary) 25%,transparent)}
 .nav-capture{color:var(--primary);font-weight:750}.app-nav-capture{color:var(--primary)}
 @media(max-width:380px){.app-nav-tab{font-size:9px}.app-menu-sheet{padding:18px}.app-menu-item{padding:10px;gap:6px;font-size:13px}.app-menu-item .app-nav-icon{min-width:27px}}
+
+.detail-load-status[data-loading="true"]{display:flex;align-items:center;gap:12px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--card);min-height:64px}
+.detail-load-status[data-loading="true"]:before{content:'';flex-shrink:0;width:20px;height:20px;border:2px solid var(--line);border-top-color:var(--primary);border-radius:50%;animation:detail-loading-spin .8s linear infinite}
+@keyframes detail-loading-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.detail-load-status[data-loading="true"]:before{animation:none}}

@@ -188,6 +188,11 @@ async function page(html,js,data,expose){
  menu.w.document.querySelector('.mobile-app-nav [data-destination=more]').click();assert.equal(moreSheet.open,true);moreSheet.querySelector('[data-destination=budget]').click();assert.equal(moreSheet.open,false);assert.equal(menu.el('budgetPage').classList.contains('hidden'),false);assert.equal(menu.w.document.querySelector('.mobile-app-nav [data-destination=more]').classList.contains('is-active'),true);
  assert.deepEqual([...captureSheet.querySelectorAll('a,button[data-destination]')].map(b=>b.dataset.destination),['income','expense','salary','rent','car']);menu.close();
  console.log('PASS menu: primary order, grouped destinations, desktop/mobile capture, income/expense form selection, cross-page capture route and budget navigation');
+ const lazy=await page('car.html','car.js',{car_installments:[],car_expenses:[],accounts:[],categories:[]},'loadExcelTools');
+ assert.equal(lazy.w.document.querySelector('script[src*=sheetjs]'),null,'Excel must not block opening the page');assert.equal(lazy.el('carMessage').dataset.loading,'false');
+ const firstExcel=lazy.api.loadExcelTools(),sameExcel=lazy.api.loadExcelTools();assert.equal(firstExcel,sameExcel);const firstScript=lazy.w.document.querySelector('script[src*=sheetjs]');assert.equal(firstScript.async,true);firstScript.onerror();await assert.rejects(firstExcel,/Excel/);assert.equal(lazy.w.document.querySelector('script[src*=sheetjs]'),null);
+ const retryExcel=lazy.api.loadExcelTools();const retryScript=lazy.w.document.querySelector('script[src*=sheetjs]');lazy.w.XLSX={utils:{}};retryScript.onload();assert.equal(await retryExcel,lazy.w.XLSX);lazy.close();
+ console.log('PASS detail loading: no blocking Excel script, one shared download, failure cleanup/retry, ready status');
  console.log('PASS deep regressions: save locks, zero budget, logout failure, push readiness and stale request guards');
  console.log('PASS DOM fixtures: full paginated dashboard, XSS escaping, category/account retention, transaction edit status/source, debt save with blank due date, load failure retains data, salary category/reset/save, empty car schedule and visible modal errors');
 })().catch(e=>{console.error(e);process.exit(1)});

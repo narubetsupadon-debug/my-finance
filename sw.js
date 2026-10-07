@@ -1,10 +1,11 @@
-const CACHE='my-finance-v54-retirer3';
-const SHELL=['./','./index.html','./style.css?v=20261007-retirer3','./minimal-dark.css?v=20261007-retirer3','./theme.js?v=20261007-retirer3','./app.js?v=20261007-retirer3','./app-data.js?v=20261007-retirer3','./app-summary.js?v=20261007-retirer3','./app-dashboard.js?v=20261007-retirer3','./app-transactions.js?v=20261007-retirer3','./app-planning.js?v=20261007-retirer3','./app-safety.js?v=20261007-retirer3','./finance-core.js?v=20261007-retirer3','./app-nav.js?v=20261007-retirer3','./rent.html','./rent.css?v=20261007-retirer3','./rent.js?v=20261007-retirer3','./rent-core.js?v=20261007-retirer3','./car.html','./car.css?v=20261007-retirer3','./car.js?v=20261007-retirer3','./salary.html','./salary.js?v=20261007-retirer3','./salary-payslip.js?v=20261007-retirer3','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261007-retirer3','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+const CACHE='my-finance-v55-detail12';
+const SHELL=['./','./index.html','./style.css?v=20261007-detail12','./minimal-dark.css?v=20261007-detail12','./theme.js?v=20261007-detail12','./app.js?v=20261007-detail12','./app-data.js?v=20261007-detail12','./app-summary.js?v=20261007-detail12','./app-dashboard.js?v=20261007-detail12','./app-transactions.js?v=20261007-detail12','./app-planning.js?v=20261007-detail12','./app-safety.js?v=20261007-detail12','./finance-core.js?v=20261007-detail12','./app-nav.js?v=20261007-detail12','./rent.html','./rent.css?v=20261007-detail12','./rent.js?v=20261007-detail12','./rent-core.js?v=20261007-detail12','./car.html','./car.css?v=20261007-detail12','./car.js?v=20261007-detail12','./salary.html','./salary.js?v=20261007-detail12','./salary-payslip.js?v=20261007-detail12','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261007-detail12','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
  if(e.request.method!=='GET'||new URL(e.request.url).origin!==location.origin)return;
- e.respondWith(fetch(e.request,{cache:'no-cache'}).then(r=>{
+ const versioned=new URL(e.request.url).searchParams.has('v')&&/\.(js|css|svg)$/.test(new URL(e.request.url).pathname);
+ const network=()=>fetch(e.request,{cache:'no-cache'}).then(r=>{
   if(r.ok){const copy=r.clone();e.waitUntil(caches.open(CACHE).then(c=>c.put(e.request,copy)));}
   return r;
  }).catch(async()=>{
@@ -12,7 +13,8 @@ self.addEventListener('fetch',e=>{
   if(cached)return cached;
   if(e.request.mode==='navigate')return (await caches.match('./index.html'))||Response.error();
   return Response.error();
- }));
+ });
+ e.respondWith(versioned?caches.open(CACHE).then(c=>c.match(e.request)).then(cached=>cached||network()):network());
 });
 
 

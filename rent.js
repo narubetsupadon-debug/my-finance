@@ -1,11 +1,11 @@
-import {bangkokDay,readAll,lockFinanceForm} from './finance-core.js?v=20261007-retirer3';
-import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261007-retirer3';
+import {bangkokDay,readAll,lockFinanceForm} from './finance-core.js?v=20261007-detail12';
+import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261007-detail12';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');
 const $=id=>document.getElementById(id),money=n=>document.body.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0)),month=s=>new Date(s.slice(0,7)+'-01T00:00:00').toLocaleDateString('th-TH',{month:'long',year:'numeric'}),day=s=>s?new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'—';
 let user,rows=[],transactions=[],accounts=[],categories=[],editing=null,autoHalf=true;
 function option(el,value,label){const o=document.createElement('option');o.value=value;o.textContent=label;el.append(o);}
-function message(s,saved=false){$('rentMessage').textContent=s;$('rentSavedLink').hidden=!saved;}
+function message(s,saved=false){$('rentMessage').dataset.loading='false';$('rentMessage').textContent=s;$('rentSavedLink').hidden=!saved;}
 async function load(){[rows,transactions]=await Promise.all([
  readAll(()=>db.from('rent_records').select('*').eq('user_id',user.id).order('bill_month',{ascending:false}).order('id')),
  readAll(()=>db.from('transactions').select('*,categories(name)').eq('user_id',user.id).eq('type','expense').order('transaction_date',{ascending:false}).order('id'))

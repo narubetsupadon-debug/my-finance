@@ -72,3 +72,18 @@ export function lockFinanceForm(form,dialog=null){
  dialog?.addEventListener('cancel',preventCancel);
  return ()=>{controls.forEach((el,i)=>el.disabled=states[i]);dialog?.removeEventListener('cancel',preventCancel)};
 }
+
+// Load Excel only when exporting, so it cannot delay opening detail pages.
+let excelToolsPromise=null;
+export function loadExcelTools(){
+ if(window.XLSX)return Promise.resolve(window.XLSX);
+ if(excelToolsPromise)return excelToolsPromise;
+ excelToolsPromise=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');script.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';script.async=true;
+  const timer=setTimeout(()=>fail(),20000);
+  function fail(){clearTimeout(timer);script.onload=null;script.onerror=null;script.remove();excelToolsPromise=null;reject(new Error('โหลดเครื่องมือ Excel ไม่สำเร็จ ลองส่งออกอีกครั้งได้'));}
+  script.onerror=fail;script.onload=()=>{if(!window.XLSX)return fail();clearTimeout(timer);script.onload=null;script.onerror=null;resolve(window.XLSX);};
+  document.head.append(script);
+ });
+ return excelToolsPromise;
+}
