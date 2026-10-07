@@ -47,6 +47,15 @@ async function page(html,js,data,expose){
  assert.equal(p.el('txList').querySelector('img'),null);
  assert.equal(p.el('recentList').querySelectorAll('.transaction-row').length,5);
  assert.match(p.el('txList').querySelector('.status-cancelled').textContent,/ยกเลิก/);
+ assert.equal(p.el('txFilters').open,false,'secondary filters start collapsed');
+ assert.equal(p.el('txFilterMonth').tagName,'SELECT','month selector must not rely on mobile native month inputs');
+ assert.equal(p.el('txList').querySelectorAll('.tx-day-group').length,1);
+ assert.equal(p.el('txList').querySelectorAll('.tx-row-menu').length,1201);
+ assert.equal(p.el('txList').querySelector('.tx-row-menu').open,false);
+ p.el('txSearch').value='not-a-real-description';p.el('txSearch').oninput();assert.match(p.el('txList').textContent,/ไม่พบรายการที่ตรงกัน/);assert.equal(p.el('txResetFilters').hidden,false);
+ p.el('txResetFilters').click();assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.equal(p.el('txResetFilters').hidden,true);
+ p.el('txFilterType').value='income';p.el('txFilterType').onchange();assert.equal(p.el('txFilterBadge').textContent,'1');assert.equal(p.el('txFilterBadge').hidden,false);p.el('txResetFilters').click();
+ p.el('txFilterMonth').value=day.slice(0,7);p.el('txFilterMonth').onchange();assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.equal(p.el('txFilterMonth').value,day.slice(0,7));p.el('txResetFilters').click();
  p.el('viewToday').click();assert.equal(p.el('insightDetailDialog').open,true);p.el('insightDetailDialog').close();
  p.el('nextBillCard').click();assert.equal(p.el('billsPage').classList.contains('hidden'),false);
   // accent toast must not appear on ordinary navigation clicks

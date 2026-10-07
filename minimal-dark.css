@@ -4,6 +4,7 @@
    the visual system so all current features stay intact.
    ========================================================= */
 :root{
+  --surface:#1a2130;
   color-scheme:dark;
   --bg:#0b0e14;
   --card:#121722;

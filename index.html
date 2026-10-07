@@ -9,20 +9,20 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
-<link rel="stylesheet" href="./style.css?v=20261007-backend13">
-<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261007-backend13" media="(prefers-color-scheme: dark)">
-<script src="./theme.js?v=20261007-backend13"></script>
+<link rel="stylesheet" href="./style.css?v=20261007-ui14">
+<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261007-ui14" media="(prefers-color-scheme: dark)">
+<script src="./theme.js?v=20261007-ui14"></script>
 <style>
 .insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 #insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261007-backend13">
+</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261007-ui14">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
   <div class="auth-splash-card">
-    <img src="./app-icon.svg?v=20261007-backend13" width="72" height="72" alt="">
+    <img src="./app-icon.svg?v=20261007-ui14" width="72" height="72" alt="">
     <h1>My Finance</h1>
     <p>กำลังเปิดกระเป๋าของมิว…</p>
     <span class="auth-splash-spinner" aria-hidden="true"></span>
@@ -31,7 +31,7 @@
 
 <div id="authScreen" class="auth-screen hidden">
   <div class="auth-card">
-    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261007-backend13" width="56" height="56" alt="">My Finance</h1>
+    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261007-ui14" width="56" height="56" alt="">My Finance</h1>
     <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และยอดคงเหลือบัตรในที่เดียว</p>
     <div class="auth-tabs">
       <button id="tabLogin" class="active">เข้าสู่ระบบ</button>
@@ -52,7 +52,7 @@
   </div>
   <header class="topbar">
     <div class="topin">
-      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261007-backend13" width="36" height="36" alt="">My Finance</div><div class="muted">Supabase Cloud Sync</div></div>
+      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261007-ui14" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
       <div class="userbox">
         <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings">⚙️ ตั้งค่า</button>
         <span id="userEmail" class="muted"></span>
@@ -155,16 +155,21 @@
       </section>
 
       <section id="transactionsPage" class="page hidden">
-        <div class="page-head"><div><h2>รายรับ‑รายจ่าย</h2><div id="txCount" class="muted"></div></div><button class="btn primary" onclick="openTx()">+ เพิ่มรายการ</button></div><div class="flow-note"><span class="flow-note-icon">💡</span><div><strong>รายการทั่วไปบันทึกที่นี่</strong><br>รถ บิลประจำ และเงินเดือนที่บันทึกผ่านเมนูของตัวเองจะเชื่อมรายการให้อัตโนมัติ จึงไม่ต้องบันทึกซ้ำ</div></div>
-        <div class="card">
-          <div class="filters">
-            <input id="txSearch" placeholder="ค้นหารายการ...">
-            <select id="txFilterType"><option value="all">ทุกประเภท</option><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select>
-            <select id="txFilterCategory"><option value="">ทุกหมวด</option></select>
-            <input id="txFilterMonth" type="month">
-          </div>
-          <div id="txList" class="list section"></div>
+        <div class="page-head tx-page-head"><div><div class="tx-eyebrow">สมุดบันทึกของฉัน</div><h2>รายรับ–รายจ่าย</h2><div id="txCount" class="muted" aria-live="polite"></div></div><button class="btn primary tx-add-button" onclick="openTx()"><span aria-hidden="true">＋</span> เพิ่มรายการ</button></div>
+        <div class="card tx-toolbar">
+          <label class="tx-search-box" for="txSearch"><span aria-hidden="true">⌕</span><input id="txSearch" type="search" placeholder="ค้นหาชื่อ หมวด หรือหมายเหตุ" autocomplete="off" aria-label="ค้นหารายการ"></label>
+          <details id="txFilters" class="tx-filter-panel">
+            <summary><span>ตัวกรอง <span id="txFilterBadge" class="tx-filter-badge" hidden></span></span><span id="txFilterSummary" class="tx-filter-summary">ทุกช่วงเวลา</span><span class="tx-filter-caret" aria-hidden="true">⌄</span></summary>
+            <div class="filters tx-filter-fields">
+              <label for="txFilterType">ประเภท<select id="txFilterType"><option value="all">ทุกประเภท</option><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select></label>
+              <label for="txFilterCategory">หมวดหมู่<select id="txFilterCategory"><option value="">ทุกหมวด</option></select></label>
+              <label class="tx-month-field" for="txFilterMonth">ช่วงเวลา<select id="txFilterMonth"><option value="">ทุกเดือน</option></select></label>
+            </div>
+          </details>
+          <button id="txResetFilters" type="button" class="tx-reset-filters" hidden>ล้างการค้นหาและตัวกรอง</button>
         </div>
+        <details class="tx-guide"><summary>บันทึกอย่างไรไม่ให้ซ้ำ?</summary><p>รายการทั่วไปบันทึกที่นี่ ส่วนเงินเดือน ค่าห้อง รถ และบิลที่บันทึกผ่านเมนูของตัวเอง จะเชื่อมรายการให้อัตโนมัติ ไม่ต้องลงซ้ำค่ะ</p></details>
+        <div id="txList" class="list tx-ledger"></div>
       </section>
 
       <section id="categoriesPage" class="page hidden">
@@ -424,8 +429,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
-<script type="module" src="./app.js?v=20261007-backend13"></script>
-<script type="module" src="./app-nav.js?v=20261007-backend13"></script></body>
+<script type="module" src="./app.js?v=20261007-ui14"></script>
+<script type="module" src="./app-nav.js?v=20261007-ui14"></script></body>
 </html>
-
-

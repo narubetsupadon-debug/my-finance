@@ -649,3 +649,50 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 .detail-load-status[data-loading="true"]:before{content:'';flex-shrink:0;width:20px;height:20px;border:2px solid var(--line);border-top-color:var(--primary);border-radius:50%;animation:detail-loading-spin .8s linear infinite}
 @keyframes detail-loading-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.detail-load-status[data-loading="true"]:before{animation:none}}
+
+/* App ledger: a compact reading surface, with secondary controls on demand. */
+#transactionsPage [hidden]{display:none!important}
+.tx-page-head{align-items:center;flex-direction:row;margin:4px 0 16px;gap:12px}
+.tx-page-head>div{min-width:0}.tx-eyebrow{font-size:12px;color:var(--muted);margin-bottom:5px}
+.tx-page-head h2{font-size:25px;margin:0 0 5px}.tx-add-button{white-space:nowrap;min-height:44px;padding:10px 15px;font-size:13px}
+.tx-toolbar{padding:12px;border-radius:18px;box-shadow:none}
+.tx-search-box{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:var(--surface,#f8f9fc);min-width:0}
+.tx-search-box>span{font-size:25px;color:var(--muted);flex-shrink:0}.tx-search-box input{width:100%;min-width:0;min-height:44px;border:0;background:transparent;color:var(--text);padding:10px 0;font-size:14px;outline:none}
+.tx-search-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 12%,transparent)}
+.tx-filter-panel>summary{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer;padding:10px 3px 0;font-size:13px;list-style:none;color:var(--text)}
+.tx-filter-panel>summary::-webkit-details-marker,.tx-row-menu>summary::-webkit-details-marker,.tx-guide>summary::-webkit-details-marker{display:none}
+.tx-filter-summary{margin-left:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}
+.tx-filter-caret{font-size:18px}.tx-filter-panel[open] .tx-filter-caret{transform:rotate(180deg)}
+.tx-filter-badge{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:4px;background:color-mix(in srgb,var(--primary) 10%,var(--card));color:var(--primary);border-radius:7px;font-size:11px;font-weight:700}
+#transactionsPage .tx-filter-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;padding:12px 0 3px}
+.tx-filter-fields label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:12px;color:var(--muted)}
+#transactionsPage .tx-filter-fields select{width:100%;min-width:0;max-width:100%;min-height:44px;padding:10px 8px;background:var(--card);color:var(--text);border:1px solid var(--line);font-size:14px}
+.tx-reset-filters{display:block;border:0;background:none;color:var(--primary);font:inherit;font-size:12px;min-height:44px;padding:8px 3px;cursor:pointer;text-align:left}
+.tx-guide{margin:10px 3px 16px;font-size:12px;color:var(--muted)}.tx-guide>summary{cursor:pointer;min-height:32px;display:flex;align-items:center;gap:7px;list-style:none}.tx-guide>summary:before{content:'ⓘ';font-size:15px;color:var(--primary)}.tx-guide>summary:after{content:'⌄';margin-left:3px}.tx-guide[open]>summary:after{content:'⌃'}.tx-guide p{margin:6px 0 0;line-height:1.7;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--text)}
+.tx-ledger{gap:18px}.tx-day-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 3px 8px;color:var(--muted)}.tx-day-header h3{margin:0;font-size:13px;font-weight:700;color:var(--text)}.tx-day-header>span{font-size:11px}
+.tx-day-card{padding:0 14px;background:var(--card);border:1px solid var(--line);border-radius:17px}
+#transactionsPage .ledger-row{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr) auto 36px;gap:10px;padding:15px 0;align-items:center;background:transparent;min-width:0}
+#transactionsPage .ledger-row .transaction-icon{width:36px;height:36px;align-self:start;background:var(--surface,#f1f3f9);border-radius:12px;font-size:19px}
+#transactionsPage .ledger-row b{white-space:normal;overflow-wrap:anywhere;line-height:1.5;font-size:14px;font-weight:700}
+#transactionsPage .ledger-row .transaction-detail>.muted{font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin-top:4px}
+#transactionsPage .ledger-row .amount{grid-column:3;grid-row:1;justify-self:end;align-self:start;margin-top:3px;font-size:15px;font-weight:750;white-space:nowrap;font-variant-numeric:tabular-nums}
+#transactionsPage .ledger-row .status-paid{display:none}.ledger-row .tx-status{font-size:11px;margin-top:5px}
+.tx-row-menu{position:relative;grid-column:4;grid-row:1;align-self:start}.tx-row-menu>summary{display:grid;place-items:center;min-height:44px;min-width:36px;border-radius:10px;cursor:pointer;list-style:none;font-size:23px;color:var(--muted)}.tx-row-menu[open]>summary{background:var(--surface,#f3f4f6);color:var(--primary)}
+.tx-row-menu-panel{position:absolute;right:0;top:42px;z-index:20;display:flex;flex-direction:column;gap:4px;padding:6px;min-width:155px;background:var(--card);border:1px solid var(--line);border-radius:13px;box-shadow:0 10px 28px #17203320}
+.tx-row-menu-panel .btn{justify-content:flex-start;min-height:44px;background:transparent;color:var(--text);font-weight:600;border-radius:8px}.tx-row-menu-panel .btn.danger{color:var(--red)}.tx-row-menu-panel .btn:hover{background:var(--surface,#f8f9fc);transform:none}
+.tx-row-menu>summary:focus-visible,.tx-guide>summary:focus-visible,.tx-filter-panel>summary:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.tx-empty{background:var(--card);border-color:var(--line);padding:32px 16px;border-radius:17px}.tx-empty b{color:var(--text);font-size:15px}.tx-empty p{font-size:13px;line-height:1.6}
+@media(max-width:820px){
+ .tx-page-head{flex-direction:row;align-items:center;margin:4px 1px 14px}.tx-page-head h2{font-size:22px}.tx-page-head .muted{font-size:12px}.tx-eyebrow{font-size:11px}.tx-add-button{min-height:44px;padding:10px 12px;font-size:12px}
+ #transactionsPage .tx-filter-fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tx-month-field{grid-column:1/-1}
+ .tx-search-box input,#transactionsPage .tx-filter-fields select{font-size:16px}.tx-search-box input::placeholder{font-size:13px}
+ .tx-guide{margin-bottom:12px}.tx-day-card{padding:0 12px}.tx-ledger{gap:16px}
+ #transactionsPage .ledger-row{grid-template-columns:32px minmax(0,1fr) 32px;column-gap:9px;row-gap:5px;padding:13px 0}
+ #transactionsPage .ledger-row .transaction-icon{width:32px;height:34px;grid-column:1;grid-row:1/3;font-size:18px}
+ #transactionsPage .ledger-row .transaction-detail{grid-column:2;grid-row:1}
+ #transactionsPage .ledger-row .amount{grid-column:2;grid-row:2;justify-self:start;font-size:15px;margin-top:0}
+ #transactionsPage .ledger-row .tx-row-menu{grid-column:3;grid-row:1/3;align-self:center}
+ #transactionsPage .ledger-row .transaction-detail>.muted{font-size:11px}
+ .mobile-app-nav .app-nav-tab{font-size:11px;line-height:1.35;gap:5px}.mobile-app-nav .app-nav-tab[data-destination=transactions]{font-size:10px}
+}
+@media(max-width:360px){.tx-page-head h2{font-size:20px}.tx-add-button{font-size:11px;padding:9px}.tx-row-menu-panel{min-width:145px}.tx-filter-summary{max-width:150px}}
