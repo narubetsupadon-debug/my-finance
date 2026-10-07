@@ -68,6 +68,8 @@ async function page(html,js,data,expose){
  assert.equal(p.el('txFilterCategory').value,'cat');assert.equal(p.el('txAccount').value,'acc');
  await p.el('txForm').onsubmit({preventDefault(){},currentTarget:p.el('txForm')});
  assert.equal(p.state.writes.at(-1).row.status,'cancelled');assert.equal(p.state.writes.at(-1).row.source,'import_r3_v2');
+ assert.match(p.el('appToast').textContent,/รายการยกเลิก/);p.el('appToast').querySelector('.toast-action').click();assert.equal(p.el('transactionsPage').classList.contains('hidden'),false);assert.equal(p.el('txSearch').value,'food');
+ p.state.failAfterWrite=true;p.w.openTx('t0');await p.el('txForm').onsubmit({preventDefault(){},currentTarget:p.el('txForm')});assert.equal(p.el('txDialog').open,false);assert.match(p.el('appToast').textContent,/ไม่ต้องบันทึกซ้ำ/);assert.equal(p.el('appToast').querySelector('.toast-action').textContent,'โหลดใหม่');assert.equal(p.el('txError').classList.contains('hidden'),true);p.state.failAfterWrite=false;p.state.fail=false;p.el('appToast').querySelector('.toast-action').click();await new Promise(r=>setTimeout(r,0));assert.equal(p.el('appToast').querySelector('.toast-action').textContent,'ดูรายการ');
  p.w.openEntity('debt');p.el('entityFields').querySelector('[name=name]').value='card';
  await p.el('entityForm').onsubmit({preventDefault(){},currentTarget:p.el('entityForm')});
  assert.equal(p.state.writes.at(-1).table,'debts');assert.equal(p.state.writes.at(-1).row.due_day,null);assert.equal(p.w.alerts.length,0);

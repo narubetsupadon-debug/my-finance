@@ -1,10 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-payslip2';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-payslip2';
-import {createSummaryRenderer} from './app-summary.js?v=20261007-payslip2';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261007-payslip2';
-import {createTransactionRenderer} from './app-transactions.js?v=20261007-payslip2';
-import {createPlanningRenderer} from './app-planning.js?v=20261007-payslip2';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-payslip2';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-ux3';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-ux3';
+import {createSummaryRenderer} from './app-summary.js?v=20261007-ux3';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261007-ux3';
+import {createTransactionRenderer} from './app-transactions.js?v=20261007-ux3';
+import {createPlanningRenderer} from './app-planning.js?v=20261007-ux3';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-ux3';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -228,8 +228,20 @@ $('txDialog')?.addEventListener('close',flushRealtimeAfterEdit);
 $('entityDialog')?.addEventListener('close',flushRealtimeAfterEdit);
 $('retryData').onclick=()=>loadAll();
 function renderAll(){fillTxSelectors();renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary();renderSettings();applyUiSettings();void refreshPushStatus()}
-function showAppToast(message){
- const el=$('appToast'); if(!el)return; el.textContent=message; el.classList.remove('hidden'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>el.classList.add('hidden'),2200)
+function showAppToast(message,action=null){
+ const el=$('appToast');if(!el)return;clearTimeout(window.__toastTimer);el.replaceChildren();
+ const text=document.createElement('span');text.textContent=message;el.append(text);el.classList.remove('hidden');
+ if(action){
+  const view=document.createElement('button');view.type='button';view.className='toast-action';view.textContent=action.label;view.onclick=()=>{action.run();el.classList.add('hidden')};el.append(view);
+  const close=document.createElement('button');close.type='button';close.className='toast-close';close.textContent='×';close.setAttribute('aria-label','ปิดข้อความ');close.onclick=()=>el.classList.add('hidden');el.append(close);
+ }else window.__toastTimer=setTimeout(()=>el.classList.add('hidden'),4000);
+}
+function savedNotice(label,refreshed,action){
+ showAppToast(label+(refreshed?' · โหลดข้อมูลล่าสุดแล้ว':' · โหลดข้อมูลล่าสุดไม่ได้ กรุณากดโหลดใหม่ ไม่ต้องบันทึกซ้ำ'),refreshed?action:{label:'โหลดใหม่',run:async()=>savedNotice(label,await loadAll(),action)});
+}
+function viewSavedTransaction(row){
+ $('txFilterType').value='all';$('txFilterCategory').value='';$('txFilterMonth').value=row.transaction_date.slice(0,7);$('txSearch').value=row.description;
+ renderTransactions();showPage('transactions');
 }
 function quickCategoryMatch(label){
  const aliases={อาหาร:['อาหาร'],กาแฟ:['กาแฟ','อาหาร'],รถ:['รถยนต์','เดินทาง'],ซื้อของ:['ช้อปปิ้ง'],จ่ายบัตร:['หนี้/ผ่อน'],บิล:['บิล/สาธารณูปโภค']}
@@ -511,13 +523,15 @@ $('txForm').onsubmit=async e=>{
  }
  $('txDuplicateWarning')?.classList.add('hidden');
  $('txError').classList.add('hidden');const unlock=lockFinanceForm($('txForm'),$('txDialog'));
- button.disabled=true;button.textContent='กำลังบันทึก…';
+ button.disabled=true;button.textContent='กำลังบันทึก…';let committed=false;
  try{
   const q=editing.id?supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id):supabase.from('transactions').insert(row);
   const r=await q.select('id').single();
   if(r.error)throw r.error;
-  const favoriteSaved=saveFavorite(row);$('txDialog').close();showAppToast(favoriteSaved?'บันทึกแล้ว ✅':'บันทึกรายการแล้ว แต่เก็บรายการโปรดในเครื่องนี้ไม่ได้');await loadAll();
- }catch(error){txError('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
+  committed=true;const favoriteSaved=saveFavorite(row);$('txDialog').close();
+  const label='บันทึกรายการแล้ว ✅'+(row.status==='cancelled'?' · รายการยกเลิก ไม่นับรวมยอด':'')+(!favoriteSaved?' · เก็บรายการโปรดในเครื่องนี้ไม่ได้':'');
+  savedNotice(label,await loadAll(),{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});
+ }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});else txError('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
 }
 $('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
 for(const id of ['txAmount','txDesc','txDate','txCategory','txAccount']){
@@ -570,12 +584,12 @@ $('entityForm').onsubmit=async e=>{
   fd.debt_id=paymentSource.startsWith('debt:')?paymentSource.slice(5):null;
  }
  if(!editing.id){if(editing.type==='category')fd.sort_order=0;else fd.is_active=true;if(editing.type==='bill')fd.frequency='monthly'}
- const unlock=lockFinanceForm($('entityForm'),$('entityDialog'));button.disabled=true;
+ const entityType=editing.type;let committed=false;const unlock=lockFinanceForm($('entityForm'),$('entityDialog'));button.disabled=true;
  try{
   const q=editing.id?supabase.from(table).update(fd).eq('id',editing.id).eq('user_id',user.id):supabase.from(table).insert(fd);
   const {error}=await q.select('id').single();if(error)throw error;
-  $('entityDialog').close();showAppToast('บันทึกแล้ว ✅');await loadAll();
- }catch(error){alert('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false}
+  committed=true;$('entityDialog').close();savedNotice('บันทึก'+({category:'หมวดหมู่',account:'บัญชี',bill:'บิล',budget:'งบประมาณ',debt:'บัตร/สินเชื่อ'}[entityType])+'แล้ว ✅',await loadAll(),{label:'ดูข้อมูล',run:()=>showPage({category:'categories',account:'accounts',bill:'bills',budget:'budget',debt:'debts'}[entityType])});
+ }catch(error){if(committed)savedNotice('บันทึกข้อมูลสำเร็จแล้ว',false,{label:'ดูข้อมูล',run:()=>showPage(table==='budgets'?'budget':table)});else alert('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false}
 }
 
 async function payRecurringBill(bill,button){
