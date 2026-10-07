@@ -83,7 +83,8 @@ function renderSummary(){
  $('sumDebtPay').textContent=money(grouped['ชำระบัตร/สินเชื่อ']||0)
  const rentTotal=grouped['ห้องเช่า']||0
  const carTotal=(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0)
- $('sumRent').textContent=money(rentTotal)
+ $('sumRent').textContent=money(Math.round(rentTotal*100/2)/100)
+ $('sumRentFull').textContent=money(rentTotal)
  $('sumCar').textContent=money(carTotal)
  $('sumCarInstallment').textContent=money(grouped['ค่างวดรถ']||0)
  $('sumCarOther').textContent=money(carTotal-(grouped['ค่างวดรถ']||0))

@@ -1,10 +1,10 @@
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-split6';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-split6';
-import {createSummaryRenderer} from './app-summary.js?v=20261007-split6';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261007-split6';
-import {createTransactionRenderer} from './app-transactions.js?v=20261007-split6';
-import {createPlanningRenderer} from './app-planning.js?v=20261007-split6';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-split6';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-rent7';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-rent7';
+import {createSummaryRenderer} from './app-summary.js?v=20261007-rent7';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261007-rent7';
+import {createTransactionRenderer} from './app-transactions.js?v=20261007-rent7';
+import {createPlanningRenderer} from './app-planning.js?v=20261007-rent7';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-rent7';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'

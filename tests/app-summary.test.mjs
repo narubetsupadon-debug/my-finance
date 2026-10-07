@@ -19,18 +19,22 @@ try{
  const render=createSummaryRenderer({$,money:String,esc:String,bangkokDay:()=> '2026-10-07',getTransactions:()=>[
   {transaction_date:'2026-10-01',type:'income',amount:1000,status:'paid'},
   {transaction_date:'2026-10-02',type:'expense',amount:250,status:'paid'},
+  {transaction_date:'2026-10-03',type:'expense',amount:2000,status:'paid',categories:{name:'ห้องเช่า'}},
   {transaction_date:'2026-10-02',type:'expense',amount:999,status:'cancelled'}
  ],ChartCtor:Chart});
  render();
  const trend=charts[0].config;
  assert.equal(trend.data.labels.length,7);
  assert.equal(trend.data.datasets[2].label,'สุทธิรายวัน');
- assert.deepEqual(trend.data.datasets[2].data,[1000,-250,0,0,0,0,0]);
- assert.equal($('sumBalance').textContent,'750');
+ assert.deepEqual(trend.data.datasets[2].data,[1000,-250,-2000,0,0,0,0]);
+ assert.equal($('sumBalance').textContent,'-1250');
+ assert.equal($('sumRent').textContent,'1000');
+ assert.equal($('sumRentFull').textContent,'2000');
  assert.equal(trend.data.datasets[2].pointRadius,0);
  assert.equal(trend.options.interaction.intersect,false);
  render.setRange('6m');
  assert.equal(charts[3].config.data.labels.length,6);
  assert.equal(charts[3].config.data.datasets[2].label,'สุทธิรายเดือน');
+ assert.equal($('sumRent').textContent,'1000');assert.equal($('sumExpense').textContent,'2250');
 }finally{globalThis.document=previousDocument;}
 console.log('PASS summary: current and historical dates, recorded future entries, cancelled exclusion, daily net and monthly range');
