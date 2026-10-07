@@ -59,3 +59,7 @@
  .car-expense-head{align-items:stretch;flex-direction:column}.car-expense-head .btn{width:100%}
 }
 @media(max-width:420px){.car-expense-metrics{grid-template-columns:1fr 1fr}.car-expense-item{padding:10px}.car-expense-item strong{font-size:13px}}
+
+/* Month expenses first; installment detail remains available */
+.car-wrap .car-expense-metrics{margin-top:20px}.car-wrap .car-expense-metrics>div:first-child{grid-column:1/-1;background:color-mix(in srgb,var(--primary) 7%,var(--card))}.car-wrap #carMonthExpense{font-size:clamp(26px,5vw,36px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.car-wrap .car-installment-details>summary{font-weight:700}.car-wrap .car-installment-details[open]>summary{margin-bottom:16px}.car-wrap .car-installment-details>.grid3 .card{box-shadow:none}.car-wrap .car-installment-details .car-table{margin-top:12px}.car-wrap .car-expense-head{gap:12px;flex-wrap:wrap}.car-wrap .car-expense-head>div{min-width:0}.car-wrap .car-expense-head h2{font-size:21px}.car-wrap .metric{min-width:0}.car-wrap .metric .value{overflow-wrap:anywhere}
+@media(max-width:650px){.car-wrap .car-expense-head{display:grid;grid-template-columns:minmax(0,1fr)}.car-wrap #addCarExpense{width:100%;min-height:48px}.car-wrap .car-installment-details{padding:14px}.car-wrap .car-installment-details>.card{padding:0;border:0;background:transparent;box-shadow:none}}
