@@ -16,11 +16,11 @@ if(!params.has('screen')){
  const rows=[['a','2026-10-07','ข้าวกลางวัน',60,'paid',categories[0]],['b','2026-10-07','รายการตัวอย่างชื่อยาวมากสำหรับทดสอบหน้าจอขนาดเล็ก',1200,'pending',categories[2]],['c','2026-10-06','ค่าเดินทาง',150,'paid',categories[1]],['d','2026-09-30','รายการยกเลิกตัวอย่าง',99,'cancelled',categories[0]]].map(([id,date,description,amount,status,cat])=>({id,transaction_date:date,description,amount,status,type:'expense',category_id:cat.id,categories:cat,accounts:{name:'บัญชีตัวอย่าง'},source:'web'}));
  const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  $('txFilterCategory').innerHTML='<option value="">ทุกหมวด</option>'+categories.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join('');
- const {createTransactionRenderer}=await import('../app-transactions.js?v=20261008-entry16');
+ const {createTransactionRenderer}=await import('../app-transactions.js?v=20261008-capacity17');
  const renderer=createTransactionRenderer({$,esc,getTransactions:()=>rows,money:n=>'฿'+Number(n).toLocaleString('th-TH',{minimumFractionDigits:2}),fmtDate:d=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})});
  renderer.renderTransactions();$('txSearch').oninput=renderer.renderTransactions;for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderer.renderTransactions;
  window.openTx=()=>alert('ตัวอย่างสำหรับตรวจหน้าตาเท่านั้น ไม่มีการบันทึกข้อมูล');
- const nav=document.createElement('script');nav.src='../app-nav.js?v=20261008-entry16';nav.type='module';document.body.append(nav);
+ const nav=document.createElement('script');nav.src='../app-nav.js?v=20261008-capacity17';nav.type='module';document.body.append(nav);
  document.addEventListener('finance:navigate',()=>{});location.hash='transactions';
 }
 </script></body></html>

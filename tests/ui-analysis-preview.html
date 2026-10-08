@@ -13,11 +13,11 @@ if(!params.has('screen')){
  $('summaryPeriodText').textContent='ตัวอย่างข้อมูลสำหรับตรวจหน้าตาเท่านั้น';
  const transactions=[['a','2026-10-01',120,'อาหาร'],['b','2026-10-03',180,'อาหาร'],['c','2026-10-07',90,'อาหาร'],['rent','2026-10-05',7210,'ห้องเช่า'],['coffee','2026-10-04',65,'กาแฟ'],['prior','2026-09-02',300,'อาหาร'],['prior-rent','2026-09-05',7000,'ห้องเช่า']].map(([id,transaction_date,amount,name])=>({id,transaction_date,amount,type:'expense',status:'paid',source:name==='ห้องเช่า'?'rent':'web',description:name+' (ตัวอย่าง)',categories:{name},accounts:{name:'บัญชีตัวอย่าง'}}));
  const budgets=[{id:'budget',name:'งบกินและกาแฟ',is_active:true,monthly_limit:4000,category_names:['อาหาร','กาแฟ']}],records=[{transaction_id:'rent',my_amount:3605},{transaction_id:'prior-rent',my_amount:3500}];
- const {createExpenseAnalysisRenderer}=await import('../expense-analysis.js?v=20261008-entry16'),{rentShareTotals}=await import('../app-summary.js?v=20261008-entry16');
+ const {createExpenseAnalysisRenderer}=await import('../expense-analysis.js?v=20261008-capacity17'),{rentShareTotals}=await import('../app-summary.js?v=20261008-capacity17');
  const render=createExpenseAnalysisRenderer({$,money:n=>'฿'+Number(n).toLocaleString('th-TH',{minimumFractionDigits:2}),fmtDate:d=>new Date(d+'T12:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})});
  let range='month';function refresh(){const config=range==='month'?{mode:'days',monthKey:'2026-10'}:range==='custom'?{mode:'days',monthKey:'2026-09'}:{mode:'months',keys:['2026-08','2026-09','2026-10']};render({transactions,budgets,config,today:'2026-10-07',label:range==='month'?'ตุลาคม 2569':range==='custom'?'กันยายน 2569':'3 เดือนล่าสุด',groupBy:x=>x.categories.name,rentTotals:rows=>rentShareTotals(rows,records)});}
  document.querySelectorAll('[data-summary-range]').forEach(b=>{b.onclick=()=>{range=b.dataset.summaryRange;document.querySelectorAll('[data-summary-range]').forEach(n=>n.classList.toggle('active',n===b));refresh();};});refresh();
- const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261008-entry16';document.body.append(nav);location.hash='summary';
+ const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261008-capacity17';document.body.append(nav);location.hash='summary';
 }
 function $(id){return document.getElementById(id);}
 </script></body></html>

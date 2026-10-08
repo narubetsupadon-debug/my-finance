@@ -1,0 +1,14 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>พื้นที่แอพ · ตัวอย่างสำหรับตรวจหน้าจอ</title></head><body><script type="module">
+const params=new URLSearchParams(location.search);
+if(!params.has('screen')){
+ document.body.style.cssText='padding:20px;background:#e8ebf2;font-family:system-ui';const h=document.createElement('h1');h.textContent='พื้นที่แอพ · ข้อมูลตัวอย่างสำหรับตรวจหน้าจอ';document.body.append(h);
+ for(const [title,width,extra] of [['390px',390,''],['320px',320,''],['Dark',390,'&dark=1']]){const frame=document.createElement('iframe');frame.title=title;frame.src='./ui-capacity-preview.html?screen=1'+extra;frame.style.cssText='width:'+width+'px;height:850px;border:0;border-radius:20px;margin-right:16px';document.body.append(frame);}
+}else{
+ const html=await (await fetch('../index.html')).text(),parsed=new DOMParser().parseFromString(html,'text/html');
+ for(const link of parsed.querySelectorAll('link[rel=stylesheet]')){if(link.id==='darkThemeStylesheet'&&!params.has('dark'))continue;const clone=link.cloneNode();clone.href=new URL(link.getAttribute('href'),new URL('../index.html',location.href));if(clone.id==='darkThemeStylesheet')clone.media='all';document.head.append(clone);}
+ const card=parsed.querySelector('.capacity-card');document.body.style.padding='16px';document.body.append(card);
+ const {renderCapacity}=await import('../app-storage.js?v=20261008-capacity17');let full=false;
+ function show(){renderCapacity(id=>document.getElementById(id),{databaseBytes:full?450000000:14000000,databaseLimitBytes:500000000,fileBytes:0,fileLimitBytes:1000000000,appTableBytes:1000000,transactionCount:240,fileCount:0,unknownFileSizes:0,checkedAt:'2026-10-08T02:30:00Z'});document.getElementById('capacityStatus').textContent='ข้อมูลตัวอย่าง ไม่ได้เชื่อมบัญชีจริง';}
+ document.getElementById('refreshCapacity').onclick=()=>{full=!full;show()};show();
+}
+</script></body></html>

@@ -1,12 +1,13 @@
-import {serializeFinanceBackup} from './finance-backup.js?v=20261008-entry16';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-entry16';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-entry16';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-entry16';
-import {createSummaryRenderer} from './app-summary.js?v=20261008-entry16';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261008-entry16';
-import {createTransactionRenderer} from './app-transactions.js?v=20261008-entry16';
-import {createPlanningRenderer} from './app-planning.js?v=20261008-entry16';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-entry16';
+import {createCapacityMonitor} from './app-storage.js?v=20261008-capacity17';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261008-capacity17';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-capacity17';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-capacity17';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-capacity17';
+import {createSummaryRenderer} from './app-summary.js?v=20261008-capacity17';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261008-capacity17';
+import {createTransactionRenderer} from './app-transactions.js?v=20261008-capacity17';
+import {createPlanningRenderer} from './app-planning.js?v=20261008-capacity17';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-capacity17';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -180,7 +181,7 @@ async function requestLogout(button){
 $('logout').onclick=()=>requestLogout($('logout'));
 $('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settingsLogout')));
 function clearSessionUI(){
- sessionRevision++;user=null;refreshCoordinator.dispose();
+ sessionRevision++;user=null;refreshCoordinator.dispose();capacityMonitor.clear();
  if(channel){supabase.removeChannel(channel);channel=null}
  categories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();rentRecords=[];lastSyncAt=null;
  document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());
@@ -559,6 +560,10 @@ for(const id of ['txAmount','txDesc','txDate','txCategory','txAccount']){
  $(id)?.addEventListener('change',()=>{duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden')});
 }
 
+const capacityMonitor=createCapacityMonitor({$,rpc:()=>supabase.rpc('finance_capacity'),getUser:()=>user,isVisible:()=>!!user&&!document.hidden&&!$('settingsPage').classList.contains('hidden')});
+window.addEventListener('finance:page',()=>void capacityMonitor.sync());
+document.addEventListener('visibilitychange',()=>void capacityMonitor.sync());
+window.addEventListener('online',()=>void capacityMonitor.sync());
 async function refreshHealthCheck(){
  const btn=$('runHealthCheck');if(!btn||!user)return;
  btn.disabled=true;btn.textContent='กำลังตรวจ…';
