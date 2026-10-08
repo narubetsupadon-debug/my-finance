@@ -24,6 +24,16 @@ try{
   {transaction_date:'2026-10-02',type:'expense',amount:999,status:'cancelled'}
  ],ChartCtor:Chart});
  render();
+ const pie=charts.find(x=>x.config.type==='doughnut').config;
+ const pieLabels=()=>pie.options.plugins.legend.labels.generateLabels({data:pie.data,getDataVisibility:()=>true});
+ assert.equal(pieLabels()[0].fontColor,'#475569','custom legend must explicitly use light theme text');
+ globalThis.document.documentElement={dataset:{resolvedTheme:'dark'}};
+ render();
+ const darkPie=charts.at(-1).config;
+ assert.equal(darkPie.options.plugins.legend.labels.generateLabels({data:darkPie.data,getDataVisibility:()=>true})[0].fontColor,'#cbd5e1');
+ assert.equal(darkPie.options.color,'#cbd5e1');
+ globalThis.document.documentElement.dataset.resolvedTheme='light';
+ charts.splice(3);
  const trend=charts[0].config;
  assert.equal(trend.data.labels.length,7);
  assert.equal(trend.data.datasets[2].label,'สุทธิรายวัน');
