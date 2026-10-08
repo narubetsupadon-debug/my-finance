@@ -717,3 +717,17 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 .capacity-item progress::-webkit-progress-bar{background:var(--surface);border-radius:99px}.capacity-item progress::-webkit-progress-value{background:var(--primary);border-radius:99px}.capacity-item progress::-moz-progress-bar{background:var(--primary);border-radius:99px}
 .capacity-item progress.capacity-warning{accent-color:#d28b16}.capacity-item progress.capacity-warning::-webkit-progress-value{background:#d28b16}.capacity-item progress.capacity-full{accent-color:#dc3545}.capacity-item progress.capacity-full::-webkit-progress-value{background:#dc3545}
 .capacity-note{font-size:12px;line-height:1.8;overflow-wrap:anywhere}.capacity-actions{margin-top:16px}.capacity-actions small{font-size:12px}
+
+/* Due rows: reserve numeric totals, and give long missing-amount text its own row. */
+.upcoming-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;border-bottom-color:var(--line)}
+.upcoming-main{min-width:0}.upcoming-name{display:block;line-height:1.5;overflow-wrap:break-word;word-break:normal}.upcoming-total{min-width:0}.upcoming-amount{display:block;line-height:1.5;white-space:nowrap}.upcoming-amount.is-unset{font-size:12px;font-weight:500;color:var(--muted);white-space:normal}
+@media(max-width:600px){
+ .upcoming-item.has-no-amount{grid-template-columns:minmax(0,1fr);gap:8px}
+ .upcoming-item.has-no-amount .upcoming-total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;text-align:left}
+ .upcoming-item.has-no-amount .upcoming-total>.muted{white-space:nowrap;flex-shrink:0}
+}
+@media(max-width:360px){
+ .upcoming-item{grid-template-columns:minmax(0,1fr);gap:8px}
+ .upcoming-item .upcoming-total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;text-align:left}
+ .upcoming-item .upcoming-total>.muted{white-space:nowrap;flex-shrink:0}
+}

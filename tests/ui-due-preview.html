@@ -1,0 +1,14 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>รายการใกล้ถึงกำหนด · ตัวอย่าง</title></head><body><script type="module">
+const params=new URLSearchParams(location.search);
+if(!params.has('screen')){document.body.style.cssText='padding:16px;background:#e8ebf2;font-family:system-ui';const h=document.createElement('h2');h.textContent='ตรวจหน้าจอ · ข้อมูลตัวอย่าง ไม่ใช่บัญชีจริง';document.body.append(h);for(const [title,width,extra] of [['390px',390,''],['320px',320,''],['Dark',390,'&dark=1']]){const f=document.createElement('iframe');f.title=title;f.src='./ui-due-preview.html?screen=1'+extra;f.style.cssText='width:'+width+'px;height:800px;border:0;margin-right:16px;border-radius:20px';document.body.append(f);}}
+else{
+ const parsed=new DOMParser().parseFromString(await (await fetch('../index.html')).text(),'text/html');
+ for(const link of parsed.querySelectorAll('link[rel=stylesheet]')){if(link.id==='darkThemeStylesheet'&&!params.has('dark'))continue;const c=link.cloneNode();c.href=new URL(link.getAttribute('href'),new URL('../index.html',location.href));if(c.id==='darkThemeStylesheet')c.media='all';document.head.append(c);}
+ const app=parsed.getElementById('app');document.body.append(app);const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const {createDashboardRenderer}=await import('../app-dashboard.js?v=20261008-due18');
+ const bills=[['ค่า Apple bill',99,17],['ค่า Spotify',249,21],['ค่าเน็ตมือถือ',426,21]].map(([name,amount,due_day])=>({name,amount,due_day,is_active:true}));
+ const debts=[{name:'KBank Credit Card (K PLUS)',outstanding_amount:100,is_active:true,due_day:10},{name:'Shopee SEasyCash',outstanding_amount:100,is_active:true,installment_amount:1784,due_day:24}];
+ createDashboardRenderer({$,money:n=>'฿'+Number(n).toLocaleString('th-TH',{minimumFractionDigits:2}),fmtDate:s=>s,esc,bangkokDate:()=>new Date(2026,9,8),bangkokDay:()=>'2026-10-08',billDue:x=>new Date(2026,9,x.due_day),nextDueDate:d=>new Date(2026,9,d),getTransactions:()=>[],getBills:()=>bills,getDebts:()=>debts,getUiSettings:()=>({}),budgetTotals:()=>({}),orderedQuickItems:()=>[],showPage(){},renderTxList(){},refreshDailyGreeting(){}})();
+ const card=$('upcomingList').closest('details');card.open=true;document.body.append(card);app.remove();document.body.style.padding='12px';
+}
+</script></body></html>
