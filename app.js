@@ -1,13 +1,13 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261008-due18';
-import {serializeFinanceBackup} from './finance-backup.js?v=20261008-due18';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-due18';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-due18';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-due18';
-import {createSummaryRenderer} from './app-summary.js?v=20261008-due18';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261008-due18';
-import {createTransactionRenderer} from './app-transactions.js?v=20261008-due18';
-import {createPlanningRenderer} from './app-planning.js?v=20261008-due18';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-due18';
+import {createCapacityMonitor} from './app-storage.js?v=20261008-audit19';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261008-audit19';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-audit19';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-audit19';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-audit19';
+import {createSummaryRenderer} from './app-summary.js?v=20261008-audit19';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261008-audit19';
+import {createTransactionRenderer} from './app-transactions.js?v=20261008-audit19';
+import {createPlanningRenderer} from './app-planning.js?v=20261008-audit19';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-audit19';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -603,7 +603,7 @@ $('entityForm').onsubmit=async e=>{
  e.preventDefault();const button=e.currentTarget.querySelector('button[type="submit"]');if(button.disabled)return;
  const form=new FormData(e.currentTarget),fd=Object.fromEntries(form.entries());
  const table={category:'categories',account:'accounts',bill:'bills',budget:'budgets',debt:'debts'}[editing.type];
- fd.user_id=user.id;fd.name=fd.name.trim();if(!fd.name)return alert('กรุณากรอกชื่อ');if(editing.type==='account'){fd.bank_code=String(fd.bank_code||'').trim()||null;fd.account_number=String(fd.account_number||'').replace(/\\D/g,'')||null;}
+ fd.user_id=user.id;fd.name=fd.name.trim();if(!fd.name)return alert('กรุณากรอกชื่อ');if(editing.type==='account'){fd.bank_code=String(fd.bank_code||'').trim()||null;fd.account_number=String(fd.account_number||'').replace(/\D/g,'')||null;}
  if(editing.type==='budget'){fd.monthly_limit=Number(fd.monthly_limit||0);fd.category_names=form.getAll('category_names')}
  else for(const k of ['opening_balance','amount','due_day','original_amount','outstanding_amount','installment_amount'])if(k in fd)fd[k]=k==='due_day'&&fd[k]===''?null:Number(fd[k]||0);
  if('category_id' in fd)fd.category_id=fd.category_id||null;

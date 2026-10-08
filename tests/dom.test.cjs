@@ -63,6 +63,17 @@ async function page(html,js,data,expose,storage={}){
  recentData.accounts[1].is_active=false;recentData.categories=categories.filter(c=>c.id!=='coffee');await restored.api.loadAll();restored.w.openTx();assert.equal(restored.el('txCategory').value,'');assert.equal(restored.el('txAccount').value,'');restored.close();
  const corrupt=await page('index.html','app.js',{categories,accounts,transactions:[]},'',{[recentKey]:'{broken json'});corrupt.w.openTx();assert.equal(corrupt.el('txCategory').value,'');corrupt.w.Storage.prototype.setItem=()=>{throw Error('storage disabled')};corrupt.el('txCategory').value='cat';corrupt.el('txAmount').value='10';corrupt.el('txDesc').value='storage unavailable';await corrupt.el('txForm').onsubmit({preventDefault(){},currentTarget:corrupt.el('txForm')});assert.equal(corrupt.el('txDialog').open,false);assert.equal(corrupt.state.writes.length,1);corrupt.close();
  console.log('PASS recent selections: successful saves, cancellation/failure, income separation, reload, owner isolation, edits, removed categories/inactive accounts and unavailable storage');
+ // Account numbers retain leading zeros and strip pasted separators before saving.
+ const accountPage=await page('index.html','app.js',{categories,accounts,transactions:[]},'');
+ for(const [input,expected] of [['001-234 567x','001234567'],['0000123456','0000123456'],['',null]]){
+  accountPage.w.openEntity('account');
+  const form=accountPage.el('entityForm');form.querySelector('[name="name"]').value='Fixture account';
+  form.querySelector('[name="account_number"]').value=input;
+  await form.onsubmit({preventDefault(){},currentTarget:form});
+  assert.equal(accountPage.state.writes.at(-1).row.account_number,expected);
+ }
+ accountPage.close();
+ console.log('PASS account save: pasted separators removed, leading zeros preserved, empty number remains null');
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
  const p=await page('index.html','app.js',{categories,accounts,transactions,car_expenses:[{id:'ce1',user_id:'user',transaction_id:'t1'}]},'loadAll,fillTxSelectors,checkDailyRollover,refreshHealthCheck');
