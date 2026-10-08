@@ -9,20 +9,20 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
-<link rel="stylesheet" href="./style.css?v=20261008-summary23">
-<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261008-summary23" media="(prefers-color-scheme: dark)">
-<script src="./theme.js?v=20261008-summary23"></script>
+<link rel="stylesheet" href="./style.css?v=20261008-compact24">
+<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261008-compact24" media="(prefers-color-scheme: dark)">
+<script src="./theme.js?v=20261008-compact24"></script>
 <style>
 .insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 #insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261008-summary23">
+</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261008-compact24">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
   <div class="auth-splash-card">
-    <img src="./app-icon.svg?v=20261008-summary23" width="72" height="72" alt="">
+    <img src="./app-icon.svg?v=20261008-compact24" width="72" height="72" alt="">
     <h1>My Finance</h1>
     <p>กำลังเปิดกระเป๋าของมิว…</p>
     <span class="auth-splash-spinner" aria-hidden="true"></span>
@@ -31,7 +31,7 @@
 
 <div id="authScreen" class="auth-screen hidden">
   <div class="auth-card">
-    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261008-summary23" width="56" height="56" alt="">My Finance</h1>
+    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261008-compact24" width="56" height="56" alt="">My Finance</h1>
     <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และยอดคงเหลือบัตรในที่เดียว</p>
     <div class="auth-tabs">
       <button id="tabLogin" class="active">เข้าสู่ระบบ</button>
@@ -52,7 +52,7 @@
   </div>
   <header class="topbar">
     <div class="topin">
-      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261008-summary23" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
+      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261008-compact24" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
       <div class="userbox">
         <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings">⚙️ ตั้งค่า</button>
         <span id="userEmail" class="muted"></span>
@@ -234,6 +234,7 @@
           <div class="card summary-kpi balance-kpi"><div class="summary-kpi-icon">◎</div><div><div class="label">เงินเหลือสุทธิ</div><div id="sumBalance" class="value balance money">฿0</div><small id="sumBalanceHint">รายรับ − รายจ่าย</small></div></div>
         </div>
 
+        <details class="card section summary-details"><summary><span><b>ค่าห้อง รถ และรายจ่ายประจำ</b><small>ดูยอดแยกตามเรื่อง</small></span><span aria-hidden="true">⌄</span></summary><div class="summary-detail-body">
         <div class="summary-breakdown-grid section">
           <div class="card summary-mini"><span>💳</span><div><div class="label">บัตร/สินเชื่อ</div><div id="sumDebtPay" class="value expense money">฿0</div></div></div>
           <div class="card summary-mini"><span aria-hidden="true">🏠</span><div><div class="label">ค่าห้องเช่า</div><div id="sumRent" class="value warning money">฿0</div><small class="muted">ส่วนมิว · บิลรวมอ้างอิง <b id="sumRentFull">฿0</b><br>ตามวันที่จ่าย · <a href="./rent.html">ดูประวัติตามเดือนบิล →</a></small></div></div>
@@ -241,13 +242,17 @@
           <div class="card summary-mini"><span>🔁</span><div><div class="label">รายจ่ายประจำ</div><div id="sumRecurring" class="value balance money">฿0</div></div></div>
         </div>
 
+        </div></details>
+
         <section class="expense-analysis section" aria-labelledby="analysisTitle">
           <div class="analysis-heading"><div><div class="summary-eyebrow">รู้ก่อน วางแผนได้</div><h3 id="analysisTitle">นิลินวิเคราะห์รายจ่าย</h3></div><span id="analysisPeriod" class="analysis-period"></span></div>
           <p class="analysis-scope">จากรายการที่จ่ายแล้วตามช่วงที่เลือก · ไม่รวมรอดำเนินการ ยกเลิก และวันที่อนาคต</p>
           <div class="analysis-grid">
             <article class="card analysis-card"><div class="analysis-card-heading"><span aria-hidden="true">↗</span><h4>เงินไปหมวดไหนมากที่สุด?</h4></div><div id="analysisRanking"></div><p id="analysisRentNote" class="analysis-rent-note" hidden></p></article>
+            <details class="card summary-details analysis-more"><summary><span><b>เปรียบเทียบและวางแผนงบ</b><small>ดูเดือนก่อนและประมาณการสิ้นเดือน</small></span><span aria-hidden="true">⌄</span></summary><div class="summary-detail-body">
             <article class="card analysis-card"><div class="analysis-card-heading"><span aria-hidden="true">⇄</span><h4>ต่างจากเดือนก่อนเท่าไร?</h4></div><div id="analysisComparison"></div></article>
             <article class="card analysis-card analysis-forecast-card"><div class="analysis-card-heading"><span aria-hidden="true">◎</span><h4>งบจะพอถึงสิ้นเดือนไหม?</h4></div><div id="analysisForecast"></div><details class="analysis-method"><summary>อ่านการคาดการณ์อย่างไร?</summary><p>ประมาณจากยอดที่จ่ายในหมวดของแต่ละงบ ÷ จำนวนวันที่ผ่านไปในเดือน × จำนวนวันทั้งเดือน ไม่ใช่ยอดแน่นอน และยังไม่รวมรายจ่ายที่ยังไม่ได้บันทึกหรือรายการรอจ่าย ต้องผ่านอย่างน้อย 7 วันและมีรายจ่ายในงบอย่างน้อย 3 วันจึงคาดการณ์ได้ งบที่ใช้หมวดร่วมกันแสดงแยก ไม่บวกรวมซ้ำ</p></details></article>
+            </div></details>
           </div>
           <p class="analysis-footnote">ผลวิเคราะห์อิงข้อมูลที่บันทึก ไม่ยืนยันว่ารายการครบทุกวัน ยอดอาจต่างจากการ์ดสรุปที่รวมรายการรอดำเนินการหรือวันที่อนาคต</p>
         </section>
@@ -257,16 +262,19 @@
             <div class="summary-card-head"><div><h3 id="summaryTrendTitle">กระแสเงินสด</h3><p>รายรับ รายจ่าย และยอดสุทธิของแต่ละวันหรือเดือน</p></div><span class="summary-card-badge" id="summaryTrendBadge">รายวัน</span></div>
             <div class="chart-box summary-trend-chart"><canvas id="monthlyTrendChart"></canvas></div>
           </div>
+        </div>
+        <details class="card section summary-details summary-extra-charts"><summary><span><b>ดูกราฟรายจ่ายเพิ่มเติม</b><small>สัดส่วนและแนวโน้มแยกหมวด</small></span><span aria-hidden="true">⌄</span></summary><div class="summary-detail-body">
           <div class="card summary-chart-card summary-share-card">
             <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดไหนกินสัดส่วนมากที่สุด</p></div><span class="summary-card-badge">100%</span></div>
             <div class="chart-box donut summary-donut"><canvas id="categoryPieChart"></canvas></div>
           </div>
-        </div>
 
         <div class="card section summary-chart-card">
           <div class="summary-card-head"><div><h3 id="summaryCategoryTitle">รายจ่ายแยกหมวดหมู่</h3><p>เปรียบเทียบพฤติกรรมการใช้เงินตามช่วงเวลา</p></div><span class="summary-card-badge" id="summaryCategoryBadge">รายวัน</span></div>
           <div class="chart-box tall"><canvas id="monthlyCategoryChart"></canvas></div>
         </div>
+
+        </div></details>
 
         <details class="card section summary-details">
           <summary><span><b>รายละเอียดตัวเลข</b><small>ตารางสรุปและรายจ่ายแยกหมวด</small></span><span aria-hidden="true">⌄</span></summary>
@@ -460,6 +468,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
-<script type="module" src="./app.js?v=20261008-summary23"></script>
-<script type="module" src="./app-nav.js?v=20261008-summary23"></script></body>
+<script type="module" src="./app.js?v=20261008-compact24"></script>
+<script type="module" src="./app-nav.js?v=20261008-compact24"></script></body>
 </html>

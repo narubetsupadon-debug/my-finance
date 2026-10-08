@@ -737,3 +737,8 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
  .mobile-app-nav.is-scroll-hidden{transform:translateY(calc(100% + 24px + env(safe-area-inset-bottom,0px)));opacity:0;pointer-events:none}
 }
 @media(prefers-reduced-motion:reduce){.mobile-app-nav{transition:none}}
+
+#summaryPage .summary-main-grid{grid-template-columns:minmax(0,1fr)}
+#summaryPage .analysis-grid{grid-template-columns:minmax(0,1fr)}
+.analysis-more .analysis-card{border:0;box-shadow:none;padding:14px 0;background:transparent}
+.summary-extra-charts .summary-share-card{border:0;box-shadow:none}
