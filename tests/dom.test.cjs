@@ -236,7 +236,22 @@ async function page(html,js,data,expose,storage={}){
  menu.el('txDialog').close();menu.w.document.querySelector('[data-open-capture]').click();captureSheet.querySelector('[data-destination=expense]').click();assert.equal(menu.el('txType').value,'expense');menu.el('txDialog').close();
  menu.w.history.replaceState(null,'','#capture-income');menu.api.handleNavigationRoute();assert.equal(menu.el('txDialog').open,true);assert.equal(menu.el('txType').value,'income');assert.equal(menu.w.location.hash,'#transactions');menu.el('txDialog').close();
  menu.w.document.querySelector('.mobile-app-nav [data-destination=more]').click();assert.equal(moreSheet.open,true);moreSheet.querySelector('[data-destination=budget]').click();assert.equal(moreSheet.open,false);assert.equal(menu.el('budgetPage').classList.contains('hidden'),false);assert.equal(menu.w.document.querySelector('.mobile-app-nav [data-destination=more]').classList.contains('is-active'),true);
- assert.deepEqual([...captureSheet.querySelectorAll('a,button[data-destination]')].map(b=>b.dataset.destination),['income','expense','salary','rent','car']);menu.close();
+ assert.deepEqual([...captureSheet.querySelectorAll('a,button[data-destination]')].map(b=>b.dataset.destination),['income','expense','salary','rent','car']);
+ const autoNav=menu.w.document.querySelector('.mobile-app-nav');
+ Object.defineProperty(menu.w,'innerWidth',{value:390,writable:true});
+ Object.defineProperty(menu.w.document.documentElement,'scrollHeight',{value:3000,configurable:true});
+ function scrollMenu(y){menu.w.scrollY=y;menu.w.dispatchEvent(new menu.w.Event('scroll'));}
+ menu.w.document.activeElement?.blur();scrollMenu(80);assert.equal(autoNav.classList.contains('is-scroll-hidden'),true);
+ scrollMenu(76);assert.equal(autoNav.classList.contains('is-scroll-hidden'),true,'minor jitter should not reveal menu');
+ scrollMenu(60);assert.equal(autoNav.classList.contains('is-scroll-hidden'),false);
+ scrollMenu(120);assert.equal(autoNav.classList.contains('is-scroll-hidden'),true);
+ autoNav.querySelector('button').focus();assert.equal(autoNav.classList.contains('is-scroll-hidden'),false,'keyboard focus must reveal menu');
+ autoNav.querySelector('button').blur();scrollMenu(180);
+ menu.w.dispatchEvent(new menu.w.CustomEvent('finance:page',{detail:'dashboard'}));assert.equal(autoNav.classList.contains('is-scroll-hidden'),false);
+ scrollMenu(240);scrollMenu(0);assert.equal(autoNav.classList.contains('is-scroll-hidden'),false);
+ moreSheet.showModal();scrollMenu(300);assert.equal(autoNav.classList.contains('is-scroll-hidden'),false,'dialogs must keep navigation available');moreSheet.close();
+ menu.w.innerWidth=1200;scrollMenu(400);assert.equal(autoNav.classList.contains('is-scroll-hidden'),false);
+ menu.close();
  console.log('PASS menu: primary order, grouped destinations, desktop/mobile capture, income/expense form selection, cross-page capture route and budget navigation');
  const lazy=await page('car.html','car.js',{car_installments:[],car_expenses:[],accounts:[],categories:[]},'loadExcelTools');
  assert.equal(lazy.w.document.querySelector('script[src*=sheetjs]'),null,'Excel must not block opening the page');assert.equal(lazy.el('carMessage').dataset.loading,'false');

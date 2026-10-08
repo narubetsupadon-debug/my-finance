@@ -29,3 +29,23 @@ document.querySelector('[data-open-capture]')?.addEventListener('click',openCapt
 active(location.pathname.endsWith('/rent.html')?'rent':location.pathname.endsWith('/salary.html')?'salary':location.pathname.endsWith('/car.html')?'car':location.hash.slice(1)||'dashboard');
 mount.append(nav,sheet,captureSheet);
 document.documentElement.classList.add('mobile-nav-ready');
+
+// Follow deliberate page scrolling, ignoring dialog scrolls and iOS overscroll.
+let navScrollY=Math.max(0,window.scrollY),navScrollDistance=0;
+function revealNavigation(){nav.classList.remove('is-scroll-hidden');navScrollDistance=0;navScrollY=Math.max(0,window.scrollY);}
+window.addEventListener('scroll',()=>{
+ const maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+ const y=Math.min(maxY,Math.max(0,window.scrollY)),delta=y-navScrollY;navScrollY=y;
+ if(window.innerWidth>820||y<=32||document.querySelector('dialog[open]')||nav.querySelector(':focus-visible')){revealNavigation();return;}
+ if(!delta)return;
+ if(Math.sign(delta)!==Math.sign(navScrollDistance))navScrollDistance=0;
+ navScrollDistance+=delta;
+ if(navScrollDistance>=24){nav.classList.add('is-scroll-hidden');navScrollDistance=0;}
+ else if(navScrollDistance<=-12){nav.classList.remove('is-scroll-hidden');navScrollDistance=0;}
+},{passive:true});
+nav.addEventListener('focusin',revealNavigation);
+window.addEventListener('finance:page',revealNavigation);
+window.addEventListener('finance:open-capture',revealNavigation);
+window.addEventListener('resize',revealNavigation);
+window.addEventListener('pageshow',revealNavigation);
+sheet.addEventListener('close',revealNavigation);captureSheet.addEventListener('close',revealNavigation);

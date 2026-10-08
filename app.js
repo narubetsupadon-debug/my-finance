@@ -1,13 +1,13 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261008-audit19';
-import {serializeFinanceBackup} from './finance-backup.js?v=20261008-audit19';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-audit19';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-audit19';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-audit19';
-import {createSummaryRenderer} from './app-summary.js?v=20261008-audit19';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261008-audit19';
-import {createTransactionRenderer} from './app-transactions.js?v=20261008-audit19';
-import {createPlanningRenderer} from './app-planning.js?v=20261008-audit19';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-audit19';
+import {createCapacityMonitor} from './app-storage.js?v=20261008-nav20';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261008-nav20';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-nav20';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-nav20';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-nav20';
+import {createSummaryRenderer} from './app-summary.js?v=20261008-nav20';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261008-nav20';
+import {createTransactionRenderer} from './app-transactions.js?v=20261008-nav20';
+import {createPlanningRenderer} from './app-planning.js?v=20261008-nav20';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-nav20';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
