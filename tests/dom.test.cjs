@@ -27,9 +27,10 @@ function dbMock(data){
  };
  return {db,state};
 }
-async function page(html,js,data,expose){
+async function page(html,js,data,expose,storage={}){
  const dom=new JSDOM(fs.readFileSync(root+html,'utf8'),{url:'https://finance.test/',runScripts:'outside-only'});
  const w=dom.window,{db,state}=dbMock(data);w.createClient=()=>db;w.alerts=[];w.alert=x=>w.alerts.push(x);w.confirm=()=>true;w.scrollTo=()=>{};w.setInterval=()=>0;
+ for(const [key,value] of Object.entries(storage))w.localStorage.setItem(key,value);
  w.HTMLElement.prototype.scrollIntoView=function(){};w.requestAnimationFrame=cb=>{cb();return 1};w.cancelAnimationFrame=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  let code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
@@ -41,6 +42,26 @@ async function page(html,js,data,expose){
  const day=new Date().toISOString().slice(0,10);
  const categories=[{id:'cat',user_id:'user',name:'อาหาร',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'coffee',user_id:'user',name:'กาแฟ',type:'expense',icon:'☕'},{id:'utilities',user_id:'user',name:'บิล/สาธารณูปโภค',type:'expense',icon:'🧾'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];
+ // Recent selections come only from successful new saves, remain separate by
+ // type/owner, survive reload, and never alter an existing transaction.
+ const recentKey='finance-recent-selection-v1:user';
+ const recentData={categories,accounts:[...accounts,{id:'cash',user_id:'user',name:'cash',is_active:true}],transactions:[]};
+ const recent=await page('index.html','app.js',recentData,'loadAll,setOwner:id=>{user={id}}');
+ const submitRecent=()=>recent.el('txForm').onsubmit({preventDefault(){},currentTarget:recent.el('txForm')});
+ recent.w.openTx();recent.el('txCategory').value='coffee';recent.el('txAccount').value='cash';recent.el('txDialog').close();
+ recent.w.openTx();assert.equal(recent.el('txCategory').value,'');assert.equal(recent.w.localStorage.getItem(recentKey),null);
+ recent.el('txDesc').value='new coffee';recent.el('txAmount').value='65';recent.el('txCategory').value='coffee';recent.el('txAccount').value='cash';await submitRecent();
+ recent.w.openTx();assert.equal(recent.el('txCategory').value,'coffee');assert.equal(recent.el('txAccount').value,'cash');assert.equal(recent.el('txAmount').value,'');assert.equal(recent.el('txDesc').value,'');
+ recent.w.document.querySelector('[data-tx-type="income"]').click();assert.equal(recent.el('txCategory').value,'');assert.equal(recent.el('txAccount').value,'');
+ recent.el('txCategory').value='inc';recent.el('txAccount').value='acc';recent.el('txDesc').value='income';recent.el('txAmount').value='100';await submitRecent();
+ recent.w.openTx();assert.equal(recent.el('txCategory').value,'coffee');recent.w.document.querySelector('[data-tx-type="income"]').click();assert.equal(recent.el('txCategory').value,'inc');assert.equal(recent.el('txAccount').value,'acc');
+ recent.w.document.querySelector('[data-tx-type="expense"]').click();recent.el('txCategory').value='cat';recent.el('txDesc').value='failed';recent.el('txAmount').value='10';recent.state.fail=true;await submitRecent();recent.state.fail=false;recent.el('txDialog').close();recent.w.openTx();assert.equal(recent.el('txCategory').value,'coffee');
+ recentData.transactions.push({id:'old',user_id:'user',type:'expense',status:'paid',description:'old',amount:5,transaction_date:day,category_id:'cat',account_id:'acc'});recent.el('txDialog').close();await recent.api.loadAll();recent.w.openTx('old');assert.equal(recent.el('txCategory').value,'cat');assert.equal(recent.el('txAccount').value,'acc');await submitRecent();recent.w.openTx();assert.equal(recent.el('txCategory').value,'coffee');
+ const savedSelections=recent.w.localStorage.getItem(recentKey);recent.el('txDialog').close();recent.api.setOwner('another-owner');recent.w.openTx();assert.equal(recent.el('txCategory').value,'');assert.equal(recent.el('txAccount').value,'');recent.close();
+ const restored=await page('index.html','app.js',recentData,'loadAll',{[recentKey]:savedSelections});restored.w.openTx();assert.equal(restored.el('txCategory').value,'coffee');assert.equal(restored.el('txAccount').value,'cash');restored.el('txDialog').close();
+ recentData.accounts[1].is_active=false;recentData.categories=categories.filter(c=>c.id!=='coffee');await restored.api.loadAll();restored.w.openTx();assert.equal(restored.el('txCategory').value,'');assert.equal(restored.el('txAccount').value,'');restored.close();
+ const corrupt=await page('index.html','app.js',{categories,accounts,transactions:[]},'',{[recentKey]:'{broken json'});corrupt.w.openTx();assert.equal(corrupt.el('txCategory').value,'');corrupt.w.Storage.prototype.setItem=()=>{throw Error('storage disabled')};corrupt.el('txCategory').value='cat';corrupt.el('txAmount').value='10';corrupt.el('txDesc').value='storage unavailable';await corrupt.el('txForm').onsubmit({preventDefault(){},currentTarget:corrupt.el('txForm')});assert.equal(corrupt.el('txDialog').open,false);assert.equal(corrupt.state.writes.length,1);corrupt.close();
+ console.log('PASS recent selections: successful saves, cancellation/failure, income separation, reload, owner isolation, edits, removed categories/inactive accounts and unavailable storage');
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
  const p=await page('index.html','app.js',{categories,accounts,transactions,car_expenses:[{id:'ce1',user_id:'user',transaction_id:'t1'}]},'loadAll,fillTxSelectors,checkDailyRollover,refreshHealthCheck');

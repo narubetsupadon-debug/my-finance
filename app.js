@@ -1,12 +1,12 @@
-import {serializeFinanceBackup} from './finance-backup.js?v=20261007-analysis15';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261007-analysis15';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261007-analysis15';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261007-analysis15';
-import {createSummaryRenderer} from './app-summary.js?v=20261007-analysis15';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261007-analysis15';
-import {createTransactionRenderer} from './app-transactions.js?v=20261007-analysis15';
-import {createPlanningRenderer} from './app-planning.js?v=20261007-analysis15';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261007-analysis15';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261008-entry16';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-entry16';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-entry16';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-entry16';
+import {createSummaryRenderer} from './app-summary.js?v=20261008-entry16';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261008-entry16';
+import {createTransactionRenderer} from './app-transactions.js?v=20261008-entry16';
+import {createPlanningRenderer} from './app-planning.js?v=20261008-entry16';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-entry16';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -388,7 +388,8 @@ function syncTxType(){
  document.querySelectorAll('[data-tx-type]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.txType===$('txType').value)));
  $('txForm').classList.toggle('is-income',$('txType').value==='income');
 }
-document.querySelectorAll('[data-tx-type]').forEach(b=>b.onclick=()=>{$('txType').value=b.dataset.txType;fillTxSelectors()});
+function changeTxType(type){$('txType').value=type;fillTxSelectors();if(!editing.id)applyRecentTxSelection();renderCardPaymentSuggestions()}
+document.querySelectorAll('[data-tx-type]').forEach(b=>b.onclick=()=>changeTxType(b.dataset.txType));
 function fillTxSelectors(){
  syncTxType();
  const currentCat=$('txCategory').value,currentAccount=$('txAccount').value,currentFilter=$('txFilterCategory').value
@@ -434,7 +435,7 @@ function showPage(name){
 window.addEventListener('finance:navigate',e=>showPage(e.detail));
 window.addEventListener('hashchange',handleNavigationRoute);
 function handleNavigationRoute(){const route=location.hash.slice(1);if(route==='capture-income'||route==='capture-expense'){showPage('transactions');captureTransaction(route.slice(8));}else showPage(route||'dashboard');}
-function captureTransaction(type){if(!user||$('txForm').querySelector('button[type=submit]').disabled||$('txDialog').open)return;openTx();$('txType').value=type==='income'?'income':'expense';fillTxSelectors();renderCardPaymentSuggestions();}
+function captureTransaction(type){if(!user||$('txForm').querySelector('button[type=submit]').disabled||$('txDialog').open)return;openTx();changeTxType(type==='income'?'income':'expense');}
 window.addEventListener('finance:capture',e=>captureTransaction(e.detail));
 navNodes.forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 document.addEventListener('click',e=>{const j=e.target.closest('[data-page-jump]');if(j)showPage(j.dataset.pageJump)})
@@ -468,11 +469,22 @@ document.addEventListener('change',e=>{
  if(input.checked)hidden.delete(label);else hidden.add(label);
  writeUiSettings({quickHidden:[...hidden]});renderSettings();renderDashboard();
 });
-for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=fillTxSelectors;$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary
+for(const id of ['txFilterType','txFilterCategory','txFilterMonth'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=()=>changeTxType($('txType').value);$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary
 document.addEventListener('click',e=>{const range=e.target.closest('[data-summary-range]');if(range){renderSummary.setRange?.(range.dataset.summaryRange)}})
 
 
 function favoriteKey(){return 'finance-favorites-v1:'+user.id}
+function recentTxKey(){return 'finance-recent-selection-v1:'+user.id}
+function readRecentTxSelections(){try{const value=JSON.parse(localStorage.getItem(recentTxKey())||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}catch{return {}}}
+function applyRecentTxSelection(){
+ const value=readRecentTxSelections()[$('txType').value]||{};
+ $('txCategory').value=categories.some(c=>c.id===value.category_id&&c.type===$('txType').value)?value.category_id:'';
+ const accountId=Object.hasOwn(value,'account_id')?value.account_id:uiSettings.defaultAccount;
+ $('txAccount').value=accounts.some(a=>a.id===accountId&&a.is_active!==false)?accountId:'';
+}
+function rememberTxSelection(row){
+ try{const values=readRecentTxSelections();values[row.type]={category_id:row.category_id,account_id:row.account_id};localStorage.setItem(recentTxKey(),JSON.stringify(values));return true}catch{return false}
+}
 function readFavorites(){try{const v=JSON.parse(localStorage.getItem(favoriteKey())||'[]');return Array.isArray(v)?v.filter(x=>x&&typeof x.description==='string'&&['income','expense'].includes(x.type)).slice(0,12):[]}catch{return []}}
 function templateKey(x){return JSON.stringify([x.type,x.description.trim(),x.category_id||'',x.account_id||''])}
 function repeatChoices(){
@@ -510,8 +522,8 @@ window.openTx=(id=null)=>{
  duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden');
  editing={type:'tx',id};$('txFavorite').checked=false;$('txError').classList.add('hidden');$('txExtra').open=false;$('txRepeatSection').open=false;
  $('txDialogTitle').textContent=id?'แก้ไขรายการ':'บันทึกรายการ';
- $('txDate').value=bangkokDay();$('txAccount').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
- fillTxSelectors();if(!id&&uiSettings.defaultAccount&&[...$('txAccount').options].some(o=>o.value===uiSettings.defaultAccount))$('txAccount').value=uiSettings.defaultAccount;renderRepeatChoices();
+ $('txDate').value=bangkokDay();$('txAccount').value='';$('txCategory').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
+ fillTxSelectors();if(!id)applyRecentTxSelection();renderRepeatChoices();
  if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;}}
  renderCardPaymentSuggestions();$('txDialog').showModal();requestAnimationFrame(()=>{$('txForm').scrollTop=0;});
 }
@@ -536,7 +548,7 @@ $('txForm').onsubmit=async e=>{
   const q=editing.id?supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id):supabase.from('transactions').insert(row);
   const r=await q.select('id').single();
   if(r.error)throw r.error;
-  committed=true;const favoriteSaved=saveFavorite(row);$('txDialog').close();
+  committed=true;if(!editing.id)rememberTxSelection(row);const favoriteSaved=saveFavorite(row);$('txDialog').close();
   const label='บันทึกรายการแล้ว ✅'+(row.status==='cancelled'?' · รายการยกเลิก ไม่นับรวมยอด':'')+(!favoriteSaved?' · เก็บรายการโปรดในเครื่องนี้ไม่ได้':'');
   savedNotice(label,await loadAll(),{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});
  }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});else txError('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
