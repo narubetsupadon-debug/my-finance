@@ -6,10 +6,21 @@ const CLIENT_KEY=Deno.env.get("SUPABASE_ANON_KEY");
 const admin=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 const headers={"Content-Type":"application/json","Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization,apikey,content-type,x-cron-secret","Access-Control-Allow-Methods":"POST,OPTIONS"};
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers});
+// Limit outbound requests to browser push providers; never log endpoint tokens.
+function validPushEndpoint(value){
+ if(typeof value!=="string"||value.length>4096||/[\\\s]/.test(value))return false;
+ try{
+  const url=new URL(value),host=url.hostname;
+  if(url.protocol!=="https:"||url.username||url.password||url.port||url.hash||url.pathname==="/")return false;
+  return host==="fcm.googleapis.com"||host==="updates.push.services.mozilla.com"
+   ||/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+push\.apple\.com$/.test(host)
+   ||/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+notify\.windows\.com$/.test(host);
+ }catch{return false;}
+}
 async function authUser(req){const a=req.headers.get("authorization")||"";if(!a.toLowerCase().startsWith("bearer "))return null;const {data,error}=await admin.auth.getUser(a.slice(7));return error?null:data.user;}
 function rand(){const b=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...b)).replaceAll("+","-").replaceAll("/","_").replaceAll("=","");}
 async function config(){const {data,error}=await admin.rpc("get_push_server_config");if(error)throw error;if(data?.vapid_private&&data?.vapid_public&&data?.cron_secret)return data;const k=webpush.generateVAPIDKeys();const secret=data?.cron_secret||rand();const {error:e}=await admin.rpc("store_push_server_config",{p_vapid_private:k.privateKey,p_vapid_public:k.publicKey,p_cron_secret:secret});if(e)throw e;return {vapid_private:k.privateKey,vapid_public:k.publicKey,cron_secret:secret};}
-async function sendUser(uid,payload,cfg){webpush.setVapidDetails("mailto:noreply@myfinance.local",cfg.vapid_public,cfg.vapid_private);const {data,error}=await admin.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("user_id",uid).eq("enabled",true);if(error)throw error;let sent=0;for(const s of data||[]){try{await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},JSON.stringify(payload),{TTL:86400});sent++;}catch(e){const st=Number(e?.statusCode||0);if(st===404||st===410)await admin.from("push_subscriptions").delete().eq("id",s.id);else console.error("push error",st,String(e));}}return sent;}
+async function sendUser(uid,payload,cfg){webpush.setVapidDetails("mailto:noreply@myfinance.local",cfg.vapid_public,cfg.vapid_private);const {data,error}=await admin.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("user_id",uid).eq("enabled",true);if(error)throw error;let sent=0;for(const s of data||[]){if(!validPushEndpoint(s.endpoint)){console.error("push endpoint rejected",s.id);continue;}try{await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},JSON.stringify(payload),{TTL:86400});sent++;}catch(e){const st=Number(e?.statusCode||0);if(st===404||st===410)await admin.from("push_subscriptions").delete().eq("id",s.id);else console.error("push error",st,String(e));}}return sent;}
 function bkk(){return new Date(Date.now()+7*3600000)}
 function iso(d){return d.toISOString().slice(0,10)}
 function dueIso(day){const n=bkk(),y=n.getUTCFullYear(),m=n.getUTCMonth(),d=n.getUTCDate();const md=(yy,mm)=>Math.min(Math.max(1,day),new Date(Date.UTC(yy,mm+1,0)).getUTCDate());let t=Date.UTC(y,m,md(y,m));if(t<Date.UTC(y,m,d)){let yy=y,mm=m+1;if(mm>11){mm=0;yy++}t=Date.UTC(yy,mm,md(yy,mm));}return iso(new Date(t));}
@@ -19,7 +30,7 @@ async function runReminders(cfg){const rs=await Promise.all([admin.from("bills")
 Deno.serve(async(req)=>{if(req.method==="OPTIONS")return json({ok:true});if(req.method!=="POST")return json({error:"method_not_allowed"},405);try{const body=await req.json().catch(()=>({}));const action=body?.action||"";if(!["config","subscribe","unsubscribe","test","run"].includes(action))return json({error:"unknown_action"},400);const user=action==="run"?null:await authUser(req);if(action!=="run"&&!user)return json({error:"unauthorized"},401);const scoped=["subscribe","unsubscribe"].includes(action)?createClient(SUPABASE_URL,CLIENT_KEY,{global:{headers:{Authorization:req.headers.get("authorization")||""}},auth:{persistSession:false,autoRefreshToken:false}}):null;const cfg=await config();if(action==="config"){return json({publicKey:cfg.vapid_public});}if(action==="subscribe"){
       
       const s=body?.subscription||{},keys=s?.keys||{};
-      if(typeof s.endpoint!=="string"||!s.endpoint.startsWith("https://")||typeof keys.p256dh!=="string"||typeof keys.auth!=="string")return json({error:"invalid_subscription"},400);
+      if(!validPushEndpoint(s.endpoint)||typeof keys.p256dh!=="string"||typeof keys.auth!=="string")return json({error:"invalid_subscription"},400);
       const {error}=await scoped.from("push_subscriptions").upsert({user_id:user.id,endpoint:s.endpoint,p256dh:keys.p256dh,auth:keys.auth,enabled:true,updated_at:new Date().toISOString()},{onConflict:"endpoint"});
       if(error)throw error;return json({ok:true});
     }
