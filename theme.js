@@ -1,7 +1,7 @@
 (function(){
   const UI_KEY='my-finance-ui-settings-v1';
   function applyUiPreferences(){
-    let s={};try{s=JSON.parse(localStorage.getItem(UI_KEY)||'{}')}catch{}
+    let s={};try{const saved=JSON.parse(localStorage.getItem(UI_KEY)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))s=saved;}catch{}
     const palettes={purple:['#7c3aed','#a78bfa'],blue:['#2563eb','#60a5fa'],green:['#059669','#34d399'],pink:['#db2777','#f472b6']};
     const accent=palettes[s.accent]||palettes.purple;
     document.documentElement.dataset.accent=s.accent||'purple';
@@ -25,6 +25,11 @@
     }
     document.documentElement.dataset.themeMode=mode;
     document.documentElement.dataset.resolvedTheme=mode==='system'?(mq.matches?'dark':'light'):mode;
+    const resolved=document.documentElement.dataset.resolvedTheme;
+    document.documentElement.style.colorScheme=resolved;
+    let meta=document.querySelector('meta[name="theme-color"]');
+    if(!meta){meta=document.createElement('meta');meta.name='theme-color';document.head.append(meta);}
+    meta.content=resolved==='dark'?'#0d1017':'#f6f7fb';
     document.querySelectorAll('[data-theme-option]').forEach(btn=>{
       const active=btn.dataset.themeOption===mode;
       btn.classList.toggle('active',active);
@@ -45,5 +50,7 @@
   }
   mq.addEventListener?.('change',()=>{if(getMode()==='system')apply('system')});
   window.financeTheme={get:getMode,set:apply,applyUiPreferences};
+  apply(getMode());
+  applyUiPreferences();
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
 })();
