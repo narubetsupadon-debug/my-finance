@@ -1,13 +1,13 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261008-excel26';
-import {serializeFinanceBackup,createFinanceWorkbook} from './finance-backup.js?v=20261008-excel26';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-excel26';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm,loadExcelTools} from './finance-core.js?v=20261008-excel26';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-excel26';
-import {createSummaryRenderer} from './app-summary.js?v=20261008-excel26';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261008-excel26';
-import {createTransactionRenderer} from './app-transactions.js?v=20261008-excel26';
-import {createPlanningRenderer} from './app-planning.js?v=20261008-excel26';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-excel26';
+import {createCapacityMonitor} from './app-storage.js?v=20261008-noexcel27';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261008-noexcel27';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-noexcel27';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-noexcel27';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-noexcel27';
+import {createSummaryRenderer} from './app-summary.js?v=20261008-noexcel27';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261008-noexcel27';
+import {createTransactionRenderer} from './app-transactions.js?v=20261008-noexcel27';
+import {createPlanningRenderer} from './app-planning.js?v=20261008-noexcel27';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-noexcel27';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -704,15 +704,3 @@ window.addEventListener('finance:theme',()=>{if(user)renderSummary();});
 
 document.querySelectorAll('#summaryPage details').forEach(details=>details.addEventListener('toggle',()=>{if(details.open&&typeof Chart!=='undefined')requestAnimationFrame(()=>details.querySelectorAll('canvas').forEach(canvas=>Chart.getChart?.(canvas)?.resize()));}));
 
-$('excelExportScope').addEventListener('change',()=>{const mode=$('excelExportScope').value;$('excelExportYearField').hidden=mode!=='year';$('excelExportRangeFields').hidden=mode!=='range';});
-$('exportFinanceExcel').onclick=async()=>{
- const button=$('exportFinanceExcel');if(!user||button.disabled)return;
- const owner=user.id,revision=sessionRevision;let from='',to='';
- if($('excelExportScope').value==='year'){const year=$('excelExportYear').value;if(!/^\d{4}$/.test(year))return showAppToast('กรุณาระบุปี ค.ศ. 4 หลัก');from=year+'-01-01';to=year+'-12-31';}
- if($('excelExportScope').value==='range'){from=$('excelExportFrom').value;to=$('excelExportTo').value;if(!from||!to||from>to)return showAppToast('กรุณาระบุช่วงวันที่ให้ถูกต้อง');}
- button.disabled=true;button.textContent='กำลังสร้าง Excel…';
- try{const {data,error}=await supabase.rpc('export_finance_backup');if(error)throw error;if(data?.owner_id!==owner)throw Error('เจ้าของข้อมูลไม่ตรง');const XLSX=await loadExcelTools();if(user?.id!==owner||sessionRevision!==revision)return;const workbook=createFinanceWorkbook(XLSX,data,{from,to});XLSX.writeFile(workbook,'My_Finance_'+(from?from+'_'+to:'All')+'_'+bangkokDay()+'.xlsx');showAppToast('ส่งออก Excel แล้ว ไฟล์มีข้อมูลการเงิน กรุณาเก็บไว้ให้ปลอดภัย');}
- catch(error){showAppToast('ส่งออก Excel ไม่สำเร็จ: '+error.message);}
- finally{button.disabled=false;button.textContent='ดาวน์โหลด Excel';}
-};
-$('excelExportYear').value=bangkokDay().slice(0,4);
