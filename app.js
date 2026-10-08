@@ -1,13 +1,13 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261008-compact24';
-import {serializeFinanceBackup} from './finance-backup.js?v=20261008-compact24';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-compact24';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-compact24';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-compact24';
-import {createSummaryRenderer} from './app-summary.js?v=20261008-compact24';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261008-compact24';
-import {createTransactionRenderer} from './app-transactions.js?v=20261008-compact24';
-import {createPlanningRenderer} from './app-planning.js?v=20261008-compact24';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-compact24';
+import {createCapacityMonitor} from './app-storage.js?v=20261008-guide25';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261008-guide25';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261008-guide25';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261008-guide25';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261008-guide25';
+import {createSummaryRenderer} from './app-summary.js?v=20261008-guide25';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261008-guide25';
+import {createTransactionRenderer} from './app-transactions.js?v=20261008-guide25';
+import {createPlanningRenderer} from './app-planning.js?v=20261008-guide25';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261008-guide25';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'

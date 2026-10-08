@@ -742,3 +742,14 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 #summaryPage .analysis-grid{grid-template-columns:minmax(0,1fr)}
 .analysis-more .analysis-card{border:0;box-shadow:none;padding:14px 0;background:transparent}
 .summary-extra-charts .summary-share-card{border:0;box-shadow:none}
+
+.settings-guide>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;list-style:none;min-height:48px;color:var(--text)}
+.settings-guide>summary small{display:block;color:var(--muted);margin-top:5px;font-size:12px}
+.usage-guide-body{margin-top:16px;line-height:1.8;color:var(--text);font-size:14px;overflow-wrap:anywhere}
+.usage-guide-intro{padding:12px;border-radius:12px;background:var(--surface,#f6f7fb)}
+.usage-guide-body>details{border-top:1px solid var(--line);padding:12px 0}
+.usage-guide-body>details>summary{cursor:pointer;font-weight:650;min-height:44px;display:flex;align-items:center}
+.usage-guide-body>details>summary:after{content:'＋';margin-left:auto;padding-left:12px;color:var(--muted)}
+.usage-guide-body>details[open]>summary:after{content:'−'}
+.usage-guide-body ol{padding-left:24px}.usage-guide-body li{margin:8px 0}
+.settings-guide summary:focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:8px}
