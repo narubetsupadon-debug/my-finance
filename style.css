@@ -753,3 +753,5 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 .usage-guide-body>details[open]>summary:after{content:'−'}
 .usage-guide-body ol{padding-left:24px}.usage-guide-body li{margin:8px 0}
 .settings-guide summary:focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:8px}
+
+.excel-export-controls{width:100%;border-top:1px solid var(--line);padding-top:16px}.excel-export-controls [hidden]{display:none!important}.excel-export-controls .field{margin-bottom:12px}
