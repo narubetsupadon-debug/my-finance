@@ -32,6 +32,11 @@ try{
  const darkPie=charts.at(-1).config;
  assert.equal(darkPie.options.plugins.legend.labels.generateLabels({data:darkPie.data,getDataVisibility:()=>true})[0].fontColor,'#cbd5e1');
  assert.equal(darkPie.options.color,'#cbd5e1');
+ const darkTrend=charts[3].config,darkCategories=charts[4].config;
+ assert.equal(darkTrend.options.scales.y.ticks.color,'#cbd5e1');
+ assert.equal(darkTrend.options.scales.x.title.color,'#cbd5e1');
+ assert.equal(darkCategories.options.scales.x.ticks.color,'#cbd5e1');
+ for(const [i,name] of darkPie.data.labels.entries())assert.equal(darkPie.data.datasets[0].backgroundColor[i],darkCategories.data.datasets.find(d=>d.label===name).backgroundColor,'same category must have same color across charts');
  globalThis.document.documentElement.dataset.resolvedTheme='light';
  charts.splice(3);
  const trend=charts[0].config;
