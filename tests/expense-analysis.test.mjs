@@ -21,3 +21,14 @@ const multi=analyzeExpenses({...input,config:{mode:'months',keys:['2026-09','202
 assert.equal(analyzeExpenses({...input,transactions:[row('1','2026-10-01',0.1),row('2','2026-10-02',0.2)]}).totalCents,30);
 assert.equal(analyzeExpenses({...input,transactions:[row('bad','2026-10-01',NaN),row('neg','2026-10-01',-1),{...row('inc','2026-10-01',999),type:'income'}]}).selected.length,0);
 console.log('PASS expense analysis: paid-only, date-aligned baselines, month-end, leap/year boundaries, missing data, satang rounding, future exclusion, per-budget overlap and guarded forecasts');
+
+const enriched=analyzeExpenses({...input,transactions:[...transactions,row('bill','2026-10-02',99,'บิล/สาธารณูปโภค'),row('debt','2026-10-02',500,'ชำระบัตร/สินเชื่อ')]});
+assert.equal(enriched.split.repaymentCents,50000);
+assert.equal(enriched.totalCents,139900);
+assert.equal(enriched.split.committedCents,109900);
+assert.equal(enriched.split.otherCents,30000);
+assert.equal(enriched.comparison.drivers[0].name,'ห้องเช่า');
+assert.equal(enriched.forecast.items[0].daysRemaining,24);
+assert.equal(enriched.forecast.items[0].dailyAllowanceCents,2916);
+assert.equal(end.forecast.items[0].dailyAllowanceCents,null);
+console.log('PASS insight drivers, recurring split, repayment exclusion and daily allowance');
