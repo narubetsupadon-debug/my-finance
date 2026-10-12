@@ -38,7 +38,24 @@ export function parseSlipText(raw){
  for(const [idx,name] of [...months,...fullMonths,...englishMonths].entries()){
   const token=name.split('').map(c=>c==='.'?'[.·]?':c).join('[ \\t]*');
   const pattern=new RegExp('(?<![\\d.])(\\d{1,2})\\s*'+token+'\\s*(พ[.]?\\s*ศ[.]?|ค[.]?\\s*ศ[.]?|BE|AD)?\\s*(\\d{4}|\\d{2})(?!\\d)','gi');
-  for(const m of text.matchAll(pattern))add(m[1],idx%12+1,m[3],idx<12||idx>=24&&idx<36,m[2]||'');
+  for(const m of text.matchAll(pattern)){
+   const prefix=text.slice(text.lastIndexOf('\n',m.index-1)+1,m.index);
+   // Do not interpret a stray numeral attached to a month as a new day.
+   if(/\d[ \t]+$/.test(prefix))continue;
+   add(m[1],idx%12+1,m[3],idx<12||idx>=24&&idx<36,m[2]||'');
+  }
+ }
+ // Conservative correction of an extra OCR glyph, only inside a recognizable
+ // Thai month. Unknown substitutions such as "n.9." remain unresolved.
+ const clean=s=>s.replace(/[.·\s]/g,'');
+ const monthNames=[...months.slice(0,12),...fullMonths].map((name,i)=>({name:clean(name),month:i%12+1}));
+ for(const m of text.matchAll(/(?:^|\n)[ \t]*(\d{1,2})[ \t]+([^\n]+?)[ \t]+((?:25|20)\d{2})(?!\d)/g)){
+  const token=clean(m[2]).replace(/^\d(?=[ก-๙])/,'');
+  if(!/^[ก-๙]+$/.test(token))continue;
+  const exact=monthNames.filter(x=>x.name===token);
+  const matches=exact.length?exact:monthNames.filter(x=>token.length===x.name.length+1&&[...token].some((_,i)=>token.slice(0,i)+token.slice(i+1)===x.name));
+  const monthValues=[...new Set(matches.map(x=>x.month))];
+  if(monthValues.length===1)add(m[1],monthValues[0],m[3],true);
  }
  const ds=[...new Set(dates)];return {amount:unique.length===1?unique[0].toFixed(2):'',date:ds.length===1?ds[0]:''};
 }
