@@ -8,3 +8,5 @@ assert.equal(parseSlipText('99.00\n199.00\n31/02/2026').date,'');
 assert.deepEqual(parseSlipText('บัญชี 1234567890\n12/10/2026'),{amount:'',date:'2026-10-12'});
 assert.equal(parseSlipText('12/10/2026\n13/10/2026').date,'');
 console.log('PASS slip parser: Thai/English dates, Buddhist years, Thai digits, fees, ambiguity and invalid dates');
+for(const text of ['12ต.ค.2569 17:13','12 ต.ค.2569','12 ต. ค. 2569','12 ต ค 2569','12ตุลาคม2569','12Oct2026'])assert.equal(parseSlipText(text).date,'2026-10-12',text);
+console.log('PASS OCR date whitespace, joined tokens and full Thai months');

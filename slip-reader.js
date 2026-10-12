@@ -16,7 +16,13 @@ export function parseSlipText(raw){
  const add=(d,m,y)=>{y=Number(y);if(y<100)y+=2000;if(y>2400)y-=543;d=Number(d);m=Number(m);const t=new Date(Date.UTC(y,m-1,d));if(y>=2000&&y<=2100&&t.getUTCFullYear()===y&&t.getUTCMonth()===m-1&&t.getUTCDate()===d)dates.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);};
  for(const m of text.matchAll(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/g))add(m[1],m[2],m[3]);
  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.','jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
- for(const m of text.matchAll(/(?<![\d.])(\d{1,2})[ \t]+([ก-๙.]+|[a-z]+)[ \t]+(\d{2,4})(?!\d)/gi)){const key=m[2].toLowerCase(),idx=months.findIndex(x=>x.replaceAll('.','')===key.replaceAll('.',''));if(idx>=0)add(m[1],idx%12+1,m[3]);}
+ const fullMonths=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+ // OCR may join date tokens or insert whitespace between abbreviation letters.
+ for(const [idx,name] of [...months,...fullMonths].entries()){
+  const token=name.split('').map(c=>c==='.'?'[.·]?':c).join('[ \\t]*');
+  const pattern=new RegExp('(?<![\\d.])(\\d{1,2})[ \\t]*'+token+'[ \\t]*(\\d{4}|\\d{2})(?!\\d)','gi');
+  for(const m of text.matchAll(pattern))add(m[1],idx%12+1,m[2]);
+ }
  const ds=[...new Set(dates)];return {amount:unique.length===1?unique[0].toFixed(2):'',date:ds.length===1?ds[0]:''};
 }
 
