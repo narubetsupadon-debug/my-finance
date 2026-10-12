@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {parseSlipText} from '../slip-reader.js';
+assert.deepEqual(parseSlipText('จำนวนเงิน 1,234.50 บาท\n12 ต.ค. 2569'),{amount:'1234.50',date:'2026-10-12'});
+assert.deepEqual(parseSlipText('Amount 99.00 THB\n12 Oct 2026\nFee 0.00'),{amount:'99.00',date:'2026-10-12'});
+assert.deepEqual(parseSlipText('๙๙.๕๐ บาท\n๑๒/๑๐/๒๕๖๙'),{amount:'99.50',date:'2026-10-12'});
+assert.equal(parseSlipText('99.00\n199.00\n31/02/2026').amount,'');
+assert.equal(parseSlipText('99.00\n199.00\n31/02/2026').date,'');
+assert.deepEqual(parseSlipText('บัญชี 1234567890\n12/10/2026'),{amount:'',date:'2026-10-12'});
+assert.equal(parseSlipText('12/10/2026\n13/10/2026').date,'');
+console.log('PASS slip parser: Thai/English dates, Buddhist years, Thai digits, fees, ambiguity and invalid dates');
