@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {parseSlipText} from '../slip-reader.js';
+import {parseSlipText,dateRegions} from '../slip-reader.js';
 assert.deepEqual(parseSlipText('จำนวนเงิน 1,234.50 บาท\n12 ต.ค. 2569'),{amount:'1234.50',date:'2026-10-12'});
 assert.deepEqual(parseSlipText('Amount 99.00 THB\n12 Oct 2026\nFee 0.00'),{amount:'99.00',date:'2026-10-12'});
 assert.deepEqual(parseSlipText('๙๙.๕๐ บาท\n๑๒/๑๐/๒๕๖๙'),{amount:'99.50',date:'2026-10-12'});
@@ -25,3 +25,9 @@ assert.equal(parseSlipText('12 Oct AD 2569').date,'');
 assert.equal(parseSlipText('Fee\n25.00 THB').amount,'');
 assert.equal(parseSlipText('12 ต.ค.\n2569\n13 ต.ค.\n2569').date,'');
 console.log('PASS split fee values, explicit eras override month language, multiline dates and contradictory-date guards');
+const word=(text,x0,x1)=>({text,bbox:{x0,y0:130,x1,y1:155}});
+const regionInput={blocks:[{paragraphs:[{lines:[{words:[word('an',40,120),word('2569',140,210),word('17:13',220,300),word('KBank',600,850)]}]}]}]};
+assert.deepEqual(dateRegions(regionInput),[{x0:40,y0:130,x1:300,y1:155}]);
+assert.deepEqual(dateRegions({blocks:[]}),[]);
+assert.equal(parseSlipText('100.00 บาท\n12 ต.ค. 2569 17:13').date,'2026-10-12');
+console.log('PASS date-region detection: year anchor, time boundary and bank logo exclusion');

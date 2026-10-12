@@ -758,3 +758,6 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 #slipReview, #slipReview .field { min-width:0; }
 #slipReview input { box-sizing:border-box; width:100%; min-width:0; max-width:100%; }
 #slipReview input[type=date] { display:block; min-height:44px; }
+#slipReview .fields { grid-template-columns:minmax(0,1fr); }
+#slipReview input[type=date] { appearance:none; -webkit-appearance:none; inline-size:100%; min-inline-size:0; }
+#slipReview input[type=date]::-webkit-date-and-time-value { min-width:0; text-align:left; }
