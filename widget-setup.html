@@ -1,0 +1,14 @@
+<!doctype html><html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ติดตั้ง My Finance Widget</title>
+<style>body{font:16px system-ui;background:#f6f7fb;color:#171b32;max-width:620px;margin:32px auto;padding:20px;line-height:1.6}button,a{display:inline-block;padding:14px;border-radius:14px}button{background:#305cef;color:white;border:0;font:inherit}textarea{box-sizing:border-box;width:100%;height:180px;font:12px monospace}li{margin:12px 0}</style>
+<h1>My Finance Widget</h1><p>วิดเจ็ตใช้ฟรีผ่าน Scriptable สำหรับหน้าจอโฮม iPhone</p>
+<ol><li>กด <b>คัดลอกสคริปต์</b> ด้านล่าง</li><li>เปิด Scriptable → กด + → วางสคริปต์ทั้งหมด</li><li>ตั้งชื่อ <b>My Finance</b> แล้วกด ▶ เพื่อเข้าสู่ระบบด้วยบัญชีเดียวกับเว็บไซต์</li><li>กลับหน้าจอโฮม → กดพื้นที่ว่างค้าง → เพิ่มวิดเจ็ต → Scriptable → เลือกขนาดกลาง</li><li>กดวิดเจ็ตค้าง → แก้ไขวิดเจ็ต → ช่อง Script เลือก <b>My Finance</b></li></ol>
+<p>กรอกรหัสผ่านเฉพาะในหน้าต่างของ Scriptable ไม่ส่งทางแชต ไม่ใส่ในโค้ด สคริปต์เก็บ session ใน Keychain และอ่านข้อมูลด้วยสิทธิ์บัญชีของคุณ ไม่ใช้กุญแจผู้ดูแลระบบ</p>
+<button id="copy" type="button" disabled>คัดลอกสคริปต์</button><p id="status" role="status">กำลังโหลดสคริปต์…</p><textarea id="code" readonly aria-label="สคริปต์สำหรับ Scriptable"></textarea>
+<p>iPhone เป็นผู้กำหนดรอบอัปเดต ไม่ใช่เรียลไทม์ ยอดใช้เกณฑ์เดียวกับหน้าเว็บภาพรวม รวมรายการรอดำเนินการ/รายการในเดือนที่ตั้งวันที่ล่วงหน้าในงบ แต่ไม่รวมยกเลิก วิดเจ็ตทำให้คนที่เห็นหน้าจอเห็นยอดเงินได้ ควรใช้เฉพาะหน้าจอโฮมที่คุณสะดวกแสดงยอด</p>
+<p>หากเลิกใช้: เปิดสคริปต์ใน Scriptable → ออกจากระบบวิดเจ็ต → ลบวิดเจ็ตจากหน้าจอ การออกจากเว็บอย่างเดียวอาจไม่ออกจากระบบวิดเจ็ต</p>
+<a href="./">กลับ My Finance</a>
+<script>
+const code=document.getElementById('code'),status=document.getElementById('status'),button=document.getElementById('copy');
+fetch('./My-Finance-Widget.js',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.text()}).then(s=>{code.value=s;button.disabled=false;status.textContent='พร้อมคัดลอกค่ะ'}).catch(()=>{status.textContent='โหลดไม่สำเร็จ รีเฟรชแล้วลองใหม่ค่ะ'});
+button.onclick=async()=>{try{await navigator.clipboard.writeText(code.value);status.textContent='คัดลอกแล้ว เปิด Scriptable แล้วกด + เพื่อวางได้เลยค่ะ'}catch{code.focus();code.select();status.textContent='กดค้างในช่องโค้ด → เลือกทั้งหมด → คัดลอกค่ะ'}};
+</script></html>
