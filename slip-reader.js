@@ -36,9 +36,9 @@ export function bindSlipReader(){
  let serial=0,worker=null,busy=false;
  const status=message=>{$('slipStatus').textContent=message;};
  const clear=()=>{serial++;busy=false;if(worker){worker.terminate().catch(()=>{});worker=null;}$('slipFile').value='';$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';$('slipRead').disabled=false;status('อ่านในเครื่อง ไม่อัปโหลดหรือเก็บรูป · ครั้งแรกต้องโหลดตัวอ่านผ่านอินเทอร์เน็ต');};
- $('txDialog').addEventListener('close',clear);
+ $('txDialog').addEventListener('close',()=>{clear();clearReview();});
  $('slipFile').addEventListener('change',()=>{serial++;busy=false;if(worker){worker.terminate().catch(()=>{});worker=null;}$('slipRead').disabled=false;clearReview();status('เลือกรูปแล้ว กดอ่านสลิปได้ค่ะ');});
- function clearReview(){$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';}
+ function clearReview(){$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';if($('slipReadText'))$('slipReadText').textContent='';}
  $('slipRead').onclick=async()=>{
   if(busy)return;const file=$('slipFile').files[0];if(!file){status('เลือกรูปสลิปก่อนค่ะ');return;}
   if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10*1024*1024){status('ใช้รูป JPG, PNG หรือ WebP ขนาดไม่เกิน 10 MB ค่ะ');return;}
@@ -49,7 +49,7 @@ export function bindSlipReader(){
    ownWorker=await OCR.createWorker('tha+eng',1,{logger:m=>{if(job===serial&&m.status==='recognizing text')status('กำลังอ่าน '+Math.round(m.progress*100)+'%');}});
    if(job!==serial)return;worker=ownWorker;
    const {data}=await ownWorker.recognize(file);if(job!==serial)return;
-   const result=parseSlipText(data.text);$('slipAmount').value=result.amount;$('slipDate').value=result.date;$('slipReview').hidden=false;
+   const result=parseSlipText(data.text);$('slipAmount').value=result.amount;$('slipDate').value=result.date;$('slipReview').hidden=false;if($('slipReadText'))$('slipReadText').textContent=data.text||'ไม่พบข้อความ';
    status(result.amount&&result.date?'อ่านได้แล้ว ตรวจยอดและวันที่ก่อนใช้ค่ะ':'อ่านบางช่องไม่ชัดหรือพบหลายค่า กรุณากรอกตรวจแก้ในช่องด้านล่างค่ะ');
   }catch(error){if(job===serial)status('อ่านไม่สำเร็จ ลองรูปที่ชัดขึ้น หรือกรอกเองได้ค่ะ');}
   finally{if(ownWorker)await ownWorker.terminate().catch(()=>{});if(job===serial){worker=null;busy=false;$('slipRead').disabled=false;}}
