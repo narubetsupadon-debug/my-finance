@@ -1,29 +1,50 @@
 // Reads images locally. Never uploads, saves transactions or assigns categories.
 export function parseSlipText(raw){
- const text=String(raw).replace(/[๐-๙]/g,c=>String('๐๑๒๓๔๕๖๗๘๙'.indexOf(c)));
+ const text=String(raw).replace(/[๐-๙]/g,c=>String('๐๑๒๓๔๕๖๗๘๙'.indexOf(c))).replace(/[\u200b-\u200d\ufeff]/g,'').replace(/(\d)\s*\.\s*(\d{2})(?!\d)/g,'$1.$2');
  const lines=text.split(/\r?\n/), amounts=[];
  for(let i=0;i<lines.length;i++){
   const line=lines[i];if(/ค่าธรรมเนียม|fee|balance|คงเหลือ/i.test(line))continue;
-  const labelled=/จำนวนเงิน|ยอดเงิน|amount|total|บาท|THB|฿/i.test(line);
-  const source=labelled?line+' '+(lines[i+1]||''):line;
-  for(const m of source.matchAll(/(?<![\d.,])(?:\d{1,3}(?:,\d{3})+|\d+)\.\d{2}(?!\d)/g)){
+  const labelled=/จำนวน(?:เงิน)?|ยอด(?:เงิน|โอน|ชำระ)|amount|total|บาท|THB|฿/i.test(line);
+  if(!labelled&&/บัญชี|account|reference|เลขที่|วันที่|date|\d{1,2}:\d{2}/i.test(line))continue;
+  const next=lines[i+1]||'';
+  const source=labelled&&!/\d+\.\d{2}|\d+\s*(?:บาท|THB|฿)/i.test(line)&&! /ค่าธรรมเนียม|fee|balance|คงเหลือ/i.test(next)?line+' '+next:line;
+  for(const m of source.matchAll(/(?<![\d.,-])(?:\d{1,3}(?:,\d{3})+|\d+)\.\d{2}(?![\d.])/g)){
    const value=Number(m[0].replaceAll(',',''));if(value>0&&value<=999999999)amounts.push({value,labelled});
+  }
+  // Integer money is accepted only next to a currency, never from bare account IDs.
+  for(const m of source.matchAll(/(?:฿|THB)\s*((?:\d{1,3}(?:,\d{3})+|\d+))(?![\d.,])|(?<![\d.,-])((?:\d{1,3}(?:,\d{3})+|\d+))\s*(?:บาท|THB)(?![a-z])/gi)){
+   const value=Number((m[1]||m[2]).replaceAll(',',''));if(value>0&&value<=999999999)amounts.push({value,labelled:true});
   }
  }
  const priority=amounts.some(x=>x.labelled)?amounts.filter(x=>x.labelled):amounts;
  const unique=[...new Set(priority.map(x=>x.value))];
  const dates=[];
- const add=(d,m,y)=>{y=Number(y);if(y<100)y+=2000;if(y>2400)y-=543;d=Number(d);m=Number(m);const t=new Date(Date.UTC(y,m-1,d));if(y>=2000&&y<=2100&&t.getUTCFullYear()===y&&t.getUTCMonth()===m-1&&t.getUTCDate()===d)dates.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);};
- for(const m of text.matchAll(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/g))add(m[1],m[2],m[3]);
+ const add=(d,m,y,thai=false)=>{y=Number(y);if(y<100)y+=thai||y>=40?2500:2000;if(y>2400)y-=543;d=Number(d);m=Number(m);const t=new Date(Date.UTC(y,m-1,d));if(y>=2000&&y<=2100&&t.getUTCFullYear()===y&&t.getUTCMonth()===m-1&&t.getUTCDate()===d)dates.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);};
+ for(const m of text.matchAll(/(?<![\d.])(\d{1,2})[ \t]*[\/\-.][ \t]*(\d{1,2})[ \t]*[\/\-.][ \t]*(\d{4}|\d{2})(?![\d.])/g))add(m[1],m[2],m[3]);
+ for(const m of text.matchAll(/\b(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})\b/g))add(m[3],m[2],m[1]);
  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.','jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
  const fullMonths=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
  // OCR may join date tokens or insert whitespace between abbreviation letters.
- for(const [idx,name] of [...months,...fullMonths].entries()){
+ const englishMonths=['january','february','march','april','may','june','july','august','september','october','november','december'];
+ for(const [idx,name] of [...months,...fullMonths,...englishMonths].entries()){
   const token=name.split('').map(c=>c==='.'?'[.·]?':c).join('[ \\t]*');
-  const pattern=new RegExp('(?<![\\d.])(\\d{1,2})[ \\t]*'+token+'[ \\t]*(\\d{4}|\\d{2})(?!\\d)','gi');
-  for(const m of text.matchAll(pattern))add(m[1],idx%12+1,m[2]);
+  const pattern=new RegExp('(?<![\\d.])(\\d{1,2})[ \\t]*'+token+'[ \\t]*(?:พ[.]?ศ[.]?|ค[.]?ศ[.]?|BE|AD)?[ \\t]*(\\d{4}|\\d{2})(?!\\d)','gi');
+  for(const m of text.matchAll(pattern))add(m[1],idx%12+1,m[2],idx<12||idx>=24&&idx<36);
  }
  const ds=[...new Set(dates)];return {amount:unique.length===1?unique[0].toFixed(2):'',date:ds.length===1?ds[0]:''};
+}
+
+async function improveImage(file){
+ const url=URL.createObjectURL(file),img=new Image();
+ try{
+  await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
+  const scale=Math.min(2,2000/Math.max(img.naturalWidth,img.naturalHeight));
+  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+  const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  const pixels=ctx.getImageData(0,0,canvas.width,canvas.height),d=pixels.data;
+  for(let i=0;i<d.length;i+=4){const gray=Math.max(0,Math.min(255,(.299*d[i]+.587*d[i+1]+.114*d[i+2]-128)*1.4+128));d[i]=d[i+1]=d[i+2]=gray;}
+  ctx.putImageData(pixels,0,0);return canvas;
+ }finally{URL.revokeObjectURL(url);}
 }
 
 let library;
@@ -49,7 +70,12 @@ export function bindSlipReader(){
    ownWorker=await OCR.createWorker('tha+eng',1,{logger:m=>{if(job===serial&&m.status==='recognizing text')status('กำลังอ่าน '+Math.round(m.progress*100)+'%');}});
    if(job!==serial)return;worker=ownWorker;
    const {data}=await ownWorker.recognize(file);if(job!==serial)return;
-   const result=parseSlipText(data.text);$('slipAmount').value=result.amount;$('slipDate').value=result.date;$('slipReview').hidden=false;if($('slipReadText'))$('slipReadText').textContent=data.text||'ไม่พบข้อความ';
+   let readText=data.text,result=parseSlipText(readText);
+   if(!result.amount||!result.date){
+    status('อ่านบางช่องไม่ชัด กำลังเพิ่มความชัดและอ่านอีกครั้ง…');
+    try{const image=await improveImage(file);if(job!==serial)return;const retry=await ownWorker.recognize(image);if(job!==serial)return;readText+='\n'+retry.data.text;result=parseSlipText(readText);}catch{if(job!==serial)return;}
+   }
+   $('slipAmount').value=result.amount;$('slipDate').value=result.date;$('slipReview').hidden=false;if($('slipReadText'))$('slipReadText').textContent=readText||'ไม่พบข้อความ';
    status(result.amount&&result.date?'อ่านได้แล้ว ตรวจยอดและวันที่ก่อนใช้ค่ะ':'อ่านบางช่องไม่ชัดหรือพบหลายค่า กรุณากรอกตรวจแก้ในช่องด้านล่างค่ะ');
   }catch(error){if(job===serial)status('อ่านไม่สำเร็จ ลองรูปที่ชัดขึ้น หรือกรอกเองได้ค่ะ');}
   finally{if(ownWorker)await ownWorker.terminate().catch(()=>{});if(job===serial){worker=null;busy=false;$('slipRead').disabled=false;}}

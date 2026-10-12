@@ -1,13 +1,13 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261012-slipdebug31';
-import {serializeFinanceBackup} from './finance-backup.js?v=20261012-slipdebug31';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261012-slipdebug31';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261012-slipdebug31';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261012-slipdebug31';
-import {createSummaryRenderer} from './app-summary.js?v=20261012-slipdebug31';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261012-slipdebug31';
-import {createTransactionRenderer} from './app-transactions.js?v=20261012-slipdebug31';
-import {createPlanningRenderer} from './app-planning.js?v=20261012-slipdebug31';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261012-slipdebug31';
+import {createCapacityMonitor} from './app-storage.js?v=20261012-slipbanks32';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261012-slipbanks32';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261012-slipbanks32';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261012-slipbanks32';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261012-slipbanks32';
+import {createSummaryRenderer} from './app-summary.js?v=20261012-slipbanks32';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261012-slipbanks32';
+import {createTransactionRenderer} from './app-transactions.js?v=20261012-slipbanks32';
+import {createPlanningRenderer} from './app-planning.js?v=20261012-slipbanks32';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261012-slipbanks32';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
