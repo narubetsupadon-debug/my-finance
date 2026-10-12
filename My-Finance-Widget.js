@@ -8,12 +8,13 @@ const SESSION_KEY='my-finance-widget-session-v1';
 
 async function api(path,{token,method='GET',body}={}){
  const request=new Request(BASE+path);request.method=method;request.timeoutInterval=15;
- request.headers={apikey:PUBLIC_KEY,'Content-Type':'application/json'};
- if(token)request.headers.Authorization='Bearer '+token;
+ // Scriptable bridges headers as a dictionary snapshot. Assign the complete
+ // dictionary once; modifying request.headers.Authorization can be discarded.
+ request.headers={apikey:PUBLIC_KEY,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})};
  if(body)request.body=JSON.stringify(body);
  request.onRedirect=()=>null;
  const data=await request.loadJSON(),status=request.response.statusCode;
- if(status<200||status>=300){const error=new Error(status===400||status===401?'เข้าสู่ระบบใหม่ใน Scriptable ค่ะ':'เชื่อมข้อมูลไม่สำเร็จ ลองใหม่ค่ะ');error.status=status;throw error;}
+ if(status<200||status>=300){const message=data?.error_code==='invalid_credentials'?'อีเมลหรือรหัสผ่านไม่ถูกต้อง':data?.error_code==='no_authorization'?'สคริปต์ไม่ได้ส่งโทเคน กรุณาอัปเดตสคริปต์':status===400||status===401?'เข้าสู่ระบบใหม่ใน Scriptable ค่ะ':'เชื่อมข้อมูลไม่สำเร็จ ลองใหม่ค่ะ';const error=new Error(message);error.status=status;throw error;}
  return data;
 }
 function storeSession(data){
