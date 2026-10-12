@@ -14,7 +14,7 @@ async function api(path,{token,method='GET',body}={}){
  if(body)request.body=JSON.stringify(body);
  request.onRedirect=()=>null;
  const data=await request.loadJSON(),status=request.response.statusCode;
- if(status<200||status>=300){const message=data?.error_code==='invalid_credentials'?'อีเมลหรือรหัสผ่านไม่ถูกต้อง':data?.error_code==='no_authorization'?'สคริปต์ไม่ได้ส่งโทเคน กรุณาอัปเดตสคริปต์':status===400||status===401?'เข้าสู่ระบบใหม่ใน Scriptable ค่ะ':'เชื่อมข้อมูลไม่สำเร็จ ลองใหม่ค่ะ';const error=new Error(message);error.status=status;throw error;}
+ if(status<200||status>=300){const message=data?.error_code==='invalid_credentials'?'อีเมลหรือรหัสผ่านไม่ถูกต้อง':data?.error_code==='no_authorization'?'สคริปต์ไม่ได้ส่งโทเคน กรุณาอัปเดตสคริปต์':data?.error_code==='session_not_found'?'การเข้าสู่ระบบเดิมหมดอายุ เปิด Scriptable เพื่อเข้าสู่ระบบใหม่ค่ะ':status===400||status===401?'เข้าสู่ระบบใหม่ใน Scriptable ค่ะ':'เชื่อมข้อมูลไม่สำเร็จ ลองใหม่ค่ะ';const error=new Error(message);error.status=status;error.code=data?.error_code;throw error;}
  return data;
 }
 function storeSession(data){
@@ -36,7 +36,14 @@ async function getSession(){
   catch(error){if([400,401].includes(error.status)){Keychain.remove(SESSION_KEY);return login();}throw error;}
  }
  // Check the session with the server; do not authorize using editable profile data.
- const user=await api('/auth/v1/user',{token:session.access_token});
+ let user;
+ try{user=await api('/auth/v1/user',{token:session.access_token});}
+ catch(error){
+  if(error.code==='session_not_found'||error.status===401&&error.code!=='no_authorization'){
+   Keychain.remove(SESSION_KEY);session=await login();
+   user=await api('/auth/v1/user',{token:session.access_token});
+  }else throw error;
+ }
  if(user.id!==session.user_id)throw new Error('บัญชีไม่ตรงกัน กรุณาเข้าสู่ระบบใหม่');
  return session;
 }
