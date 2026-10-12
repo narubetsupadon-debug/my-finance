@@ -71,7 +71,7 @@ function totals(budgets,rows,day){
 function text(widget,value,size,color){const line=widget.addText(value);line.font=Font.semiboldSystemFont(size);line.textColor=new Color(color);line.minimumScaleFactor=.65;line.lineLimit=1;return line;}
 function money(cents){return '฿'+(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 async function main(){
- const widget=new ListWidget();widget.backgroundColor=new Color('#171b32');widget.setPadding(16,16,16,16);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+15*60000);
+ const widget=new ListWidget();widget.backgroundColor=new Color('#171b32');widget.setPadding(16,16,16,16);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
  try{
   if(!config.runsInWidget&&Keychain.contains(SESSION_KEY)){
    const menu=new Alert();menu.title='My Finance Widget';menu.addAction('อัปเดต / ดูตัวอย่าง');menu.addDestructiveAction('ออกจากระบบวิดเจ็ต');menu.addCancelAction('ยกเลิก');
