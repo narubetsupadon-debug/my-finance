@@ -94,7 +94,7 @@ export function bindSlipReader(){
   if(busy)return;const file=$('slipFile').files[0];if(!file){status('เลือกรูปสลิปก่อนค่ะ');return;}
   if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10*1024*1024){status('ใช้รูป JPG, PNG หรือ WebP ขนาดไม่เกิน 10 MB ค่ะ');return;}
   const job=++serial;busy=true;$('slipRead').disabled=true;clearReview();status('กำลังโหลดตัวอ่านและอ่านสลิป… อาจใช้เวลาบนมือถือ');
-  let ownWorker,ownDateWorker;
+  let ownWorker,ownDateWorker,dateReadError='';
   try{
    const OCR=await loadOCR();if(job!==serial)return;
    ownWorker=await OCR.createWorker('tha+eng',1,{logger:m=>{if(job===serial&&m.status==='recognizing text')status('กำลังอ่าน '+Math.round(m.progress*100)+'%');}});
@@ -110,14 +110,14 @@ export function bindSlipReader(){
     status('กำลังอ่านเฉพาะวันที่ด้วยภาษาไทยแบบละเอียด… ครั้งแรกต้องโหลดเพิ่ม');
     try{
      await ownWorker.terminate().catch(()=>{});ownWorker=null;worker=null;if(job!==serial)return;
-     ownDateWorker=await OCR.createWorker('tha',1,{langPath:'https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/e12c65a915945e4c28e237a9b52bc4a8f39a0cec',gzip:false,cachePath:'finance-tha-best-e12c65a9'});
+     ownDateWorker=await OCR.createWorker('tha',1,{langPath:'https://cdn.jsdelivr.net/gh/tesseract-ocr/tessdata_best@e12c65a915945e4c28e237a9b52bc4a8f39a0cec',gzip:false,cachePath:'finance-tha-best-v2',logger:m=>{if(job===serial&&m.status==='loading language traineddata')status('กำลังโหลดภาษาไทยสำหรับวันที่ '+Math.round(m.progress*100)+'%');}});
      if(job!==serial)return;dateWorker=ownDateWorker;await ownDateWorker.setParameters({tessedit_pageseg_mode:'7'});
      for(const region of regions){const crop=await cropDate(file,region);if(job!==serial)return;const dated=await ownDateWorker.recognize(crop);if(job!==serial)return;readText+='\n'+dated.data.text;}
      result=parseSlipText(readText);
-    }catch{if(job!==serial)return;}
+    }catch(error){if(job!==serial)return;dateReadError=String(error?.message||'ตัวอ่านวันที่ทำงานไม่สำเร็จ').slice(0,180);}
    }
    $('slipAmount').value=result.amount;$('slipDate').value=result.date;$('slipReview').hidden=false;if($('slipReadText'))$('slipReadText').textContent=readText||'ไม่พบข้อความ';
-   status(result.amount&&result.date?'อ่านได้แล้ว ตรวจยอดและวันที่ก่อนใช้ค่ะ':'อ่านบางช่องไม่ชัดหรือพบหลายค่า กรุณากรอกตรวจแก้ในช่องด้านล่างค่ะ');
+   status(result.amount&&result.date?'อ่านได้แล้ว ตรวจยอดและวันที่ก่อนใช้ค่ะ':dateReadError?'ขั้นตอนอ่านวันที่ขัดข้อง: '+dateReadError:'อ่านบางช่องไม่ชัดหรือพบหลายค่า กรุณากรอกตรวจแก้ในช่องด้านล่างค่ะ');
   }catch(error){if(job===serial)status('อ่านไม่สำเร็จ ลองรูปที่ชัดขึ้น หรือกรอกเองได้ค่ะ');}
   finally{if(ownWorker)await ownWorker.terminate().catch(()=>{});if(ownDateWorker)await ownDateWorker.terminate().catch(()=>{});if(job===serial){worker=null;dateWorker=null;busy=false;$('slipRead').disabled=false;}}
  };
