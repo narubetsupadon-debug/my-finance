@@ -2,12 +2,21 @@
 export function parseSlipText(raw){
  const text=String(raw).replace(/[๐-๙]/g,c=>String('๐๑๒๓๔๕๖๗๘๙'.indexOf(c))).replace(/[\u200b-\u200d\ufeff]/g,'').replace(/(\d)\s*\.\s*(\d{2})(?!\d)/g,'$1.$2');
  const lines=text.split(/\r?\n/), amounts=[];
+ const excluded=/ค่าธรรมเนียม|fee|balance|คงเหลือ/i,excludedLines=new Set();
  for(let i=0;i<lines.length;i++){
-  const line=lines[i];if(/ค่าธรรมเนียม|fee|balance|คงเหลือ/i.test(line))continue;
+  if(!excluded.test(lines[i]))continue;excludedLines.add(i);
+  // A fee/balance label can be on its own line, with its value below it.
+  if(!/\d/.test(lines[i])){
+   let next=i+1;while(next<lines.length&&!lines[next].trim())next++;
+   if(next<lines.length&&/^\s*(?:฿|THB)?\s*[\d,]+(?:\.\d{2})?\s*(?:บาท|THB)?\s*$/i.test(lines[next]))excludedLines.add(next);
+  }
+ }
+ for(let i=0;i<lines.length;i++){
+  const line=lines[i];if(excludedLines.has(i))continue;
   const labelled=/จำนวน(?:เงิน)?|ยอด(?:เงิน|โอน|ชำระ)|amount|total|บาท|THB|฿/i.test(line);
   if(!labelled&&/บัญชี|account|reference|เลขที่|วันที่|date|\d{1,2}:\d{2}/i.test(line))continue;
   const next=lines[i+1]||'';
-  const source=labelled&&!/\d+\.\d{2}|\d+\s*(?:บาท|THB|฿)/i.test(line)&&! /ค่าธรรมเนียม|fee|balance|คงเหลือ/i.test(next)?line+' '+next:line;
+  const source=labelled&&!/\d+\.\d{2}|\d+\s*(?:บาท|THB|฿)/i.test(line)&&!excludedLines.has(i+1)?line+' '+next:line;
   for(const m of source.matchAll(/(?<![\d.,-])(?:\d{1,3}(?:,\d{3})+|\d+)\.\d{2}(?![\d.])/g)){
    const value=Number(m[0].replaceAll(',',''));if(value>0&&value<=999999999)amounts.push({value,labelled});
   }
@@ -19,8 +28,8 @@ export function parseSlipText(raw){
  const priority=amounts.some(x=>x.labelled)?amounts.filter(x=>x.labelled):amounts;
  const unique=[...new Set(priority.map(x=>x.value))];
  const dates=[];
- const add=(d,m,y,thai=false)=>{y=Number(y);if(y<100)y+=thai||y>=40?2500:2000;if(y>2400)y-=543;d=Number(d);m=Number(m);const t=new Date(Date.UTC(y,m-1,d));if(y>=2000&&y<=2100&&t.getUTCFullYear()===y&&t.getUTCMonth()===m-1&&t.getUTCDate()===d)dates.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);};
- for(const m of text.matchAll(/(?<![\d.])(\d{1,2})[ \t]*[\/\-.][ \t]*(\d{1,2})[ \t]*[\/\-.][ \t]*(\d{4}|\d{2})(?![\d.])/g))add(m[1],m[2],m[3]);
+ const add=(d,m,y,thai=false,era='')=>{y=Number(y);const calendar=era.replace(/[.\s]/g,'').toUpperCase(),be=['พศ','BE'].includes(calendar),ad=['คศ','AD'].includes(calendar);if(y<100)y+=be||!ad&&(thai||y>=40)?2500:2000;if(be||!ad&&y>2400)y-=543;d=Number(d);m=Number(m);const t=new Date(Date.UTC(y,m-1,d));if(y>=2000&&y<=2100&&t.getUTCFullYear()===y&&t.getUTCMonth()===m-1&&t.getUTCDate()===d)dates.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);};
+ for(const m of text.matchAll(/(?<![\d.])(\d{1,2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.]\s*(\d{4}|\d{2})(?![\d.])/g))add(m[1],m[2],m[3]);
  for(const m of text.matchAll(/\b(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})\b/g))add(m[3],m[2],m[1]);
  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.','jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
  const fullMonths=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
@@ -28,8 +37,8 @@ export function parseSlipText(raw){
  const englishMonths=['january','february','march','april','may','june','july','august','september','october','november','december'];
  for(const [idx,name] of [...months,...fullMonths,...englishMonths].entries()){
   const token=name.split('').map(c=>c==='.'?'[.·]?':c).join('[ \\t]*');
-  const pattern=new RegExp('(?<![\\d.])(\\d{1,2})[ \\t]*'+token+'[ \\t]*(?:พ[.]?ศ[.]?|ค[.]?ศ[.]?|BE|AD)?[ \\t]*(\\d{4}|\\d{2})(?!\\d)','gi');
-  for(const m of text.matchAll(pattern))add(m[1],idx%12+1,m[2],idx<12||idx>=24&&idx<36);
+  const pattern=new RegExp('(?<![\\d.])(\\d{1,2})\\s*'+token+'\\s*(พ[.]?\\s*ศ[.]?|ค[.]?\\s*ศ[.]?|BE|AD)?\\s*(\\d{4}|\\d{2})(?!\\d)','gi');
+  for(const m of text.matchAll(pattern))add(m[1],idx%12+1,m[3],idx<12||idx>=24&&idx<36,m[2]||'');
  }
  const ds=[...new Set(dates)];return {amount:unique.length===1?unique[0].toFixed(2):'',date:ds.length===1?ds[0]:''};
 }
