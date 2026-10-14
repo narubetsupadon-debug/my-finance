@@ -1,13 +1,13 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261014-safe43';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261014-safe43';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-safe43';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261014-safe43';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-safe43';
-import {createSummaryRenderer} from './app-summary.js?v=20261014-safe43';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261014-safe43';
-import {createTransactionRenderer} from './app-transactions.js?v=20261014-safe43';
-import {createPlanningRenderer} from './app-planning.js?v=20261014-safe43';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-safe43';
+import {createCapacityMonitor} from './app-storage.js?v=20261014-studio44';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261014-studio44';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-studio44';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261014-studio44';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-studio44';
+import {createSummaryRenderer} from './app-summary.js?v=20261014-studio44';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261014-studio44';
+import {createTransactionRenderer} from './app-transactions.js?v=20261014-studio44';
+import {createPlanningRenderer} from './app-planning.js?v=20261014-studio44';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-studio44';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
