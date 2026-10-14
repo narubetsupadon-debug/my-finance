@@ -1,4 +1,5 @@
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-deep39';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261014-bills40';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-bills40';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
@@ -18,6 +19,9 @@ function renderDashboard(){
  const prevExp=previous.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
  const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=todayRows.reduce((s,x)=>s+Number(x.amount),0)
  const bsum=budgetTotals(),dailyLeft=bsum.daily,pct=bsum.limit?Math.min(100,bsum.spent/bsum.limit*100):0
+ const billStates=bills.filter(b=>b.is_active&&(b.frequency==='monthly'||!b.frequency)).map(b=>recurringBillMonthStatus(b,transactions,today));
+ if($('homeBillStatus'))$('homeBillStatus').textContent=billStates.length?'บิลเดือนนี้ · จ่ายแล้ว '+billStates.filter(s=>s.state==='paid').length+' · รอจ่าย '+billStates.filter(s=>s.state==='pending').length+' · ยังไม่บันทึก '+billStates.filter(s=>s.state==='unrecorded').length:'เพิ่มบิลประจำไว้ช่วยจำ ›';
+ if($('homeBillStatusNote'))$('homeBillStatusNote').textContent='ตรวจเฉพาะรายการที่เชื่อมกับบิล · ถ้ากรอกแยกไว้ ตรวจรายการก่อนบันทึกซ้ำ';
  $('nextBillCard')?.classList.toggle('hidden',uiSettings.dueReminder===false);
  $('upcomingList')?.closest('details')?.classList.toggle('hidden',uiSettings.dueReminder===false);
  document.querySelector('.budget-panel')?.classList.toggle('budget-panel-warning',uiSettings.budgetReminder!==false&&bsum.limit>0&&bsum.spent/bsum.limit>=.8);

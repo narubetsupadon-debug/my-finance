@@ -26,3 +26,11 @@ await assert.rejects(core.readAll(()=>({range:async()=>++calls===1?{data:input.s
 console.log('PASS core: Thai dates, year boundary, overlapping budgets, cancelled expenses, daily allowance, month-end due dates, >1000 rows, failed page');
 
 
+const monthlyBill={id:'b1',due_day:31};
+const billTx=(status,date,extra={})=>({type:'expense',source:'bill_payment:b1',status,transaction_date:date,...extra});
+assert.equal(core.recurringBillMonthStatus(monthlyBill,[],'2026-02-28').state,'unrecorded');assert.equal(core.recurringBillMonthStatus(monthlyBill,[],'2026-02-28').due,true);
+assert.equal(core.recurringBillMonthStatus(monthlyBill,[billTx('pending','2026-10-02')],'2026-10-14').state,'pending');
+assert.equal(core.recurringBillMonthStatus(monthlyBill,[billTx('paid','2026-10-20')],'2026-10-14').state,'pending');
+assert.equal(core.recurringBillMonthStatus(monthlyBill,[billTx('paid','2026-10-02')],'2026-10-14').state,'paid');
+for(const row of [billTx('cancelled','2026-10-02'),billTx('paid','2026-09-02'),billTx('paid','2026-10-02',{source:'web'}),billTx('paid','2026-10-02',{source:'bill_payment:other'}),billTx('paid','2026-10-02',{type:'income'})])assert.equal(core.recurringBillMonthStatus(monthlyBill,[row],'2026-10-14').state,'unrecorded');
+console.log('PASS recurring bill status: owner-loaded exact bill links, pending/future not paid, cancelled/manual/other-month excluded, clamped due dates');

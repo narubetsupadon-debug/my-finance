@@ -87,3 +87,12 @@ export function loadExcelTools(){
  });
  return excelToolsPromise;
 }
+
+// Read-only status of this month's explicitly linked recurring bill entries.
+export function recurringBillMonthStatus(bill,transactions,today=bangkokDay()){
+ const rows=transactions.filter(x=>x.type==='expense'&&x.status!=='cancelled'&&x.source==='bill_payment:'+bill.id&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.transaction_date))&&x.transaction_date.slice(0,7)===today.slice(0,7));
+ const paidRows=rows.filter(x=>x.status!=='pending'&&x.transaction_date<=today);
+ const state=paidRows.length?'paid':rows.length?'pending':'unrecorded';
+ const [y,m]=today.split('-').map(Number),day=Number(bill.due_day),dueDay=Number.isInteger(day)&&day>=1&&day<=31?Math.min(day,new Date(y,m,0).getDate()):null;
+ return {state,rows,paidRows,due:dueDay!==null&&dueDay<=Number(today.slice(8,10))};
+}

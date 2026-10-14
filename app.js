@@ -1,13 +1,13 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261014-deep39';
-import {serializeFinanceBackup} from './finance-backup.js?v=20261014-deep39';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-deep39';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261014-deep39';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-deep39';
-import {createSummaryRenderer} from './app-summary.js?v=20261014-deep39';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261014-deep39';
-import {createTransactionRenderer} from './app-transactions.js?v=20261014-deep39';
-import {createPlanningRenderer} from './app-planning.js?v=20261014-deep39';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-deep39';
+import {createCapacityMonitor} from './app-storage.js?v=20261014-bills40';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261014-bills40';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-bills40';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm} from './finance-core.js?v=20261014-bills40';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-bills40';
+import {createSummaryRenderer} from './app-summary.js?v=20261014-bills40';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261014-bills40';
+import {createTransactionRenderer} from './app-transactions.js?v=20261014-bills40';
+import {createPlanningRenderer} from './app-planning.js?v=20261014-bills40';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-bills40';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -631,7 +631,7 @@ async function payRecurringBill(bill,button){
  if(!confirm('ยืนยันว่าจ่าย '+bill.name+' '+money(amount)+(via?' '+via:'')+' แล้ววันนี้?'))return;
  const source='bill_payment:'+bill.id,ym=bangkokDay().slice(0,7);
  const localPaid=transactions.some(x=>x.status!=='cancelled'&&x.source===source&&String(x.transaction_date).slice(0,7)===ym);
- if(localPaid){showAppToast('บิลนี้จ่ายแล้วในเดือนนี้ ✅');renderBills();return;}
+ if(localPaid){const status=recurringBillMonthStatus(bill,transactions,bangkokDay());showAppToast(status.state==='paid'?'บิลนี้จ่ายแล้วในเดือนนี้ ✅':'บิลนี้มีรายการรอจ่ายหรือวันที่อนาคตแล้ว กรุณาตรวจรายการก่อน');renderBills();return;}
  const originalText=button?.textContent||'✓ จ่ายแล้ว';if(button){button.disabled=true;button.textContent='กำลังบันทึก…';}
  try{
   const {error}=await supabase.rpc('pay_recurring_bill',{p_bill_id:bill.id,p_paid_date:bangkokDay()});
