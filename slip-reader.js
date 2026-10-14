@@ -107,7 +107,7 @@ export function bindSlipReader(){
  const clear=()=>{serial++;busy=false;if(worker){worker.terminate().catch(()=>{});worker=null;}if(dateWorker){dateWorker.terminate().catch(()=>{});dateWorker=null;}$('slipFile').value='';$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';$('slipRead').disabled=false;status('อ่านในเครื่อง ไม่อัปโหลดหรือเก็บรูป · ครั้งแรกต้องโหลดตัวอ่านผ่านอินเทอร์เน็ต');};
  $('txDialog').addEventListener('close',()=>{clear();clearReview();});
  $('slipFile').addEventListener('change',()=>{serial++;busy=false;if(worker){worker.terminate().catch(()=>{});worker=null;}if(dateWorker){dateWorker.terminate().catch(()=>{});dateWorker=null;}$('slipRead').disabled=false;clearReview();status('เลือกรูปแล้ว กดอ่านสลิปได้ค่ะ');});
- function clearReview(){$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';if($('slipReadText'))$('slipReadText').textContent='';fieldStatus('slipAmountStatus','ยอดเงิน: ยังไม่ได้อ่าน');fieldStatus('slipDateStatus','วันที่: ยังไม่ได้อ่าน');}
+ function clearReview(){if($('slipSectionTitle'))$('slipSectionTitle').textContent='🧾 อ่านสลิปธนาคาร — ยอดและวันที่';$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';if($('slipReadText'))$('slipReadText').textContent='';fieldStatus('slipAmountStatus','ยอดเงิน: ยังไม่ได้อ่าน');fieldStatus('slipDateStatus','วันที่: ยังไม่ได้อ่าน');}
  $('slipRead').onclick=async()=>{
   if(busy)return;const file=$('slipFile').files[0];if(!file){status('เลือกรูปสลิปก่อนค่ะ');return;}
   if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10*1024*1024){status('ใช้รูป JPG, PNG หรือ WebP ขนาดไม่เกิน 10 MB ค่ะ');return;}
@@ -147,6 +147,8 @@ export function bindSlipReader(){
   $('txAmount').value=$('slipAmount').value;$('txDate').value=$('slipDate').value;
   for(const id of ['txAmount','txDate'])$(id).dispatchEvent(new Event('input',{bubbles:true}));
   status('เติมยอดและวันที่แล้ว เลือกหมวด/บัญชีเอง แล้วกดบันทึกตามปกติค่ะ');
+  if($('slipSectionTitle'))$('slipSectionTitle').textContent='✓ ใช้ยอดและวันที่จากสลิปแล้ว · ยังไม่บันทึก · แตะเพื่อดูอีกครั้ง';
+  if($('slipSection'))$('slipSection').open=false;
  };
  for(const [input,label,output] of [['slipAmount','ยอดเงิน','slipAmountStatus'],['slipDate','วันที่','slipDateStatus']])$(input).addEventListener('input',()=>fieldStatus(output,label+': '+($(input).value?'แก้ไขแล้ว · ตรวจให้ตรงสลิป':'ยังไม่ได้กรอก')));
 }

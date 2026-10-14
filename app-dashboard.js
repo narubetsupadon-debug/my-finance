@@ -1,9 +1,11 @@
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-totals38';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
- getTransactions,getBills,getDebts,getUiSettings,budgetTotals,orderedQuickItems,
+ getTransactions,getBudgets=()=>[],getBills,getDebts,getUiSettings,budgetTotals,orderedQuickItems,
  showPage,renderTxList,refreshDailyGreeting
 }){
+const openInsightDetails=createTotalDetails({$,money,fmtDate});
 function renderDashboard(){
  const transactions=getTransactions(),bills=getBills(),debts=getDebts(),uiSettings=getUiSettings();
  refreshDailyGreeting();
@@ -33,7 +35,16 @@ function renderDashboard(){
   const amount=$(id);
   amount.style.setProperty('--amount-chars',Math.max(1,Array.from(amount.textContent).length));
  }
+ const criteria='รวมจ่ายแล้ว รอดำเนินการ และวันที่อนาคตในเดือนนี้ · ไม่รวมยกเลิก';
+ const incomeRows=monthly.filter(x=>x.type==='income'),expenseRows=monthly.filter(x=>x.type==='expense');
+ bindTotal($,'todaySpent',()=>openInsightDetails('รายจ่ายวันนี้',[{label:fmtDate(today),rows:todayRows}],criteria));
+ bindTotal($,'incomeTotal',()=>openInsightDetails('รายรับเดือนนี้',[{label:'รายรับ',rows:incomeRows}],criteria));
+ bindTotal($,'expenseTotal',()=>openInsightDetails('รายจ่ายเดือนนี้',[{label:'รายจ่าย',rows:expenseRows}],criteria));
+ bindTotal($,'balanceTotal',()=>openInsightDetails('รายรับหักรายจ่าย',[{label:'รายรับ',rows:incomeRows},{label:'รายจ่าย',rows:expenseRows}],criteria+' · ผลต่าง '+money(inc-exp)));
  $('viewToday').onclick=()=>openInsightDetails('รายจ่ายวันนี้',[{label:fmtDate(today),rows:todayRows}],'รายการที่บันทึกวันนี้ ไม่รวมรายการยกเลิก');
+ const budgetNames=new Set(getBudgets().filter(b=>b.is_active).flatMap(b=>b.category_names||[]));
+ const budgetRows=expenseRows.filter(x=>budgetNames.has(x.categories?.name));
+ bindTotal($,'budgetCard',()=>openInsightDetails('งบเดือนนี้',[{label:'ยอดใช้ในหมวดของงบ',rows:budgetRows}],criteria+' · งบรวม '+money(bsum.limit)+' หักใช้ '+money(bsum.spent)+' = เหลือ '+money(bsum.remain)+' (ขั้นต่ำ 0) · หมวดร่วมกันนับรายจ่ายครั้งเดียว'));
  $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
 
  const quick=orderedQuickItems().filter(x=>!uiSettings.quickHidden.includes(x.label))
@@ -71,19 +82,7 @@ function renderDashboard(){
  const max=Math.max(1,...Object.values(sums));$('categoryChart').innerHTML=Object.keys(sums).length?sorted.slice(0,8).map(([n,v])=>'<div class="bar-row"><span>'+esc(n)+'</span><div class="barbg"><div class="barfill" style="width:'+Math.round(v/max*100)+'%"></div></div><b>'+money(v)+'</b></div>').join(''):'<div class="empty">ยังไม่มีรายจ่ายเดือนนี้</div>'
 }
 
-function openInsightDetails(title,groups,note){
- $('insightDetailTitle').textContent=title;$('insightDetailNote').textContent=note;
- const root=$('insightDetailBody');root.replaceChildren();
- groups.forEach(group=>{
-  const section=document.createElement('section');section.className='insight-detail-group';
-  const heading=document.createElement('h4');const sum=group.rows.reduce((s,r)=>s+Number(r.amount),0);
-  heading.textContent=group.label+' · '+money(sum)+' · '+group.rows.length+' รายการ';section.append(heading);
-  if(!group.rows.length){const p=document.createElement('p');p.className='muted';p.textContent='ไม่มีรายการที่บันทึกในช่วงนี้';section.append(p);}
-  group.rows.forEach(r=>{const row=document.createElement('div');row.className='insight-detail-row';const detail=document.createElement('div');const name=document.createElement('b');name.textContent=r.description;const sub=document.createElement('small');sub.textContent=fmtDate(r.transaction_date)+' · '+(r.categories?.name||'ไม่ระบุหมวด')+' · '+(r.accounts?.name||'ไม่ระบุบัญชี');detail.append(name,sub);const amount=document.createElement('strong');amount.textContent=money(r.amount);amount.className=r.type==='income'?'income':'expense';row.append(detail,amount);section.append(row);});
-  root.append(section);
- });
- $('insightDetailDialog').showModal();
-}
+
 
 
  return renderDashboard;

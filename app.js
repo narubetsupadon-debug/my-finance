@@ -1,13 +1,13 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261014-status37';
-import {serializeFinanceBackup} from './finance-backup.js?v=20261014-status37';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-status37';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261014-status37';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-status37';
-import {createSummaryRenderer} from './app-summary.js?v=20261014-status37';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261014-status37';
-import {createTransactionRenderer} from './app-transactions.js?v=20261014-status37';
-import {createPlanningRenderer} from './app-planning.js?v=20261014-status37';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-status37';
+import {createCapacityMonitor} from './app-storage.js?v=20261014-totals38';
+import {serializeFinanceBackup} from './finance-backup.js?v=20261014-totals38';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-totals38';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,lockFinanceForm} from './finance-core.js?v=20261014-totals38';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-totals38';
+import {createSummaryRenderer} from './app-summary.js?v=20261014-totals38';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261014-totals38';
+import {createTransactionRenderer} from './app-transactions.js?v=20261014-totals38';
+import {createPlanningRenderer} from './app-planning.js?v=20261014-totals38';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-totals38';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
@@ -317,6 +317,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 const renderDashboard=createDashboardRenderer({
+ getBudgets:()=>budgets,
  $,
  money,
  fmtDate,

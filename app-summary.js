@@ -1,3 +1,4 @@
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-totals38';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
@@ -22,6 +23,7 @@ export function rentShareTotals(rows,records=[]){
 }
 // Summary page renderer. Keeps summary grouping and chart state out of app.js.
 export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,getRentRecords=()=>[],getBudgets=()=>[],renderAnalysis=null,ChartCtor=null}){
+ const openTotals=createTotalDetails({$,money,fmtDate:date=>date});
  let trendChart=null,categoryChart2=null,pieChart=null;
 
 function excelGroup(x){
@@ -101,6 +103,16 @@ function renderSummary(){
  $('sumCarInstallment').textContent=money(grouped['ค่างวดรถ']||0)
  $('sumCarOther').textContent=money(carTotal-(grouped['ค่างวดรถ']||0))
  $('sumRecurring').textContent=money(grouped['รายจ่ายประจำ']||0)
+ const criteria=config.label+' · รวมจ่ายแล้ว รอดำเนินการ และวันที่อนาคต · ไม่รวมยกเลิก';
+ const incomeRows=rows.filter(x=>x.type==='income'),expenseRows=rows.filter(x=>x.type==='expense');
+ const show=(id,title,selected,note=criteria)=>bindTotal($,id,()=>openTotals(title,[{label:title,rows:selected}],note));
+ show('sumIncome','รายรับ',incomeRows);show('sumExpense','รายจ่าย',expenseRows);
+ bindTotal($,'sumBalance',()=>openTotals('รายรับหักรายจ่าย',[{label:'รายรับ',rows:incomeRows},{label:'รายจ่าย',rows:expenseRows}],criteria+' · ผลต่าง '+money(inc-exp)));
+ show('sumDebtPay','ชำระบัตร/สินเชื่อ',expenseRows.filter(x=>excelGroup(x)==='ชำระบัตร/สินเชื่อ'));
+ show('sumRecurring','รายจ่ายประจำ',expenseRows.filter(x=>excelGroup(x)==='รายจ่ายประจำ'));
+ const carRows=expenseRows.filter(x=>['ค่างวดรถ','น้ำมันรถ','ซ่อม/ประกัน/ภาษีรถ','ค่าใช้รถอื่น ๆ','รถยนต์อื่น ๆ'].includes(excelGroup(x)));
+ show('sumCar','ค่าใช้จ่ายรถ',carRows);
+ show('sumRent','รายการอ้างอิงค่าห้องเช่า',expenseRows.filter(x=>excelGroup(x)==='ห้องเช่า'),criteria+' · การ์ดแสดงส่วนมิว '+money(rent.shareCents/100)+' / บิลรวมอ้างอิง '+money(rent.fullCents/100)+' · รายการด้านล่างแสดงยอดที่บันทึก ส่วนมิวใช้ยอดที่ระบุในประวัติค่าห้อง หรือครึ่งบิล; ข้อมูลนำเข้าเดิมเป็นส่วนมิวอยู่แล้ว');
  if(renderAnalysis)renderAnalysis({transactions,budgets:getBudgets(),config,today:bangkokDay(),label:config.label,groupBy:excelGroup,rentTotals:rentRows=>rentShareTotals(rentRows,getRentRecords())});
 
  const timelineKeys=summaryTimelineKeys(config,bangkokDay(),rows)
