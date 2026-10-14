@@ -106,14 +106,15 @@ async function main(){
   const data=totals(budgets,rows,day);
   const checkedAt=new Date();try{Keychain.set(CHECK_KEY,JSON.stringify({owner:session.user_id,at:checkedAt.getTime()}));}catch{}
   const small=config.widgetFamily==='small';
-  text(widget,'MY FINANCE',11,'aaa7ff');widget.addSpacer(small?4:8);
+  text(widget,'MY FINANCE',11,'aaa7ff');widget.addSpacer(4);
   const amountRow=widget.addStack();amountRow.layoutHorizontally();amountRow.centerAlignContent();
-  const amountCol=amountRow.addStack();amountCol.layoutVertically();text(amountCol,'วันนี้ใช้ไป',12,'d8d9e4');text(amountCol,money(data.today),small?22:30,'ffffff');
+  const amountCol=amountRow.addStack();amountCol.layoutVertically();text(amountCol,'วันนี้ใช้ไป',12,'d8d9e4');text(amountCol,money(data.today),small?22:28,'ffffff');
+  if(!small){amountCol.addSpacer(6);text(amountCol,'งบเดือนนี้เหลือ',12,'d8d9e4');text(amountCol,data.limit?money(data.remaining):'ยังไม่ตั้งงบ',22,'79dec4');}
   amountRow.addSpacer(small?4:null);const graphCol=amountRow.addStack();graphCol.layoutVertically();
-  const ringSize=small?40:48;
+  const ringSize=small?40:80;
   const graph=graphCol.addImage(budgetRing(data,ringSize));graph.imageSize=new Size(ringSize,ringSize);
-  text(graphCol,data.limit?'งบเดือนนี้':'ยังไม่ตั้งงบ',small?8:9,'a3a8be');widget.addSpacer(small?3:6);
-  text(widget,'งบเดือนนี้เหลือ',12,'d8d9e4');text(widget,data.limit?money(data.remaining):'ยังไม่ตั้งงบ',config.widgetFamily==='small'?20:26,'79dec4');widget.addSpacer();
+  text(graphCol,data.limit?'งบเดือนนี้':'ยังไม่ตั้งงบ',small?8:10,'a3a8be');widget.addSpacer(3);
+  if(small){text(widget,'งบเดือนนี้เหลือ',12,'d8d9e4');text(widget,data.limit?money(data.remaining):'ยังไม่ตั้งงบ',20,'79dec4');}widget.addSpacer();
   text(widget,'ข้อมูล ณ '+checkedLabel(checkedAt),10,'a3a8be');
   text(widget,'อ่านสำเร็จ · ขอรีเฟรช 10 นาที',9,'79dec4');
  }catch(error){text(widget,'MY FINANCE',12,'aaa7ff');widget.addSpacer(10);const line=widget.addText(error.message||'เชื่อมต่อไม่ได้ กรุณาเปิด Scriptable');line.font=Font.systemFont(12);line.textColor=new Color('#ffffff');widget.addSpacer();const last=lastCheck();text(widget,last?'สำเร็จล่าสุด '+checkedLabel(last):'ยังไม่มีข้อมูลล่าสุด',10,'a3a8be');text(widget,'อัปเดตไม่สำเร็จ · แตะเปิดเว็บ',9,'ffc28c');}
