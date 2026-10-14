@@ -1,5 +1,5 @@
-import {recurringBillMonthStatus} from './finance-core.js?v=20261014-simple41';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-simple41';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261014-polish42';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-polish42';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
