@@ -103,10 +103,11 @@ export function bindSlipReader(){
  const $=id=>document.getElementById(id);if(!$('slipFile'))return;
  let serial=0,worker=null,dateWorker=null,busy=false;
  const status=message=>{$('slipStatus').textContent=message;};
+ const fieldStatus=(id,value)=>{if($(id))$(id).textContent=value;};
  const clear=()=>{serial++;busy=false;if(worker){worker.terminate().catch(()=>{});worker=null;}if(dateWorker){dateWorker.terminate().catch(()=>{});dateWorker=null;}$('slipFile').value='';$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';$('slipRead').disabled=false;status('อ่านในเครื่อง ไม่อัปโหลดหรือเก็บรูป · ครั้งแรกต้องโหลดตัวอ่านผ่านอินเทอร์เน็ต');};
  $('txDialog').addEventListener('close',()=>{clear();clearReview();});
  $('slipFile').addEventListener('change',()=>{serial++;busy=false;if(worker){worker.terminate().catch(()=>{});worker=null;}if(dateWorker){dateWorker.terminate().catch(()=>{});dateWorker=null;}$('slipRead').disabled=false;clearReview();status('เลือกรูปแล้ว กดอ่านสลิปได้ค่ะ');});
- function clearReview(){$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';if($('slipReadText'))$('slipReadText').textContent='';}
+ function clearReview(){$('slipReview').hidden=true;$('slipAmount').value='';$('slipDate').value='';if($('slipReadText'))$('slipReadText').textContent='';fieldStatus('slipAmountStatus','ยอดเงิน: ยังไม่ได้อ่าน');fieldStatus('slipDateStatus','วันที่: ยังไม่ได้อ่าน');}
  $('slipRead').onclick=async()=>{
   if(busy)return;const file=$('slipFile').files[0];if(!file){status('เลือกรูปสลิปก่อนค่ะ');return;}
   if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10*1024*1024){status('ใช้รูป JPG, PNG หรือ WebP ขนาดไม่เกิน 10 MB ค่ะ');return;}
@@ -134,8 +135,10 @@ export function bindSlipReader(){
     }catch(error){if(job!==serial)return;dateReadError=String(error?.message||'ตัวอ่านวันที่ทำงานไม่สำเร็จ').slice(0,180);}
    }
    $('slipAmount').value=result.amount;$('slipDate').value=result.date;$('slipReview').hidden=false;if($('slipReadText'))$('slipReadText').textContent=readText||'ไม่พบข้อความ';
+   fieldStatus('slipAmountStatus',result.amount?'ยอดเงิน: อ่านได้ · ตรวจอีกครั้ง':'ยอดเงิน: อ่านไม่ชัด · กรอกเอง');
+   fieldStatus('slipDateStatus',result.date?'วันที่: อ่านได้ · ตรวจอีกครั้ง':'วันที่: อ่านไม่ชัด · กรอกเอง');
    status(result.amount&&result.date?'อ่านได้แล้ว ตรวจยอดและวันที่ก่อนใช้ค่ะ':dateReadError?'ขั้นตอนอ่านวันที่ขัดข้อง: '+dateReadError:'อ่านบางช่องไม่ชัดหรือพบหลายค่า กรุณากรอกตรวจแก้ในช่องด้านล่างค่ะ');
-  }catch(error){if(job===serial)status('อ่านไม่สำเร็จ ลองรูปที่ชัดขึ้น หรือกรอกเองได้ค่ะ');}
+  }catch(error){if(job===serial){status('อ่านไม่สำเร็จ ลองรูปที่ชัดขึ้น หรือกรอกเองได้ค่ะ');fieldStatus('slipAmountStatus','ยอดเงิน: อ่านไม่สำเร็จ');fieldStatus('slipDateStatus','วันที่: อ่านไม่สำเร็จ');}}
   finally{if(ownWorker)await ownWorker.terminate().catch(()=>{});if(ownDateWorker)await ownDateWorker.terminate().catch(()=>{});if(job===serial){worker=null;dateWorker=null;busy=false;$('slipRead').disabled=false;}}
  };
  $('slipApply').onclick=()=>{
@@ -145,5 +148,6 @@ export function bindSlipReader(){
   for(const id of ['txAmount','txDate'])$(id).dispatchEvent(new Event('input',{bubbles:true}));
   status('เติมยอดและวันที่แล้ว เลือกหมวด/บัญชีเอง แล้วกดบันทึกตามปกติค่ะ');
  };
+ for(const [input,label,output] of [['slipAmount','ยอดเงิน','slipAmountStatus'],['slipDate','วันที่','slipDateStatus']])$(input).addEventListener('input',()=>fieldStatus(output,label+': '+($(input).value?'แก้ไขแล้ว · ตรวจให้ตรงสลิป':'ยังไม่ได้กรอก')));
 }
 if(typeof document!=='undefined')bindSlipReader();

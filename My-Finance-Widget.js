@@ -5,6 +5,11 @@ const BASE='https://mmvdhopogchcxwlstflk.supabase.co';
 const PUBLIC_KEY='sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W';
 const WEBSITE='https://narubetsupadon-debug.github.io/my-finance/';
 const SESSION_KEY='my-finance-widget-session-v1';
+const CHECK_KEY='my-finance-widget-last-success-v1';
+function lastCheck(){
+ try{if(!Keychain.contains(SESSION_KEY)||!Keychain.contains(CHECK_KEY))return null;const session=JSON.parse(Keychain.get(SESSION_KEY)),last=JSON.parse(Keychain.get(CHECK_KEY));return last.owner===session.user_id&&Number.isFinite(last.at)?new Date(last.at):null;}catch{return null;}
+}
+function checkedLabel(at){const df=new DateFormatter();df.dateFormat='dd/MM HH:mm';df.timeZone='Asia/Bangkok';return df.string(at);}
 
 async function api(path,{token,method='GET',body}={}){
  const request=new Request(BASE+path);request.method=method;request.timeoutInterval=15;
@@ -71,12 +76,12 @@ function totals(budgets,rows,day){
 function text(widget,value,size,color){const line=widget.addText(value);line.font=Font.semiboldSystemFont(size);line.textColor=new Color(color);line.minimumScaleFactor=.65;line.lineLimit=1;return line;}
 function money(cents){return '฿'+(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 async function main(){
- const widget=new ListWidget();widget.backgroundColor=new Color('#171b32');widget.setPadding(16,16,16,16);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
+ const widget=new ListWidget();widget.backgroundColor=new Color('#171b32');const padding=config.widgetFamily==='small'?12:16;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
  try{
   if(!config.runsInWidget&&Keychain.contains(SESSION_KEY)){
    const menu=new Alert();menu.title='My Finance Widget';menu.addAction('อัปเดต / ดูตัวอย่าง');menu.addDestructiveAction('ออกจากระบบวิดเจ็ต');menu.addCancelAction('ยกเลิก');
    const action=await menu.presentSheet();if(action===-1){Script.complete();return;}if(action===1){
-    const session=JSON.parse(Keychain.get(SESSION_KEY));try{await api('/auth/v1/logout?scope=local',{token:session.access_token,method:'POST'});}catch{}Keychain.remove(SESSION_KEY);throw new Error('ออกจากระบบแล้ว ลบวิดเจ็ตบนหน้าจอด้วยค่ะ');
+    const session=JSON.parse(Keychain.get(SESSION_KEY));try{await api('/auth/v1/logout?scope=local',{token:session.access_token,method:'POST'});}catch{}Keychain.remove(SESSION_KEY);if(Keychain.contains(CHECK_KEY))Keychain.remove(CHECK_KEY);throw new Error('ออกจากระบบแล้ว ลบวิดเจ็ตบนหน้าจอด้วยค่ะ');
    }
   }
   const session=await getSession(),day=currentDay(),month=day.slice(0,7),[y,m]=month.split('-').map(Number),next=new Date(Date.UTC(y,m,1)).toISOString().slice(0,10);
@@ -85,10 +90,12 @@ async function main(){
    readAll('budgets','select=id,is_active,monthly_limit,category_names',session)
   ]);
   const data=totals(budgets,rows,day);
+  const checkedAt=new Date();try{Keychain.set(CHECK_KEY,JSON.stringify({owner:session.user_id,at:checkedAt.getTime()}));}catch{}
   text(widget,'MY FINANCE',11,'aaa7ff');widget.addSpacer(8);text(widget,'วันนี้ใช้ไป',12,'d8d9e4');text(widget,money(data.today),config.widgetFamily==='small'?24:30,'ffffff');widget.addSpacer(8);
   text(widget,'งบเดือนนี้เหลือ',12,'d8d9e4');text(widget,data.limit?money(data.remaining):'ยังไม่ตั้งงบ',config.widgetFamily==='small'?20:26,'79dec4');widget.addSpacer();
-  const df=new DateFormatter();df.dateFormat='dd/MM HH:mm';df.timeZone='Asia/Bangkok';text(widget,'อัปเดต '+df.string(new Date()),10,'a3a8be');
- }catch(error){text(widget,'MY FINANCE',12,'aaa7ff');widget.addSpacer(10);const line=widget.addText(error.message||'เชื่อมต่อไม่ได้ กรุณาเปิด Scriptable');line.font=Font.systemFont(12);line.textColor=new Color('#ffffff');widget.addSpacer();text(widget,'ไม่มีข้อมูลใหม่ · แตะเปิดเว็บ',10,'a3a8be');}
+  text(widget,'ข้อมูล ณ '+checkedLabel(checkedAt),10,'a3a8be');
+  text(widget,'อ่านสำเร็จ · ขอรีเฟรช 10 นาที',9,'79dec4');
+ }catch(error){text(widget,'MY FINANCE',12,'aaa7ff');widget.addSpacer(10);const line=widget.addText(error.message||'เชื่อมต่อไม่ได้ กรุณาเปิด Scriptable');line.font=Font.systemFont(12);line.textColor=new Color('#ffffff');widget.addSpacer();const last=lastCheck();text(widget,last?'สำเร็จล่าสุด '+checkedLabel(last):'ยังไม่มีข้อมูลล่าสุด',10,'a3a8be');text(widget,'อัปเดตไม่สำเร็จ · แตะเปิดเว็บ',9,'ffc28c');}
  Script.setWidget(widget);if(!config.runsInWidget)await widget.presentMedium();Script.complete();
 }
 await main();

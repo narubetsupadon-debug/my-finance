@@ -761,3 +761,9 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 #slipReview .fields { grid-template-columns:minmax(0,1fr); }
 #slipReview input[type=date] { appearance:none; -webkit-appearance:none; inline-size:100%; min-inline-size:0; }
 #slipReview input[type=date]::-webkit-date-and-time-value { min-width:0; text-align:left; }
+.slip-field-status{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;font-size:12px;color:var(--text)}
+.slip-field-status span{padding:7px 10px;border-radius:9px;background:var(--bg);border:1px solid var(--line);overflow-wrap:anywhere}
+.capture-form .field input,.capture-form .field select,.capture-form .field textarea{font-size:16px;min-width:0;box-sizing:border-box}
+.capture-form input[type=file]{max-width:100%;overflow:hidden}
+.capture-form button{min-height:44px}
+.capture-form .capture-actions{padding-bottom:max(12px,env(safe-area-inset-bottom));flex-wrap:wrap}
