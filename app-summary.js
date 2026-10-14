@@ -1,5 +1,5 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261014-studio44';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-studio44';
+import {sumTransactionAmounts} from './finance-core.js?v=20261014-carfit45';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-carfit45';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
@@ -157,3 +157,4 @@ renderSummary.setRange=range=>{selectedRange=range;renderSummary()}
 
  return renderSummary;
 }
+

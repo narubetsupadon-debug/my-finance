@@ -1,10 +1,10 @@
-const CACHE='my-finance-v87-studio44';
-const SHELL=['./','./index.html','./style.css?v=20261014-studio44','./minimal-dark.css?v=20261014-studio44','./theme.js?v=20261014-studio44','./app.js?v=20261014-studio44','./app-data.js?v=20261014-studio44','./app-summary.js?v=20261014-studio44','./app-dashboard.js?v=20261014-studio44','./app-transactions.js?v=20261014-studio44','./app-planning.js?v=20261014-studio44','./app-safety.js?v=20261014-studio44','./finance-core.js?v=20261014-studio44','./finance-backup.js?v=20261014-studio44','./app-nav.js?v=20261014-studio44','./rent.html','./rent.css?v=20261014-studio44','./rent.js?v=20261014-studio44','./rent-core.js?v=20261014-studio44','./car.html','./car.css?v=20261014-studio44','./car.js?v=20261014-studio44','./salary.html','./salary.js?v=20261014-studio44','./salary-payslip.js?v=20261014-studio44','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261014-studio44','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
-SHELL.push('./ui-polish.css?v=20261014-studio44');
-SHELL.push('./app-storage.js?v=20261014-studio44');
-SHELL.push('./expense-analysis.js?v=20261014-studio44');
-SHELL.push('./total-details.js?v=20261014-studio44');
-SHELL.push('./slip-reader.js?v=20261014-studio44');
+const CACHE='my-finance-v88-carfit45';
+const SHELL=['./','./index.html','./style.css?v=20261014-carfit45','./minimal-dark.css?v=20261014-carfit45','./theme.js?v=20261014-carfit45','./app.js?v=20261014-carfit45','./app-data.js?v=20261014-carfit45','./app-summary.js?v=20261014-carfit45','./app-dashboard.js?v=20261014-carfit45','./app-transactions.js?v=20261014-carfit45','./app-planning.js?v=20261014-carfit45','./app-safety.js?v=20261014-carfit45','./finance-core.js?v=20261014-carfit45','./finance-backup.js?v=20261014-carfit45','./app-nav.js?v=20261014-carfit45','./rent.html','./rent.css?v=20261014-carfit45','./rent.js?v=20261014-carfit45','./rent-core.js?v=20261014-carfit45','./car.html','./car.css?v=20261014-carfit45','./car.js?v=20261014-carfit45','./salary.html','./salary.js?v=20261014-carfit45','./salary-payslip.js?v=20261014-carfit45','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261014-carfit45','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+SHELL.push('./ui-polish.css?v=20261014-carfit45');
+SHELL.push('./app-storage.js?v=20261014-carfit45');
+SHELL.push('./expense-analysis.js?v=20261014-carfit45');
+SHELL.push('./total-details.js?v=20261014-carfit45');
+SHELL.push('./slip-reader.js?v=20261014-carfit45');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
@@ -39,3 +39,4 @@ self.addEventListener('notificationclick',event=>{
   return clients.openWindow?clients.openWindow(target):undefined;
  }));
 });
+

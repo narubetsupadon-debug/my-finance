@@ -1,5 +1,5 @@
-import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261014-studio44';
-import {setupPayslipImport} from './salary-payslip.js?v=20261014-studio44';
+import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261014-carfit45';
+import {setupPayslipImport} from './salary-payslip.js?v=20261014-carfit45';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const retrySafeInsert=createRetrySafeInsert();
 const supabase=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');
@@ -51,3 +51,4 @@ for(const id of ['salaryOtherDetails','salaryDeductionDetails','salaryAdvancedDe
 $('salaryForm').addEventListener('invalid',e=>{let parent=e.target.parentElement;while(parent&&parent!==$('salaryForm')){if(parent.tagName==='DETAILS')parent.open=true;parent=parent.parentElement;}syncSalaryDetails();},true);
 $('payslipFile').addEventListener('change',()=>salaryStep(1));
 $('salaryForm').addEventListener('input',()=>{$('salarySavedLink').hidden=true;salaryStep(2);$('salaryMessage').textContent='กำลังตรวจยอด · ยังไม่ได้บันทึกการแก้ไข';});
+

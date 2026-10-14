@@ -1,5 +1,5 @@
-import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261014-studio44';
-import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261014-studio44';
+import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261014-carfit45';
+import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261014-carfit45';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const retrySafeInsert=createRetrySafeInsert();
 const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');
@@ -30,3 +30,4 @@ $('rentForm').onsubmit=async e=>{e.preventDefault();const b=$('saveRent');if(b.d
  }catch(err){if(committed){$('rentApp').classList.add('hidden');message('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else $('rentError').textContent=err.code==='23505'?'เดือนนี้มีบิลแล้ว กรุณารีเฟรชและแก้ไขรายการเดิม':err.message;}finally{unlock();b.disabled=false;sync();}
 };
 try{const u=await db.auth.getUser();if(u.error||!u.data.user)message('กรุณาเข้าสู่ระบบที่หน้าหลัก แล้วกลับมาหน้าค่าห้องเช่า');else{user=u.data.user;[accounts,categories]=await Promise.all([readAll(()=>db.from('accounts').select('id,name').eq('user_id',user.id).order('name').order('id')),readAll(()=>db.from('categories').select('id,name').eq('user_id',user.id).eq('type','expense').order('name').order('id'))]);categories=categories.filter(c=>rentCategories.includes(c.name));await load();open();$('rentApp').classList.remove('hidden');message('พร้อมบันทึกค่าห้องเช่า');}}catch(err){message('โหลดไม่ได้: '+err.message);}
+

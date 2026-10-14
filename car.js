@@ -1,4 +1,4 @@
-import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261014-studio44';
+import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261014-carfit45';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const retrySafeInsert=createRetrySafeInsert();
 const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');const $=id=>document.getElementById(id),money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0)),date=s=>new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});let user,rows=[],expenseRows=[],editing,editingExpense=null,accounts=[],categories=[];
@@ -22,6 +22,11 @@ function renderExpenses(){
  $('carMonthExpense').textContent=money(month.reduce((s,x)=>s+Number(x.amount||0),0));
  $('carYearExpense').textContent=money(expenseRows.filter(x=>String(x.expense_date).slice(0,4)===year).reduce((s,x)=>s+Number(x.amount||0),0));
  $('carFuelExpense').textContent=money(month.filter(x=>x.expense_type==='fuel').reduce((s,x)=>s+Number(x.amount||0),0));
+ for(const id of ['carMonthExpense','carYearExpense','carFuelExpense']){
+  const value=$(id),length=Array.from(value.textContent).length;
+  value.style.setProperty('--money-chars',Math.max(8,length));
+  value.closest('.metric').classList.toggle('has-long-money',length>11);
+ }
  const odo=expenseRows.map(x=>Number(x.odometer_km)).filter(Number.isFinite).filter(x=>x>0);
  $('carLatestOdo').textContent=odo.length?new Intl.NumberFormat('th-TH').format(Math.max(...odo))+' km':'—';
  const filter=$('carExpenseFilter').value;
@@ -83,5 +88,6 @@ $('deleteCarExpense').onclick=async()=>{
 
 $('exportCar').onclick=async()=>{if(!rows.length)return msg('ยังไม่มีข้อมูล');const b=$('exportCar');if(b.disabled)return;b.disabled=true;try{const XLSX=await loadExcelTools();const data=rows.map(r=>({'งวด':r.installment_no,'กำหนดชำระ':r.due_date,'ค่างวดตามสัญญา':Number(r.scheduled_amount),'หาร 2 (อ้างอิง)':Number(r.scheduled_amount)/2,'บุ๋มบิ๋ม':r.partner_amount===null?null:Number(r.partner_amount),'มิว':r.my_amount===null?null:Number(r.my_amount),'สถานะ':r.status==='paid'?'จ่ายแล้ว':'ยังไม่จ่าย','วันที่จ่ายจริง':r.payment_date||'','หมายเหตุ':r.note||''}));const w=XLSX.utils.book_new(),s=XLSX.utils.json_to_sheet(data);s['!cols']=Object.keys(data[0]).map(()=>({wch:22}));XLSX.utils.book_append_sheet(w,s,'ผ่อนรถ');XLSX.writeFile(w,'My_Finance_Car.xlsx');}catch(e){msg('ส่งออกไม่ได้: '+e.message);}finally{b.disabled=false;}};
 try{const u=await db.auth.getUser();if(u.error||!u.data.user){msg('กรุณาเข้าสู่ระบบที่หน้าหลัก แล้วกลับมาหน้าผ่อนรถ');}else{user=u.data.user;const [a,c]=await Promise.all([readAll(()=>db.from('accounts').select('id,name').eq('user_id',user.id).order('name').order('id')),readAll(()=>db.from('categories').select('id,name').eq('user_id',user.id).eq('type','expense').order('name').order('id'))]);accounts=a;categories=c;option($('carAccount'),'','ไม่ระบุบัญชี');a.forEach(x=>option($('carAccount'),x.id,x.name));c.forEach(x=>option($('carCategory'),x.id,x.name));await load();$('carApp').classList.remove('hidden');msg('ข้อมูลเฉพาะบัญชี '+user.email);}}catch(e){msg('โหลดไม่ได้: '+e.message);}
+
 
 
