@@ -73,22 +73,18 @@ function totals(budgets,rows,day){
  const spent=expenses.filter(x=>x.transaction_date.slice(0,7)===day.slice(0,7)&&names.has(x.categories?.name)).reduce((s,x)=>s+cents(x),0);
  return {today,limit,spent,remaining:Math.max(0,limit-spent)};
 }
-function recentExpenseDays(rows,day){
- const end=Date.parse(day+'T00:00:00Z');
- const days=Array.from({length:7},(_,i)=>({day:new Date(end-(6-i)*86400000).toISOString().slice(0,10),cents:0,count:0}));
- const lookup=new Map(days.map(x=>[x.day,x]));
- for(const row of rows){const item=lookup.get(row.transaction_date),amount=Number(row.amount);if(item&&row.type==='expense'&&row.status!=='cancelled'&&Number.isFinite(amount)){item.cents+=Math.round(amount*100);item.count++;}}
- return days;
-}
-function widgetRangeStart(day){const first=day.slice(0,7)+'-01',week=recentExpenseDays([],day)[0].day;return first<week?first:week;}
-function expenseMiniChart(days,width,height){
- const ctx=new DrawContext();ctx.size=new Size(width,height);ctx.opaque=false;ctx.respectScreenScale=true;
- const max=Math.max(1,...days.map(x=>x.cents)),step=width/7,barWidth=Math.max(2,step-3),base=height-2;
- for(let i=0;i<days.length;i++){
-  const amount=Math.max(0,days[i].cents),barHeight=amount?Math.max(2,amount/max*(height-3)):1;
-  ctx.setFillColor(new Color(amount?(i===6?'#79dec4':'#8b83f6'):'#454a64'));
-  ctx.fillRect(new Rect(i*step+(step-barWidth)/2,base-barHeight,barWidth,barHeight));
+function budgetPercent(data){return data.limit>0?Math.round(data.spent/data.limit*100):null;}
+function budgetRing(data,size){
+ const ctx=new DrawContext();ctx.size=new Size(size,size);ctx.opaque=false;ctx.respectScreenScale=true;
+ const percent=budgetPercent(data),fill=percent===null?0:Math.min(100,Math.max(0,percent));
+ const dot=size*.065,radius=size*.405,center=size/2;
+ for(let i=0;i<100;i++){
+  const angle=(i/100*Math.PI*2)-Math.PI/2;
+  ctx.setFillColor(new Color(i<fill?(data.spent>data.limit?'#ffc28c':'#79dec4'):'#3b405b'));
+  ctx.fillEllipse(new Rect(center+Math.cos(angle)*radius-dot/2,center+Math.sin(angle)*radius-dot/2,dot,dot));
  }
+ ctx.setFont(Font.semiboldSystemFont(size*.23));ctx.setTextColor(new Color('#ffffff'));ctx.setTextAlignedCenter();
+ ctx.drawTextInRect(percent===null?'—':percent+'%',new Rect(0,size*.36,size,size*.3));
  return ctx.getImage();
 }
 function text(widget,value,size,color){const line=widget.addText(value);line.font=Font.semiboldSystemFont(size);line.textColor=new Color(color);line.minimumScaleFactor=.65;line.lineLimit=1;return line;}
@@ -104,7 +100,7 @@ async function main(){
   }
   const session=await getSession(),day=currentDay(),month=day.slice(0,7),[y,m]=month.split('-').map(Number),next=new Date(Date.UTC(y,m,1)).toISOString().slice(0,10);
   const [rows,budgets]=await Promise.all([
-   readAll('transactions','select=id,amount,type,status,transaction_date,categories(name)&transaction_date=gte.'+widgetRangeStart(day)+'&transaction_date=lt.'+next,session),
+   readAll('transactions','select=id,amount,type,status,transaction_date,categories(name)&transaction_date=gte.'+month+'-01&transaction_date=lt.'+next,session),
    readAll('budgets','select=id,is_active,monthly_limit,category_names',session)
   ]);
   const data=totals(budgets,rows,day);
@@ -114,9 +110,9 @@ async function main(){
   const amountRow=widget.addStack();amountRow.layoutHorizontally();amountRow.centerAlignContent();
   const amountCol=amountRow.addStack();amountCol.layoutVertically();text(amountCol,'วันนี้ใช้ไป',12,'d8d9e4');text(amountCol,money(data.today),small?22:30,'ffffff');
   amountRow.addSpacer(small?4:null);const graphCol=amountRow.addStack();graphCol.layoutVertically();
-  const days=recentExpenseDays(rows,day),width=small?40:84,height=small?26:36;
-  const graph=graphCol.addImage(expenseMiniChart(days,width,height));graph.imageSize=new Size(width,height);
-  text(graphCol,small?'7 วัน': '7 วัน → วันนี้',small?8:9,'a3a8be');widget.addSpacer(small?4:8);
+  const ringSize=small?40:48;
+  const graph=graphCol.addImage(budgetRing(data,ringSize));graph.imageSize=new Size(ringSize,ringSize);
+  text(graphCol,data.limit?'งบเดือนนี้':'ยังไม่ตั้งงบ',small?8:9,'a3a8be');widget.addSpacer(small?3:6);
   text(widget,'งบเดือนนี้เหลือ',12,'d8d9e4');text(widget,data.limit?money(data.remaining):'ยังไม่ตั้งงบ',config.widgetFamily==='small'?20:26,'79dec4');widget.addSpacer();
   text(widget,'ข้อมูล ณ '+checkedLabel(checkedAt),10,'a3a8be');
   text(widget,'อ่านสำเร็จ · ขอรีเฟรช 10 นาที',9,'79dec4');
