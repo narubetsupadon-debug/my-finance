@@ -98,6 +98,9 @@ async function page(html,js,data,expose,storage={}){
  p.el('txFilterMonth').value=day.slice(0,7);p.el('txFilterMonth').onchange();assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.equal(p.el('txFilterMonth').value,day.slice(0,7));p.el('txResetFilters').click();
  p.el('viewToday').click();assert.equal(p.el('insightDetailDialog').open,true);p.el('insightDetailDialog').close();
  for(const id of ['incomeTotal','expenseTotal','balanceTotal','sumIncome','sumExpense','sumBalance','sumRecurring','sumRent','budgetCard']){p.el(id).click();assert.equal(p.el('insightDetailDialog').open,true,id+' opens contributing records');assert.match(p.el('insightDetailNote').textContent,/รอดำเนินการ/);p.el('insightDetailDialog').close();}
+ assert.match(p.el('analysisDeep').textContent,/จ่ายบ่อย/);assert.match(p.el('analysisDeep').textContent,/ไม่มีการเปลี่ยนข้อมูล/);
+ const scenarioButtons=p.el('analysisDeep').querySelectorAll('.deep-savings-controls button');assert.equal(scenarioButtons[1].getAttribute('aria-pressed'),'true');const writesBeforeScenario=p.state.writes.length;scenarioButtons[2].click();assert.equal(p.el('analysisDeep').querySelectorAll('.deep-savings-controls button')[2].getAttribute('aria-pressed'),'true');assert.equal(p.state.writes.length,writesBeforeScenario,'savings simulation must never write transactions');
+ p.el('analysisDeep').querySelector('.deep-item').click();assert.equal(p.el('insightDetailDialog').open,true);assert.match(p.el('insightDetailNote').textContent,/ไม่ได้หมายความว่าผิดปกติ/);p.el('insightDetailDialog').close();
  p.el('nextBillCard').click();assert.equal(p.el('billsPage').classList.contains('hidden'),false);
   // accent toast must not appear on ordinary navigation clicks
   p.el('appToast').classList.add('hidden');

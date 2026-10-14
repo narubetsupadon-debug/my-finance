@@ -1,9 +1,9 @@
-const CACHE='my-finance-v81-totals38';
-const SHELL=['./','./index.html','./style.css?v=20261014-totals38','./minimal-dark.css?v=20261014-totals38','./theme.js?v=20261014-totals38','./app.js?v=20261014-totals38','./app-data.js?v=20261014-totals38','./app-summary.js?v=20261014-totals38','./app-dashboard.js?v=20261014-totals38','./app-transactions.js?v=20261014-totals38','./app-planning.js?v=20261014-totals38','./app-safety.js?v=20261014-totals38','./finance-core.js?v=20261014-totals38','./finance-backup.js?v=20261014-totals38','./app-nav.js?v=20261014-totals38','./rent.html','./rent.css?v=20261014-totals38','./rent.js?v=20261014-totals38','./rent-core.js?v=20261014-totals38','./car.html','./car.css?v=20261014-totals38','./car.js?v=20261014-totals38','./salary.html','./salary.js?v=20261014-totals38','./salary-payslip.js?v=20261014-totals38','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261014-totals38','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
-SHELL.push('./app-storage.js?v=20261014-totals38');
-SHELL.push('./expense-analysis.js?v=20261014-totals38');
-SHELL.push('./total-details.js?v=20261014-totals38');
-SHELL.push('./slip-reader.js?v=20261014-totals38');
+const CACHE='my-finance-v82-deep39';
+const SHELL=['./','./index.html','./style.css?v=20261014-deep39','./minimal-dark.css?v=20261014-deep39','./theme.js?v=20261014-deep39','./app.js?v=20261014-deep39','./app-data.js?v=20261014-deep39','./app-summary.js?v=20261014-deep39','./app-dashboard.js?v=20261014-deep39','./app-transactions.js?v=20261014-deep39','./app-planning.js?v=20261014-deep39','./app-safety.js?v=20261014-deep39','./finance-core.js?v=20261014-deep39','./finance-backup.js?v=20261014-deep39','./app-nav.js?v=20261014-deep39','./rent.html','./rent.css?v=20261014-deep39','./rent.js?v=20261014-deep39','./rent-core.js?v=20261014-deep39','./car.html','./car.css?v=20261014-deep39','./car.js?v=20261014-deep39','./salary.html','./salary.js?v=20261014-deep39','./salary-payslip.js?v=20261014-deep39','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261014-deep39','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+SHELL.push('./app-storage.js?v=20261014-deep39');
+SHELL.push('./expense-analysis.js?v=20261014-deep39');
+SHELL.push('./total-details.js?v=20261014-deep39');
+SHELL.push('./slip-reader.js?v=20261014-deep39');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{

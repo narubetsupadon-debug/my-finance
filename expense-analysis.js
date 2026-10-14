@@ -15,7 +15,7 @@ export function analyzeExpenses({transactions=[],budgets=[],config,today,groupBy
   const currentRows=spending.filter(x=>x.transaction_date.slice(0,7)===month&&Number(x.transaction_date.slice(8,10))<=cutoff),previousRows=spending.filter(x=>x.transaction_date.slice(0,7)===previousMonth&&Number(x.transaction_date.slice(8,10))<=cutoff);
   const currentCents=sum(currentRows),previousCents=sum(previousRows),deltaCents=currentCents-previousCents;
   const names=new Set([...currentRows,...previousRows].map(groupBy));
-  const drivers=[...names].map(name=>({name,currentCents:sum(currentRows.filter(x=>groupBy(x)===name)),previousCents:sum(previousRows.filter(x=>groupBy(x)===name))})).map(g=>({...g,deltaCents:g.currentCents-g.previousCents})).sort((a,b)=>b.deltaCents-a.deltaCents);
+  const drivers=[...names].map(name=>{const current=currentRows.filter(x=>groupBy(x)===name),previous=previousRows.filter(x=>groupBy(x)===name),currentCents=sum(current),previousCents=sum(previous);return {name,currentRows:current,previousRows:previous,currentCents,previousCents,currentCount:current.length,previousCount:previous.length,currentAverageCents:current.length?Math.round(currentCents/current.length):null,previousAverageCents:previous.length?Math.round(previousCents/previous.length):null,deltaCents:currentCents-previousCents};}).sort((a,b)=>Math.abs(b.deltaCents)-Math.abs(a.deltaCents)||a.name.localeCompare(b.name,'th'));
   comparison={drivers,state:month>current?'future':!currentRows.length||!previousRows.length?'insufficient':'ready',month,previousMonth,cutoff,currentRows,previousRows,currentCents,previousCents,deltaCents,percent:previousCents>0?deltaCents/previousCents*100:null};
   if(month===current){
    const elapsedDays=Number(today.slice(8,10)),monthRows=spending.filter(x=>x.transaction_date.slice(0,7)===month);
@@ -32,10 +32,14 @@ export function analyzeExpenses({transactions=[],budgets=[],config,today,groupBy
  const committedNames=new Set(['รายจ่ายประจำ','บิล/สาธารณูปโภค','ห้องเช่า','ค่างวดรถ']);
  const committed=selected.filter(x=>committedNames.has(groupBy(x))),other=selected.filter(x=>!committedNames.has(groupBy(x)));
  const selectedRepayments=repayments.filter(x=>config.mode==='days'?x.transaction_date.slice(0,7)===config.monthKey:config.keys.includes(x.transaction_date.slice(0,7)));
- return {selected,totalCents,ranking,comparison,forecast,split:{committed,other,committedCents:sum(committed),otherCents:sum(other),repayments:selectedRepayments,repaymentCents:sum(selectedRepayments)}};
+ const largest=[...selected].sort((a,b)=>cents(b)-cents(a)||a.transaction_date.localeCompare(b.transaction_date)).slice(0,3);
+ const frequent=[...ranking].sort((a,b)=>b.rows.length-a.rows.length||b.amountCents-a.amountCents).slice(0,3);
+ const deep={count:selected.length,recordedDays:new Set(selected.map(x=>x.transaction_date)).size,averageCents:selected.length?Math.round(totalCents/selected.length):null,largest,largestCents:sum(largest),frequent,savings:[5,10,20].map(percent=>({percent,baseCents:sum(other),savedCents:Math.round(sum(other)*percent/100)}))};
+ return {selected,totalCents,ranking,comparison,forecast,deep,split:{committed,other,committedCents:sum(committed),otherCents:sum(other),repayments:selectedRepayments,repaymentCents:sum(selectedRepayments)}};
 }
 
 export function createExpenseAnalysisRenderer({$,money,fmtDate,analyze=analyzeExpenses}){
+ let savingsPercent=10;
  const monthLabel=m=>new Date(Number(m.slice(0,4)),Number(m.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'});
  const make=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
  function openDetails(title,groups,note){
@@ -77,6 +81,42 @@ export function createExpenseAnalysisRenderer({$,money,fmtDate,analyze=analyzeEx
    box.append(button('ดูรายการที่นับในงบ ›',()=>openDetails('รายจ่ายในงบ '+b.name,[{label:input.label,rows:b.rows}],'นับเฉพาะหมวดที่ตั้งไว้ในงบนี้ และเฉพาะรายจ่ายที่จ่ายแล้ว')));forecast.append(box);
   }
   const split=$('analysisSplit');if(split){split.replaceChildren();for(const [label,rows,value] of [['บิล ค่าห้อง และค่างวดรถ',result.split.committed,result.split.committedCents],['รายจ่ายอื่นที่ลองทบทวนได้',result.split.other,result.split.otherCents],['ชำระบัตร/สินเชื่อ (แยกจากยอดวิเคราะห์)',result.split.repayments,result.split.repaymentCents]]){const box=make('div','analysis-budget');box.append(make('strong','',label),make('p','money',money(value/100)),button('ดูรายการ ›',()=>openDetails(label,[{label:input.label,rows}],'จำแนกจากหมวดที่บันทึก ไม่ยืนยันว่าทุกรายการลดได้')));split.append(box);}split.append(make('p','analysis-period-note','เป็นยอดจ่ายแล้ว ไม่ใช่บิลที่ต้องจ่ายทั้งหมด ค่าห้องใช้ยอดรายการจริง ส่วนของมิวดูในหมายเหตุค่าห้อง; รายจ่ายอื่นอาจมีรายการจำเป็นด้วย'));}
+  const deepRoot=$('analysisDeep');
+  if(deepRoot){
+   deepRoot.replaceChildren();
+   const d=result.deep;
+   if(!d.count)deepRoot.append(make('p','analysis-empty','ยังไม่มีรายการจ่ายแล้วสำหรับเจาะลึกในช่วงนี้'));
+   else{
+    const overview=make('article','analysis-card deep-section');overview.append(make('h4','','จ่ายบ่อย หรือจ่ายก้อนใหญ่?'));
+    overview.append(make('p','analysis-period-note',d.count+' รายการ · บันทึก '+d.recordedDays+' วัน · เฉลี่ย '+money(d.averageCents/100)+'/รายการ'));
+    overview.append(make('p','analysis-verdict','รายการใหญ่สุด (ไม่เกิน 3 รายการ) รวม '+money(d.largestCents/100)+' ('+(result.totalCents?d.largestCents/result.totalCents*100:0).toFixed(1)+'% ของรายจ่าย)'));
+    for(const row of d.largest){const b=button('',()=>openDetails('รายจ่ายก้อนใหญ่',[{label:input.label,rows:[row]}],'รายการใหญ่ตามยอดที่บันทึก ไม่ได้หมายความว่าผิดปกติหรือไม่จำเป็น'));b.className='deep-item';b.append(make('span','',row.description||'ไม่ระบุชื่อ'),make('strong','money',money(row.amount)),make('small','',fmtDate(row.transaction_date)+' · '+input.groupBy(row)));overview.append(b);}
+    overview.append(make('p','analysis-period-note','หมวดที่บันทึกบ่อย: '+d.frequent.map(g=>g.name+' '+g.rows.length+' รายการ').join(' · ')));
+    overview.append(button('ดูรายการจ่ายจริงทั้งหมด ›',()=>openDetails('รายจ่ายที่ใช้วิเคราะห์',[{label:input.label,rows:result.selected}],'จำนวนวันคือวันที่มีรายการบันทึก ไม่ยืนยันว่าบันทึกครบทุกวัน')));deepRoot.append(overview);
+    const drivers=make('article','analysis-card deep-section');drivers.append(make('h4','','หมวดไหนทำให้ยอดเปลี่ยน?'));
+    if(c.state!=='ready')drivers.append(make('p','analysis-empty',c.state==='select_month'?'เลือกเดือนเดียวเพื่อดูการเปลี่ยนแปลงรายหมวด':'ต้องมีรายการจ่ายแล้วทั้งเดือนที่เลือกและเดือนก่อน จึงจะแยกสาเหตุได้'));
+    else{
+     drivers.append(make('p','analysis-period-note','เทียบวันที่ 1–'+c.cutoff+' ของสองเดือน · เรียงจากผลต่างมากที่สุด'));
+     for(const g of c.drivers.filter(g=>g.deltaCents!==0)){
+      const b=button('',()=>openDetails('เทียบหมวด '+g.name,[{label:monthLabel(c.month),rows:g.currentRows},{label:monthLabel(c.previousMonth),rows:g.previousRows}],'จำนวนครั้งหมายถึงจำนวนรายการที่บันทึก ไม่ยืนยันจำนวนครั้งที่ซื้อจริง; หมวดที่ไม่มีรายการไม่ถือว่าไม่ได้ใช้เงิน'));
+      b.className='deep-item';b.append(make('span','',g.name),make('strong',(g.deltaCents>0?'expense':'income')+' money',(g.deltaCents>0?'+':'−')+money(Math.abs(g.deltaCents)/100)));
+      b.append(make('small','',g.previousCount+' → '+g.currentCount+' รายการ · เฉลี่ย/รายการ '+(g.previousAverageCents===null?'ไม่มีรายการ':money(g.previousAverageCents/100))+' → '+(g.currentAverageCents===null?'ไม่มีรายการ':money(g.currentAverageCents/100))));
+      const countDiff=g.currentCount-g.previousCount,averageDiff=(g.currentAverageCents||0)-(g.previousAverageCents||0);
+      const reason=!g.previousCount?'เดือนก่อนยังไม่มีรายการหมวดนี้':!g.currentCount?'ช่วงนี้ยังไม่มีรายการหมวดนี้':countDiff>0&&averageDiff>0?'จำนวนรายการและยอดเฉลี่ยเพิ่มทั้งคู่':countDiff<0&&averageDiff<0?'จำนวนรายการและยอดเฉลี่ยลดทั้งคู่':countDiff===0?'จำนวนรายการเท่าเดิม ยอดเปลี่ยนตามค่าเฉลี่ย':averageDiff===0?'ค่าเฉลี่ยใกล้เดิม ยอดเปลี่ยนตามจำนวนรายการ':'จำนวนรายการและค่าเฉลี่ยเปลี่ยนสวนทางกัน';
+      b.append(make('small','deep-reason',reason+' · ดูรายการ ›'));drivers.append(b);
+     }
+     if(c.drivers.every(g=>g.deltaCents===0))drivers.append(make('p','analysis-empty','ยอดทุกหมวดเท่ากันในสองช่วง'));
+    }deepRoot.append(drivers);
+    const savings=make('article','analysis-card deep-section');savings.append(make('h4','','ถ้าลองลดรายจ่ายอื่น จะเหลือเพิ่มเท่าไร?'));
+    savings.append(make('p','analysis-period-note','จำลองกับรายจ่ายอื่น '+money(result.split.otherCents/100)+' ในช่วงที่เลือก แยกค่าห้อง บิล ค่างวดรถ และชำระบัตร/สินเชื่อออก'));
+    const controls=make('div','deep-savings-controls');
+    const scenario=d.savings.find(x=>x.percent===savingsPercent);
+    for(const x of d.savings){const b=button('ลด '+x.percent+'%',()=>{savingsPercent=x.percent;render(input);});b.setAttribute('aria-pressed',String(x.percent===savingsPercent));controls.append(b);}savings.append(controls);
+    savings.append(make('p','analysis-verdict income money','ประหยัดได้ '+money(scenario.savedCents/100)+' ในช่วงนี้'));
+    for(const g of result.ranking.filter(g=>result.split.other.some(x=>g.rows.includes(x))).slice(0,3))savings.append(button(g.name+' · ถ้าลด '+savingsPercent+'% = '+money(Math.round(g.amountCents*savingsPercent/100)/100)+' ›',()=>openDetails('จำลองลดหมวด '+g.name,[{label:input.label,rows:g.rows}],'ใช้ฐานยอดที่จ่ายแล้วในช่วงนี้ × '+savingsPercent+'% เป็นตัวอย่าง ไม่แก้ยอดหรือบันทึกธุรกรรม')));
+    savings.append(make('p','analysis-period-note','เป็นการจำลอง ไม่ใช่ยอดประหยัดจริง รายจ่ายอื่นอาจจำเป็นด้วย ไม่มีการเปลี่ยนข้อมูล และไม่คูณเป็นรายปีจากเดือนที่ยังบันทึกไม่ครบ'));deepRoot.append(savings);
+   }
+  }
   return result;
  };
 }

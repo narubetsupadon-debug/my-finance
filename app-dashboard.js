@@ -1,4 +1,4 @@
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-totals38';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-deep39';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,

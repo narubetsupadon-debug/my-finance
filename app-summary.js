@@ -1,4 +1,4 @@
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-totals38';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-deep39';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
