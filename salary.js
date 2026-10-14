@@ -1,5 +1,5 @@
-import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261014-guide45';
-import {setupPayslipImport} from './salary-payslip.js?v=20261014-guide45';
+import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261014-perf46';
+import {setupPayslipImport} from './salary-payslip.js?v=20261014-perf46';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const retrySafeInsert=createRetrySafeInsert();
 const supabase=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');

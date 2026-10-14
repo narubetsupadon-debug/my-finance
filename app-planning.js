@@ -1,4 +1,4 @@
-import {recurringBillMonthStatus} from './finance-core.js?v=20261014-guide45';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261014-perf46';
 // Bills, debts, and budget rendering extracted from app.js.
 export function createPlanningRenderer({$,money,esc,bangkokDay,budgetSummary,getBills,getDebts,getBudgets,getTransactions}){
 function renderBills(){
