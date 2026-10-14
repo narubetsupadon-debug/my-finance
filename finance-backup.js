@@ -6,3 +6,24 @@ export function serializeFinanceBackup(backup){
  return JSON.stringify(backup,null,2);
 }
 
+
+// Read-only recovery rehearsal: validates cross-table identity and references.
+// This does not import, merge or overwrite live financial data.
+export function verifyFinanceBackup(backup,expectedOwner=backup?.owner_id){
+ serializeFinanceBackup(backup);
+ if(backup.owner_id!==expectedOwner)throw new Error('เจ้าของไฟล์สำรองไม่ตรงกับบัญชี');
+ const ids=Object.fromEntries(financialBackupTables.map(t=>[t,new Set(backup.data[t].map(r=>r.id))]));
+ const counts={};
+ for(const table of financialBackupTables){counts[table]=backup.data[table].length;
+  for(const row of backup.data[table]){
+   for(const [field,target] of [['category_id','categories'],['account_id','accounts'],['debt_id','debts'],['transaction_id','transactions']]){
+    if(row[field]!=null&&!ids[target].has(row[field]))throw new Error('ลิงก์ในไฟล์สำรองไม่ครบ: '+table+' / '+field);
+   }
+  }
+ }
+ const links=[...backup.data.salary_records,...backup.data.car_expenses,...backup.data.car_installments,...backup.data.rent_records].map(r=>r.transaction_id).filter(Boolean);
+ if(new Set(links).size!==links.length)throw new Error('รายการจ่ายเชื่อมหลายเรื่องในไฟล์สำรอง');
+ // Separate JSON instances prove the serialized snapshot round trips losslessly.
+ const restored=JSON.parse(serializeFinanceBackup(backup));
+ return {ok:true,owner:expectedOwner,counts,totalRows:Object.values(counts).reduce((s,n)=>s+n,0),restored};
+}

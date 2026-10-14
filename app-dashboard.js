@@ -1,5 +1,6 @@
-import {recurringBillMonthStatus} from './finance-core.js?v=20261014-polish42';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-polish42';
+import {sumTransactionAmounts} from './finance-core.js?v=20261014-safe43';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261014-safe43';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-safe43';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
@@ -14,10 +15,10 @@ function renderDashboard(){
  const monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
  const prevDate=new Date(y,m-1,1),py=prevDate.getFullYear(),pm=prevDate.getMonth()
  const previous=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===py&&d.getMonth()===pm&&x.status!=='cancelled'})
- const inc=monthly.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0)
- const exp=monthly.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
- const prevExp=previous.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
- const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=todayRows.reduce((s,x)=>s+Number(x.amount),0)
+ const inc=sumTransactionAmounts(monthly,'income')
+ const exp=sumTransactionAmounts(monthly,'expense')
+ const prevExp=sumTransactionAmounts(previous,'expense')
+ const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=sumTransactionAmounts(todayRows)
  const bsum=budgetTotals(),dailyLeft=bsum.daily,pct=bsum.limit?Math.min(100,bsum.spent/bsum.limit*100):0
  const billStates=bills.filter(b=>b.is_active&&(b.frequency==='monthly'||!b.frequency)).map(b=>recurringBillMonthStatus(b,transactions,today));
  if($('homeBillStatus'))$('homeBillStatus').textContent=billStates.length?'บิลเดือนนี้ · จ่ายแล้ว '+billStates.filter(s=>s.state==='paid').length+' · รอจ่าย '+billStates.filter(s=>s.state==='pending').length+' · ยังไม่บันทึก '+billStates.filter(s=>s.state==='unrecorded').length:'เพิ่มบิลประจำไว้ช่วยจำ ›';
@@ -61,7 +62,7 @@ function renderDashboard(){
  const cutoff=Math.min(now.getDate(),new Date(y,m,0).getDate());
  const currentComparable=monthly.filter(x=>x.type==='expense'&&Number(x.transaction_date.slice(8,10))<=cutoff);
  const priorComparable=previous.filter(x=>x.type==='expense'&&Number(x.transaction_date.slice(8,10))<=cutoff);
- const currentSum=currentComparable.reduce((s,x)=>s+Number(x.amount),0),priorSum=priorComparable.reduce((s,x)=>s+Number(x.amount),0);
+ const currentSum=sumTransactionAmounts(currentComparable),priorSum=sumTransactionAmounts(priorComparable);
  if(top)insights.push({text:'เดือนนี้ใช้มากสุดที่ '+top[0]+' '+money(top[1]),icon:'✨',open:()=>openInsightDetails('รายจ่ายหมวด '+top[0],[{label:'เดือนนี้ · '+top[0],rows:monthly.filter(x=>x.type==='expense'&&(x.categories?.name||'อื่นๆ')===top[0])}],'ไม่รวมรายการยกเลิก')});
  if(priorSum>0){const diff=(currentSum-priorSum)/priorSum*100;insights.push({text:diff===0?'รายจ่ายเท่ากับเดือนก่อนในช่วงเดียวกัน':('รายจ่าย'+(diff>0?'เพิ่มขึ้น ':'ลดลง ')+Math.abs(diff).toFixed(0)+'% ในช่วงเดียวกัน'),icon:'📊',open:()=>openInsightDetails('เทียบรายจ่ายช่วงวันที่ 1–'+cutoff,[{label:now.toLocaleDateString('th-TH',{month:'long',year:'numeric'}),rows:currentComparable},{label:prevDate.toLocaleDateString('th-TH',{month:'long',year:'numeric'}),rows:priorComparable}],'เทียบช่วงวันที่เท่ากันของสองเดือน จากรายการที่บันทึกไว้ ไม่รวมรายการยกเลิก')});}
  if(bsum.limit)insights.push({text:bsum.spent>bsum.limit?'ใช้เกินงบรวม '+money(bsum.spent-bsum.limit):'งบรวมยังเหลือ '+money(bsum.remain),icon:'🎯',open:()=>showPage('budget')});

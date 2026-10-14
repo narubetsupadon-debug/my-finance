@@ -1,5 +1,6 @@
-import {bangkokDay,readAll,lockFinanceForm,loadExcelTools} from './finance-core.js?v=20261014-polish42';
+import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261014-safe43';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const retrySafeInsert=createRetrySafeInsert();
 const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');const $=id=>document.getElementById(id),money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0)),date=s=>new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});let user,rows=[],expenseRows=[],editing,editingExpense=null,accounts=[],categories=[];
 function msg(s,saved=false){$('carMessage').dataset.loading='false';$('carMessage').textContent=s;$('carSavedLink').hidden=!saved;if(saved)$('carMessage').scrollIntoView({block:'nearest',behavior:'smooth'});if($('carDialog').open)$('carFormMessage').textContent=s;}
 function option(el,id,name){const o=document.createElement('option');o.value=id;o.textContent=name;el.append(o);}
@@ -69,10 +70,9 @@ $('carExpenseForm').onsubmit=async e=>{
    odometer_km:$('carExpenseOdo').value===''?null:Number($('carExpenseOdo').value),liters:$('carExpenseType').value==='fuel'&&$('carExpenseLiters').value!==''?Number($('carExpenseLiters').value):null,
    vendor:$('carExpenseVendor').value.trim()||null,account_id:$('carExpenseAccount').value||null,category_id:$('carExpenseCategory').value||null,note:$('carExpenseNote').value.trim()||null};
   if(!row.category_id)throw new Error('กรุณาเลือกหมวดรายจ่าย');
-  const q=editingExpense?db.from('car_expenses').update(row).eq('id',editingExpense.id).eq('user_id',user.id):db.from('car_expenses').insert(row);
-  const r=await q.select('id').single();if(r.error)throw r.error;committed=true;
+  const r=editingExpense?await db.from('car_expenses').update(row).eq('id',editingExpense.id).eq('user_id',user.id).select('id').single():await retrySafeInsert(db,'car_expenses',row);if(r.error)throw r.error;committed=true;
   $('carExpenseDialog').close();await load();msg(editingExpense?'แก้ไขค่าใช้จ่ายรถแล้ว ✅':'เพิ่มค่าใช้จ่ายรถแล้ว ✅',true);
- }catch(err){if(committed){$('carApp').classList.add('hidden');msg('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else{$('carExpenseMessage').textContent='บันทึกไม่ได้: '+err.message;}}finally{unlock();b.disabled=false;}
+ }catch(err){if(committed){$('carApp').classList.add('hidden');msg('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else{$('carExpenseMessage').textContent=err.code==='SAVE_UNCONFIRMED'?err.message:'บันทึกไม่ได้: '+err.message;}}finally{unlock();b.disabled=false;}
 };
 $('deleteCarExpense').onclick=async()=>{
  if(!editingExpense||!confirm('ลบค่าใช้จ่ายรถรายการนี้? รายการรายจ่ายที่เชื่อมจะถูกลบด้วย'))return;

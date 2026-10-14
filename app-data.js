@@ -17,7 +17,7 @@ export async function fetchFinanceData(db,userId,readAll){
   };
 }
 
-export function createRefreshCoordinator({refresh,isBlocked=()=>false,getDelay=()=>180}){
+export function createRefreshCoordinator({refresh,isBlocked=()=>false,getDelay=()=>180,onError=()=>{}}){
   let timer=null,cycle=null,queued=false,pending=false;
 
   async function run(){
@@ -41,7 +41,7 @@ export function createRefreshCoordinator({refresh,isBlocked=()=>false,getDelay=(
     timer=setTimeout(()=>{
       timer=null;
       if(isBlocked()){pending=true;return;}
-      pending=false;void run();
+      pending=false;void run().catch(onError);
     },delay);
   }
 

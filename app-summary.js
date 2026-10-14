@@ -1,4 +1,5 @@
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-polish42';
+import {sumTransactionAmounts} from './finance-core.js?v=20261014-safe43';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-safe43';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
@@ -82,7 +83,7 @@ function renderSummary(){
  const rows=config.mode==='days'
   ?valid.filter(x=>String(x.transaction_date).slice(0,7)===config.monthKey)
   :valid.filter(x=>config.keys.includes(String(x.transaction_date).slice(0,7)))
- const inc=rows.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),exp=rows.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0)
+ const inc=sumTransactionAmounts(rows,'income'),exp=sumTransactionAmounts(rows,'expense')
  $('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumBalance').textContent=money(inc-exp)
  $('summaryPeriodText').textContent='กำลังดู '+config.label
  $('summaryTrendTitle').textContent='กระแสเงินสด'

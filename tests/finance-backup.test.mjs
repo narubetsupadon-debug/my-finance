@@ -9,3 +9,8 @@ const missing=structuredClone(backup);delete missing.data.accounts;assert.throws
 const duplicate=structuredClone(backup);duplicate.data.transactions.push(duplicate.data.transactions[0]);assert.throws(()=>serializeFinanceBackup(duplicate),/ไม่ครบ/);
 const secrets=structuredClone(backup);secrets.data.push_subscriptions=[];assert.throws(()=>serializeFinanceBackup(secrets),/ไม่ครบ/);
 console.log('PASS backup: all financial tables, cancelled/legacy provenance, bill/payment dates, exact JSON round trip, ownership, completeness and duplicate ids');
+const {verifyFinanceBackup}=await import('../finance-backup.js');
+const rehearsal=verifyFinanceBackup(backup,'fixture-owner');assert.equal(rehearsal.ok,true);assert.notEqual(rehearsal.restored,backup);assert.deepEqual(rehearsal.restored,backup);assert.equal(rehearsal.totalRows,2);assert.throws(()=>verifyFinanceBackup(backup,'other'),/เจ้าของ/);
+const missingRef=structuredClone(backup);missingRef.data.transactions[0].category_id='missing';assert.throws(()=>verifyFinanceBackup(missingRef),/ลิงก์/);
+const multiLink=structuredClone(backup);multiLink.data.car_expenses=[{id:'car',user_id:'fixture-owner',transaction_id:'tx'}];assert.throws(()=>verifyFinanceBackup(multiLink),/หลายเรื่อง/);
+console.log('PASS backup recovery rehearsal: exact JSON clone, owner isolation, row counts, missing references and cross-source double links rejected; no production write');

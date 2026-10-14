@@ -41,3 +41,4 @@ assert.equal(coordinator.pending,true);
 blocked=false;coordinator.flush();
 await new Promise(r=>setTimeout(r,10));
 assert.equal(runs,2);coordinator.dispose();
+let recorded=false;const failing=createRefreshCoordinator({refresh:async()=>{throw Error('offline')},getDelay:()=>0,onError:()=>{recorded=true}});failing.schedule();await new Promise(r=>setTimeout(r,10));assert.equal(recorded,true);failing.dispose();console.log('PASS scheduled refresh rejection is handled');

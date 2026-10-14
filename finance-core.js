@@ -5,12 +5,15 @@ export function bangkokDay(instant = new Date()) {
 }
 export function bangkokDate(instant = new Date()) { return new Date(bangkokDay(instant)+'T12:00:00'); }
 export async function readAll(makeQuery, pageSize = 500) {
-  const rows=[];
+  if(!Number.isInteger(pageSize)||pageSize<=0||pageSize>1000)throw new Error('ขนาดหน้าข้อมูลไม่ถูกต้อง');
+  const rows=[],seen=new Set();
   for(let from=0;;from+=pageSize){
     const {data,error}=await makeQuery().range(from,from+pageSize-1);
-    if(error)throw error;
+    if(error){recordFinanceError('read',error);throw error;}
     if(!Array.isArray(data))throw new Error('ไม่ได้รับข้อมูลจากเซิร์ฟเวอร์');
-    rows.push(...data);
+    if(data.some(x=>x?.id&&seen.has(x.id)))throw new Error('ได้รับข้อมูลหน้าซ้ำ กรุณาลองโหลดใหม่');
+    data.forEach(x=>{if(x?.id)seen.add(x.id)});rows.push(...data);
+    if(rows.length>100000)throw new Error('ข้อมูลเกินขอบเขตการโหลด กรุณาตรวจระบบ');
     if(data.length<pageSize)return rows;
   }
 }
@@ -95,4 +98,46 @@ export function recurringBillMonthStatus(bill,transactions,today=bangkokDay()){
  const state=paidRows.length?'paid':rows.length?'pending':'unrecorded';
  const [y,m]=today.split('-').map(Number),day=Number(bill.due_day),dueDay=Number.isInteger(day)&&day>=1&&day<=31?Math.min(day,new Date(y,m,0).getDate()):null;
  return {state,rows,paidRows,due:dueDay!==null&&dueDay<=Number(today.slice(8,10))};
+}
+
+// Diagnostics intentionally exclude messages, URLs, payloads and credentials.
+const financeDiagnostics=[];
+export function recordFinanceError(area,error){
+ const code=/^[A-Z0-9_]{1,24}$/i.test(String(error?.code||''))?String(error.code):'UNCLASSIFIED';
+ const entry={at:new Date().toISOString(),area:String(area).replace(/[^a-z0-9_/-]/gi,'').slice(0,40),code};
+ financeDiagnostics.push(entry);if(financeDiagnostics.length>20)financeDiagnostics.shift();
+ return entry;
+}
+export function getFinanceDiagnostics(){return financeDiagnostics.map(x=>({...x}));}
+export function sumTransactionAmounts(rows,type=null){return rows.filter(x=>!type||x.type===type).reduce((sum,x)=>sum+Math.round(Number(x.amount||0)*100),0)/100;}
+// One ID per new-form draft. Retrying an ambiguous response cannot create a
+// second row; confirmation is owner-scoped and never overwrites an existing row.
+export function createRetrySafeInsert(){
+ let draft=null;
+ return async function insert(db,table,row){
+  const signature=JSON.stringify(row);
+  if(draft&&draft.owner!==row.user_id)draft=null;
+  if(draft&&draft.signature!==signature)throw new Error('รายการก่อนหน้ายังรอยืนยัน กรุณาลองข้อมูลเดิมหรือรีเฟรชตรวจรายการก่อนเปลี่ยนข้อมูล');
+  if(!draft)draft={id:crypto.randomUUID(),owner:row.user_id,signature};
+  const id=draft.id;
+  try{
+   const {data,error}=await db.from(table).insert({...row,id}).select('id').single();
+   if(error)throw error;if(!data?.id)throw new Error('ไม่ได้รับผลยืนยันการบันทึก');
+   draft=null;return {data,error:null};
+  }catch(error){
+   recordFinanceError('save/'+table,error);
+   try{
+    const result=await db.from(table).select('*').eq('id',id).eq('user_id',row.user_id).range(0,0);
+    if(result.error)throw result.error;
+    const saved=result.data?.[0];
+    if(saved&&Object.entries(row).every(([key,value])=>(key==='transaction_id'&&value===null)|| (typeof value==='number'?Number(saved?.[key])===value:saved?.[key]===value))){
+     draft=null;return {data:{id:saved.id},error:null,recovered:true};
+    }
+    // A known SQL validation error is definitive; allow corrections.
+    if(!saved&&/^[0-9A-Z]{5}$/.test(String(error.code||'')))draft=null;
+   }catch(readError){recordFinanceError('confirm/'+table,readError);}
+   if(draft){const uncertain=new Error('ยังยืนยันการบันทึกไม่ได้ ลองบันทึกข้อมูลเดิมอีกครั้ง หรือรีเฟรชตรวจรายการก่อนสร้างใหม่');uncertain.code='SAVE_UNCONFIRMED';throw uncertain;}
+   throw error;
+  }
+ };
 }

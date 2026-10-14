@@ -1,14 +1,15 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261014-polish42';
-import {serializeFinanceBackup} from './finance-backup.js?v=20261014-polish42';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-polish42';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm} from './finance-core.js?v=20261014-polish42';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-polish42';
-import {createSummaryRenderer} from './app-summary.js?v=20261014-polish42';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261014-polish42';
-import {createTransactionRenderer} from './app-transactions.js?v=20261014-polish42';
-import {createPlanningRenderer} from './app-planning.js?v=20261014-polish42';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-polish42';
+import {createCapacityMonitor} from './app-storage.js?v=20261014-safe43';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261014-safe43';
+import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-safe43';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261014-safe43';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-safe43';
+import {createSummaryRenderer} from './app-summary.js?v=20261014-safe43';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261014-safe43';
+import {createTransactionRenderer} from './app-transactions.js?v=20261014-safe43';
+import {createPlanningRenderer} from './app-planning.js?v=20261014-safe43';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-safe43';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
+const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
 // MINIMAL_DARK_CHART_DEFAULTS
@@ -213,6 +214,7 @@ async function performLoad(){
   bills=data.bills;debts=data.debts;budgets=data.budgets;carExpenseTxIds=data.carExpenseTxIds;rentRecords=data.rentRecords;
   $('dataError').classList.add('hidden');setSyncStatus('ok');renderAll();return true;
  }catch(error){
+  recordFinanceError('load',error);
   if(user?.id!==loadingUser||sessionRevision!==revision)return false;
   $('dataErrorText').textContent='โหลดข้อมูลล่าสุดไม่ได้ ข้อมูลที่เห็นอาจยังไม่ครบหรือไม่เป็นปัจจุบัน: '+error.message;
   $('dataError').classList.remove('hidden');setSyncStatus('error','ซิงก์ไม่สำเร็จ · '+error.message);return false;
@@ -221,6 +223,7 @@ async function performLoad(){
 function editorOpen(){return !!($('txDialog')?.open||$('entityDialog')?.open)}
 const refreshCoordinator=createRefreshCoordinator({
  refresh:performLoad,
+ onError:error=>recordFinanceError('refresh',error),
  isBlocked:editorOpen,
  getDelay:()=>Math.max(180,360-(performance.now()-lastNavigationAt))
 });
@@ -547,13 +550,12 @@ $('txForm').onsubmit=async e=>{
  $('txError').classList.add('hidden');const unlock=lockFinanceForm($('txForm'),$('txDialog'));
  button.disabled=true;button.textContent='กำลังบันทึก…';let committed=false;
  try{
-  const q=editing.id?supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id):supabase.from('transactions').insert(row);
-  const r=await q.select('id').single();
+  const r=editing.id?await supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id).select('id').single():await retrySafeInsert(supabase,'transactions',row);
   if(r.error)throw r.error;
   committed=true;if(!editing.id)rememberTxSelection(row);const favoriteSaved=saveFavorite(row);$('txDialog').close();
   const label='บันทึกรายการแล้ว ✅'+(row.status==='cancelled'?' · รายการยกเลิก ไม่นับรวมยอด':'')+(!favoriteSaved?' · เก็บรายการโปรดในเครื่องนี้ไม่ได้':'');
   savedNotice(label,await loadAll(),{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});
- }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});else txError('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
+ }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});else txError(error.code==='SAVE_UNCONFIRMED'?error.message:'บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
 }
 $('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
 for(const id of ['txAmount','txDesc','txDate','txCategory','txAccount']){
@@ -696,7 +698,7 @@ $('txDialog')?.addEventListener('focusin',e=>{
 
 $('exportFinanceBackup').onclick=async()=>{
  const button=$('exportFinanceBackup');if(!user||button.disabled)return;button.disabled=true;button.textContent='กำลังสำรอง…';
- try{const {data,error}=await supabase.rpc('export_finance_backup');if(error)throw error;const content=serializeFinanceBackup(data),url=URL.createObjectURL(new Blob([content],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='My_Finance_Backup_'+bangkokDay()+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showAppToast('สร้างไฟล์สำรองข้อมูลการเงินแล้ว กรุณาเก็บไฟล์ไว้ในที่ปลอดภัย');}
+ try{const {data,error}=await supabase.rpc('export_finance_backup');if(error)throw error;if(!user)throw new Error('กรุณาเข้าสู่ระบบก่อนสำรองข้อมูล');verifyFinanceBackup(data,user.id);const content=serializeFinanceBackup(data),url=URL.createObjectURL(new Blob([content],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='My_Finance_Backup_'+bangkokDay()+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showAppToast('สร้างไฟล์สำรองข้อมูลการเงินแล้ว กรุณาเก็บไฟล์ไว้ในที่ปลอดภัย');}
  catch(error){showAppToast('สำรองข้อมูลไม่ได้: '+error.message);}
  finally{button.disabled=false;button.textContent='ดาวน์โหลดข้อมูลสำรอง JSON';}
 };

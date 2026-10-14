@@ -1,7 +1,7 @@
 -- Verification only. Success intentionally raises AUDIT_PASS_ROLLBACK to roll back all fixture rows.
 -- Requires a database admin connection; no existing financial rows are modified.
 DO $audit$
-DECLARE uid uuid; cat uuid; inc uuid; acct uuid; expense uuid; tx uuid; sal uuid; saltx uuid; rejected boolean;
+DECLARE uid uuid; cat uuid; inc uuid; acct uuid; expense uuid; tx uuid; sal uuid; saltx uuid; rejected boolean; rentcat uuid; rentid uuid; renttx uuid; billid uuid; billtx uuid; again uuid;
 BEGIN
  SELECT user_id INTO uid FROM public.car_expenses LIMIT 1;
  IF uid IS NULL THEN RAISE EXCEPTION 'No fixture owner'; END IF;
@@ -26,5 +26,18 @@ BEGIN
  IF NOT rejected THEN RAISE EXCEPTION 'Salary null relink was allowed'; END IF;
  UPDATE public.salary_records SET base_salary=2 WHERE id=sal;
  IF (SELECT amount FROM public.transactions WHERE id=saltx)<>2 THEN RAISE EXCEPTION 'Salary update did not sync'; END IF;
- RAISE EXCEPTION 'AUDIT_PASS_ROLLBACK: car create/update/delete, direct edit protection, immutable links and salary sync all passed';
+ SELECT category_id INTO rentcat FROM public.rent_records WHERE user_id=uid LIMIT 1;
+ IF rentcat IS NULL THEN RAISE EXCEPTION 'No rent category fixture'; END IF;
+ INSERT INTO public.rent_records(user_id,bill_month,payment_date,category_id,account_id,full_amount,my_amount,status)
+ VALUES(uid,'1800-02-01','1800-02-05',rentcat,acct,1,0.5,'paid') RETURNING id,transaction_id INTO rentid,renttx;
+ UPDATE public.rent_records SET full_amount=2,my_amount=1 WHERE id=rentid;
+ IF (SELECT amount FROM public.transactions WHERE id=renttx)<>2 THEN RAISE EXCEPTION 'Rent amount did not sync'; END IF;
+ UPDATE public.rent_records SET status='pending' WHERE id=rentid;
+ IF (SELECT status FROM public.transactions WHERE id=renttx)<>'cancelled' THEN RAISE EXCEPTION 'Pending rent remained paid'; END IF;
+ INSERT INTO public.bills(user_id,name,amount,frequency,due_day,category_id,account_id,is_active)
+ VALUES(uid,'__rollback_bill_'||gen_random_uuid(),1,'monthly',1,cat,acct,true) RETURNING id INTO billid;
+ billtx:=public.pay_recurring_bill(billid,'1800-03-01');
+ again:=public.pay_recurring_bill(billid,'1800-03-01');
+ IF billtx<>again OR (SELECT count(*) FROM public.transactions WHERE source='bill_payment:'||billid::text)<>1 THEN RAISE EXCEPTION 'Bill retry duplicated payment'; END IF;
+ RAISE EXCEPTION 'AUDIT_PASS_ROLLBACK: car create/update/delete, direct edit protection, immutable links salary sync, rent amount/status sync and recurring bill retry all passed';
 END $audit$;
