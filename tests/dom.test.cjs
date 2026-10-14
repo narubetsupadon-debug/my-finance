@@ -235,6 +235,11 @@ async function page(html,js,data,expose,storage={}){
  console.log('PASS rent DOM: half default, editable share, existing payment, bill month vs payment date, pending status, linked edit and duplicate-month guard');
  const menu=await page('index.html','app.js',{categories,accounts,transactions:[]},'handleNavigationRoute');
  menu.w.eval(fs.readFileSync(root+'app-nav.js','utf8'));
+ // Repeated page changes must not synchronously measure page layout.
+ let navigationLayouts=0;
+ for(const el of menu.w.document.querySelectorAll('.page'))Object.defineProperty(el,'offsetWidth',{get(){navigationLayouts++;return 390},configurable:true});
+ for(const destination of ['summary','settings','transactions','dashboard'])menu.w.document.querySelector('.navbtn[data-page="'+destination+'"]').click();
+ assert.equal(navigationLayouts,0,'navigation must not force page layout for animation');
  assert.deepEqual([...menu.w.document.querySelectorAll('.mobile-app-nav button')].map(b=>b.dataset.destination),['dashboard','transactions','capture','summary','more']);
  const allSheets=menu.w.document.querySelectorAll('.app-menu-sheet'),moreSheet=allSheets[0],captureSheet=allSheets[1];
  // Guide shortcuts must open the existing UI, without writing any records.
