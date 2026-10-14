@@ -49,3 +49,12 @@ window.addEventListener('finance:open-capture',revealNavigation);
 window.addEventListener('resize',revealNavigation);
 window.addEventListener('pageshow',revealNavigation);
 sheet.addEventListener('close',revealNavigation);captureSheet.addEventListener('close',revealNavigation);
+
+// Guide actions use the same capture chooser as the main navigation.
+document.addEventListener('click',e=>{
+ const capture=e.target.closest('[data-guide-capture]');if(capture){openCapture();return;}
+ const jump=e.target.closest('[data-guide-target]');if(!jump)return;
+ const target=document.getElementById(jump.dataset.guideTarget);if(!target)return;
+ const card=target.closest('.settings-card')||target;card.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth',block:'start'});
+ const focus=target.matches('button,input,select')?target:target.querySelector('button,input,select');focus?.focus({preventScroll:true});
+});

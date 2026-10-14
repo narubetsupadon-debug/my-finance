@@ -176,3 +176,10 @@ html[data-resolved-theme=dark] .spent-panel{border-color:transparent}
  .card{padding:16px}.summary-kpi{padding:14px 12px}.summary-kpi .value{font-size:20px}.mobile-app-nav{left:8px;right:8px}
 }
 @media(prefers-reduced-motion:reduce){.sidebar .navbtn,.quick-btn,.card,.btn{transition:none}}
+
+/* The guide separates expandable instructions from working navigation. */
+.usage-guide-hint{color:var(--primary2);font-size:13px;line-height:1.7}
+.usage-guide-actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 4px}
+.usage-guide-actions a{text-decoration:none}
+.settings-card{scroll-margin-top:110px}
+.usage-guide-body>details[open]>summary{color:var(--primary2)}

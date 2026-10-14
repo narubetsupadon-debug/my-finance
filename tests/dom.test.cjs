@@ -237,6 +237,17 @@ async function page(html,js,data,expose,storage={}){
  menu.w.eval(fs.readFileSync(root+'app-nav.js','utf8'));
  assert.deepEqual([...menu.w.document.querySelectorAll('.mobile-app-nav button')].map(b=>b.dataset.destination),['dashboard','transactions','capture','summary','more']);
  const allSheets=menu.w.document.querySelectorAll('.app-menu-sheet'),moreSheet=allSheets[0],captureSheet=allSheets[1];
+ // Guide shortcuts must open the existing UI, without writing any records.
+ const guide=menu.el('appUsageGuide');guide.open=true;
+ guide.querySelector('[data-guide-capture]').click();assert.equal(captureSheet.open,true);
+ captureSheet.querySelector('[data-destination=expense]').click();assert.equal(menu.el('txDialog').open,true);assert.equal(menu.el('txType').value,'expense');menu.el('txDialog').close();
+ for(const destination of ['bills','debts','summary','budget','transactions']){guide.querySelector('[data-page-jump="'+destination+'"]').click();assert.equal(menu.el(destination+'Page').classList.contains('hidden'),false);}
+ assert.deepEqual([...guide.querySelectorAll('a')].map(a=>a.getAttribute('href')),['./salary.html','./rent.html','./car.html']);
+ for(const button of guide.querySelectorAll('[data-guide-target]')){
+  const target=menu.el(button.dataset.guideTarget);let scrolled=false;target.closest('.settings-card').scrollIntoView=()=>{scrolled=true};button.click();assert.equal(scrolled,true);
+ }
+ assert.equal(menu.state.writes.length,0);
+ menu.w.document.querySelector('.navbtn[data-page=dashboard]').click();
  assert.deepEqual([...moreSheet.querySelectorAll('h3')].map(h=>h.textContent),['วางแผนเงิน','บันทึกเฉพาะเรื่อง','จัดการข้อมูล']);
  menu.w.document.querySelector('.mobile-app-nav [data-destination=capture]').click();assert.equal(captureSheet.open,true);
  captureSheet.querySelector('[data-destination=income]').click();assert.equal(captureSheet.open,false);assert.equal(menu.el('txDialog').open,true);assert.equal(menu.el('txType').value,'income');
