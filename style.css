@@ -774,3 +774,5 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 @media(max-width:380px){.deep-item{grid-template-columns:minmax(0,1fr)}.deep-item>strong{grid-row:2}.deep-item>small{grid-column:1}}
 
 .bill-month-strip{padding:12px 16px;border:1px solid var(--line);border-radius:16px;background:var(--card);line-height:1.6;color:var(--text);font-size:13px}.bill-month-strip button{min-height:44px;text-align:left;white-space:normal;line-height:1.6}.bill-month-strip small{display:block;color:var(--muted);font-size:12px}.analysis-brief{padding:12px 14px;background:var(--card);border-left:3px solid var(--primary);border-radius:10px;font-size:13px;line-height:1.7;color:var(--text)}
+
+.summary-short-analysis h3{font-size:16px;margin:0 0 8px}.summary-short-analysis .analysis-brief{border:0;padding:0;margin:0 0 8px;background:transparent;line-height:1.8}.summary-short-analysis>small{font-size:12px;display:block}.summary-short-analysis{padding:18px}

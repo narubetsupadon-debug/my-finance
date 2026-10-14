@@ -53,7 +53,13 @@ export function createExpenseAnalysisRenderer({$,money,fmtDate,analyze=analyzeEx
  return function render(input){
   const result=analyze(input),{comparison:c,forecast:f}=result;
   $('analysisPeriod').textContent=input.label;
-  if($('analysisHeadline')){const comparisonText=c.state==='ready'?(c.deltaCents===0?'รายจ่ายเท่าเดิมในช่วงวันที่เท่ากัน':(c.deltaCents>0?'รายจ่ายเพิ่ม ':'รายจ่ายลด ')+money(Math.abs(c.deltaCents)/100)+' เทียบเดือนก่อนในช่วงวันที่เท่ากัน'):'ดูหมวดที่ใช้มากที่สุดด้านล่าง';const warnings=f.items.filter(b=>['over_actual','over_projected'].includes(b.state)).length;$('analysisHeadline').textContent=comparisonText+(warnings?' · มี '+warnings+' งบที่เกินแล้วหรือมีแนวโน้มเกิน':'')+' · เปิดหัวข้อด้านล่างเมื่ออยากดูเพิ่ม';}
+  if($('analysisHeadline')){
+   const top=result.ranking[0];
+   const lead=top?'ใช้มากที่สุดกับ '+top.name+' '+money(top.amountCents/100)+' ('+top.percent.toFixed(1)+'% ของรายจ่ายที่วิเคราะห์)':'ยังไม่มีรายจ่ายที่จ่ายแล้วในช่วงนี้';
+   const comparisonText=c.state==='ready'?(c.deltaCents===0?'ยอดเท่าเดิมเมื่อเทียบช่วงวันที่ตรงกันกับเดือนก่อน':(c.deltaCents>0?'ยอดเพิ่ม ':'ยอดลด ')+money(Math.abs(c.deltaCents)/100)+' เมื่อเทียบช่วงวันที่ตรงกันกับเดือนก่อน'):c.state==='select_month'?'เลือกเดือนเดียวหากต้องการเทียบเดือนก่อน':'ยังมีข้อมูลไม่พอสำหรับเทียบเดือนก่อน';
+   const warnings=f.items.filter(b=>['over_actual','over_projected'].includes(b.state)).length;
+   $('analysisHeadline').textContent=lead+'. '+comparisonText+(warnings?'. มี '+warnings+' งบที่เกินแล้วหรือมีแนวโน้มเกิน':'');
+  }
   const ranking=$('analysisRanking');ranking.replaceChildren();
   if(!result.ranking.length)ranking.append(make('p','analysis-empty','ยังไม่มีรายจ่ายที่จ่ายแล้วในช่วงนี้'));
   result.ranking.slice(0,3).forEach((g,i)=>{const b=button('',()=>openDetails('รายจ่ายหมวด '+g.name,[{label:input.label,rows:g.rows}],'ยอดเงินจ่ายออกจริง ไม่รวมรอดำเนินการ ยกเลิก และวันที่อนาคต'));b.className='analysis-category';const top=make('div','analysis-category-top'),name=make('span','analysis-category-name',(i+1)+'. '+g.name),amount=make('strong','money',money(g.amountCents/100));top.append(name,amount);const track=make('div','analysis-track'),bar=make('div','analysis-bar');bar.style.width=g.percent+'%';track.append(bar);b.append(top,track,make('small','',g.percent.toFixed(1)+'% ของรายจ่าย · '+g.rows.length+' รายการ · ดูรายการ ›'));ranking.append(b);});
