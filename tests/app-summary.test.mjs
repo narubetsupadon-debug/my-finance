@@ -11,48 +11,49 @@ assert.equal(summaryTimelineKeys(config,'2026-10-07',[{transaction_date:'2026-10
 assert.deepEqual(summaryTimelineKeys({mode:'months',keys:['2026-09','2026-10']},'2026-10-07'),['2026-09','2026-10']);
 
 const elements=new Map();
-const $=id=>{if(!elements.has(id))elements.set(id,{textContent:'',innerHTML:'',value:id==='summaryYear'?'2026':id==='summaryMonth'?'10':'',classList:{toggle(){}},setAttribute(){}});return elements.get(id);};
+const $=id=>{if(!elements.has(id))elements.set(id,{textContent:'',innerHTML:'',parentElement:{hidden:false},value:id==='summaryYear'?'2026':id==='summaryMonth'?'10':'',classList:{toggle(){}},setAttribute(){}});return elements.get(id);};
 const charts=[];
-class Chart{constructor(canvas,config){charts.push({canvas,config});}destroy(){}}
+class Chart{constructor(canvas,config){charts.push({canvas,config});this.destroyed=false;}destroy(){this.destroyed=true;}}
 const previousDocument=globalThis.document;
 globalThis.document={body:{classList:{contains:()=>false}},querySelectorAll:()=>[]};
+let transactions=[
+ {transaction_date:'2026-10-01',type:'income',amount:1000,status:'paid'},
+ {transaction_date:'2026-10-02',type:'expense',amount:250,status:'paid'},
+ {transaction_date:'2026-10-03',type:'expense',amount:2000,status:'paid',categories:{name:'ห้องเช่า'}},
+ {transaction_date:'2026-10-02',type:'expense',amount:999,status:'cancelled'},
+ {transaction_date:'2026-09-02',type:'expense',amount:50,status:'paid'}
+];
 try{
- const render=createSummaryRenderer({$,money:String,esc:String,bangkokDay:()=> '2026-10-07',getTransactions:()=>[
-  {transaction_date:'2026-10-01',type:'income',amount:1000,status:'paid'},
-  {transaction_date:'2026-10-02',type:'expense',amount:250,status:'paid'},
-  {transaction_date:'2026-10-03',type:'expense',amount:2000,status:'paid',categories:{name:'ห้องเช่า'}},
-  {transaction_date:'2026-10-02',type:'expense',amount:999,status:'cancelled'}
- ],ChartCtor:Chart});
+ const render=createSummaryRenderer({$,money:String,esc:String,bangkokDay:()=> '2026-10-07',getTransactions:()=>transactions,ChartCtor:Chart});
  render();
- const pie=charts.find(x=>x.config.type==='doughnut').config;
- const pieLabels=()=>pie.options.plugins.legend.labels.generateLabels({data:pie.data,getDataVisibility:()=>true});
- assert.equal(pieLabels()[0].fontColor,'#475569','custom legend must explicitly use light theme text');
+ assert.equal(charts.length,1,'Summary renders just one chart');
+ const pie=charts[0].config;
+ const legend=c=>c.options.plugins.legend.labels.generateLabels({data:c.data,getDataVisibility:()=>true});
+ assert.equal(legend(pie)[0].fontColor,'#475569');
+ assert.equal(legend(pie)[0].text,'ห้องเช่า 88.9%');
+ assert.equal($('sumBalance').textContent,'-1250');
+ assert.equal($('sumRent').textContent,'1000');assert.equal($('sumRentFull').textContent,'2000');
  globalThis.document.documentElement={dataset:{resolvedTheme:'dark'}};
  render();
- const darkPie=charts.at(-1).config;
- assert.equal(darkPie.options.plugins.legend.labels.generateLabels({data:darkPie.data,getDataVisibility:()=>true})[0].fontColor,'#cbd5e1');
- assert.equal(darkPie.options.color,'#cbd5e1');
- const darkTrend=charts[3].config,darkCategories=charts[4].config;
- assert.equal(darkTrend.options.scales.y.ticks.color,'#cbd5e1');
- assert.equal(darkTrend.options.scales.x.title.color,'#cbd5e1');
- assert.equal(darkCategories.options.scales.x.ticks.color,'#cbd5e1');
- for(const [i,name] of darkPie.data.labels.entries())assert.equal(darkPie.data.datasets[0].backgroundColor[i],darkCategories.data.datasets.find(d=>d.label===name).backgroundColor,'same category must have same color across charts');
- globalThis.document.documentElement.dataset.resolvedTheme='light';
- charts.splice(3);
- const trend=charts[0].config;
- assert.equal(trend.data.labels.length,7);
- assert.equal(trend.data.datasets[2].label,'สุทธิรายวัน');
- assert.deepEqual(trend.data.datasets[2].data,[1000,-250,-2000,0,0,0,0]);
- assert.equal($('sumBalance').textContent,'-1250');
- assert.equal($('sumRent').textContent,'1000');
- assert.equal($('sumRentFull').textContent,'2000');
- assert.equal(trend.data.datasets[2].pointRadius,0);
- assert.equal(trend.options.interaction.intersect,false);
- render.setRange('6m');
- assert.equal(charts[3].config.data.labels.length,6);
- assert.equal(charts[3].config.data.datasets[2].label,'สุทธิรายเดือน');
- assert.equal($('sumRent').textContent,'1000');assert.equal($('sumExpense').textContent,'2250');
+ assert.equal(legend(charts.at(-1).config)[0].fontColor,'#cbd5e1');
+ render.setRange('6m');assert.equal($('sumExpense').textContent,'2300');
+ render.setRange('custom');$('summaryMonth').value='09';render();assert.equal($('sumExpense').textContent,'50');
+ $('summaryMonth').value='all';render();assert.equal($('sumExpense').textContent,'2300');
+ render.setRange('month');
+ transactions=Array.from({length:9},(_,i)=>({transaction_date:'2026-10-02',type:'expense',amount:(i+1)*10,status:'paid',categories:{name:'หมวด '+i}}));
+ render();
+ const grouped=charts.at(-1).config;
+ assert.equal(grouped.data.labels.length,6,'Many categories collapse into five leaders plus remainder');
+ assert.equal(grouped.data.labels.at(-1),'หมวดที่เหลือ');
+ assert.equal(grouped.data.datasets[0].data.reduce((a,b)=>a+b,0),450,'Remainder must preserve the entire expense total');
+ const count=charts.length;transactions=[];render();
+ assert.equal(charts.length,count,'Empty range does not create a blank chart');
+ assert.equal($('summaryPieEmpty').hidden,false);assert.equal($('sumExpense').textContent,'0');
+ assert.equal($('categoryPieChart').parentElement.hidden,true);
+ transactions=[{transaction_date:'2026-10-31',type:'expense',amount:100,status:'pending'}];render();
+ assert.equal($('summaryPieEmpty').hidden,true);assert.equal($('categoryPieChart').parentElement.hidden,false);
+ assert.equal($('sumExpense').textContent,'100','Pending/future scope stays unchanged');
 }finally{globalThis.document=previousDocument;}
-console.log('PASS summary: current and historical dates, recorded future entries, cancelled exclusion, daily net and monthly range');
+console.log('PASS compact summary: totals, ranges, one percentage chart, category remainder, empty state, themes and unchanged pending/future scope');
 
 assert.deepEqual(rentShareTotals([{id:"rent",amount:2000,status:"paid",source:"rent"}],[{transaction_id:"rent",my_amount:800}]),{shareCents:80000,fullCents:200000});

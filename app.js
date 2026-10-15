@@ -1,13 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261014-perf46';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261014-perf46';
-import {createExpenseAnalysisRenderer} from './expense-analysis.js?v=20261014-perf46';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261014-perf46';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261014-perf46';
-import {createSummaryRenderer} from './app-summary.js?v=20261014-perf46';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261014-perf46';
-import {createTransactionRenderer} from './app-transactions.js?v=20261014-perf46';
-import {createPlanningRenderer} from './app-planning.js?v=20261014-perf46';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261014-perf46';
+import {createCapacityMonitor} from './app-storage.js?v=20261015-summary47';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-summary47';
+import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-summary47';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-summary47';
+import {createSummaryRenderer} from './app-summary.js?v=20261015-summary47';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261015-summary47';
+import {createTransactionRenderer} from './app-transactions.js?v=20261015-summary47';
+import {createPlanningRenderer} from './app-planning.js?v=20261015-summary47';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-summary47';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -374,8 +373,6 @@ const renderSummary=createSummaryRenderer({
  bangkokDay,
  getTransactions:()=>transactions,
  getRentRecords:()=>rentRecords,
- getBudgets:()=>budgets,
- renderAnalysis:createExpenseAnalysisRenderer({$,money,fmtDate}),
  ChartCtor:typeof Chart==='undefined'?null:Chart
 });
 function renderCardPaymentSuggestions(){

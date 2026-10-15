@@ -1,5 +1,5 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261014-perf46';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261014-perf46';
+import {sumTransactionAmounts} from './finance-core.js?v=20261015-summary47';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261015-summary47';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
@@ -23,9 +23,9 @@ export function rentShareTotals(rows,records=[]){
  },{shareCents:0,fullCents:0});
 }
 // Summary page renderer. Keeps summary grouping and chart state out of app.js.
-export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,getRentRecords=()=>[],getBudgets=()=>[],renderAnalysis=null,ChartCtor=null}){
+export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,getRentRecords=()=>[],ChartCtor=null}){
  const openTotals=createTotalDetails({$,money,fmtDate:date=>date});
- let trendChart=null,categoryChart2=null,pieChart=null;
+ let pieChart=null;
 
 function excelGroup(x){
  if(x.source==='rent')return 'ห้องเช่า'
@@ -86,9 +86,6 @@ function renderSummary(){
  const inc=sumTransactionAmounts(rows,'income'),exp=sumTransactionAmounts(rows,'expense')
  $('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumBalance').textContent=money(inc-exp)
  $('summaryPeriodText').textContent='กำลังดู '+config.label
- $('summaryTrendTitle').textContent='กระแสเงินสด'
- $('summaryCategoryTitle').textContent='รายจ่ายแยกหมวดหมู่'
- $('summaryTrendBadge').textContent=config.badge;$('summaryCategoryBadge').textContent=config.badge
  $('sumIncomeHint').textContent=config.label;$('sumExpenseHint').textContent=config.label
  $('sumBalanceHint').textContent=inc-exp>=0?'ยังเหลือ '+(inc?((inc-exp)/inc*100).toFixed(0):0)+'% ของรายรับ':'รายจ่ายมากกว่ารายรับ'
  document.querySelectorAll('[data-summary-range]').forEach(b=>{const active=b.dataset.summaryRange===selectedRange;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))})
@@ -114,43 +111,18 @@ function renderSummary(){
  const carRows=expenseRows.filter(x=>['ค่างวดรถ','น้ำมันรถ','ซ่อม/ประกัน/ภาษีรถ','ค่าใช้รถอื่น ๆ','รถยนต์อื่น ๆ'].includes(excelGroup(x)));
  show('sumCar','ค่าใช้จ่ายรถ',carRows);
  show('sumRent','รายการอ้างอิงค่าห้องเช่า',expenseRows.filter(x=>excelGroup(x)==='ห้องเช่า'),criteria+' · การ์ดแสดงส่วนมิว '+money(rent.shareCents/100)+' / บิลรวมอ้างอิง '+money(rent.fullCents/100)+' · รายการด้านล่างแสดงยอดที่บันทึก ส่วนมิวใช้ยอดที่ระบุในประวัติค่าห้อง หรือครึ่งบิล; ข้อมูลนำเข้าเดิมเป็นส่วนมิวอยู่แล้ว');
- if(renderAnalysis)renderAnalysis({transactions,budgets:getBudgets(),config,today:bangkokDay(),label:config.label,groupBy:excelGroup,rentTotals:rentRows=>rentShareTotals(rentRows,getRentRecords())});
-
- const timelineKeys=summaryTimelineKeys(config,bangkokDay(),rows)
- const timelineLabels=config.mode==='days'
-  ?timelineKeys.map(k=>String(Number(k.slice(8,10))))
-  :timelineKeys.map(k=>new Date(Number(k.slice(0,4)),Number(k.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'short',year:config.keys.some(x=>x.slice(0,4)!==config.keys[0].slice(0,4))?'2-digit':undefined}))
- const timeline=timelineKeys.map(k=>{const r=rows.filter(x=>config.mode==='days'?String(x.transaction_date).slice(0,10)===k:String(x.transaction_date).slice(0,7)===k);const income=r.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),expense=r.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0);return{income,expense,balance:income-expense,count:r.length}})
  const chartTextColor=document.documentElement?.dataset.resolvedTheme==='dark'?'#cbd5e1':'#475569';
- const moneyFmt=v=>document.body?.classList.contains('privacy-mode')?'••••':new Intl.NumberFormat('th-TH',{maximumFractionDigits:0}).format(v)
- if(trendChart)trendChart.destroy()
- if(ChartCtor)trendChart=new ChartCtor($('monthlyTrendChart'),{data:{labels:timelineLabels,datasets:[
-  {type:'bar',label:'รายรับ',data:timeline.map(x=>x.income),backgroundColor:'rgba(16,185,129,.72)',borderRadius:4,maxBarThickness:16,pointStyle:'rect'},
-  {type:'bar',label:'รายจ่าย',data:timeline.map(x=>x.expense),backgroundColor:'rgba(239,68,68,.70)',borderRadius:4,maxBarThickness:16,pointStyle:'rect'},
-  {type:'line',label:config.mode==='days'?'สุทธิรายวัน':'สุทธิรายเดือน',data:timeline.map(x=>x.balance),borderColor:'#4f46e5',backgroundColor:'#4f46e5',borderWidth:2,tension:0,pointRadius:0,pointHoverRadius:4,pointHitRadius:12,pointStyle:'line'}
- ]},options:{color:chartTextColor,responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:chartTextColor,usePointStyle:true,boxWidth:10,boxHeight:10,padding:14}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{y:{ticks:{color:chartTextColor,callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}},x:{title:{color:chartTextColor,display:config.mode==='days',text:config.mode==='days'?'วันที่':''},ticks:{color:chartTextColor,autoSkip:true,maxTicksLimit:6,maxRotation:0,minRotation:0},grid:{display:false}}}}})
-
- const priority=['ห้องเช่า','ค่างวดรถ','น้ำมันรถ','ซ่อม/ประกัน/ภาษีรถ','ค่าใช้รถอื่น ๆ','ชำระบัตร/สินเชื่อ','รายจ่ายประจำ']
- const other=[...new Set(rows.filter(x=>x.type==='expense').map(excelGroup).filter(x=>!priority.includes(x)))].sort()
- const cats=[...priority,...other].filter(g=>rows.some(x=>x.type==='expense'&&excelGroup(x)===g))
- const timelineByCat=cats.map(g=>timelineKeys.map(k=>rows.filter(x=>x.type==='expense'&&(config.mode==='days'?String(x.transaction_date).slice(0,10)===k:String(x.transaction_date).slice(0,7)===k)&&excelGroup(x)===g).reduce((s,x)=>s+Number(x.amount),0)))
- if(categoryChart2)categoryChart2.destroy()
- const palette=['#6366f1','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#10b981','#ec4899','#64748b','#84cc16','#f97316','#14b8a6','#a855f7']
- const categoryColor=new Map(cats.map((name,i)=>[name,palette[i%palette.length]]));
- if(ChartCtor)categoryChart2=new ChartCtor($('monthlyCategoryChart'),{type:'bar',data:{labels:timelineLabels,datasets:cats.map((g,idx)=>({label:g,data:timelineByCat[idx],backgroundColor:categoryColor.get(g),borderRadius:4}))},options:{color:chartTextColor,responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:chartTextColor}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{x:{stacked:true,ticks:{color:chartTextColor},grid:{display:false}},y:{stacked:true,ticks:{color:chartTextColor,callback:v=>'฿'+moneyFmt(v)},grid:{color:'rgba(148,163,184,.15)'}}}}})
-
- const pieCats=Object.entries(grouped).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1])
+ const palette=['#6366f1','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#10b981'];
+ const allCategories=Object.entries(grouped).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+ const pieCats=allCategories.length>6?[...allCategories.slice(0,5),['หมวดที่เหลือ',allCategories.slice(5).reduce((sum,[,value])=>sum+value,0)]]:allCategories;
  const expenseTotal=pieCats.reduce((sum,[,value])=>sum+Number(value),0)
  const expensePercent=value=>expenseTotal>0?(Number(value)/expenseTotal*100):0
+ $('summaryPieEmpty').hidden=pieCats.length>0;
+ $('categoryPieChart').parentElement.hidden=pieCats.length===0;
  if(pieChart)pieChart.destroy()
- if(ChartCtor)pieChart=new ChartCtor($('categoryPieChart'),{type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map(([name])=>categoryColor.get(name)),borderWidth:0}]},options:{color:chartTextColor,responsive:true,maintainAspectRatio:false,cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:chartTextColor,boxWidth:12,usePointStyle:true,generateLabels:chart=>{const ds=chart.data.datasets[0]||{data:[]};return chart.data.labels.map((label,i)=>({text:label+' '+expensePercent(ds.data[i]).toFixed(1)+'%',fontColor:chartTextColor,fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,hidden:!chart.getDataVisibility(i),index:i}))}}},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+expensePercent(c.raw).toFixed(1)+'%)'}}}}})
+ if(ChartCtor&&pieCats.length)pieChart=new ChartCtor($('categoryPieChart'),{type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},options:{color:chartTextColor,responsive:true,maintainAspectRatio:false,cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:chartTextColor,boxWidth:12,usePointStyle:true,generateLabels:chart=>{const ds=chart.data.datasets[0]||{data:[]};return chart.data.labels.map((label,i)=>({text:label+' '+expensePercent(ds.data[i]).toFixed(1)+'%',fontColor:chartTextColor,fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,hidden:!chart.getDataVisibility(i),index:i}))}}},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+expensePercent(c.raw).toFixed(1)+'%)'}}}}})
 
- const tableKeys=config.mode==='days'?[config.monthKey]:config.keys
- const monthly=tableKeys.map(k=>{const r=valid.filter(x=>x.status!=='cancelled'&&String(x.transaction_date).slice(0,7)===k);const income=r.filter(x=>x.type==='income').reduce((s,x)=>s+Number(x.amount),0),expense=r.filter(x=>x.type==='expense').reduce((s,x)=>s+Number(x.amount),0);return[k,{income,expense,balance:income-expense,count:r.length}]})
- $('summaryTable').innerHTML=monthly.length?'<div class="table-wrap"><table class="table"><thead><tr><th>เดือน</th><th>รายรับ</th><th>รายจ่าย</th><th>คงเหลือ</th><th>รายการ</th></tr></thead><tbody>'+monthly.map(([k,v])=>{const label=new Date(Number(k.slice(0,4)),Number(k.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'});return '<tr><td>'+label+'</td><td class="income">'+money(v.income)+'</td><td class="expense">'+money(v.expense)+'</td><td class="balance">'+money(v.balance)+'</td><td>'+v.count+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">ยังไม่มีข้อมูล</div>'
 
- const headers=tableKeys.map(k=>new Date(Number(k.slice(0,4)),Number(k.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'short',year:'2-digit'}))
- $('categoryMonthTable').innerHTML=cats.length?'<div class="table-wrap"><table class="table"><thead><tr><th>หมวด</th>'+headers.map(h=>'<th>'+h+'</th>').join('')+'<th>รวม</th></tr></thead><tbody>'+cats.map(g=>{const vals=tableKeys.map(k=>valid.filter(x=>x.type==='expense'&&x.status!=='cancelled'&&String(x.transaction_date).slice(0,7)===k&&excelGroup(x)===g).reduce((s,x)=>s+Number(x.amount),0));return '<tr><td>'+esc(g)+'</td>'+vals.map(v=>'<td>'+money(v)+'</td>').join('')+'<td><b>'+money(vals.reduce((a,b)=>a+b,0))+'</b></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">ยังไม่มีข้อมูลรายจ่าย</div>'
 }
 renderSummary.setRange=range=>{selectedRange=range;renderSummary()}
 

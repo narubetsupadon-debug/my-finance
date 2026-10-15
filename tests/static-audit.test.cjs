@@ -112,9 +112,9 @@ assert.match(source['app-planning.js'],/paymentLabel/,'bill list must show the c
 assert.match(source['app.js'],/bill_payment:.*หน้าบิลประจำ/s,'bill-generated transactions must be protected from generic editing/deletion');
 
 assert.match(source['index.html'],/id="summaryPeriodText"/,'summary period label missing');
-assert.match(source['index.html'],/id="summaryTrendTitle"/,'summary trend title missing');
-assert.match(source['index.html'],/id="summaryCategoryTitle"/,'summary category title missing');
-assert.match(source['app-summary.js'],/timelineKeys/,'summary charts must follow the selected period');
+assert.match(source['index.html'],/id="categoryPieChart"/,'summary share chart missing');
+assert.doesNotMatch(source['index.html'],/id="(?:summaryMore|analysisHeadline|monthlyTrendChart|monthlyCategoryChart|summaryTable|categoryMonthTable)"/,'removed analysis must not remain in the page');
+assert.doesNotMatch(source['app.js'],/createExpenseAnalysisRenderer/,'retired analysis must not load or render');
 assert.match(source['app-summary.js'],/badge:'รายวัน'/,'single-month Summary must use daily detail');
 assert.match(source['app-summary.js'],/badge:'รายเดือน'/,'multi-month Summary must use monthly detail');
 

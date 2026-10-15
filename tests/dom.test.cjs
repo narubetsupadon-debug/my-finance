@@ -82,11 +82,8 @@ async function page(html,js,data,expose,storage={}){
  assert.ok(p.el('settingsLogout'));assert.equal(p.el('authSplash').classList.contains('hidden'),true);assert.equal(p.el('authScreen').classList.contains('hidden'),true);assert.equal(p.el('app').classList.contains('hidden'),false);assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.ok(p.el('pushDeviceSetting'));assert.match(p.el('syncStatusText').textContent,/ซิงก์แล้ว/);
  assert.equal(p.el('txList').querySelector('img'),null);
  assert.equal(p.el('recentList').querySelectorAll('.transaction-row').length,5);
- assert.equal(p.el('analysisRanking').querySelectorAll('.analysis-category').length,1);
- assert.equal(p.el('analysisRanking').querySelector('img'),null);
- assert.match(p.el('analysisComparison').textContent,/ยังเปรียบเทียบไม่ได้/);
- assert.match(p.el('analysisForecast').textContent,/ยังไม่มีงบ/);
- p.el('analysisRanking').querySelector('button').click();assert.equal(p.el('insightDetailDialog').open,true);assert.equal(p.el('insightDetailBody').querySelectorAll('.insight-detail-row').length,1200);assert.equal(p.el('insightDetailBody').querySelector('img'),null);p.el('insightDetailDialog').close();
+ assert.equal(p.el('summaryPage').querySelectorAll('canvas').length,1);
+ assert.equal(p.el('summaryMore'),null);
  assert.match(p.el('txList').querySelector('.status-cancelled').textContent,/ยกเลิก/);
  assert.equal(p.el('txFilters').open,false,'secondary filters start collapsed');
  assert.equal(p.el('txFilterMonth').tagName,'SELECT','month selector must not rely on mobile native month inputs');
@@ -99,9 +96,6 @@ async function page(html,js,data,expose,storage={}){
  p.el('txFilterMonth').value=day.slice(0,7);p.el('txFilterMonth').onchange();assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.equal(p.el('txFilterMonth').value,day.slice(0,7));p.el('txResetFilters').click();
  p.el('viewToday').click();assert.equal(p.el('insightDetailDialog').open,true);p.el('insightDetailDialog').close();
  for(const id of ['incomeTotal','expenseTotal','balanceTotal','sumIncome','sumExpense','sumBalance','sumRecurring','sumRent','budgetCard']){p.el(id).click();assert.equal(p.el('insightDetailDialog').open,true,id+' opens contributing records');assert.match(p.el('insightDetailNote').textContent,/รอดำเนินการ/);p.el('insightDetailDialog').close();}
- assert.match(p.el('analysisDeep').textContent,/จ่ายบ่อย/);assert.match(p.el('analysisDeep').textContent,/ไม่มีการเปลี่ยนข้อมูล/);
- const scenarioButtons=p.el('analysisDeep').querySelectorAll('.deep-savings-controls button');assert.equal(scenarioButtons[1].getAttribute('aria-pressed'),'true');const writesBeforeScenario=p.state.writes.length;scenarioButtons[2].click();assert.equal(p.el('analysisDeep').querySelectorAll('.deep-savings-controls button')[2].getAttribute('aria-pressed'),'true');assert.equal(p.state.writes.length,writesBeforeScenario,'savings simulation must never write transactions');
- p.el('analysisDeep').querySelector('.deep-item').click();assert.equal(p.el('insightDetailDialog').open,true);assert.match(p.el('insightDetailNote').textContent,/ไม่ได้หมายความว่าผิดปกติ/);p.el('insightDetailDialog').close();
  p.el('nextBillCard').click();assert.equal(p.el('billsPage').classList.contains('hidden'),false);
   // accent toast must not appear on ordinary navigation clicks
   p.el('appToast').classList.add('hidden');
@@ -141,11 +135,11 @@ async function page(html,js,data,expose,storage={}){
  assert.notEqual(p.el('todayLabel').textContent,oldLabel);
  assert.equal(p.el('todayCount').textContent,'0 รายการ');
  // Summary range shortcuts must drive the whole dashboard.
- assert.match(p.el('summaryPeriodText').textContent,/กำลังดู/);assert.equal(p.el('summaryTrendBadge').textContent,'รายวัน');
- p.w.document.querySelector('[data-summary-range="6m"]').click();assert.equal(p.el('summaryTrendBadge').textContent,'รายเดือน');assert.match(p.el('summaryPeriodText').textContent,/6 เดือนล่าสุด/);
+ assert.match(p.el('summaryPeriodText').textContent,/กำลังดู/);assert.equal(p.el('summaryPage').querySelectorAll('canvas').length,1);
+ p.w.document.querySelector('[data-summary-range="6m"]').click();assert.equal(p.el('summaryPage').querySelectorAll('canvas').length,1);assert.match(p.el('summaryPeriodText').textContent,/6 เดือนล่าสุด/);
  p.w.document.querySelector('[data-summary-range="custom"]').click();assert.equal(p.el('summaryCustomFilters').classList.contains('hidden'),false);
- p.el('summaryYear').value=day.slice(0,4);p.el('summaryMonth').value=day.slice(5,7);p.el('summaryMonth').onchange();assert.equal(p.el('summaryTrendBadge').textContent,'รายวัน');
- p.el('summaryMonth').value='all';p.el('summaryMonth').onchange();assert.equal(p.el('summaryTrendBadge').textContent,'รายเดือน');
+ p.el('summaryYear').value=day.slice(0,4);p.el('summaryMonth').value=day.slice(5,7);p.el('summaryMonth').onchange();assert.equal(p.el('summaryPage').querySelectorAll('canvas').length,1);
+ p.el('summaryMonth').value='all';p.el('summaryMonth').onchange();assert.equal(p.el('summaryPage').querySelectorAll('canvas').length,1);
  // New bills default to utilities so Summary classifies them as recurring expenses.
  p.w.openEntity('bill');assert.equal(p.el('entityFields').querySelector('[name=category_id]').value,'utilities');p.el('entityDialog').close();
  p.close();
@@ -165,7 +159,7 @@ async function page(html,js,data,expose,storage={}){
  const paidTx={id:'paidbill',user_id:'user',type:'expense',status:'paid',source:'bill_payment:bill1',transaction_date:day,description:'ค่าเน็ต',amount:599,category_id:'utilities',account_id:'acc',categories:categories[2],accounts:accounts[0]};
  const paidBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[paidTx],bills:[bill]},'loadAll');
  assert.match(paidBillsPage.el('billList').textContent,/จ่ายแล้วเดือนนี้/);assert.equal(paidBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);paidBillsPage.close();
- const pendingBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[{...paidTx,status:'pending'}],bills:[bill]},'loadAll');assert.match(pendingBillsPage.el('billList').textContent,/รอจ่าย/);assert.equal(pendingBillsPage.el('billList').querySelector('[data-pay-bill]'),null);assert.match(pendingBillsPage.el('homeBillStatus').textContent,/รอจ่าย 1/);assert.equal(pendingBillsPage.w.document.querySelector('#analysisSplitSection').open,false);assert.equal(pendingBillsPage.el('analysisDeep').closest('details').open,false);pendingBillsPage.el('homeBillStatus').click();assert.equal(pendingBillsPage.el('billsPage').classList.contains('hidden'),false);pendingBillsPage.close();
+ const pendingBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[{...paidTx,status:'pending'}],bills:[bill]},'loadAll');assert.match(pendingBillsPage.el('billList').textContent,/รอจ่าย/);assert.equal(pendingBillsPage.el('billList').querySelector('[data-pay-bill]'),null);assert.match(pendingBillsPage.el('homeBillStatus').textContent,/รอจ่าย 1/);assert.equal(pendingBillsPage.el('summaryMore'),null);pendingBillsPage.el('homeBillStatus').click();assert.equal(pendingBillsPage.el('billsPage').classList.contains('hidden'),false);pendingBillsPage.close();
  const s=await page('salary.html','salary.js',{categories,accounts,transactions:[]},'reset');
  assert.equal(s.el('salarySavedLink').hidden,true);assert.equal(s.el('salaryOtherDetails').open,false);assert.equal(s.el('salaryDeductionDetails').open,false);
  assert.equal(s.el('bonus').closest('details').id,'salaryOtherDetails');assert.equal(s.el('allowance').closest('details').id,'salaryOtherDetails');assert.notEqual(s.el('bonus'),s.el('allowance'));

@@ -9,21 +9,21 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
-<link rel="stylesheet" href="./style.css?v=20261014-perf46">
-<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261014-perf46" media="(prefers-color-scheme: dark)">
-<script src="./theme.js?v=20261014-perf46"></script>
+<link rel="stylesheet" href="./style.css?v=20261015-summary47">
+<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261015-summary47" media="(prefers-color-scheme: dark)">
+<script src="./theme.js?v=20261015-summary47"></script>
 <style>
 .insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 #insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261014-perf46">
+</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261015-summary47">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./ui-polish.css?v=20261014-perf46">
+<link rel="stylesheet" href="./ui-polish.css?v=20261015-summary47">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
   <div class="auth-splash-card">
-    <img src="./app-icon.svg?v=20261014-perf46" width="72" height="72" alt="">
+    <img src="./app-icon.svg?v=20261015-summary47" width="72" height="72" alt="">
     <h1>My Finance</h1>
     <p>กำลังเปิดกระเป๋าของมิว…</p>
     <span class="auth-splash-spinner" aria-hidden="true"></span>
@@ -32,7 +32,7 @@
 
 <div id="authScreen" class="auth-screen hidden">
   <div class="auth-card">
-    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261014-perf46" width="56" height="56" alt="">My Finance</h1>
+    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261015-summary47" width="56" height="56" alt="">My Finance</h1>
     <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และยอดคงเหลือบัตรในที่เดียว</p>
     <div class="auth-tabs">
       <button id="tabLogin" class="active">เข้าสู่ระบบ</button>
@@ -53,7 +53,7 @@
   </div>
   <header class="topbar">
     <div class="topin">
-      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261014-perf46" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
+      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261015-summary47" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
       <div class="userbox">
         <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings">⚙️ ตั้งค่า</button>
         <span id="userEmail" class="muted"></span>
@@ -213,7 +213,7 @@
           <div>
             <div class="summary-eyebrow">FINANCIAL REVIEW</div>
             <h2>สรุปการเงิน</h2>
-            <div id="summaryPeriodText" class="muted">ดูภาพรวมและแนวโน้มตามช่วงเวลาที่เลือก</div>
+            <div id="summaryPeriodText" class="muted">รายรับ รายจ่าย และเงินเหลือตามช่วงเวลาที่เลือก</div>
           </div>
           <div class="summary-period-picker" aria-label="เลือกช่วงเวลาสรุป">
             <div class="summary-range-chips" id="summaryRangeChips">
@@ -246,51 +246,11 @@
 
         </div></details>
 
-        <div class="card section summary-short-analysis"><h3>นิลินสรุปให้</h3><p id="analysisHeadline" class="analysis-brief money" aria-live="polite"></p><small class="muted">วิเคราะห์เฉพาะยอดจ่ายแล้ว ไม่รวมยอดชำระบัตร/สินเชื่อ</small></div>
-          <div class="card summary-chart-card summary-share-card">
-            <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดไหนกินสัดส่วนมากที่สุด</p></div><span class="summary-card-badge">100%</span></div>
-            <div class="chart-box donut summary-donut"><canvas id="categoryPieChart"></canvas></div>
-          </div>
-        <details id="summaryMore" class="card section summary-details"><summary><span><b>วิเคราะห์เพิ่มเติม</b><small>ดูรายละเอียดเมื่ออยากเจาะลึก</small></span><span aria-hidden="true">⌄</span></summary><div class="summary-detail-body">
-        <section class="expense-analysis section" aria-labelledby="analysisTitle">
-          <div class="analysis-heading"><div><div class="summary-eyebrow">รู้ก่อน วางแผนได้</div><h3 id="analysisTitle">นิลินวิเคราะห์รายจ่าย</h3></div><span id="analysisPeriod" class="analysis-period"></span></div>
-          <p class="analysis-scope">จากรายการที่จ่ายแล้วตามช่วงที่เลือก · ไม่รวมรอดำเนินการ ยกเลิก วันที่อนาคต และยอดชำระบัตร/สินเชื่อ</p>
-          <div class="analysis-grid">
-            <article class="card analysis-card"><div class="analysis-card-heading"><span aria-hidden="true">↗</span><h4>เงินไปหมวดไหนมากที่สุด?</h4></div><div id="analysisRanking"></div><p id="analysisRentNote" class="analysis-rent-note" hidden></p></article>
-            <details id="analysisSplitSection" class="card summary-details analysis-more"><summary><span><b>รายจ่ายส่วนไหนลองปรับได้?</b><small>บิลและค่างวด · รายจ่ายอื่น · ชำระสินเชื่อ</small></span><span aria-hidden="true">⌄</span></summary><div id="analysisSplit" class="summary-detail-body"></div></details>
-            <details class="card summary-details analysis-more"><summary><span><b>เปรียบเทียบและวางแผนงบ</b><small>ดูเดือนก่อนและประมาณการสิ้นเดือน</small></span><span aria-hidden="true">⌄</span></summary><div class="summary-detail-body">
-            <article class="card analysis-card"><div class="analysis-card-heading"><span aria-hidden="true">⇄</span><h4>ต่างจากเดือนก่อนเท่าไร?</h4></div><div id="analysisComparison"></div></article>
-            <article class="card analysis-card analysis-forecast-card"><div class="analysis-card-heading"><span aria-hidden="true">◎</span><h4>งบจะพอถึงสิ้นเดือนไหม?</h4></div><div id="analysisForecast"></div><details class="analysis-method"><summary>อ่านการคาดการณ์อย่างไร?</summary><p>ประมาณจากยอดที่จ่ายในหมวดของแต่ละงบ ÷ จำนวนวันที่ผ่านไปในเดือน × จำนวนวันทั้งเดือน ไม่ใช่ยอดแน่นอน และยังไม่รวมรายจ่ายที่ยังไม่ได้บันทึกหรือรายการรอจ่าย ต้องผ่านอย่างน้อย 7 วันและมีรายจ่ายในงบอย่างน้อย 3 วันจึงคาดการณ์ได้ งบที่ใช้หมวดร่วมกันแสดงแยก ไม่บวกรวมซ้ำ</p></details></article>
-            </div></details>
-          </div>
-          <details class="card section summary-details analysis-more"><summary><span><b>เจาะลึกพฤติกรรมและลองวางแผน</b><small>รายจ่ายก้อนใหญ่ · เทียบรายหมวด · จำลองลดรายจ่าย</small></span><span aria-hidden="true">⌄</span></summary><div id="analysisDeep" class="summary-detail-body"></div></details>
-          <p class="analysis-footnote">ผลวิเคราะห์อิงข้อมูลที่บันทึก ไม่ยืนยันว่ารายการครบทุกวัน ยอดอาจต่างจากการ์ดสรุปที่รวมรายการรอดำเนินการหรือวันที่อนาคต</p>
-        </section>
-
-        <div class="summary-main-grid section">
-          <div class="card summary-chart-card">
-            <div class="summary-card-head"><div><h3 id="summaryTrendTitle">กระแสเงินสด</h3><p>รายรับ รายจ่าย และยอดสุทธิของแต่ละวันหรือเดือน</p></div><span class="summary-card-badge" id="summaryTrendBadge">รายวัน</span></div>
-            <div class="chart-box summary-trend-chart"><canvas id="monthlyTrendChart"></canvas></div>
-          </div>
+        <div class="card section summary-chart-card summary-share-card">
+          <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดหลักและสัดส่วนของยอดรายจ่ายที่เลือก</p></div><span class="summary-card-badge">100%</span></div>
+          <div class="chart-box donut summary-donut"><canvas id="categoryPieChart" aria-label="กราฟสัดส่วนรายจ่ายตามช่วงเวลาที่เลือก" role="img"></canvas></div>
+          <p id="summaryPieEmpty" class="empty" hidden>ยังไม่มีรายจ่ายในช่วงนี้</p>
         </div>
-        <details class="card section summary-details summary-extra-charts"><summary><span><b>ดูกราฟรายจ่ายเพิ่มเติม</b><small>สัดส่วนและแนวโน้มแยกหมวด</small></span><span aria-hidden="true">⌄</span></summary><div class="summary-detail-body">
-
-
-        <div class="card section summary-chart-card">
-          <div class="summary-card-head"><div><h3 id="summaryCategoryTitle">รายจ่ายแยกหมวดหมู่</h3><p>เปรียบเทียบพฤติกรรมการใช้เงินตามช่วงเวลา</p></div><span class="summary-card-badge" id="summaryCategoryBadge">รายวัน</span></div>
-          <div class="chart-box tall"><canvas id="monthlyCategoryChart"></canvas></div>
-        </div>
-
-        </div></details>
-
-        <details class="card section summary-details">
-          <summary><span><b>รายละเอียดตัวเลข</b><small>ตารางสรุปและรายจ่ายแยกหมวด</small></span><span aria-hidden="true">⌄</span></summary>
-          <div class="summary-detail-body">
-            <div><h3>สรุปตามช่วงเวลา</h3><div id="summaryTable"></div></div>
-            <div class="section"><h3>รายจ่ายแยกหมวด</h3><div id="categoryMonthTable"></div></div>
-          </div>
-        </details>
-        </div></details>
       </section>
 
       <section id="settingsPage" class="page hidden">
@@ -311,7 +271,7 @@
             <details><summary>3. ค่าห้องเช่าและส่วนที่แชร์กัน</summary><ol><li>ไปที่ เพิ่มเติม → ค่าห้องเช่า เลือกเดือนของบิล เช่น กันยายน</li><li>กรอกยอดเต็มและส่วนมิว เลือกสถานะจ่ายแล้วหรือยังไม่จ่าย</li><li>ถ้าจ่ายแล้ว ใส่วันจ่ายเงินจริง เช่น 5 ตุลาคม แล้วบันทึก</li></ol><p>เดือนบิลกับวันจ่ายเป็นคนละค่า หน้าสรุปนับตามวันจ่าย โดยแสดงส่วนมิวและยอดเต็มอ้างอิงแยกกัน หากมีรายจ่ายเดิมอยู่แล้ว ให้เลือกเชื่อมรายการเดิมที่ข้อมูลตรงกัน</p><div class="usage-guide-actions"><a class="btn soft" href="./rent.html">เปิดหน้าค่าห้องเช่า →</a></div></details>
             <details><summary>4. ค่างวดและค่าใช้รถ</summary><p>ไปที่ เพิ่มเติม → รถของฉัน ค่างวดให้แก้ที่งวดนั้นและระบุส่วนมิว ส่วนค่าน้ำมัน ซ่อม ประกัน หรือค่าใช้รถอื่น ให้เพิ่มในค่าใช้จ่ายรถ ระบบเชื่อมรายจ่ายให้ แก้รายการที่เชื่อมผ่านหน้ารถเพื่อให้ยอดตรงกัน</p><div class="usage-guide-actions"><a class="btn soft" href="./car.html">เปิดหน้ารถของฉัน →</a></div></details>
             <details><summary>5. บิลประจำ บัตร และสินเชื่อ</summary><ol><li>ไปที่ เพิ่มเติม → บิลประจำ ตั้งยอด วันครบกำหนด และบัญชีหรือบัตรที่ใช้จ่าย</li><li>เมื่อจ่ายจริง กดบันทึกจ่ายที่บิล ระบบสร้างรายจ่าย และบิลที่ผูกบัตรจะเพิ่มยอดใช้บัตรตามรายการ</li><li>ดูหรือแก้ยอดบัตรที่ เพิ่มเติม → บัตรและสินเชื่อ</li></ol><p>การตั้งบิลยังไม่ใช่การจ่ายจริง ยอดบิลต่อเดือนกับยอดจ่ายที่บันทึกในช่วงที่เลือกจึงอาจต่างกัน ไม่ต้องเพิ่มรายจ่ายทั่วไปซ้ำหลังบันทึกผ่านบิล</p><div class="usage-guide-actions"><button type="button" class="btn soft" data-page-jump="bills">เปิดบิลประจำ →</button><button type="button" class="btn soft" data-page-jump="debts">เปิดบัตรและสินเชื่อ →</button></div></details>
-            <details><summary>6. ดูสรุป งบ และแก้ข้อมูล</summary><p>หน้าสรุปเลือกเดือนนี้ 3 เดือน 6 เดือน ปีนี้ หรือกำหนดเองได้ กดขยายเพื่อดูกราฟและตารางเพิ่มเติม การ์ดสรุปรวมรายการที่ไม่ยกเลิก ส่วนผลวิเคราะห์ใช้เฉพาะที่จ่ายแล้วและไม่ใช่วันที่อนาคต จึงอาจมียอดต่างกัน</p><p>ตั้งงบที่ เพิ่มเติม → งบประมาณ แล้วเลือกหมวดที่ต้องการติดตาม รายการทั่วไปแก้ผ่านเมนู ⋯ ในหน้ารายรับ–รายจ่าย รายการเงินเดือน ห้อง รถ และบิลที่เชื่อม ให้จัดการผ่านเมนูเฉพาะเรื่อง</p><div class="usage-guide-actions"><button type="button" class="btn soft" data-page-jump="summary">ดูสรุป →</button><button type="button" class="btn soft" data-page-jump="budget">ตั้งงบประมาณ →</button><button type="button" class="btn soft" data-page-jump="transactions">ดูและแก้รายการ →</button></div></details>
+            <details><summary>6. ดูสรุป งบ และแก้ข้อมูล</summary><p>หน้าสรุปเลือกเดือนนี้ 3 เดือน 6 เดือน ปีนี้ หรือกำหนดเองได้ ดูยอดรับ–จ่าย เงินเหลือ และกราฟสัดส่วนรายจ่ายได้ในหน้าเดียว แตะยอดเพื่อดูรายการ หรือเปิด “ดูยอดแยก” เพื่อดูค่าห้อง รถ บิล และสินเชื่อ ยอดสรุปรวมรายการที่ไม่ยกเลิก รวมรอดำเนินการและวันที่อนาคต</p><p>ตั้งงบที่ เพิ่มเติม → งบประมาณ แล้วเลือกหมวดที่ต้องการติดตาม รายการทั่วไปแก้ผ่านเมนู ⋯ ในหน้ารายรับ–รายจ่าย รายการเงินเดือน ห้อง รถ และบิลที่เชื่อม ให้จัดการผ่านเมนูเฉพาะเรื่อง</p><div class="usage-guide-actions"><button type="button" class="btn soft" data-page-jump="summary">ดูสรุป →</button><button type="button" class="btn soft" data-page-jump="budget">ตั้งงบประมาณ →</button><button type="button" class="btn soft" data-page-jump="transactions">ดูและแก้รายการ →</button></div></details>
             <details><summary>7. ธีม การซิงก์ และสำรองข้อมูล</summary><p>ตั้งค่าเลือกธีมสว่าง มืด หรือตามเครื่อง และซ่อนยอดเงินได้ บนมือถือ เลื่อนลงจะซ่อนเมนู เลื่อนขึ้นจะแสดงกลับ</p><p>ข้อมูลการเงินซิงก์เมื่อเชื่อมต่ออินเทอร์เน็ต หากซิงก์ไม่สำเร็จ กดลองใหม่และตรวจรายการก่อนบันทึกซ้ำ ดูพื้นที่จัดเก็บได้ในตั้งค่า โดยอัปเดตทุก 30 วินาทีขณะเปิดหน้านี้</p><p>ส่งออกไฟล์สำรองจากตั้งค่าและเก็บไว้ให้ปลอดภัย ไฟล์มีข้อมูลการเงิน ปัจจุบันยังไม่มีเมนูนำไฟล์สำรองกลับอัตโนมัติ</p><div class="usage-guide-actions"><button type="button" class="btn soft" data-guide-target="accentPicks">ไปที่ตั้งค่าหน้าตา ↓</button><button type="button" class="btn soft" data-guide-target="exportFinanceBackup">ไปที่ตรวจสอบและสำรองข้อมูล ↓</button></div></details>
           </div>
         </details>
@@ -500,8 +460,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
-<script type="module" src="./slip-reader.js?v=20261014-perf46"></script>
-<script type="module" src="./app.js?v=20261014-perf46"></script>
-<script type="module" src="./app-nav.js?v=20261014-perf46"></script></body>
+<script type="module" src="./slip-reader.js?v=20261015-summary47"></script>
+<script type="module" src="./app.js?v=20261015-summary47"></script>
+<script type="module" src="./app-nav.js?v=20261015-summary47"></script></body>
 </html>
 
