@@ -1,5 +1,5 @@
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261015-save50';
-import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261015-save50';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261015-edit51';
+import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261015-edit51';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const retrySafeInsert=createRetrySafeInsert();
 const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W',{global:{fetch:createFinanceFetch()}});

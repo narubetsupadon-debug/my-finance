@@ -36,6 +36,6 @@ if(!params.has('screen')){
  const url=URL.createObjectURL(new Blob([appText],{type:'text/javascript'}));
  const app=document.createElement('script');app.type='module';app.src=url;document.body.append(app);
  await new Promise((resolve,reject)=>{app.onload=resolve;app.onerror=reject});URL.revokeObjectURL(url);
- const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261015-save50';document.body.append(nav);
+ const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261015-edit51';document.body.append(nav);
 }
 </script></body></html>

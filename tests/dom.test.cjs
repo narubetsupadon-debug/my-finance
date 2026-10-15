@@ -19,10 +19,10 @@ function dbMock(data,options={}){
  const db={auth:{getSession:async()=>({data:{session:options.signedOut?null:{user:{id:'user',email:'test@example.invalid'}}}}),signInWithPassword:async()=>({data:{user:{id:'user',email:'test@example.invalid'}},error:null}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:callback=>{state.authChange=callback;return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>({error:state.signOutError||null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
  db.rpc=async(name,args)=>{state.rpcs.push({name,args});return state.fail?{error:{message:'offline'}}:{data:name==='export_finance_backup'?state.backupPayload:name==='finance_health_check'?(state.healthCounts||Object.fromEntries(['duplicateGroups','orphanCar','orphanSalary','orphanInstallments','orphanRent','mismatchCar','mismatchSalary','mismatchInstallments','mismatchRent','brokenSourceLinks','invalidDimensions','billDuplicateGroups','orphanBills'].map(k=>[k,0]))):'rpc-saved',error:null};};
  db.from=table=>{
-  let rows=[...(data[table]||[])],write=null;
+  let rows=[...(data[table]||[])],write=null,writingUpdate=false;
   const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},not(k,op,v){if(op==='is'&&v===null)rows=rows.filter(r=>r[k]!==null&&r[k]!==undefined);return q},
-  insert(row){write=row;state.writes.push({table,row});return q},update(row){write=row;state.writes.push({table,row});return q},
-  single:async()=>{if(state.writeGate)await state.writeGate;if(state.writeError)return {error:state.writeError};if(state.fail)return {error:{message:'offline'}};if(state.failAfterWrite)state.fail=true;if(state.loseResponse){state.loseResponse=false;data[table]=[...(data[table]||[]),{...write,id:write.id||'saved'}];return {error:{message:'response lost'}}}return {data:{id:'saved'}}},
+  insert(row){writingUpdate=false;write=row;state.writes.push({table,row});return q},update(row){writingUpdate=true;write=row;state.writes.push({table,row});return q},
+  single:async()=>{if(state.writeGate)await state.writeGate;if(state.writeError)return {error:state.writeError};if(state.fail)return {error:{message:'offline'}};if(state.failAfterWrite)state.fail=true;if(state.loseResponse){state.loseResponse=false;data[table]=[...(data[table]||[]),{...write,id:write.id||'saved'}];return {error:{message:'response lost'}}}if(state.persistWrites){data[table]??=[];if(writingUpdate){for(const r of rows)Object.assign(r,write);return {data:{id:rows[0]?.id}};}data[table].push({...write});return {data:{id:write.id}};}return {data:{id:'saved'}}},
   range:async(a,b)=>{if(state.readGate)await state.readGate;return state.fail?{error:{message:'offline'}}:{data:rows.slice(a,b+1)}},
   then(resolve,reject){return Promise.resolve(state.fail?{error:{message:'offline'}}:{data:rows}).then(resolve,reject)}
   };return q;
@@ -72,6 +72,20 @@ async function page(html,js,data,expose,storage={},options={}){
  await rejected.el('txForm').onsubmit({preventDefault(){},currentTarget:rejected.el('txForm')});
  assert.equal(rejected.el('txError').dataset.saveState,'failed');assert.match(rejected.el('txError').textContent,/บันทึกไม่สำเร็จ/);assert.equal(rejected.el('txDialog').open,true);rejected.close();
  console.log('PASS save states: uncertain drafts remain editable, retry keeps ID, success is distinct and explicit rejection is failed');
+ const editData={categories,accounts,transactions:[]};
+ const immediateEdit=await page('index.html','app.js',editData,'loadAll');immediateEdit.state.persistWrites=true;
+ immediateEdit.w.openTx();immediateEdit.el('txDesc').value='saved fixture';immediateEdit.el('txAmount').value='45';immediateEdit.el('txCategory').value='cat';
+ await immediateEdit.el('txForm').onsubmit({preventDefault(){},currentTarget:immediateEdit.el('txForm')});
+ const savedId=editData.transactions[0].id;
+ assert.equal(immediateEdit.el('appToast').querySelector('.toast-action').textContent,'แก้ไขรายการนี้');
+ editData.transactions.push({id:'another-record',user_id:'user',transaction_date:day,type:'expense',status:'paid',description:'another fixture',amount:100,category_id:'cat',source:'web'});await immediateEdit.api.loadAll();
+ immediateEdit.el('appToast').querySelector('.toast-action').click();
+ assert.equal(immediateEdit.el('txDialog').open,true);assert.equal(immediateEdit.el('txDialogTitle').textContent,'แก้ไขรายการ');assert.equal(immediateEdit.el('txAmount').value,'45');assert.equal(immediateEdit.el('txDesc').value,'saved fixture');
+ immediateEdit.el('txAmount').value='55';await immediateEdit.el('txForm').onsubmit({preventDefault(){},currentTarget:immediateEdit.el('txForm')});
+ assert.equal(editData.transactions.length,2,'Edit must update the saved row rather than inserting another');assert.equal(editData.transactions.find(x=>x.id===savedId).amount,55);assert.equal(editData.transactions.find(x=>x.id==='another-record').amount,100);
+ editData.transactions.splice(0);await immediateEdit.api.loadAll();immediateEdit.el('appToast').querySelector('.toast-action').click();assert.equal(immediateEdit.el('txDialog').open,false);assert.equal(immediateEdit.el('appToast').classList.contains('hidden'),false);assert.match(immediateEdit.el('appToast').textContent,/ยังโหลดรายการนี้ไม่ได้/);immediateEdit.close();
+ console.log('PASS immediate edit: exact saved identity, original fields restored, update without duplicate, missing record cannot open a blank draft');
+
 
 
  // Recent selections come only from successful new saves, remain separate by
@@ -148,8 +162,8 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.equal(p.el('txFilterCategory').value,'cat');assert.equal(p.el('txAccount').value,'acc');
  await p.el('txForm').onsubmit({preventDefault(){},currentTarget:p.el('txForm')});
  assert.equal(p.state.writes.at(-1).row.status,'cancelled');assert.equal(p.state.writes.at(-1).row.source,'import_r3_v2');
- assert.match(p.el('appToast').textContent,/รายการยกเลิก/);p.el('appToast').querySelector('.toast-action').click();assert.equal(p.el('transactionsPage').classList.contains('hidden'),false);assert.equal(p.el('txSearch').value,'food');
- p.state.failAfterWrite=true;p.w.openTx('t0');await p.el('txForm').onsubmit({preventDefault(){},currentTarget:p.el('txForm')});assert.equal(p.el('txDialog').open,false);assert.match(p.el('appToast').textContent,/ไม่ต้องบันทึกซ้ำ/);assert.equal(p.el('appToast').querySelector('.toast-action').textContent,'โหลดใหม่');assert.equal(p.el('txError').classList.contains('hidden'),true);p.state.failAfterWrite=false;p.state.fail=false;p.el('appToast').querySelector('.toast-action').click();await new Promise(r=>setTimeout(r,0));assert.equal(p.el('appToast').querySelector('.toast-action').textContent,'ดูรายการ');
+ assert.match(p.el('appToast').textContent,/รายการยกเลิก/);p.el('appToast').querySelector('.toast-action').click();assert.equal(p.el('transactionsPage').classList.contains('hidden'),false);assert.equal(p.el('txDialog').open,true);assert.equal(p.el('txDesc').value,'food');p.el('txDialog').close();
+ p.state.failAfterWrite=true;p.w.openTx('t0');await p.el('txForm').onsubmit({preventDefault(){},currentTarget:p.el('txForm')});assert.equal(p.el('txDialog').open,false);assert.match(p.el('appToast').textContent,/ไม่ต้องบันทึกซ้ำ/);assert.equal(p.el('appToast').querySelector('.toast-action').textContent,'โหลดใหม่');assert.equal(p.el('txError').classList.contains('hidden'),true);p.state.failAfterWrite=false;p.state.fail=false;p.el('appToast').querySelector('.toast-action').click();await new Promise(r=>setTimeout(r,0));assert.equal(p.el('appToast').querySelector('.toast-action').textContent,'แก้ไขรายการนี้');
  p.w.openEntity('debt');p.el('entityFields').querySelector('[name=name]').value='card';
  await p.el('entityForm').onsubmit({preventDefault(){},currentTarget:p.el('entityForm')});
  assert.equal(p.state.writes.at(-1).table,'debts');assert.equal(p.state.writes.at(-1).row.due_day,null);assert.equal(p.w.alerts.length,0);

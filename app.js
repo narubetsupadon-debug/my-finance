@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261015-save50';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-save50';
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-save50';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-save50';
-import {createSummaryRenderer} from './app-summary.js?v=20261015-save50';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261015-save50';
-import {createTransactionRenderer} from './app-transactions.js?v=20261015-save50';
-import {createPlanningRenderer} from './app-planning.js?v=20261015-save50';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-save50';
+import {createCapacityMonitor} from './app-storage.js?v=20261015-edit51';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-edit51';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-edit51';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-edit51';
+import {createSummaryRenderer} from './app-summary.js?v=20261015-edit51';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261015-edit51';
+import {createTransactionRenderer} from './app-transactions.js?v=20261015-edit51';
+import {createPlanningRenderer} from './app-planning.js?v=20261015-edit51';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-edit51';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -237,7 +237,7 @@ function showAppToast(message,action=null,state=''){
  const el=$('appToast');if(!el)return;el.dataset.saveState=state;clearTimeout(window.__toastTimer);el.replaceChildren();
  const text=document.createElement('span');text.textContent=message;el.append(text);el.classList.remove('hidden');
  if(action){
-  const view=document.createElement('button');view.type='button';view.className='toast-action';view.textContent=action.label;view.onclick=()=>{action.run();el.classList.add('hidden')};el.append(view);
+  const view=document.createElement('button');view.type='button';view.className='toast-action';view.textContent=action.label;view.onclick=()=>{el.classList.add('hidden');action.run()};el.append(view);
   const close=document.createElement('button');close.type='button';close.className='toast-close';close.textContent='×';close.setAttribute('aria-label','ปิดข้อความ');close.onclick=()=>el.classList.add('hidden');el.append(close);
  }else window.__toastTimer=setTimeout(()=>el.classList.add('hidden'),4000);
 }
@@ -247,6 +247,19 @@ function savedNotice(label,refreshed,action){
 function viewSavedTransaction(row){
  $('txFilterType').value='all';$('txFilterCategory').value='';$('txFilterMonth').value=row.transaction_date.slice(0,7);$('txSearch').value=row.description;
  renderTransactions();showPage('transactions');
+}
+function editSavedTransaction(id,row){
+ const saved=transactions.find(x=>x.id===id&&x.user_id===user?.id);
+ if(!saved){
+  viewSavedTransaction(row);
+  showAppToast('ยังโหลดรายการนี้ไม่ได้ กรุณาโหลดข้อมูลล่าสุดก่อนแก้ไข',{label:'โหลดใหม่',run:async()=>{if(await loadAll())editSavedTransaction(id,row)}});
+  return;
+ }
+ if(['car_installment','car_expense'].includes(saved.source)||carExpenseTxIds.has(id)){location.href='./car.html';return;}
+ if(saved.source==='salary'){location.href='./salary.html';return;}
+ if(saved.source==='rent'){location.href='./rent.html';return;}
+ if(saved.source?.startsWith('bill_payment:')){showPage('bills');return;}
+ showPage('transactions');window.openTx(id);
 }
 function quickCategoryMatch(label){
  const aliases={อาหาร:['อาหาร'],กาแฟ:['กาแฟ','อาหาร'],รถ:['รถยนต์','เดินทาง'],ซื้อของ:['ช้อปปิ้ง'],จ่ายบัตร:['หนี้/ผ่อน'],บิล:['บิล/สาธารณูปโภค']}
@@ -544,14 +557,14 @@ $('txForm').onsubmit=async e=>{
  }
  $('txDuplicateWarning')?.classList.add('hidden');
  $('txError').classList.add('hidden');const unlock=lockFinanceForm($('txForm'),$('txDialog'));
- button.disabled=true;button.textContent='กำลังบันทึก…';let committed=false;
+ button.disabled=true;button.textContent='กำลังบันทึก…';let committed=false,savedId=editing.id;
  try{
   const r=editing.id?await supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id).select('id').single():await retrySafeInsert(supabase,'transactions',row);
   if(r.error)throw r.error;
-  committed=true;if(!editing.id)rememberTxSelection(row);const favoriteSaved=saveFavorite(row);$('txDialog').close();
+  savedId=savedId||r.data?.id;committed=true;if(!editing.id)rememberTxSelection(row);const favoriteSaved=saveFavorite(row);$('txDialog').close();
   const label='บันทึกรายการสำเร็จแล้ว ✅'+(row.status==='cancelled'?' · รายการยกเลิก ไม่นับรวมยอด':'')+(!favoriteSaved?' · เก็บรายการโปรดในเครื่องนี้ไม่ได้':'');
-  savedNotice(label,await loadAll(),{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});
- }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});else{showFinanceSaveError($('txError'),error);$('txError').scrollIntoView({block:'nearest'})}}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
+  savedNotice(label,await loadAll(),{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});
+ }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});else{showFinanceSaveError($('txError'),error);$('txError').scrollIntoView({block:'nearest'})}}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
 }
 $('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
 for(const id of ['txAmount','txDesc','txDate','txCategory','txAccount']){
