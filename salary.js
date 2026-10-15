@@ -1,8 +1,8 @@
-import {bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261015-summary47';
-import {setupPayslipImport} from './salary-payslip.js?v=20261015-summary47';
+import {createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261015-network48';
+import {setupPayslipImport} from './salary-payslip.js?v=20261015-network48';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const retrySafeInsert=createRetrySafeInsert();
-const supabase=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W');
+const supabase=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W',{global:{fetch:createFinanceFetch()}});
 const $=id=>document.getElementById(id),money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(n);
 const earnings=[['base_salary','เงินเดือนพื้นฐาน'],['overtime','OT'],['allowance','เบี้ยเลี้ยง / ค่าตำแหน่ง'],['bonus','โบนัส'],['other_income','รายได้อื่น']];
 const deductions=[['social_security','ประกันสังคม'],['tax','ภาษีหัก ณ ที่จ่าย'],['provident_fund','กองทุนสำรองเลี้ยงชีพ'],['other_deductions','รายการหักอื่น']];

@@ -141,3 +141,29 @@ export function createRetrySafeInsert(){
   }
  };
 }
+
+// Bound Supabase requests, including response-body stalls. Never replay writes here.
+export function createFinanceFetch(fetchFn=globalThis.fetch,timeoutMs=20000){
+ if(!Number.isFinite(timeoutMs)||timeoutMs<=0)throw new Error('Invalid request timeout');
+ return (input,init={})=>{
+  const controller=new AbortController();
+  const source=init.signal||(typeof input==='object'?input?.signal:null);
+  let timer;
+  const cleanup=()=>{clearTimeout(timer);source?.removeEventListener('abort',cancel)};
+  const cancel=()=>{controller.abort(source.reason);cleanup()};
+  if(source?.aborted)controller.abort(source.reason);
+  else{
+   source?.addEventListener('abort',cancel,{once:true});
+   timer=setTimeout(()=>{
+    const error=new Error('เชื่อมต่อใช้เวลานานเกินไป กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่');error.name='TimeoutError';
+    controller.abort(error);cleanup();
+   },timeoutMs);
+  }
+  try{
+   return Promise.resolve(fetchFn(input,{...init,signal:controller.signal})).then(response=>{
+    // Keep the deadline alive for body reads; Node need not stay open just for this timer.
+    timer?.unref?.();return response;
+   },error=>{cleanup();throw error});
+  }catch(error){cleanup();throw error}
+ };
+}

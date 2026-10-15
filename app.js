@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261015-summary47';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-summary47';
-import {bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-summary47';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-summary47';
-import {createSummaryRenderer} from './app-summary.js?v=20261015-summary47';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261015-summary47';
-import {createTransactionRenderer} from './app-transactions.js?v=20261015-summary47';
-import {createPlanningRenderer} from './app-planning.js?v=20261015-summary47';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-summary47';
+import {createCapacityMonitor} from './app-storage.js?v=20261015-network48';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-network48';
+import {createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-network48';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-network48';
+import {createSummaryRenderer} from './app-summary.js?v=20261015-network48';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261015-network48';
+import {createTransactionRenderer} from './app-transactions.js?v=20261015-network48';
+import {createPlanningRenderer} from './app-planning.js?v=20261015-network48';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-network48';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -17,7 +17,7 @@ if(typeof Chart!=='undefined'){
  Chart.defaults.borderColor='rgba(148,163,184,.12)';
  Chart.defaults.font.family='Inter, "Noto Sans Thai", system-ui, -apple-system, sans-serif';
 }
-const supabase=createClient(url,key)
+const supabase=createClient(url,key,{global:{fetch:createFinanceFetch()}})
 const $=id=>document.getElementById(id)
 const money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
 const fmtDate=s=>s?new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'2-digit'}).format(new Date(s+'T00:00:00')):''

@@ -14,9 +14,9 @@ const backupCore=fs.readFileSync(root+'finance-backup.js','utf8').replaceAll('ex
 const rentCore=fs.readFileSync(root+'rent-core.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const totalDetails=fs.readFileSync(root+'total-details.js','utf8').replaceAll('export ','');
 const payslip=fs.readFileSync(root+'salary-payslip.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
-function dbMock(data){
- const state={fail:false,writes:[],rpcs:[]};
- const db={auth:{getSession:async()=>({data:{session:{user:{id:'user',email:'test@example.invalid'}}}}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:callback=>{state.authChange=callback;return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>({error:state.signOutError||null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
+function dbMock(data,options={}){
+ const state={fail:!!options.fail,writes:[],rpcs:[]};
+ const db={auth:{getSession:async()=>({data:{session:options.signedOut?null:{user:{id:'user',email:'test@example.invalid'}}}}),signInWithPassword:async()=>({data:{user:{id:'user',email:'test@example.invalid'}},error:null}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:callback=>{state.authChange=callback;return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>({error:state.signOutError||null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
  db.rpc=async(name,args)=>{state.rpcs.push({name,args});return state.fail?{error:{message:'offline'}}:{data:name==='export_finance_backup'?state.backupPayload:name==='finance_health_check'?(state.healthCounts||Object.fromEntries(['duplicateGroups','orphanCar','orphanSalary','orphanInstallments','orphanRent','mismatchCar','mismatchSalary','mismatchInstallments','mismatchRent','brokenSourceLinks','invalidDimensions','billDuplicateGroups','orphanBills'].map(k=>[k,0]))):'rpc-saved',error:null};};
  db.from=table=>{
   let rows=[...(data[table]||[])],write=null;
@@ -29,9 +29,9 @@ function dbMock(data){
  };
  return {db,state};
 }
-async function page(html,js,data,expose,storage={}){
+async function page(html,js,data,expose,storage={},options={}){
  const dom=new JSDOM(fs.readFileSync(root+html,'utf8'),{url:'https://finance.test/',runScripts:'outside-only'});
- const w=dom.window,{db,state}=dbMock(data);w.createClient=()=>db;w.alerts=[];w.alert=x=>w.alerts.push(x);w.confirm=()=>true;w.scrollTo=()=>{};w.setInterval=()=>0;
+ const w=dom.window,{db,state}=dbMock(data,options);w.createClient=()=>db;w.alerts=[];w.alert=x=>w.alerts.push(x);w.confirm=()=>true;w.scrollTo=()=>{};w.setInterval=()=>0;
  for(const [key,value] of Object.entries(storage))w.localStorage.setItem(key,value);
  w.HTMLElement.prototype.scrollIntoView=function(){};w.requestAnimationFrame=cb=>{cb();return 1};w.cancelAnimationFrame=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
@@ -44,6 +44,22 @@ async function page(html,js,data,expose,storage={}){
  const day=new Date().toISOString().slice(0,10);
  const categories=[{id:'cat',user_id:'user',name:'อาหาร',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'coffee',user_id:'user',name:'กาแฟ',type:'expense',icon:'☕'},{id:'utilities',user_id:'user',name:'บิล/สาธารณูปโภค',type:'expense',icon:'🧾'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];
+ // First login must release the auth controls even when the initial data load fails.
+ const firstLogin=await page('index.html','app.js',{categories,accounts,transactions:[]},'loadAll',{}, {signedOut:true,fail:true});
+ assert.equal(firstLogin.el('authScreen').classList.contains('hidden'),false);
+ firstLogin.el('email').value='test@example.invalid';firstLogin.el('password').value='fixture-only';
+ await firstLogin.el('authBtn').onclick();
+ assert.equal(firstLogin.el('authBtn').disabled,false);
+ assert.equal(firstLogin.el('app').classList.contains('hidden'),false);
+ assert.equal(firstLogin.el('dataError').classList.contains('hidden'),false);
+ firstLogin.w.document.querySelector('[data-page="summary"]').click();
+ assert.equal(firstLogin.el('summaryPage').classList.contains('hidden'),false,'Initial load failure must not freeze navigation');
+ firstLogin.state.fail=false;await firstLogin.api.loadAll();
+ assert.equal(firstLogin.el('dataError').classList.contains('hidden'),true);
+ assert.match(firstLogin.el('syncStatusText').textContent,/ซิงก์แล้ว/);
+ firstLogin.close();
+ console.log('PASS first-login failure recovery: auth controls unlock, navigation remains usable, retry loads data');
+
  // Recent selections come only from successful new saves, remain separate by
  // type/owner, survive reload, and never alter an existing transaction.
  const recentKey='finance-recent-selection-v1:user';
