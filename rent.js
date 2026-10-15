@@ -1,5 +1,5 @@
-import {createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261015-network48';
-import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261015-network48';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261015-save49';
+import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261015-save49';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const retrySafeInsert=createRetrySafeInsert();
 const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W',{global:{fetch:createFinanceFetch()}});
@@ -27,7 +27,7 @@ $('rentForm').onsubmit=async e=>{e.preventDefault();const b=$('saveRent');if(b.d
  try{if(duplicateRentMonth(rows,$('rentMonth').value,editing?.id))throw new Error('เดือนนี้มีบิลแล้ว กรุณาแก้ไขรายการเดิม');const amounts=rentAmounts($('rentFull').value,$('rentMy').value);const row={user_id:user.id,bill_month:$('rentMonth').value+'-01',payment_date:$('rentStatus').value==='paid'?$('rentDate').value:null,status:$('rentStatus').value,...amounts,account_id:$('rentAccount').value||null,category_id:$('rentCategory').value,note:$('rentNote').value.trim()||null};
  if(!row.category_id)throw new Error('เพิ่มหมวดค่าห้องเช่าที่หน้าหมวดหมู่ก่อน');if(!editing?.transaction_id&&row.status==='paid'&&$('rentExisting').value)row.transaction_id=$('rentExisting').value;
  const result=editing?await db.from('rent_records').update(row).eq('id',editing.id).eq('user_id',user.id).select('id').single():await retrySafeInsert(db,'rent_records',row);if(result.error)throw result.error;committed=true;await load();open(rows.find(r=>r.id===result.data.id)||null);message(row.status==='paid'?'บันทึกแล้ว ✓ รายจ่ายเต็มเชื่อมครั้งเดียว ส่วนมิวแสดงตามที่กรอก':'เก็บบิลแล้ว ✓ ยังไม่ลงรายจ่าย',row.status==='paid');
- }catch(err){if(committed){$('rentApp').classList.add('hidden');message('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else $('rentError').textContent=err.code==='23505'?'เดือนนี้มีบิลแล้ว กรุณารีเฟรชและแก้ไขรายการเดิม':err.message;}finally{unlock();b.disabled=false;sync();}
+ }catch(err){if(committed){$('rentApp').classList.add('hidden');message('บันทึกสำเร็จแล้ว แต่โหลดข้อมูลล่าสุดไม่ได้ กรุณารีเฟรชก่อนทำรายการต่อ');}else showFinanceSaveError($('rentError'),err.code==='23505'?{code:err.code,message:'เดือนนี้มีบิลแล้ว กรุณารีเฟรชและแก้ไขรายการเดิม'}:err);}finally{unlock();b.disabled=false;sync();}
 };
 try{const u=await db.auth.getUser();if(u.error||!u.data.user)message('กรุณาเข้าสู่ระบบที่หน้าหลัก แล้วกลับมาหน้าค่าห้องเช่า');else{user=u.data.user;[accounts,categories]=await Promise.all([readAll(()=>db.from('accounts').select('id,name').eq('user_id',user.id).order('name').order('id')),readAll(()=>db.from('categories').select('id,name').eq('user_id',user.id).eq('type','expense').order('name').order('id'))]);categories=categories.filter(c=>rentCategories.includes(c.name));await load();open();$('rentApp').classList.remove('hidden');message('พร้อมบันทึกค่าห้องเช่า');}}catch(err){message('โหลดไม่ได้: '+err.message);}
 

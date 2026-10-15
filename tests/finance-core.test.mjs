@@ -43,3 +43,10 @@ const invalidDb=makeDb(),correct=core.createRetrySafeInsert();invalidDb.failCode
 for(let i=0;i<25;i++)core.recordFinanceError('load',{message:'secret password token',code:'NETWORK',body:draftRow});assert.equal(core.getFinanceDiagnostics().length,20);assert(!JSON.stringify(core.getFinanceDiagnostics()).includes('secret'));assert(!JSON.stringify(core.getFinanceDiagnostics()).includes('private text'));
 await assert.rejects(core.readAll(()=>({range:async()=>({data:[{id:'same'}]})}),1),/หน้าซ้ำ/);
 console.log('PASS retry-safe writes: lost acknowledgement confirmed, offline retains ID, draft changes blocked, SQL correction allowed, satang sums, sanitized bounded diagnostics and repeated pagination rejected');
+
+const {financeSaveFeedback}=await import('../finance-core.js');
+for(const error of [{code:'SAVE_UNCONFIRMED'},{name:'TimeoutError'},{message:'TypeError: Failed to fetch'},{message:'offline'},{status:503}]){
+ const result=financeSaveFeedback(error);assert.equal(result.state,'uncertain');assert.match(result.message,/ข้อมูลอาจบันทึกแล้ว/);
+}
+for(const code of ['23505','23514','42501','P0001'])assert.equal(financeSaveFeedback({code,message:'server rejected write'}).state,'failed');
+console.log('PASS save feedback: uncertain transport acknowledgements stay distinct from explicit database rejections');

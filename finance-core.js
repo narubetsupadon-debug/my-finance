@@ -167,3 +167,17 @@ export function createFinanceFetch(fetchFn=globalThis.fetch,timeoutMs=20000){
   }catch(error){cleanup();throw error}
  };
 }
+
+// A missing reply is not proof that a write failed.
+export function financeSaveFeedback(error){
+ const message=String(error?.message||'เกิดข้อผิดพลาด');
+ const uncertain=error?.code==='SAVE_UNCONFIRMED'||/TimeoutError|AbortError/.test(error?.name||'')||/fetch|network|offline|timeout|timed out|abort|connection|เชื่อมต่อใช้เวลานานเกินไป|ยังรอยืนยัน/i.test(message)||Number(error?.status)>=500;
+ return uncertain
+  ?{state:'uncertain',message:'ยังยืนยันการบันทึกไม่ได้ · ข้อมูลอาจบันทึกแล้ว กรุณาตรวจรายการเมื่อออนไลน์ก่อนสร้างรายการใหม่ หากลองรายการเดิมอีกครั้งให้คงข้อมูลเดิมไว้'}
+  :{state:'failed',message:'บันทึกไม่สำเร็จ · '+message};
+}
+export function showFinanceSaveError(element,error){
+ const feedback=financeSaveFeedback(error);
+ if(element){element.textContent=feedback.message;element.dataset.saveState=feedback.state;element.setAttribute('role','alert');element.classList.remove('hidden');}
+ return feedback;
+}

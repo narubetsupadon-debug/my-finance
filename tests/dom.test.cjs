@@ -22,7 +22,7 @@ function dbMock(data,options={}){
   let rows=[...(data[table]||[])],write=null;
   const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},not(k,op,v){if(op==='is'&&v===null)rows=rows.filter(r=>r[k]!==null&&r[k]!==undefined);return q},
   insert(row){write=row;state.writes.push({table,row});return q},update(row){write=row;state.writes.push({table,row});return q},
-  single:async()=>{if(state.writeGate)await state.writeGate;if(state.fail)return {error:{message:'offline'}};if(state.failAfterWrite)state.fail=true;if(state.loseResponse){state.loseResponse=false;data[table]=[...(data[table]||[]),{...write,id:write.id||'saved'}];return {error:{message:'response lost'}}}return {data:{id:'saved'}}},
+  single:async()=>{if(state.writeGate)await state.writeGate;if(state.writeError)return {error:state.writeError};if(state.fail)return {error:{message:'offline'}};if(state.failAfterWrite)state.fail=true;if(state.loseResponse){state.loseResponse=false;data[table]=[...(data[table]||[]),{...write,id:write.id||'saved'}];return {error:{message:'response lost'}}}return {data:{id:'saved'}}},
   range:async(a,b)=>{if(state.readGate)await state.readGate;return state.fail?{error:{message:'offline'}}:{data:rows.slice(a,b+1)}},
   then(resolve,reject){return Promise.resolve(state.fail?{error:{message:'offline'}}:{data:rows}).then(resolve,reject)}
   };return q;
@@ -59,6 +59,20 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.match(firstLogin.el('syncStatusText').textContent,/ซิงก์แล้ว/);
  firstLogin.close();
  console.log('PASS first-login failure recovery: auth controls unlock, navigation remains usable, retry loads data');
+ const unclear=await page('index.html','app.js',{categories,accounts,transactions:[]},'');
+ unclear.w.openTx();unclear.el('txDesc').value='uncertain fixture';unclear.el('txAmount').value='10';unclear.el('txCategory').value='cat';unclear.state.fail=true;
+ await unclear.el('txForm').onsubmit({preventDefault(){},currentTarget:unclear.el('txForm')});
+ assert.equal(unclear.el('txError').dataset.saveState,'uncertain');assert.match(unclear.el('txError').textContent,/ยังยืนยันการบันทึกไม่ได้/);
+ assert.equal(unclear.el('txDialog').open,true);assert.equal(unclear.el('txAmount').value,'10');assert.equal(unclear.el('txForm').querySelector('[type=submit]').disabled,false);
+ unclear.state.fail=false;await unclear.el('txForm').onsubmit({preventDefault(){},currentTarget:unclear.el('txForm')});
+ assert.equal(unclear.state.writes[0].row.id,unclear.state.writes[1].row.id,'Retry must keep the same draft identity');
+ assert.equal(unclear.el('appToast').dataset.saveState,'success');unclear.close();
+ const rejected=await page('index.html','app.js',{categories,accounts,transactions:[]},'');
+ rejected.w.openTx();rejected.el('txDesc').value='rejected fixture';rejected.el('txAmount').value='10';rejected.el('txCategory').value='cat';rejected.state.writeError={code:'23514',message:'invalid amount'};
+ await rejected.el('txForm').onsubmit({preventDefault(){},currentTarget:rejected.el('txForm')});
+ assert.equal(rejected.el('txError').dataset.saveState,'failed');assert.match(rejected.el('txError').textContent,/บันทึกไม่สำเร็จ/);assert.equal(rejected.el('txDialog').open,true);rejected.close();
+ console.log('PASS save states: uncertain drafts remain editable, retry keeps ID, success is distinct and explicit rejection is failed');
+
 
  // Recent selections come only from successful new saves, remain separate by
  // type/owner, survive reload, and never alter an existing transaction.
@@ -197,7 +211,7 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.equal(c.el('nextNo').textContent,'ยังไม่มีตารางผ่อน');assert.equal(c.el('carSavedLink').hidden,true);assert.equal(c.el('carInstallmentDetails').open,false);assert.equal(c.el('carRows').closest('details').id,'carInstallmentDetails');c.el('carInstallmentDetails').open=true;assert.equal(c.el('carRows').isConnected,true);
  c.api.open({id:'car',installment_no:1,status:'pending'});c.state.fail=true;
  await c.el('carForm').onsubmit({preventDefault(){}});
- assert.match(c.el('carFormMessage').textContent,/offline/);assert.equal(c.el('carDialog').open,true);c.close();
+ assert.match(c.el('carFormMessage').textContent,/ยังยืนยันการบันทึกไม่ได้/);assert.equal(c.el('carFormMessage').dataset.saveState,'uncertain');assert.equal(c.el('carDialog').open,true);c.close();
  const expense=await page('car.html','car.js',{categories,accounts,car_installments:[]},'openExpense');
  expense.api.openExpense();expense.el('carExpenseAmount').value='500';expense.state.failAfterWrite=true;
  await expense.el('carExpenseForm').onsubmit({preventDefault(){}});

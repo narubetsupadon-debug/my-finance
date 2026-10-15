@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261015-network48';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-network48';
-import {createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-network48';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-network48';
-import {createSummaryRenderer} from './app-summary.js?v=20261015-network48';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261015-network48';
-import {createTransactionRenderer} from './app-transactions.js?v=20261015-network48';
-import {createPlanningRenderer} from './app-planning.js?v=20261015-network48';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-network48';
+import {createCapacityMonitor} from './app-storage.js?v=20261015-save49';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-save49';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-save49';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-save49';
+import {createSummaryRenderer} from './app-summary.js?v=20261015-save49';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261015-save49';
+import {createTransactionRenderer} from './app-transactions.js?v=20261015-save49';
+import {createPlanningRenderer} from './app-planning.js?v=20261015-save49';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-save49';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -233,8 +233,8 @@ $('txDialog')?.addEventListener('close',flushRealtimeAfterEdit);
 $('entityDialog')?.addEventListener('close',flushRealtimeAfterEdit);
 $('retryData').onclick=()=>loadAll();
 function renderAll(){fillTxSelectors();renderDashboard();renderTransactions();renderCategories();renderAccounts();renderBills();renderDebts();renderBudget();renderSummary();renderSettings();applyUiSettings();void refreshPushStatus()}
-function showAppToast(message,action=null){
- const el=$('appToast');if(!el)return;clearTimeout(window.__toastTimer);el.replaceChildren();
+function showAppToast(message,action=null,state=''){
+ const el=$('appToast');if(!el)return;el.dataset.saveState=state;clearTimeout(window.__toastTimer);el.replaceChildren();
  const text=document.createElement('span');text.textContent=message;el.append(text);el.classList.remove('hidden');
  if(action){
   const view=document.createElement('button');view.type='button';view.className='toast-action';view.textContent=action.label;view.onclick=()=>{action.run();el.classList.add('hidden')};el.append(view);
@@ -242,7 +242,7 @@ function showAppToast(message,action=null){
  }else window.__toastTimer=setTimeout(()=>el.classList.add('hidden'),4000);
 }
 function savedNotice(label,refreshed,action){
- showAppToast(label+(refreshed?' · โหลดข้อมูลล่าสุดแล้ว':' · โหลดข้อมูลล่าสุดไม่ได้ กรุณากดโหลดใหม่ ไม่ต้องบันทึกซ้ำ'),refreshed?action:{label:'โหลดใหม่',run:async()=>savedNotice(label,await loadAll(),action)});
+ showAppToast(label+(refreshed?' · โหลดข้อมูลล่าสุดแล้ว':' · โหลดข้อมูลล่าสุดไม่ได้ กรุณากดโหลดใหม่ ไม่ต้องบันทึกซ้ำ'),refreshed?action:{label:'โหลดใหม่',run:async()=>savedNotice(label,await loadAll(),action)},'success');
 }
 function viewSavedTransaction(row){
  $('txFilterType').value='all';$('txFilterCategory').value='';$('txFilterMonth').value=row.transaction_date.slice(0,7);$('txSearch').value=row.description;
@@ -527,7 +527,7 @@ window.openTx=(id=null)=>{
  if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;}}
  renderCardPaymentSuggestions();$('txDialog').showModal();requestAnimationFrame(()=>{$('txForm').scrollTop=0;});
 }
-function txError(message){$('txError').textContent=message;$('txError').classList.remove('hidden');$('txError').scrollIntoView({block:'nearest'})}
+function txError(message){$('txError').dataset.saveState='failed';$('txError').textContent=message;$('txError').classList.remove('hidden');$('txError').scrollIntoView({block:'nearest'})}
 $('txForm').onsubmit=async e=>{
  e.preventDefault();const button=e.currentTarget.querySelector('button[type="submit"]');if(button.disabled)return;
  const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:transactions.find(x=>x.id===editing.id)?.status||'paid',note:$('txNote').value.trim()||null,source:transactions.find(x=>x.id===editing.id)?.source||'web'};
@@ -548,9 +548,9 @@ $('txForm').onsubmit=async e=>{
   const r=editing.id?await supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id).select('id').single():await retrySafeInsert(supabase,'transactions',row);
   if(r.error)throw r.error;
   committed=true;if(!editing.id)rememberTxSelection(row);const favoriteSaved=saveFavorite(row);$('txDialog').close();
-  const label='บันทึกรายการแล้ว ✅'+(row.status==='cancelled'?' · รายการยกเลิก ไม่นับรวมยอด':'')+(!favoriteSaved?' · เก็บรายการโปรดในเครื่องนี้ไม่ได้':'');
+  const label='บันทึกรายการสำเร็จแล้ว ✅'+(row.status==='cancelled'?' · รายการยกเลิก ไม่นับรวมยอด':'')+(!favoriteSaved?' · เก็บรายการโปรดในเครื่องนี้ไม่ได้':'');
   savedNotice(label,await loadAll(),{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});
- }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});else txError(error.code==='SAVE_UNCONFIRMED'?error.message:'บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
+ }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'ดูรายการ',run:()=>viewSavedTransaction(row)});else{showFinanceSaveError($('txError'),error);$('txError').scrollIntoView({block:'nearest'})}}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
 }
 $('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
 for(const id of ['txAmount','txDesc','txDate','txCategory','txAccount']){
@@ -616,7 +616,7 @@ $('entityForm').onsubmit=async e=>{
   const q=editing.id?supabase.from(table).update(fd).eq('id',editing.id).eq('user_id',user.id):supabase.from(table).insert(fd);
   const {error}=await q.select('id').single();if(error)throw error;
   committed=true;$('entityDialog').close();savedNotice('บันทึก'+({category:'หมวดหมู่',account:'บัญชี',bill:'บิล',budget:'งบประมาณ',debt:'บัตร/สินเชื่อ'}[entityType])+'แล้ว ✅',await loadAll(),{label:'ดูข้อมูล',run:()=>showPage({category:'categories',account:'accounts',bill:'bills',budget:'budget',debt:'debts'}[entityType])});
- }catch(error){if(committed)savedNotice('บันทึกข้อมูลสำเร็จแล้ว',false,{label:'ดูข้อมูล',run:()=>showPage(table==='budgets'?'budget':table)});else alert('บันทึกไม่ได้: '+error.message)}finally{unlock();button.disabled=false}
+ }catch(error){if(committed)savedNotice('บันทึกข้อมูลสำเร็จแล้ว',false,{label:'ดูข้อมูล',run:()=>showPage(table==='budgets'?'budget':table)});else alert(financeSaveFeedback(error).message)}finally{unlock();button.disabled=false}
 }
 
 async function payRecurringBill(bill,button){
@@ -633,9 +633,8 @@ async function payRecurringBill(bill,button){
  try{
   const {error}=await supabase.rpc('pay_recurring_bill',{p_bill_id:bill.id,p_paid_date:bangkokDay()});
   if(error)throw error;
-  showAppToast(debt?'บันทึกรายจ่ายและเพิ่มยอดบัตร '+debt.name+' แล้ว ✅':'บันทึก '+bill.name+' เป็นรายจ่ายแล้ว ✅');
-  await loadAll();
- }catch(error){showAppToast('บันทึกการจ่ายบิลไม่ได้: '+error.message)}
+  savedNotice(debt?'บันทึกรายจ่ายและเพิ่มยอดบัตร '+debt.name+' สำเร็จแล้ว ✅':'บันทึก '+bill.name+' เป็นรายจ่ายสำเร็จแล้ว ✅',await loadAll(),{label:'ดูบิล',run:()=>showPage('bills')});
+ }catch(error){const feedback=financeSaveFeedback(error);showAppToast(feedback.message,{label:'ตรวจรายการ',run:()=>{showPage('transactions');void loadAll()}},feedback.state)}
  finally{if(button?.isConnected){button.disabled=false;button.textContent=originalText;}}
 }
 

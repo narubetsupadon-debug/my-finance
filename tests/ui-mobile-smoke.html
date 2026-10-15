@@ -1,0 +1,41 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Finance · mobile smoke test</title></head><body>
+<script type="module">
+// Browser-only test harness: synthetic records in memory, no database or authentication requests.
+const params=new URLSearchParams(location.search);
+if(!params.has('screen')){
+ document.body.style.cssText='margin:0;padding:20px;background:#e8ebf2;font-family:system-ui';
+ const title=document.createElement('h1');title.textContent='ทดสอบมือถือ · ข้อมูลจำลอง ไม่บันทึกเข้าบัญชีจริง';title.style.fontSize='18px';document.body.append(title);
+ for(const width of [390,320]){const frame=document.createElement('iframe');frame.title=width+'px';frame.src='./ui-mobile-smoke.html?screen=1';frame.style.cssText='width:'+width+'px;height:1000px;border:0;margin:12px;vertical-align:top';document.body.append(frame);}
+}else{
+ const source=await (await fetch('../index.html')).text();const parsed=new DOMParser().parseFromString(source,'text/html');
+ for(const link of parsed.querySelectorAll('link[rel=stylesheet]')){const clone=link.cloneNode();clone.href=new URL(link.getAttribute('href'),new URL('../index.html',location.href));document.head.append(clone);}
+ document.body.innerHTML=parsed.body.innerHTML;document.querySelectorAll('script').forEach(s=>s.remove());
+ document.querySelectorAll('img[src]').forEach(el=>el.src=new URL(el.getAttribute('src'),new URL('../index.html',location.href)));
+ const fixtureUser={id:'fixture-owner',email:'fixture@example.invalid'};let mode='ok';
+ const data={categories:[{id:'food',user_id:fixtureUser.id,name:'อาหาร',type:'expense',icon:'🍜',sort_order:1},{id:'salary',user_id:fixtureUser.id,name:'เงินเดือน',type:'income',icon:'💰',sort_order:2}],accounts:[{id:'cash',user_id:fixtureUser.id,name:'เงินสดตัวอย่าง',account_type:'cash',is_active:true,opening_balance:0}],transactions:[]};
+ const banner=document.createElement('div');banner.style.cssText='position:sticky;top:0;z-index:1000;background:#fff3c4;color:#412b00;padding:8px;font:12px system-ui';banner.textContent='ข้อมูลจำลอง · ไม่เชื่อมต่อบัญชีจริง ';
+ const select=document.createElement('select');select.setAttribute('aria-label','สถานการณ์ทดสอบ');
+ for(const [value,label] of [['ok','ออนไลน์'],['reject','เซิร์ฟเวอร์ปฏิเสธ'],['uncertain','บันทึกแล้วแต่เน็ตขาด']]){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);}select.onchange=()=>mode=select.value;banner.append(select);document.body.prepend(banner);
+ const channel={on(){return this},subscribe(){return this}};
+ window.fixtureDb={auth:{getSession:async()=>({data:{session:{user:fixtureUser}}}),getUser:async()=>({data:{user:fixtureUser}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},channel:()=>channel,removeChannel(){},rpc:async()=>({data:null,error:null}),from(table){
+  let filters=[],row=null,operation=null;
+  const rows=()=> (data[table]||[]).filter(r=>filters.every(([k,v,not])=>not?r[k]!=null:r[k]===v)).map(r=>({...r,categories:data.categories.find(c=>c.id===r.category_id),accounts:data.accounts.find(a=>a.id===r.account_id)}));
+  const q={select(){return q},order(){return q},eq(k,v){filters.push([k,v]);return q},neq(){return q},not(k){filters.push([k,null,true]);return q},insert(value){row=value;operation='insert';return q},update(value){row=value;operation='update';return q},
+   async single(){
+    if(mode==='reject')return {data:null,error:{code:'23514',message:'ยอดเงินไม่ผ่านเงื่อนไขตัวอย่าง'}};
+    data[table]??=[];
+    if(operation==='insert'){
+     if(data[table].some(r=>r.id===row.id))return {data:null,error:{code:'23505',message:'duplicate id'}};
+     data[table].push({...row,id:row.id||crypto.randomUUID()});
+    }else for(const target of rows()){const stored=data[table].find(r=>r.id===target.id);Object.assign(stored,row);}
+    if(mode==='uncertain')return {data:null,error:{message:'Failed to fetch'}};
+    return {data:{id:row?.id||rows()[0]?.id||'saved'},error:null};
+   },async range(a,b){if(mode==='uncertain')return {data:null,error:{message:'offline'}};return {data:rows().slice(a,b+1),error:null}},then(resolve,reject){return Promise.resolve({data:rows(),error:null}).then(resolve,reject)}};return q;
+ }};
+ const appText=(await (await fetch('../app.js')).text()).replace(/^import \{ createClient \} from .*$/m,'const createClient=()=>window.fixtureDb;').replace("navigator.serviceWorker.register('./sw.js'","navigator.serviceWorker.register('../sw.js'").replace(/from '(\.\/[^']+)'/g,(_,path)=>"from '"+new URL('../'+path.slice(2),location.href).href+"'");
+ const url=URL.createObjectURL(new Blob([appText],{type:'text/javascript'}));
+ const app=document.createElement('script');app.type='module';app.src=url;document.body.append(app);
+ await new Promise((resolve,reject)=>{app.onload=resolve;app.onerror=reject});URL.revokeObjectURL(url);
+ const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261015-save49';document.body.append(nav);
+}
+</script></body></html>

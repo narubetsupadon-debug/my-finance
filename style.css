@@ -776,3 +776,7 @@ body{background:var(--bg);letter-spacing:-.008em}.topbar{background:rgba(245,246
 .bill-month-strip{padding:12px 16px;border:1px solid var(--line);border-radius:16px;background:var(--card);line-height:1.6;color:var(--text);font-size:13px}.bill-month-strip button{min-height:44px;text-align:left;white-space:normal;line-height:1.6}.bill-month-strip small{display:block;color:var(--muted);font-size:12px}.analysis-brief{padding:12px 14px;background:var(--card);border-left:3px solid var(--primary);border-radius:10px;font-size:13px;line-height:1.7;color:var(--text)}
 
 .summary-short-analysis h3{font-size:16px;margin:0 0 8px}.summary-short-analysis .analysis-brief{border:0;padding:0;margin:0 0 8px;background:transparent;line-height:1.8}.summary-short-analysis>small{font-size:12px;display:block}.summary-short-analysis{padding:18px}
+
+/* Keep ambiguous saves visually distinct from confirmed failures. */
+[data-save-state="uncertain"]{color:var(--text);background:color-mix(in srgb,#f59e0b 12%,var(--card));border:1px solid color-mix(in srgb,#f59e0b 55%,var(--line));border-radius:12px;padding:12px;line-height:1.65;overflow-wrap:anywhere}
+[data-save-state="failed"]{color:var(--red);line-height:1.65;overflow-wrap:anywhere}
