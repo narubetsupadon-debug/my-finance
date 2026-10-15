@@ -2,17 +2,31 @@
 <script type="module">
 // Browser-only test harness: synthetic records in memory, no database or authentication requests.
 const params=new URLSearchParams(location.search);
+const view=['index','salary','rent','car'].includes(params.get('view'))?params.get('view'):'index';
 if(!params.has('screen')){
  document.body.style.cssText='margin:0;padding:20px;background:#e8ebf2;font-family:system-ui';
  const title=document.createElement('h1');title.textContent='ทดสอบมือถือ · ข้อมูลจำลอง ไม่บันทึกเข้าบัญชีจริง';title.style.fontSize='18px';document.body.append(title);
- for(const width of [390,320]){const frame=document.createElement('iframe');frame.title=width+'px';frame.src='./ui-mobile-smoke.html?screen=1';frame.style.cssText='width:'+width+'px;height:1000px;border:0;margin:12px;vertical-align:top';document.body.append(frame);}
+ for(const width of [390,320]){const frame=document.createElement('iframe');frame.title=width+'px';const query=new URLSearchParams(params);query.set('screen','1');frame.src='./ui-mobile-smoke.html?'+query;frame.style.cssText='width:'+width+'px;height:1000px;border:0;margin:12px;vertical-align:top';document.body.append(frame);}
 }else{
- const source=await (await fetch('../index.html')).text();const parsed=new DOMParser().parseFromString(source,'text/html');
- for(const link of parsed.querySelectorAll('link[rel=stylesheet]')){const clone=link.cloneNode();clone.href=new URL(link.getAttribute('href'),new URL('../index.html',location.href));document.head.append(clone);}
+ const source=await (await fetch('../'+view+'.html')).text();const parsed=new DOMParser().parseFromString(source,'text/html');
+ for(const link of parsed.querySelectorAll('link[rel=stylesheet]')){const clone=link.cloneNode();clone.href=new URL(link.getAttribute('href'),new URL('../'+view+'.html',location.href));document.head.append(clone);}
+ for(const style of parsed.querySelectorAll('style'))document.head.append(style.cloneNode(true));
  document.body.innerHTML=parsed.body.innerHTML;document.querySelectorAll('script').forEach(s=>s.remove());
- document.querySelectorAll('img[src]').forEach(el=>el.src=new URL(el.getAttribute('src'),new URL('../index.html',location.href)));
+ document.querySelectorAll('img[src]').forEach(el=>el.src=new URL(el.getAttribute('src'),new URL('../'+view+'.html',location.href)));
  const fixtureUser={id:'fixture-owner',email:'fixture@example.invalid'};let mode='ok';
  const data={categories:[{id:'food',user_id:fixtureUser.id,name:'อาหาร',type:'expense',icon:'🍜',sort_order:1},{id:'salary',user_id:fixtureUser.id,name:'เงินเดือน',type:'income',icon:'💰',sort_order:2}],accounts:[{id:'cash',user_id:fixtureUser.id,name:'เงินสดตัวอย่าง',account_type:'cash',is_active:true,opening_balance:0}],transactions:[]};
+ if(params.get('scenario')==='menus'){
+  const today=new Date(Date.now()+7*3600000).toISOString().slice(0,10),month=today.slice(0,7),future='2099-12-31',owner=fixtureUser.id;
+  data.accounts[0].account_number='0012345678';
+  data.transactions=[{id:'fixture-paid',user_id:owner,type:'expense',status:'paid',description:'อาหารตัวอย่าง',amount:35,transaction_date:today,category_id:'food',account_id:'cash'}, {id:'fixture-pending',user_id:owner,type:'expense',status:'pending',description:'อาหารรอจ่ายตัวอย่าง',amount:70,transaction_date:today,category_id:'food',account_id:null}, {id:'fixture-future',user_id:owner,type:'expense',status:'paid',description:'อาหารอนาคตตัวอย่าง',amount:100,transaction_date:future,category_id:'food',account_id:'cash'}, {id:'fixture-bill',user_id:owner,type:'expense',status:'paid',description:'บิลที่จ่ายตัวอย่าง',amount:50,transaction_date:today,category_id:'food',account_id:'cash',source:'bill_payment:bill-paid'}];
+  data.budgets=[{id:'budget-food',user_id:owner,name:'งบอาหารตัวอย่าง',monthly_limit:100,is_active:true,category_names:['อาหาร']}];
+  data.bills=[{id:'bill-paid',user_id:owner,name:'บิลจ่ายแล้วตัวอย่าง',amount:50,due_day:1,is_active:true,frequency:'monthly',category_id:'food'},{id:'bill-due',user_id:owner,name:'บิลถึงกำหนดตัวอย่าง',amount:50,due_day:1,is_active:true,frequency:'monthly',category_id:'food'}];
+  data.debts=[{id:'card-fixture',user_id:owner,name:'บัตรตัวอย่าง',debt_type:'credit_card',original_amount:1000,outstanding_amount:200,is_active:true}];
+  data.salary_records=[{id:'salary-fixture',user_id:owner,salary_month:month+'-01',payment_date:today,base_salary:1000,overtime:0,allowance:0,bonus:0,other_income:0,social_security:0,tax:0,provident_fund:0,other_deductions:0,net_amount:1000,account_id:'cash',category_id:'salary'}];
+  data.car_installments=[{id:'installment-fixture',user_id:owner,installment_no:1,status:'paid',due_date:today,payment_date:today,my_amount:200,partner_amount:200,scheduled_amount:400,category_id:'food',account_id:'cash'}];
+  data.car_expenses=[{id:'car-expense-fixture',user_id:owner,expense_date:today,expense_type:'fuel',amount:55,category_id:'food',account_id:'cash'}];
+  data.categories.push({id:'rent-cat',user_id:owner,name:'ห้องเช่า',type:'expense',icon:'🏠'});
+ }
  const banner=document.createElement('div');banner.style.cssText='position:sticky;top:0;z-index:1000;background:#fff3c4;color:#412b00;padding:8px;font:12px system-ui';banner.textContent='ข้อมูลจำลอง · ไม่เชื่อมต่อบัญชีจริง ';
  const select=document.createElement('select');select.setAttribute('aria-label','สถานการณ์ทดสอบ');
  for(const [value,label] of [['ok','ออนไลน์'],['reject','เซิร์ฟเวอร์ปฏิเสธ'],['uncertain','บันทึกแล้วแต่เน็ตขาด']]){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);}select.onchange=()=>mode=select.value;banner.append(select);document.body.prepend(banner);
@@ -32,10 +46,10 @@ if(!params.has('screen')){
     return {data:{id:row?.id||rows()[0]?.id||'saved'},error:null};
    },async range(a,b){if(mode==='uncertain')return {data:null,error:{message:'offline'}};return {data:rows().slice(a,b+1),error:null}},then(resolve,reject){return Promise.resolve({data:rows(),error:null}).then(resolve,reject)}};return q;
  }};
- const appText=(await (await fetch('../app.js')).text()).replace(/^import \{ createClient \} from .*$/m,'const createClient=()=>window.fixtureDb;').replace("navigator.serviceWorker.register('./sw.js'","navigator.serviceWorker.register('../sw.js'").replace(/from '(\.\/[^']+)'/g,(_,path)=>"from '"+new URL('../'+path.slice(2),location.href).href+"'");
+ const appText=(await (await fetch('../'+(view==='index'?'app':view)+'.js')).text()).replace(/^import\s*\{\s*createClient\s*\}\s*from .*$/m,'const createClient=()=>window.fixtureDb;').replace("navigator.serviceWorker.register('./sw.js'","navigator.serviceWorker.register('../sw.js'").replace(/from '(\.\/[^']+)'/g,(_,path)=>"from '"+new URL('../'+path.slice(2),location.href).href+"'");
  const url=URL.createObjectURL(new Blob([appText],{type:'text/javascript'}));
  const app=document.createElement('script');app.type='module';app.src=url;document.body.append(app);
  await new Promise((resolve,reject)=>{app.onload=resolve;app.onerror=reject});URL.revokeObjectURL(url);
- const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261015-edit51';document.body.append(nav);
+ const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261015-menus53';document.body.append(nav);
 }
 </script></body></html>

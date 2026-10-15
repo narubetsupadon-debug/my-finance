@@ -1,5 +1,5 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261015-edit51';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261015-edit51';
+import {sumTransactionAmounts} from './finance-core.js?v=20261015-menus53';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261015-menus53';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
@@ -79,7 +79,10 @@ function setupSummaryFilters(){
 function renderSummary(){
  const transactions=getTransactions()
  setupSummaryFilters()
- const config=rangeConfig(),valid=transactions.filter(x=>x.status!=='cancelled')
+ const paidOnly=$('summaryStatus')?.value==='paid';
+ const config=rangeConfig(),valid=transactions.filter(x=>x.status!=='cancelled'&&(!paidOnly||((x.status||'paid')==='paid'&&String(x.transaction_date)<=bangkokDay())))
+ const scope=paidOnly?'เฉพาะรับ/จ่ายแล้วถึงวันนี้':'รวมรอดำเนินการและวันที่อนาคต';
+ if($('summaryScope'))$('summaryScope').textContent=scope+' · ไม่รวมยกเลิก · รวมยอดชำระบัตร/สินเชื่อ · แตะยอดดูรายการ';
  const rows=config.mode==='days'
   ?valid.filter(x=>String(x.transaction_date).slice(0,7)===config.monthKey)
   :valid.filter(x=>config.keys.includes(String(x.transaction_date).slice(0,7)))
@@ -101,7 +104,7 @@ function renderSummary(){
  $('sumCarInstallment').textContent=money(grouped['ค่างวดรถ']||0)
  $('sumCarOther').textContent=money(carTotal-(grouped['ค่างวดรถ']||0))
  $('sumRecurring').textContent=money(grouped['รายจ่ายประจำ']||0)
- const criteria=config.label+' · รวมจ่ายแล้ว รอดำเนินการ และวันที่อนาคต · ไม่รวมยกเลิก';
+ const criteria=config.label+' · '+scope+' · ไม่รวมยกเลิก';
  const incomeRows=rows.filter(x=>x.type==='income'),expenseRows=rows.filter(x=>x.type==='expense');
  const show=(id,title,selected,note=criteria)=>bindTotal($,id,()=>openTotals(title,[{label:title,rows:selected}],note));
  show('sumIncome','รายรับ',incomeRows);show('sumExpense','รายจ่าย',expenseRows);

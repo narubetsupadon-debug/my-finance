@@ -44,6 +44,27 @@ async function page(html,js,data,expose,storage={},options={}){
  const day=new Date().toISOString().slice(0,10);
  const categories=[{id:'cat',user_id:'user',name:'อาหาร',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'coffee',user_id:'user',name:'กาแฟ',type:'expense',icon:'☕'},{id:'utilities',user_id:'user',name:'บิล/สาธารณูปโภค',type:'expense',icon:'🧾'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];
+ // Combined filters, scoped totals, linked history and draft cancellation are user-facing behavior.
+ const menuData={categories,accounts:[{...accounts[0],account_number:'0012345678'}],transactions:[
+  {id:'food-paid',user_id:'user',type:'expense',status:'paid',amount:35,description:'food paid',transaction_date:day,category_id:'cat',account_id:'acc',categories:categories[0]},
+  {id:'food-pending',user_id:'user',type:'expense',status:'pending',amount:70,description:'food pending',transaction_date:day,category_id:'cat',account_id:null,categories:categories[0]},
+  {id:'food-cancelled',user_id:'user',type:'expense',status:'cancelled',amount:999,description:'food cancelled',transaction_date:day,category_id:'cat',account_id:'acc',categories:categories[0]},
+  {id:'bill-paid',user_id:'user',type:'expense',status:'paid',amount:50,description:'bill fixture',transaction_date:day,category_id:'utilities',account_id:'acc',source:'bill_payment:paid-bill',categories:categories[2]}
+ ],budgets:[{id:'food-budget',user_id:'user',name:'food fixture',monthly_limit:100,is_active:true,category_names:['อาหาร']}],bills:[
+  {id:'paid-bill',user_id:'user',name:'paid fixture',is_active:true,frequency:'monthly',amount:50,due_day:1},
+  {id:'due-bill',user_id:'user',name:'due fixture',is_active:true,frequency:'monthly',amount:50,due_day:1}
+ ]};
+ const menus=await page('index.html','app.js',menuData,'');
+ menus.el('txFilterAccount').value='acc';menus.el('txFilterStatus').value='paid';menus.el('txFilterStatus').onchange();assert.equal(menus.el('txCount').textContent,'2 รายการ');assert.doesNotMatch(menus.el('txList').textContent,/food pending|food cancelled/);
+ menus.el('txFilterAccount').value='__none__';menus.el('txFilterStatus').value='pending';menus.el('txFilterStatus').onchange();assert.equal(menus.el('txCount').textContent,'1 รายการ');assert.match(menus.el('txList').textContent,/food pending/);menus.el('txResetFilters').click();assert.equal(menus.el('txCount').textContent,'4 รายการ');
+ menus.el('summaryStatus').value='paid';menus.el('summaryStatus').onchange();assert.match(menus.el('sumExpense').textContent,/85\.00/);menus.el('sumExpense').click();assert.doesNotMatch(menus.el('insightDetailBody').textContent,/food pending|food cancelled/);menus.el('insightDetailDialog').close();
+ menus.el('budgetList').querySelector('[data-budget-history]').click();assert.match(menus.el('insightDetailBody').textContent,/food paid/);assert.match(menus.el('insightDetailBody').textContent,/food pending/);assert.doesNotMatch(menus.el('insightDetailBody').textContent,/food cancelled|bill fixture/);assert.match(menus.el('budgetList').textContent,/เกินงบ/);menus.el('insightDetailDialog').close();
+ assert.equal(menus.el('billList').querySelector('[data-bill-history]').dataset.billHistory,'due-bill');menus.el('billList').querySelector('[data-bill-history="paid-bill"]').click();assert.match(menus.el('insightDetailBody').textContent,/bill fixture/);assert.doesNotMatch(menus.el('insightDetailBody').textContent,/food paid/);menus.el('insightDetailDialog').close();
+ assert.match(menus.el('expenseCats').textContent,/ใช้ใน 3 รายการ/);assert.doesNotMatch(menus.el('accountList').textContent,/0012345678/);assert.match(menus.el('accountList').textContent,/•••• 5678/);
+ let prompts=0;menus.w.confirm=()=>{prompts++;return false;};menus.w.openTx();menus.w.requestCloseTx();assert.equal(menus.el('txDialog').open,false);assert.equal(prompts,0);
+ menus.w.openTx();menus.el('txAmount').value='45';menus.el('txDesc').value='keep this draft';menus.w.requestCloseTx();assert.equal(menus.el('txDialog').open,true);assert.equal(menus.el('txDesc').value,'keep this draft');assert.equal(prompts,1);
+ const escape=new menus.w.Event('cancel',{cancelable:true});menus.el('txDialog').dispatchEvent(escape);assert.equal(escape.defaultPrevented,true);assert.equal(menus.el('txDialog').open,true);menus.w.confirm=()=>true;menus.w.requestCloseTx();assert.equal(menus.el('txDialog').open,false);assert.equal(menus.state.writes.length,0);menus.close();
+ console.log('PASS menu improvements: combined filters, paid-only drilldown, budget and bill identity, due order, masked accounts, category counts and draft-close cancellation');
  // First login must release the auth controls even when the initial data load fails.
  const firstLogin=await page('index.html','app.js',{categories,accounts,transactions:[]},'loadAll',{}, {signedOut:true,fail:true});
  assert.equal(firstLogin.el('authScreen').classList.contains('hidden'),false);
@@ -205,7 +226,7 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.match(paidBillsPage.el('billList').textContent,/จ่ายแล้วเดือนนี้/);assert.equal(paidBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);paidBillsPage.close();
  const pendingBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[{...paidTx,status:'pending'}],bills:[bill]},'loadAll');assert.match(pendingBillsPage.el('billList').textContent,/รอจ่าย/);assert.equal(pendingBillsPage.el('billList').querySelector('[data-pay-bill]'),null);assert.match(pendingBillsPage.el('homeBillStatus').textContent,/รอจ่าย 1/);assert.equal(pendingBillsPage.el('summaryMore'),null);pendingBillsPage.el('homeBillStatus').click();assert.equal(pendingBillsPage.el('billsPage').classList.contains('hidden'),false);pendingBillsPage.close();
  const s=await page('salary.html','salary.js',{categories,accounts,transactions:[]},'reset');
- assert.equal(s.el('salarySavedLink').hidden,true);assert.equal(s.el('salaryOtherDetails').open,false);assert.equal(s.el('salaryDeductionDetails').open,false);
+ assert.equal(s.el('salaryEditor').open,false);s.el('newSalary').click();assert.equal(s.el('salaryEditor').open,true);assert.equal(s.el('salarySavedLink').hidden,true);assert.equal(s.el('salaryOtherDetails').open,false);assert.equal(s.el('salaryDeductionDetails').open,false);
  assert.equal(s.el('bonus').closest('details').id,'salaryOtherDetails');assert.equal(s.el('allowance').closest('details').id,'salaryOtherDetails');assert.notEqual(s.el('bonus'),s.el('allowance'));
  s.el('salaryExpandAll').click();for(const id of ['salaryOtherDetails','salaryDeductionDetails','salaryAdvancedDetails'])assert.equal(s.el(id).open,true);
  s.el('salaryExpandAll').click();assert.equal(s.el('salaryDeductionDetails').open,false);
@@ -221,6 +242,9 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.equal(s.state.writes.at(-1).row.base_salary,1000);assert.equal(s.el('category_id').value,'inc');assert.equal(s.el('salarySavedLink').hidden,false);assert.equal(s.el('salaryStep3').getAttribute('aria-current'),'step');s.el('bonus').dispatchEvent(new s.w.Event('input',{bubbles:true}));assert.equal(s.el('salarySavedLink').hidden,true);assert.equal(s.el('salaryStep2').getAttribute('aria-current'),'step');
  s.el('base_salary').value='1000';s.el('account_id').value='acc';s.state.failAfterWrite=true;
  await s.el('salaryForm').onsubmit({preventDefault(){}});assert.match(s.el('salaryMessage').textContent,/บันทึกสำเร็จแล้ว/);assert.equal(s.el('salaryApp').classList.contains('hidden'),true);s.close();
+ const carQuick=await page('car.html','car.js',{categories,accounts,car_installments:[{id:'newer',user_id:'user',installment_no:2,status:'paid',due_date:day,payment_date:day,my_amount:200,scheduled_amount:400},{id:'older',user_id:'user',installment_no:1,status:'paid',due_date:'2026-01-01',payment_date:'2026-01-01',my_amount:100,scheduled_amount:200},{id:'pending',user_id:'user',installment_no:3,status:'pending',due_date:'2026-12-01',scheduled_amount:400}],car_expenses:[{id:'exp-old',user_id:'user',expense_date:'2026-01-01',expense_type:'fuel',amount:10},{id:'exp-new',user_id:'user',expense_date:day,expense_type:'fuel',amount:55}]},'');
+ carQuick.el('carEditLatestInstallment').click();assert.match(carQuick.el('carTitle').textContent,/งวดที่ 2/);assert.equal(carQuick.el('carMy').value,'200');carQuick.el('carDialog').close();carQuick.el('carExpenseFilter').value='repair';carQuick.el('carExpenseFilter').onchange();carQuick.el('carEditLatestExpense').click();assert.equal(carQuick.el('carExpenseAmount').value,'55');assert.equal(carQuick.state.writes.length,0);carQuick.close();
+ console.log('PASS car shortcuts: latest paid installment and exact latest expense, independent of history filters, no write on open');
  const c=await page('car.html','car.js',{categories,accounts,car_installments:[]},'open');
  assert.equal(c.el('nextNo').textContent,'ยังไม่มีตารางผ่อน');assert.equal(c.el('carSavedLink').hidden,true);assert.equal(c.el('carInstallmentDetails').open,false);assert.equal(c.el('carRows').closest('details').id,'carInstallmentDetails');c.el('carInstallmentDetails').open=true;assert.equal(c.el('carRows').isConnected,true);
  c.api.open({id:'car',installment_no:1,status:'pending'});c.state.fail=true;

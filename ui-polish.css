@@ -191,3 +191,15 @@ html{scroll-behavior:auto}
  dialog::backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}
  .app-menu-sheet::backdrop{backdrop-filter:none;-webkit-backdrop-filter:none}
 }
+
+/* Menu clarity and compact detail views */
+.settings-group-heading{grid-column:1/-1;margin:18px 0 0;color:var(--muted);font-size:14px}
+.category-usage{display:block;font-size:12px;font-weight:400;margin-top:4px}
+.summary-status-control{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;font-size:14px;color:var(--muted)}
+.summary-status-control select{width:auto;max-width:100%;min-width:0}
+.detail-editor>summary{cursor:pointer;min-height:48px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;font-weight:650}
+.detail-shortcuts{display:flex;flex-wrap:wrap;gap:10px}
+.budget-over{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--red) 10%,var(--card))}
+.rent-check-summary{border-left:3px solid var(--primary);padding:12px;background:var(--card);line-height:1.8;overflow-wrap:anywhere}
+.home-feed>.home-detail{margin-top:0}
+@media(max-width:650px){.summary-status-control{display:block}.summary-status-control select{display:block;width:100%;margin-top:6px}.detail-shortcuts>.btn{flex:1 1 140px}#transactionsPage .tx-filter-fields{grid-template-columns:minmax(0,1fr)}}
