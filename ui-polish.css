@@ -196,7 +196,7 @@ html{scroll-behavior:auto}
 .settings-group-heading{grid-column:1/-1;margin:18px 0 0;color:var(--muted);font-size:14px}
 .category-usage{display:block;font-size:12px;font-weight:400;margin-top:4px}
 .summary-status-control{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;font-size:14px;color:var(--muted)}
-.summary-status-control select{width:auto;max-width:100%;min-width:0}
+.summary-status-control select{width:auto;max-width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit;font-size:16px}
 .detail-editor>summary{cursor:pointer;min-height:48px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;font-weight:650}
 .detail-shortcuts{display:flex;flex-wrap:wrap;gap:10px}
 .budget-over{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--red) 10%,var(--card))}

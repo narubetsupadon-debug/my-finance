@@ -13,13 +13,13 @@ if(!params.has('screen')){
  const transactions=[['a','2026-10-01',120,'อาหาร'],['b','2026-10-03',180,'อาหาร'],['c','2026-10-07',90,'อาหาร'],['rent','2026-10-05',7210,'ห้องเช่า'],['coffee','2026-10-04',65,'กาแฟ'],['prior','2026-09-02',300,'อาหาร'],['prior-rent','2026-09-05',7000,'ห้องเช่า']].map(([id,transaction_date,amount,name])=>({id,transaction_date,amount,type:'expense',status:'paid',source:name==='ห้องเช่า'?'rent':'web',description:name+' (ตัวอย่าง)',categories:{name},accounts:{name:'บัญชีตัวอย่าง'}}));
  const records=[{transaction_id:'rent',my_amount:3605},{transaction_id:'prior-rent',my_amount:3500}];
  transactions.push({id:'income',transaction_date:'2026-10-01',amount:23000,type:'income',status:'paid',description:'เงินเดือนตัวอย่าง',categories:{name:'เงินเดือน'}});
- const {createSummaryRenderer}=await import('../app-summary.js?v=20261015-menus53');
+ const {createSummaryRenderer}=await import('../app-summary.js?v=20261015-menus54');
  const chartScript=document.createElement('script');chartScript.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js';document.head.append(chartScript);await new Promise((resolve,reject)=>{chartScript.onload=resolve;chartScript.onerror=reject});
  document.documentElement.dataset.resolvedTheme=params.has('dark')?'dark':'light';
  const render=createSummaryRenderer({$,money:n=>'฿'+Number(n).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}),esc:s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;'),bangkokDay:()=> '2026-10-15',getTransactions:()=>transactions,getRentRecords:()=>records,ChartCtor:window.Chart});
  document.querySelectorAll('[data-summary-range]').forEach(b=>b.onclick=()=>render.setRange(b.dataset.summaryRange));
  $('summaryYear').onchange=render;$('summaryMonth').onchange=render;render();
- const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261015-menus53';document.body.append(nav);location.hash='summary';
+ const nav=document.createElement('script');nav.type='module';nav.src='../app-nav.js?v=20261015-menus54';document.body.append(nav);location.hash='summary';
 }
 function $(id){return document.getElementById(id);}
 </script></body></html>

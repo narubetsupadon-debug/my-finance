@@ -1,5 +1,5 @@
-import {createTotalDetails} from './total-details.js?v=20261015-menus53';
-import {recurringBillMonthStatus} from './finance-core.js?v=20261015-menus53';
+import {createTotalDetails} from './total-details.js?v=20261015-menus54';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261015-menus54';
 // Bills, debts, and budget rendering extracted from app.js.
 export function createPlanningRenderer({$,money,esc,bangkokDay,budgetSummary,getBills,getDebts,getBudgets,getTransactions}){
 const openDetails=createTotalDetails({$,money,fmtDate:date=>date});
