@@ -8,7 +8,7 @@ if(!params.has('screen')){
  const title=document.createElement('h1');title.textContent='ทดสอบมือถือ · ข้อมูลจำลอง ไม่บันทึกเข้าบัญชีจริง';title.style.fontSize='18px';document.body.append(title);
  for(const width of [390,320]){const frame=document.createElement('iframe');frame.title=width+'px';const query=new URLSearchParams(params);query.set('screen','1');frame.src='./ui-mobile-smoke.html?'+query;frame.style.cssText='width:'+width+'px;height:1000px;border:0;margin:12px;vertical-align:top';document.body.append(frame);}
 }else{
- const source=await (await fetch('../'+view+'.html')).text();const parsed=new DOMParser().parseFromString(source,'text/html');
+ const source=await (await fetch('../'+view+'.html',{cache:'no-store'})).text();const parsed=new DOMParser().parseFromString(source,'text/html');
  for(const link of parsed.querySelectorAll('link[rel=stylesheet]')){const clone=link.cloneNode();clone.href=new URL(link.getAttribute('href'),new URL('../'+view+'.html',location.href));document.head.append(clone);}
  for(const style of parsed.querySelectorAll('style'))document.head.append(style.cloneNode(true));
  document.body.innerHTML=parsed.body.innerHTML;document.querySelectorAll('script').forEach(s=>s.remove());
@@ -46,7 +46,7 @@ if(!params.has('screen')){
     return {data:{id:row?.id||rows()[0]?.id||'saved'},error:null};
    },async range(a,b){if(mode==='uncertain')return {data:null,error:{message:'offline'}};return {data:rows().slice(a,b+1),error:null}},then(resolve,reject){return Promise.resolve({data:rows(),error:null}).then(resolve,reject)}};return q;
  }};
- const appText=(await (await fetch('../'+(view==='index'?'app':view)+'.js')).text()).replace(/^import\s*\{\s*createClient\s*\}\s*from .*$/m,'const createClient=()=>window.fixtureDb;').replace("navigator.serviceWorker.register('./sw.js'","navigator.serviceWorker.register('../sw.js'").replace(/from '(\.\/[^']+)'/g,(_,path)=>"from '"+new URL('../'+path.slice(2),location.href).href+"'");
+ const appText=(await (await fetch('../'+(view==='index'?'app':view)+'.js',{cache:'no-store'})).text()).replace(/^import\s*\{\s*createClient\s*\}\s*from .*$/m,'const createClient=()=>window.fixtureDb;').replace("navigator.serviceWorker.register('./sw.js'","navigator.serviceWorker.register('../sw.js'").replace(/from '(\.\/[^']+)'/g,(_,path)=>"from '"+new URL('../'+path.slice(2),location.href).href+"'");
  const url=URL.createObjectURL(new Blob([appText],{type:'text/javascript'}));
  const app=document.createElement('script');app.type='module';app.src=url;document.body.append(app);
  await new Promise((resolve,reject)=>{app.onload=resolve;app.onerror=reject});URL.revokeObjectURL(url);
