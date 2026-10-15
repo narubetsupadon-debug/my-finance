@@ -66,7 +66,7 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.equal(unclear.el('txDialog').open,true);assert.equal(unclear.el('txAmount').value,'10');assert.equal(unclear.el('txForm').querySelector('[type=submit]').disabled,false);
  unclear.state.fail=false;await unclear.el('txForm').onsubmit({preventDefault(){},currentTarget:unclear.el('txForm')});
  assert.equal(unclear.state.writes[0].row.id,unclear.state.writes[1].row.id,'Retry must keep the same draft identity');
- assert.equal(unclear.el('appToast').dataset.saveState,'success');unclear.close();
+ assert.equal(unclear.el('appToast').dataset.saveState,'success');unclear.w.openTx();assert.equal(unclear.el('appToast').classList.contains('hidden'),true,'Old success must not describe a new draft');unclear.close();
  const rejected=await page('index.html','app.js',{categories,accounts,transactions:[]},'');
  rejected.w.openTx();rejected.el('txDesc').value='rejected fixture';rejected.el('txAmount').value='10';rejected.el('txCategory').value='cat';rejected.state.writeError={code:'23514',message:'invalid amount'};
  await rejected.el('txForm').onsubmit({preventDefault(){},currentTarget:rejected.el('txForm')});

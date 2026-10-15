@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261015-save49';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-save49';
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-save49';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-save49';
-import {createSummaryRenderer} from './app-summary.js?v=20261015-save49';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261015-save49';
-import {createTransactionRenderer} from './app-transactions.js?v=20261015-save49';
-import {createPlanningRenderer} from './app-planning.js?v=20261015-save49';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-save49';
+import {createCapacityMonitor} from './app-storage.js?v=20261015-save50';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-save50';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-save50';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-save50';
+import {createSummaryRenderer} from './app-summary.js?v=20261015-save50';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261015-save50';
+import {createTransactionRenderer} from './app-transactions.js?v=20261015-save50';
+import {createPlanningRenderer} from './app-planning.js?v=20261015-save50';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-save50';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -519,6 +519,7 @@ function saveFavorite(row){
 
 window.openTx=(id=null)=>{
  if(!user||$('txForm').querySelector('button[type=submit]').disabled)return;
+ $('appToast')?.classList.add('hidden');
  duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden');
  editing={type:'tx',id};$('txFavorite').checked=false;$('txError').classList.add('hidden');$('txExtra').open=false;$('txRepeatSection').open=false;
  $('txDialogTitle').textContent=id?'แก้ไขรายการ':'บันทึกรายการ';
