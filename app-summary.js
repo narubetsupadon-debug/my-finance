@@ -1,5 +1,5 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261015-menus54';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261015-menus54';
+import {sumTransactionAmounts} from './finance-core.js?v=20261017-pdf55';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-pdf55';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
@@ -25,7 +25,7 @@ export function rentShareTotals(rows,records=[]){
 // Summary page renderer. Keeps summary grouping and chart state out of app.js.
 export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,getRentRecords=()=>[],ChartCtor=null}){
  const openTotals=createTotalDetails({$,money,fmtDate:date=>date});
- let pieChart=null;
+ let pieChart=null,lastReport=null;
 
 function excelGroup(x){
  if(x.source==='rent')return 'ห้องเช่า'
@@ -86,6 +86,9 @@ function renderSummary(){
  const rows=config.mode==='days'
   ?valid.filter(x=>String(x.transaction_date).slice(0,7)===config.monthKey)
   :valid.filter(x=>config.keys.includes(String(x.transaction_date).slice(0,7)))
+ lastReport={label:config.label,scope:scope+' · ไม่รวมยกเลิก',paidOnly,mode:config.mode,
+  keys:[...summaryTimelineKeys(config,bangkokDay(),rows)],
+  rows:rows.map(x=>({transaction_date:x.transaction_date,type:x.type,amount:x.amount,description:x.description,status:x.status,reportCategory:excelGroup(x)}))};
  const inc=sumTransactionAmounts(rows,'income'),exp=sumTransactionAmounts(rows,'expense')
  $('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumBalance').textContent=money(inc-exp)
  $('summaryPeriodText').textContent='กำลังดู '+config.label
@@ -128,6 +131,8 @@ function renderSummary(){
 
 }
 renderSummary.setRange=range=>{selectedRange=range;renderSummary()}
+// Snapshot the same rows and status scope used by the visible summary totals.
+renderSummary.getReport=()=>lastReport?{...lastReport,keys:[...lastReport.keys],rows:lastReport.rows.map(x=>({...x}))}:null;
 
 
  return renderSummary;

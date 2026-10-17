@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261015-menus54';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261015-menus54';
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261015-menus54';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261015-menus54';
-import {createSummaryRenderer} from './app-summary.js?v=20261015-menus54';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261015-menus54';
-import {createTransactionRenderer} from './app-transactions.js?v=20261015-menus54';
-import {createPlanningRenderer} from './app-planning.js?v=20261015-menus54';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261015-menus54';
+import {createCapacityMonitor} from './app-storage.js?v=20261017-pdf55';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261017-pdf55';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261017-pdf55';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261017-pdf55';
+import {createSummaryRenderer} from './app-summary.js?v=20261017-pdf55';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261017-pdf55';
+import {createTransactionRenderer} from './app-transactions.js?v=20261017-pdf55';
+import {createPlanningRenderer} from './app-planning.js?v=20261017-pdf55';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261017-pdf55';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -31,6 +31,8 @@ const formatAccountNumber=value=>{
 function accountLabel(a){return String(a?.name||'')+(a?.account_number?' · •••• '+String(a.account_number).replace(/\D/g,'').slice(-4):'')}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),rentRecords=[],duplicateOverride=false,lastSyncAt=null,sessionRevision=0
+let summaryPdfUrl=null;
+function clearSummaryPdf(){if(summaryPdfUrl)URL.revokeObjectURL(summaryPdfUrl);summaryPdfUrl=null;$('summaryPdfStatus')?.replaceChildren();}
 
 const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
 const PUSH_ENDPOINT='https://mmvdhopogchcxwlstflk.supabase.co/functions/v1/push-reminders';
@@ -128,6 +130,7 @@ function applyUiSettings(){
  document.documentElement.style.setProperty('--primary',accent[0]);
  document.documentElement.style.setProperty('--primary2',accent[1]);
  document.body?.classList.toggle('privacy-mode',!!uiSettings.privacy);
+ if(uiSettings.privacy)clearSummaryPdf();
  document.querySelectorAll('[data-accent]').forEach(b=>b.classList.toggle('active',b.dataset.accent===uiSettings.accent));
 }
 function orderedQuickItems(){
@@ -181,6 +184,7 @@ async function requestLogout(button){
 $('logout').onclick=()=>requestLogout($('logout'));
 $('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settingsLogout')));
 function clearSessionUI(){
+ clearSummaryPdf();
  sessionRevision++;user=null;refreshCoordinator.dispose();capacityMonitor.clear();
  if(channel){supabase.removeChannel(channel);channel=null}
  categories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();rentRecords=[];lastSyncAt=null;
@@ -388,6 +392,26 @@ const renderSummary=createSummaryRenderer({
  getRentRecords:()=>rentRecords,
  ChartCtor:typeof Chart==='undefined'?null:Chart
 });
+$('exportSummaryPdf').onclick=async()=>{
+ const button=$('exportSummaryPdf'),status=$('summaryPdfStatus');
+ if(button.disabled)return;
+ if(!user||!lastSyncAt||!$('dataError').classList.contains('hidden')){status.textContent='กรุณาโหลดข้อมูลให้สำเร็จก่อนดาวน์โหลด PDF';return;}
+ if(document.body.classList.contains('privacy-mode')){status.textContent='ปิดซ่อนยอดเงินในตั้งค่าก่อนดาวน์โหลด PDF ที่มีข้อมูลการเงินจริง';return;}
+ const report=renderSummary.getReport();if(!report){status.textContent='กรุณาเลือกช่วงเวลาใหม่ก่อนดาวน์โหลด';return;}
+ const revision=sessionRevision,owner=user.id;
+ const cancelled=()=>sessionRevision!==revision||user?.id!==owner||document.body.classList.contains('privacy-mode');
+ clearSummaryPdf();button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='กำลังสร้าง PDF…';status.textContent='กำลังเตรียมรายงานตามช่วงเวลาและสถานะที่เลือก…';
+ try{
+  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261017-pdf55');
+  if(cancelled())return;
+  const result=await createSummaryPdf(report,{isCancelled:cancelled,onProgress:(page,total)=>{status.textContent=`กำลังสร้าง PDF หน้า ${page}/${total}…`;}});
+  if(cancelled())return;
+  summaryPdfUrl=URL.createObjectURL(result.blob);
+  const link=document.createElement('a');link.href=summaryPdfUrl;link.download=result.filename;link.textContent='แตะดาวน์โหลดไฟล์อีกครั้ง';
+  status.replaceChildren(document.createTextNode(`PDF ${result.pageCount} หน้า พร้อมแล้ว · `),link);link.click();
+ }catch(error){if(!cancelled())status.textContent=error.message||'สร้าง PDF ไม่สำเร็จ กรุณาลองใหม่';}
+ finally{button.disabled=false;button.removeAttribute('aria-busy');button.textContent='↓ ดาวน์โหลด PDF';}
+};
 function renderCardPaymentSuggestions(){
  const box=$('cardPaymentSuggest'),list=$('cardPaymentList'); if(!box||!list)return
  const cat=categories.find(c=>c.id===$('txCategory').value),show=$('txType').value==='expense'&&cat?.name==='หนี้/ผ่อน'
