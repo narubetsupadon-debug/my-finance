@@ -121,8 +121,8 @@ export function createRetrySafeInsert(){
  return async function insert(db,table,row){
   const signature=JSON.stringify(row);
   if(draft&&draft.owner!==row.user_id)draft=null;
-  if(draft&&draft.signature!==signature)throw new Error('รายการก่อนหน้ายังรอยืนยัน กรุณาลองข้อมูลเดิมหรือรีเฟรชตรวจรายการก่อนเปลี่ยนข้อมูล');
-  if(!draft)draft={id:crypto.randomUUID(),owner:row.user_id,signature};
+  if(draft&&(draft.table!==table||draft.signature!==signature))throw new Error('รายการก่อนหน้ายังรอยืนยัน กรุณาลองข้อมูลเดิมหรือรีเฟรชตรวจรายการก่อนเปลี่ยนข้อมูล');
+  if(!draft)draft={id:crypto.randomUUID(),owner:row.user_id,table,signature};
   const id=draft.id;
   try{
    const {data,error}=await db.from(table).insert({...row,id}).select('id').single();
