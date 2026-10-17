@@ -818,14 +818,17 @@ $('txSubcategoryAdd')?.addEventListener('click',async()=>{
  if(!name||name.length>40){showAppToast('ชื่อหมวดย่อยต้องมี 1–40 ตัวอักษร');return;}
  const existing=[...(SUBCATEGORY_DEFAULTS[cat.name]||[]),...subcategories.filter(s=>s.category_id===cat.id).map(s=>s.name)];
  if(existing.some(x=>x.toLocaleLowerCase('th-TH')===name.toLocaleLowerCase('th-TH'))){syncTxSubcategory(existing.find(x=>x.toLocaleLowerCase('th-TH')===name.toLocaleLowerCase('th-TH')));return;}
- const button=$('txSubcategoryAdd');button.disabled=true;
+ const button=$('txSubcategoryAdd'),ownerId=user.id,categoryId=cat.id;button.disabled=true;
  try{
-  const {data,error}=await supabase.from('finance_subcategories').insert({user_id:user.id,category_id:cat.id,name}).select('*').single();
+  const {data,error}=await supabase.from('finance_subcategories').insert({user_id:ownerId,category_id:categoryId,name}).select('*').single();
   if(error)throw error;
-  subcategories.push(data);syncTxSubcategory(name);
+  if(user?.id!==ownerId)return;
+  if(!subcategories.some(item=>item.id===data.id))subcategories.push(data);
+  if($('txCategory').value===categoryId)syncTxSubcategory(name);
   showAppToast('เพิ่มหมวดย่อย '+name+' แล้ว ✅');
- }catch(error){showAppToast('เพิ่มหมวดย่อยไม่ได้: '+financeSaveFeedback(error).message)}
- finally{button.disabled=false;}
+ }catch(error){
+  if(user?.id===ownerId)showAppToast('เพิ่มหมวดย่อยไม่ได้: '+financeSaveFeedback(error).message);
+ }finally{button.disabled=false;}
 });
 function fillTxSelectors(){
  syncTxType();
