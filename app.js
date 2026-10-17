@@ -968,6 +968,9 @@ $('txForm').onsubmit=async e=>{
  const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:transactions.find(x=>x.id===editing.id)?.status||'paid',note:$('txNote').value.trim()||null,source:transactions.find(x=>x.id===editing.id)?.source||'web',subcategory:$('txSubcategory')?.disabled?null:$('txSubcategory').value||null};
  if(!row.description||!Number.isFinite(row.amount)||row.amount<=0)return txError('กรอกรายละเอียดและยอดเงินให้ครบ');
  if(!row.category_id)return txError('เลือกหมวดหมู่ก่อนบันทึก');
+  const selectedCategory=categories.find(c=>c.id===row.category_id);
+  const allowedSubcategories=[...(SUBCATEGORY_DEFAULTS[selectedCategory?.name]||[]),...subcategories.filter(s=>s.category_id===row.category_id&&s.is_active!==false).map(s=>s.name)];
+  if(!allowedSubcategories.includes(row.subcategory))row.subcategory=null;
   
  if(!editing.id&&!duplicateOverride){
   const duplicates=findDuplicateCandidates(row,transactions);
