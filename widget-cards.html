@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Widget วงเงินบัตรเครดิต · My Finance</title>
+<style>body{font:16px/1.75 system-ui;background:#0b0e14;color:#f4f6fb;max-width:600px;margin:24px auto;padding:20px}h1{font-size:26px}p,li{color:#b8c2d4}li{margin:14px 0}b{color:#f4f6fb}button{background:#a78bfa;color:#17102c;padding:15px 20px;border:0;border-radius:14px;font:inherit;font-weight:600}button:disabled{opacity:.5}textarea{box-sizing:border-box;width:100%;height:160px;border:1px solid #343d50;border-radius:12px;background:#121722;color:#dce1ee;padding:12px;font:12px monospace}a{color:#c4b5fd}.note{padding:16px;background:#171e2b;border-radius:16px}</style>
+<h1>💳 วงเงินบัตรเครดิตเหลือเท่าไหร่</h1>
+<p class="note">สคริปต์บัตรเครดิตโดยเฉพาะ <b>ไม่ต้องใส่ Parameter</b> กด ▶ ใน Scriptable ก็เห็นตัวอย่างบัตรทันที</p>
+<ol>
+<li>กด <b>คัดลอกสคริปต์บัตรเครดิต</b> ด้านล่าง</li>
+<li>เปิด <b>Scriptable → +</b> วางโค้ด แล้วตั้งชื่อ <b>My Finance Cards</b></li>
+<li>กด <b>▶</b> เพื่อดูตัวอย่าง หากมีหน้าต่างเข้าสู่ระบบ ใช้บัญชีเดียวกับ My Finance</li>
+<li>บนหน้าจอโฮม กด Widget ค้าง → <b>แก้ไขวิดเจ็ต</b> → ช่อง <b>Script</b> เลือก <b>My Finance Cards</b> ช่อง Parameter เว้นว่าง</li>
+</ol>
+<button id="copy" type="button" disabled>คัดลอกสคริปต์บัตรเครดิต</button>
+<p id="status" role="status">กำลังโหลด…</p>
+<textarea id="code" readonly aria-label="สคริปต์บัตรเครดิต"></textarea>
+<p>เล็ก 1 บัตร · กลาง 2 บัตร · ใหญ่ 3 บัตร แสดงชื่อและวงเงินเหลือเป็นหลัก พร้อมยอดใช้และวงเงินเต็ม อ้างอิงข้อมูลที่บันทึกในแอป ไม่ใช่ยอดสดจากธนาคาร iPhone เป็นผู้กำหนดเวลาที่ Widget อัปเดต</p>
+<p>กรอกรหัสผ่านใน Scriptable เท่านั้น สคริปต์อ่านข้อมูลตามสิทธิ์บัญชีและเก็บ session ใน Keychain</p>
+<a href="./#debts">เปิดเมนูบัตรใน My Finance</a>
+<script>
+const code=document.getElementById('code'),status=document.getElementById('status'),button=document.getElementById('copy');
+fetch('./My-Finance-Cards.js?v=cards-direct1',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.text()}).then(s=>{if(!s.includes("mode=cardMode('cards')"))throw Error();code.value=s;button.disabled=false;status.textContent='พร้อมคัดลอก · สคริปต์บัตรเครดิตค่ะ'}).catch(()=>{status.textContent='โหลดไม่สำเร็จ กรุณารีเฟรชอีกครั้งค่ะ'});
+button.onclick=async()=>{try{await navigator.clipboard.writeText(code.value);status.textContent='คัดลอกแล้วค่ะ เปิด Scriptable → + → วาง → ตั้งชื่อ My Finance Cards'}catch{code.focus();code.select();status.textContent='กดค้างในช่องโค้ด → เลือกทั้งหมด → คัดลอกค่ะ'}};
+</script></html>
