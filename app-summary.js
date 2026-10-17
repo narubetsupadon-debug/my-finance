@@ -99,7 +99,8 @@ function renderSummary(){
  document.querySelectorAll('[data-summary-range]').forEach(b=>{const active=b.dataset.summaryRange===selectedRange;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))})
  $('summaryCustomFilters').classList.toggle('hidden',selectedRange!=='custom')
 
- const grouped=rows.filter(x=>x.type==='expense').reduce((o,x)=>{const g=excelGroup(x);o[g]=(o[g]||0)+Number(x.amount);return o},{})
+ const groupedCents=rows.filter(x=>x.type==='expense').reduce((o,x)=>{const g=excelGroup(x);o[g]=(o[g]||0)+Math.round(Number(x.amount||0)*100);return o},{});
+ const grouped=Object.fromEntries(Object.entries(groupedCents).map(([name,cents])=>[name,cents/100]));
  $('sumDebtPay').textContent=money(grouped['ชำระบัตร/สินเชื่อ']||0)
  const rent=rentShareTotals(rows.filter(x=>x.type==='expense'&&excelGroup(x)==='ห้องเช่า'),getRentRecords())
  const carTotal=(grouped['ค่างวดรถ']||0)+(grouped['น้ำมันรถ']||0)+(grouped['ซ่อม/ประกัน/ภาษีรถ']||0)+(grouped['ค่าใช้รถอื่น ๆ']||0)+(grouped['รถยนต์อื่น ๆ']||0)

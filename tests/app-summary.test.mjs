@@ -56,6 +56,7 @@ try{
  transactions=[{transaction_date:'2026-10-06',type:'expense',amount:25,status:'paid',categories:{name:'อาหาร'}},{transaction_date:'2026-10-07',type:'expense',amount:10,status:'paid',categories:{name:'อาหาร'}},{transaction_date:'2026-10-07',type:'expense',amount:70,status:'pending'},{transaction_date:'2026-10-31',type:'expense',amount:100,status:'paid'},{transaction_date:'2026-10-06',type:'expense',amount:999,status:'cancelled'}];
  $('summaryStatus').value='paid';render();assert.equal($('sumExpense').textContent,'35');assert.equal(charts.at(-1).config.data.datasets[0].data.reduce((a,b)=>a+b,0),35);assert.match($('summaryScope').textContent,/เฉพาะรับ\/จ่ายแล้วถึงวันนี้/);
  $('summaryStatus').value='all';render();assert.equal($('sumExpense').textContent,'205');
+ transactions=[{transaction_date:'2026-10-06',type:'expense',amount:0.1,status:'paid',categories:{name:'อาหาร'}},{transaction_date:'2026-10-06',type:'expense',amount:0.2,status:'paid',categories:{name:'อาหาร'}}];render();assert.equal($('sumExpense').textContent,'0.3');assert.equal(charts.at(-1).config.data.datasets[0].data[0],0.3,'Category charts must sum exact satang');
 }finally{globalThis.document=previousDocument;}
 console.log('PASS compact summary: totals, ranges, one percentage chart, category remainder, empty state, themes and unchanged pending/future scope');
 
