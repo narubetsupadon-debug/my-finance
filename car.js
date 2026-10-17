@@ -1,7 +1,9 @@
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261017-pdf55';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261017-perf56';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const detailDateFormatter=new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'numeric'});
+const currencyFormatter=new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'});
 const retrySafeInsert=createRetrySafeInsert();
-const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W',{global:{fetch:createFinanceFetch()}});const $=id=>document.getElementById(id),money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0)),date=s=>new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});let user,rows=[],expenseRows=[],editing,editingExpense=null,accounts=[],categories=[];
+const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W',{global:{fetch:createFinanceFetch()}});const $=id=>document.getElementById(id),money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':currencyFormatter.format(Number(n||0)),date=s=>detailDateFormatter.format(new Date(s+'T00:00:00'));let user,rows=[],expenseRows=[],editing,editingExpense=null,accounts=[],categories=[];
 function msg(s,saved=false,state=''){$('carMessage').dataset.saveState=state||(saved?'success':'');$('carFormMessage').dataset.saveState=state||(saved?'success':'');$('carMessage').dataset.loading='false';$('carMessage').textContent=s;$('carSavedLink').hidden=!saved;if(saved)$('carMessage').scrollIntoView({block:'nearest',behavior:'smooth'});if($('carDialog').open)$('carFormMessage').textContent=s;}
 function option(el,id,name){const o=document.createElement('option');o.value=id;o.textContent=name;el.append(o);}
 async function load(){

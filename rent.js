@@ -1,9 +1,11 @@
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261017-pdf55';
-import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261017-pdf55';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261017-perf56';
+import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261017-perf56';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const detailDateFormatter=new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'numeric'});
+const currencyFormatter=new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'});
 const retrySafeInsert=createRetrySafeInsert();
 const db=createClient('https://mmvdhopogchcxwlstflk.supabase.co','sb_publishable_PYkDjHN3ULlFW9BavMvAVQ_d77eZZ5W',{global:{fetch:createFinanceFetch()}});
-const $=id=>document.getElementById(id),money=n=>document.body.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(Number(n||0)),month=s=>new Date(s.slice(0,7)+'-01T00:00:00').toLocaleDateString('th-TH',{month:'long',year:'numeric'}),day=s=>s?new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'—';
+const $=id=>document.getElementById(id),money=n=>document.body.classList.contains('privacy-mode')?'฿ ••••':currencyFormatter.format(Number(n||0)),month=s=>new Date(s.slice(0,7)+'-01T00:00:00').toLocaleDateString('th-TH',{month:'long',year:'numeric'}),day=s=>s?detailDateFormatter.format(new Date(s+'T00:00:00')):'—';
 let user,rows=[],transactions=[],accounts=[],categories=[],editing=null,autoHalf=true;
 function option(el,value,label){const o=document.createElement('option');o.value=value;o.textContent=label;el.append(o);}
 function message(s,saved=false){$('rentMessage').dataset.loading='false';$('rentMessage').textContent=s;$('rentSavedLink').hidden=!saved;}

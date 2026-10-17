@@ -1,16 +1,16 @@
-const CACHE='my-finance-v99-pdf55';
-const SHELL=['./','./index.html','./style.css?v=20261017-pdf55','./minimal-dark.css?v=20261017-pdf55','./theme.js?v=20261017-pdf55','./app.js?v=20261017-pdf55','./app-data.js?v=20261017-pdf55','./app-summary.js?v=20261017-pdf55','./app-dashboard.js?v=20261017-pdf55','./app-transactions.js?v=20261017-pdf55','./app-planning.js?v=20261017-pdf55','./app-safety.js?v=20261017-pdf55','./finance-core.js?v=20261017-pdf55','./finance-backup.js?v=20261017-pdf55','./app-nav.js?v=20261017-pdf55','./rent.html','./rent.css?v=20261017-pdf55','./rent.js?v=20261017-pdf55','./rent-core.js?v=20261017-pdf55','./car.html','./car.css?v=20261017-pdf55','./car.js?v=20261017-pdf55','./salary.html','./salary.js?v=20261017-pdf55','./salary-payslip.js?v=20261017-pdf55','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261017-pdf55','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
-SHELL.push('./ui-polish.css?v=20261017-pdf55');
-SHELL.push('./app-storage.js?v=20261017-pdf55');
-SHELL.push('./expense-analysis.js?v=20261017-pdf55');
-SHELL.push('./total-details.js?v=20261017-pdf55');
-SHELL.push('./slip-reader.js?v=20261017-pdf55');
-SHELL.push('./summary-pdf.js?v=20261017-pdf55','./fonts/Sarabun-Regular.ttf','./vendor/jspdf-4.2.1.umd.min.js');
+const CACHE='my-finance-v100-perf56';
+const SHELL=['./','./index.html','./style.css?v=20261017-perf56','./minimal-dark.css?v=20261017-perf56','./theme.js?v=20261017-perf56','./app.js?v=20261017-perf56','./app-data.js?v=20261017-perf56','./app-summary.js?v=20261017-perf56','./app-dashboard.js?v=20261017-perf56','./app-transactions.js?v=20261017-perf56','./app-planning.js?v=20261017-perf56','./app-safety.js?v=20261017-perf56','./finance-core.js?v=20261017-perf56','./finance-backup.js?v=20261017-perf56','./app-nav.js?v=20261017-perf56','./rent.html','./rent.css?v=20261017-perf56','./rent.js?v=20261017-perf56','./rent-core.js?v=20261017-perf56','./car.html','./car.css?v=20261017-perf56','./car.js?v=20261017-perf56','./salary.html','./salary.js?v=20261017-perf56','./salary-payslip.js?v=20261017-perf56','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261017-perf56','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+SHELL.push('./ui-polish.css?v=20261017-perf56');
+SHELL.push('./app-storage.js?v=20261017-perf56');
+SHELL.push('./expense-analysis.js?v=20261017-perf56');
+SHELL.push('./total-details.js?v=20261017-perf56');
+SHELL.push('./slip-reader.js?v=20261017-perf56');
+SHELL.push('./summary-pdf.js?v=20261017-perf56','./fonts/Sarabun-Regular.ttf?v=20261017-perf56','./vendor/jspdf-4.2.1.umd.min.js?v=20261017-perf56','./vendor/chart-4.4.7.umd.js?v=20261017-perf56');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
  if(e.request.method!=='GET'||new URL(e.request.url).origin!==location.origin)return;
- const versioned=new URL(e.request.url).searchParams.has('v')&&/\.(js|css|svg)$/.test(new URL(e.request.url).pathname);
+ const versioned=new URL(e.request.url).searchParams.has('v')&&/\.(js|css|svg|ttf|woff2)$/.test(new URL(e.request.url).pathname);
  const network=()=>fetch(e.request,{cache:'no-cache'}).then(r=>{
   if(r.ok){const copy=r.clone();e.waitUntil(caches.open(CACHE).then(c=>c.put(e.request,copy)));}
   return r;

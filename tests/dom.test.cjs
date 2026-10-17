@@ -141,6 +141,11 @@ async function page(html,js,data,expose,storage={},options={}){
  }
  accountPage.close();
  console.log('PASS account save: pasted separators removed, leading zeros preserved, empty number remains null');
+ const deferred=await page('index.html','app.js',{categories,accounts,transactions:[]},'scheduleLoad,get lastSync(){return lastSyncAt}');
+ let hidden=true;Object.defineProperty(deferred.w.document,'hidden',{configurable:true,get:()=>hidden});
+ const lastSync=deferred.api.lastSync;deferred.api.scheduleLoad();await new Promise(r=>setTimeout(r,400));assert.equal(deferred.api.lastSync,lastSync,'Realtime refresh waits while app is hidden');
+ hidden=false;deferred.w.document.dispatchEvent(new deferred.w.Event('visibilitychange'));await new Promise(r=>setTimeout(r,450));assert.notEqual(deferred.api.lastSync,lastSync,'Returning to the app flushes deferred refresh');deferred.close();
+ console.log('PASS background efficiency: realtime refresh deferred while hidden and resumed on return');
  const transactions=Array.from({length:1201},(_,i)=>({id:'t'+i,user_id:'user',type:'expense',status:'paid',source:'import_r3_v2',transaction_date:day,description:'food',amount:1,category_id:'cat',account_id:'acc',categories:categories[0],accounts:accounts[0]}));
  transactions[0].status='cancelled';
  const p=await page('index.html','app.js',{categories,accounts,transactions,car_expenses:[{id:'ce1',user_id:'user',transaction_id:'t1'}]},'loadAll,fillTxSelectors,checkDailyRollover,refreshHealthCheck');
@@ -153,9 +158,9 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.equal(p.el('txFilters').open,false,'secondary filters start collapsed');
  assert.equal(p.el('txFilterMonth').tagName,'SELECT','month selector must not rely on mobile native month inputs');
  assert.equal(p.el('txList').querySelectorAll('.tx-day-group').length,1);
- assert.equal(p.el('txList').querySelectorAll('.tx-row-menu').length,1201);
+ assert.equal(p.el('txList').querySelectorAll('.tx-row-menu').length,100);
  assert.equal(p.el('txList').querySelector('.tx-row-menu').open,false);
- p.el('txSearch').value='not-a-real-description';p.el('txSearch').oninput();assert.match(p.el('txList').textContent,/ไม่พบรายการที่ตรงกัน/);assert.equal(p.el('txResetFilters').hidden,false);
+ p.el('txSearch').value='not-a-real-description';p.el('txSearch').oninput();await new Promise(r=>setTimeout(r,180));assert.match(p.el('txList').textContent,/ไม่พบรายการที่ตรงกัน/);assert.equal(p.el('txResetFilters').hidden,false);
  p.el('txResetFilters').click();assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.equal(p.el('txResetFilters').hidden,true);
  p.el('txFilterType').value='income';p.el('txFilterType').onchange();assert.equal(p.el('txFilterBadge').textContent,'1');assert.equal(p.el('txFilterBadge').hidden,false);p.el('txResetFilters').click();
  p.el('txFilterMonth').value=day.slice(0,7);p.el('txFilterMonth').onchange();assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.equal(p.el('txFilterMonth').value,day.slice(0,7));p.el('txResetFilters').click();

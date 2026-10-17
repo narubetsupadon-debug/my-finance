@@ -1,6 +1,7 @@
 // Shared date, aggregation and complete-read helpers. No customer data here.
+const bangkokDayFormatter=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'});
 export function bangkokDay(instant = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(instant);
+  const parts = bangkokDayFormatter.formatToParts(instant);
   return ['year','month','day'].map(key=>parts.find(p=>p.type===key).value).join('-');
 }
 export function bangkokDate(instant = new Date()) { return new Date(bangkokDay(instant)+'T12:00:00'); }
