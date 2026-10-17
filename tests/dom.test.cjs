@@ -41,6 +41,36 @@ async function page(html,js,data,expose,storage={},options={}){
  return {w,api,state,close:()=>w.close(),el:id=>w.document.getElementById(id)};
 }
 (async()=>{
+
+ // Logos persist independently of names, while amounts and existing edit actions remain intact.
+ const walletData={categories:[],accounts:[],transactions:[],debts:[
+  {id:'logo1',user_id:'user',name:'KBank Credit Card',debt_type:'credit_card',original_amount:10000,outstanding_amount:900,installment_amount:50,due_day:25,is_active:true},
+  {id:'logo2',user_id:'user',name:'Shopee SEasyCash',debt_type:'loan',original_amount:30000,outstanding_amount:20000,installment_amount:1500,is_active:true},
+  {id:'logo3',user_id:'user',name:'<img src=x onerror=alert(1)>',debt_type:'loan',outstanding_amount:999999,is_active:false}
+ ]};
+ const walletPage=await page('index.html','app.js',walletData,'loadAll');walletPage.state.persistWrites=true;
+ assert.equal(walletPage.el('debtList').querySelectorAll('.wallet-grid>.wallet-card').length,3);
+ assert.equal(walletPage.el('debtList').querySelector('.wallet-overview').textContent.includes('999,999'),false);
+ assert.equal(walletPage.el('debtList').querySelectorAll('h3 img').length,0);
+ assert.equal(walletPage.el('debtList').querySelector('[data-brand=kbank] img').getAttribute('src'),'./preview/logos/kbank.png');
+ walletPage.w.openEntity('debt','logo1');
+ let logoChoice=walletPage.el('entityFields').querySelector('[name=logo_key]');assert.equal(logoChoice.value,'');
+ logoChoice.value='ttb';logoChoice.dispatchEvent(new walletPage.w.Event('change'));
+ assert.ok(walletPage.el('entityFields').querySelector('[data-debt-logo-preview] [data-brand=ttb]'));
+ await walletPage.el('entityForm').onsubmit({preventDefault(){},currentTarget:walletPage.el('entityForm')});
+ assert.equal(walletPage.state.writes.at(-1).row.logo_key,'ttb');assert.equal(walletPage.state.writes.at(-1).row.outstanding_amount,900);
+ assert.ok(walletPage.el('debtList').querySelector('[data-brand=ttb]'));
+ walletPage.w.openEntity('debt','logo1');logoChoice=walletPage.el('entityFields').querySelector('[name=logo_key]');assert.equal(logoChoice.value,'ttb');
+ logoChoice.value='none';logoChoice.dispatchEvent(new walletPage.w.Event('change'));assert.equal(walletPage.el('entityFields').querySelector('[data-debt-logo-preview] img'),null);
+ await walletPage.el('entityForm').onsubmit({preventDefault(){},currentTarget:walletPage.el('entityForm')});assert.equal(walletPage.state.writes.at(-1).row.logo_key,'none');
+ walletPage.w.openEntity('debt','logo1');logoChoice=walletPage.el('entityFields').querySelector('[name=logo_key]');logoChoice.value='';
+ await walletPage.el('entityForm').onsubmit({preventDefault(){},currentTarget:walletPage.el('entityForm')});assert.equal(walletPage.state.writes.at(-1).row.logo_key,null);
+ const logoImage=walletPage.el('debtList').querySelector('[data-brand=kbank] img');logoImage.dispatchEvent(new walletPage.w.Event('error'));
+ assert.equal(walletPage.el('debtList').querySelector('[data-brand=kbank] img'),null);
+ walletPage.w.openEntity('debt');const newName=walletPage.el('entityFields').querySelector('[name=name]');newName.value='Lazada PayLater';newName.dispatchEvent(new walletPage.w.Event('input'));
+ assert.ok(walletPage.el('entityFields').querySelector('[data-brand=lazada]'));walletPage.el('entityDialog').close();walletPage.close();
+ console.log('PASS wallet: separate balances, inactive exclusion, escaped names, provider override save/reopen, generic and auto choices, name detection and broken image fallback');
+
  const day=new Date().toISOString().slice(0,10);
  const categories=[{id:'cat',user_id:'user',name:'อาหาร',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'coffee',user_id:'user',name:'กาแฟ',type:'expense',icon:'☕'},{id:'utilities',user_id:'user',name:'บิล/สาธารณูปโภค',type:'expense',icon:'🧾'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];

@@ -38,7 +38,7 @@ async function refresh(){
   const [rows,budgets,debts,bills,accounts,categories,salary,rent,installments,carExpenses]=await Promise.all([
    pages('transactions','id,description,type,amount,status,transaction_date,created_at,categories(name,icon),accounts(name)',user.id,'transaction_date'),
    pages('budgets','id,name,is_active,monthly_limit,category_names',user.id),
-   pages('debts','id,name,debt_type,is_active,original_amount,outstanding_amount,due_day,installment_amount',user.id),
+   pages('debts','id,name,debt_type,is_active,original_amount,outstanding_amount,due_day,installment_amount,logo_key',user.id),
    pages('bills','id,name,is_active,amount,due_day',user.id),
    pages('accounts','id,name,account_type,is_active,opening_balance',user.id),
    pages('categories','id,name,type,icon',user.id),
@@ -137,7 +137,10 @@ function renderBudget(){
   card.append(head,bar,td('div','ใช้ไป '+fmt(used)+' / '+fmt(limit)+' · เหลือ '+fmt(Math.max(0,limit-used)),'meta'));pane.append(card);
  });
 }
-function cardBrand(name){
+function cardBrand(name,key){
+ if(key==='none')return null;
+ const files={grab:'grab.png',lazada:'lazada.ico',shopee:'shopee.png',kbank:'kbank.png',ttb:'ttb.svg',firstchoice:'firstchoice.svg'};
+ if(Object.hasOwn(files,key||''))return {file:files[key],label:key};
  const n=String(name||'').toLowerCase().replace(/[\s_()-]+/g,'');
  if(/firstchoice|เฟิร์สช้อยส์|เฟิร์สช้อย/.test(n))return {file:'firstchoice.svg',label:'Krungsri First Choice'};
  if(/kbank|kplus|kasikorn|กสิกร/.test(n))return {file:'kbank.png',label:'KBank'};
@@ -147,8 +150,8 @@ function cardBrand(name){
  if(/grab|แกร็บ/.test(n))return {file:'grab.png',label:'Grab'};
  return null;
 }
-function cardLogo(name,isCard){
- const brand=cardBrand(name),tile=td('span',isCard?'▤':'↗','wallet-symbol');
+function cardLogo(name,isCard,key){
+ const brand=cardBrand(name,key),tile=td('span',isCard?'▤':'↗','wallet-symbol');
  if(!brand)return tile;
  tile.classList.add('wallet-brand');tile.dataset.brand=brand.file.split('.')[0];tile.replaceChildren();
  const img=document.createElement('img');img.src='./logos/'+brand.file;img.alt='โลโก้ '+brand.label;img.width=80;img.height=44;img.loading='lazy';img.decoding='async';
@@ -173,7 +176,7 @@ function renderCards(){
    const used=valid(c.outstanding_amount),limit=valid(c.original_amount),pct=limit>0?Math.max(0,Math.min(100,used/limit*100)):0;
    const card=td('article','','wallet-card '+(isCard?'wallet-credit':'wallet-loan'));
    const head=td('div','','wallet-head'),identity=td('div','','wallet-identity');
-   identity.append(cardLogo(c.name,isCard),td('h3',c.name||(isCard?'บัตรเครดิต':'สินเชื่อ')));
+   identity.append(cardLogo(c.name,isCard,c.logo_key),td('h3',c.name||(isCard?'บัตรเครดิต':'สินเชื่อ')));
    head.append(identity,td('span',isCard?'CREDIT':'LOAN','wallet-tag'));card.append(head);
    const amount=td('div','','wallet-amount');amount.append(td('span',isCard?'ยอดใช้ไป':'ยอดหนี้คงเหลือ'),td('b',fmt(used)));card.append(amount);
    if(isCard){

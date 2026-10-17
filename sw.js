@@ -1,11 +1,12 @@
-const CACHE='my-finance-v101-polish57';
-const SHELL=['./','./index.html','./style.css?v=20261017-polish57','./minimal-dark.css?v=20261017-polish57','./theme.js?v=20261017-polish57','./app.js?v=20261017-polish57','./app-data.js?v=20261017-polish57','./app-summary.js?v=20261017-polish57','./app-dashboard.js?v=20261017-polish57','./app-transactions.js?v=20261017-polish57','./app-planning.js?v=20261017-polish57','./app-safety.js?v=20261017-polish57','./finance-core.js?v=20261017-polish57','./finance-backup.js?v=20261017-polish57','./app-nav.js?v=20261017-polish57','./rent.html','./rent.css?v=20261017-polish57','./rent.js?v=20261017-polish57','./rent-core.js?v=20261017-polish57','./car.html','./car.css?v=20261017-polish57','./car.js?v=20261017-polish57','./salary.html','./salary.js?v=20261017-polish57','./salary-payslip.js?v=20261017-polish57','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261017-polish57','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
-SHELL.push('./ui-polish.css?v=20261017-polish57');
-SHELL.push('./app-storage.js?v=20261017-polish57');
-SHELL.push('./expense-analysis.js?v=20261017-polish57');
-SHELL.push('./total-details.js?v=20261017-polish57');
-SHELL.push('./slip-reader.js?v=20261017-polish57');
-SHELL.push('./summary-pdf.js?v=20261017-polish57','./fonts/Sarabun-Regular.ttf?v=20261017-polish57','./vendor/jspdf-4.2.1.umd.min.js?v=20261017-polish57','./vendor/chart-4.4.7.umd.js?v=20261017-polish57');
+const CACHE='my-finance-v102-cardslogos60';
+const SHELL=['./','./index.html','./style.css?v=20261017-cardslogos60','./minimal-dark.css?v=20261017-cardslogos60','./theme.js?v=20261017-cardslogos60','./app.js?v=20261017-cardslogos60','./app-data.js?v=20261017-cardslogos60','./app-summary.js?v=20261017-cardslogos60','./app-dashboard.js?v=20261017-cardslogos60','./app-transactions.js?v=20261017-cardslogos60','./app-planning.js?v=20261017-cardslogos60','./app-safety.js?v=20261017-cardslogos60','./finance-core.js?v=20261017-cardslogos60','./finance-backup.js?v=20261017-cardslogos60','./app-nav.js?v=20261017-cardslogos60','./rent.html','./rent.css?v=20261017-cardslogos60','./rent.js?v=20261017-cardslogos60','./rent-core.js?v=20261017-cardslogos60','./car.html','./car.css?v=20261017-cardslogos60','./car.js?v=20261017-cardslogos60','./salary.html','./salary.js?v=20261017-cardslogos60','./salary-payslip.js?v=20261017-cardslogos60','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261017-cardslogos60','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+SHELL.push('./ui-polish.css?v=20261017-cardslogos60');
+SHELL.push('./app-storage.js?v=20261017-cardslogos60');
+SHELL.push('./expense-analysis.js?v=20261017-cardslogos60');
+SHELL.push('./total-details.js?v=20261017-cardslogos60');
+SHELL.push('./slip-reader.js?v=20261017-cardslogos60');
+SHELL.push('./summary-pdf.js?v=20261017-cardslogos60','./fonts/Sarabun-Regular.ttf?v=20261017-polish57','./vendor/jspdf-4.2.1.umd.min.js?v=20261017-cardslogos60','./vendor/chart-4.4.7.umd.js?v=20261017-cardslogos60');
+SHELL.push('./preview/logos/grab.png','./preview/logos/lazada.ico','./preview/logos/shopee.png','./preview/logos/kbank.png','./preview/logos/ttb.svg','./preview/logos/firstchoice.svg');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
