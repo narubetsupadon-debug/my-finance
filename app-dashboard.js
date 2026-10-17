@@ -53,7 +53,7 @@ function renderDashboard(){
  bindTotal($,'budgetCard',()=>openInsightDetails('งบเดือนนี้',[{label:'ยอดใช้ในหมวดของงบ',rows:budgetRows}],criteria+' · งบรวม '+money(bsum.limit)+' หักใช้ '+money(bsum.spent)+' = เหลือ '+money(bsum.remain)+' (ขั้นต่ำ 0) · หมวดร่วมกันนับรายจ่ายครั้งเดียว'));
  $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
 
- const quick=orderedQuickItems().filter(x=>x.available&&!uiSettings.quickHidden.includes(x.label))
+ const quick=orderedQuickItems().filter(x=>x.available!==false&&!uiSettings.quickHidden.includes(x.label))
  $('quickAdd').innerHTML=quick.map(({icon,label})=>'<button class="quick-btn" onclick="quickAdd(\''+label+'\')"><span>'+icon+'</span><b>'+label+'</b></button>').join('')+'<button class="quick-btn more" onclick="openTx()"><span>＋</span><b>หมวดอื่น ๆ</b></button>'
 
  const sums={};monthly.filter(x=>x.type==='expense').forEach(x=>{const n=x.categories?.name||'อื่นๆ';sums[n]=(sums[n]||0)+Number(x.amount)})
