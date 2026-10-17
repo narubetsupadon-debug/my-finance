@@ -1,0 +1,58 @@
+<!doctype html><html lang="th"><head><base href="../"><script>
+/* Read-only test guard: exact production screen and JS, no live financial writes. */
+(function(){
+ const originalFetch=window.fetch.bind(window);
+ window.fetch=function(resource,init){
+  const url=typeof resource==='string'?resource:resource?.url||'';
+  const method=String(init?.method||resource?.method||'GET').toUpperCase();
+  const target=String(url);
+  const api=target.includes('mmvdhopogchcxwlstflk.supabase.co');
+  const protectedApi=api&&(target.includes('/rest/v1/')||target.includes('/functions/v1/')||target.includes('/storage/v1/'));
+  const rpcReadOnly=target.includes('/rest/v1/rpc/finance_health_check');
+  if(protectedApi&&!['GET','HEAD','OPTIONS'].includes(method)&&!rpcReadOnly){
+   window.dispatchEvent(new CustomEvent('myfinance-test-blocked',{detail:{method}}));
+   return Promise.resolve(new Response(JSON.stringify({message:'โหมดทดสอบ: ไม่อนุญาตให้เปลี่ยนข้อมูลจริง',code:'PREVIEW_READ_ONLY'}),{status:403,statusText:'Preview is read only',headers:{'Content-Type':'application/json'}}));
+  }
+  return originalFetch(resource,init);
+ };
+ if('serviceWorker' in navigator){
+  const sw=navigator.serviceWorker;
+  try{sw.register=async()=>({update:async()=>{}})}catch(_){}
+ }
+ window.addEventListener('DOMContentLoaded',()=>{
+  const badge=document.createElement('div');
+  badge.setAttribute('role','status');
+  badge.textContent='🧪 TEST · หน้าตาเดียวกับแอปจริง · อ่านอย่างเดียว';
+  badge.style.cssText='position:fixed;z-index:2147483646;top:0;left:0;right:0;text-align:center;padding:calc(8px + env(safe-area-inset-top)) 8px 8px;background:#174884;color:white;font:600 12px system-ui,sans-serif;box-shadow:0 2px 12px #0003';
+  document.body.appendChild(badge);
+  const alertBox=document.createElement('div');alertBox.setAttribute('role','alert');alertBox.hidden=true;alertBox.style.cssText='position:fixed;z-index:2147483647;bottom:80px;left:12px;right:12px;max-width:480px;margin:auto;background:#fff2dc;color:#754600;padding:14px;border:1px solid #ffcf7b;border-radius:12px;font:14px system-ui';
+  document.body.appendChild(alertBox);
+  window.addEventListener('myfinance-test-blocked',()=>{alertBox.textContent='🔒 นี่คือ Test UI แบบอ่านอย่างเดียว การบันทึกหรือแก้ข้อมูลจริงถูกปิดไว้';alertBox.hidden=false});
+ });
+})();
+</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>ค่าห้องเช่า · My Finance</title><link rel="stylesheet" href="./style.css?v=20261017-quotes63">
+<link rel="stylesheet" href="./rent.css?v=20261017-quotes63">
+<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261017-quotes63" media="(prefers-color-scheme: dark)">
+<script src="./theme.js?v=20261017-quotes63"></script><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261017-quotes63">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=walletfinal">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=walletfinal">
+<link rel="stylesheet" href="./ui-polish.css?v=20261017-quotes63">
+</head><body><header class="topbar"><div class="topin"><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261017-quotes63" width="36" height="36" alt="">My Finance</div><a class="btn small ghost" href="./index.html">← กลับภาพรวม</a></div></header>
+<main class="rent-wrap finance-detail-page"><div class="detail-page-heading"><div class="eyebrow">ค่าใช้จ่ายของฉัน</div><h1>ค่าห้องเช่า</h1><p class="muted">เดือนบิลบอกว่าเป็นค่าห้องเดือนไหน วันที่จ่ายจริงใช้ลงรายรับ–รายจ่าย</p></div>
+<p id="rentMessage" class="detail-load-status" data-loading="true" role="status" aria-live="polite">กำลังเปิดข้อมูลของคุณ…</p><a id="rentSavedLink" href="./index.html#transactions" hidden>ดูรายการจ่ายที่บันทึก →</a>
+<div id="rentApp" class="hidden"><section class="card section"><div class="row"><h2 id="rentTitle">เพิ่มค่าห้องเช่า</h2><button id="newRent" class="btn soft" type="button">＋ บิลใหม่</button></div>
+<form id="rentForm"><p id="rentError" class="expense" role="alert"></p><div class="fields">
+<div class="field"><label for="rentMonth">ค่าห้องของเดือน</label><input id="rentMonth" type="month" required></div>
+
+<div class="field"><label for="rentDate">วันที่จ่ายจริง</label><input id="rentDate" type="date" required></div>
+<div class="field"><label for="rentFull">ยอดบิลเต็ม (บาท)</label><input id="rentFull" type="number" min="0.01" max="999999999999.99" step="0.01" inputmode="decimal" required></div>
+<div class="field"><label for="rentMy">ส่วนมิว (บาท)</label><input id="rentMy" type="number" min="0" max="999999999999.99" step="0.01" inputmode="decimal" required><button id="rentHalf" class="btn small ghost" type="button">แบ่งครึ่ง 50%</button></div>
+<div class="field"><label for="rentStatus">สถานะ</label><select id="rentStatus"><option value="paid">จ่ายแล้ว</option><option value="pending">ยังไม่จ่าย</option></select></div>
+<div class="field"><label for="rentAccount">บัญชีที่จ่ายยอดเต็ม</label><select id="rentAccount"></select></div>
+<div class="field"><label for="rentCategory">หมวดค่าห้องเช่า</label><select id="rentCategory" required></select></div>
+<div class="field"><label for="rentExisting">เคยลงรายจ่ายนี้แล้ว?</label><select id="rentExisting"><option value="">ยังไม่ได้ลง — สร้างรายการจ่ายครั้งเดียว</option></select><small class="muted">เลือกรายการเดิมเพื่อเชื่อม ยอด วันจ่าย และบัญชีจะเติมตามรายการนั้น</small></div>
+<div class="field full"><label for="rentNote">หมายเหตุ</label><textarea id="rentNote" maxlength="2000" placeholder="เช่น ค่าห้องเดือนกันยายน จ่ายต้นเดือนตุลาคม"></textarea></div>
+</div><p id="rentPreview" class="rent-check-summary" aria-live="polite"></p><p class="muted">รายจ่ายหลักใช้ยอดจ่ายเต็ม ส่วนมิวใช้สรุปภาระค่าห้อง เงินที่แฟนโอนคืนให้บันทึกเป็นรายรับตามวันที่รับจริง</p><div class="modal-actions"><button id="saveRent" class="btn primary" type="submit">บันทึกค่าห้องเช่า</button></div></form></section>
+<section class="card section"><h2>ประวัติตามเดือนบิล</h2><p class="muted">แสดงเฉพาะบิลที่เพิ่มในหน้านี้ ข้อมูลนำเข้าเดิมยังอยู่ในรายการรายรับ–รายจ่าย</p><div id="rentHistory" class="rent-history"></div></section></div></main>
+<script type="module" src="./rent.js?v=20261017-quotes63"></script><script type="module" src="./app-nav.js?v=20261017-quotes63"></script></body></html>
+
