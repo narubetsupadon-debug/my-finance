@@ -10,7 +10,7 @@ const errorEl=document.getElementById('preview-error');
 const retry=document.getElementById('preview-retry');
 const content=document.querySelector('.shell');
 const banner=document.querySelector('.preview');
-const state={rows:[],budgets:[],debts:[],bills:[],accounts:[],categories:[],month:'',filter:'all',type:'expense',loaded:false,user:null};
+const state={rows:[],budgets:[],debts:[],bills:[],accounts:[],categories:[],salary:[],rent:[],installments:[],carExpenses:[],month:'',filter:'all',type:'expense',loaded:false,user:null};
 const $=id=>document.getElementById(id);
 const fmt=n=>'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
 const today=()=>new Date(Date.now()+7*3600000).toISOString().slice(0,10);
@@ -35,15 +35,19 @@ async function refresh(){
   if(error||!data?.user){setGate('กรุณาเข้าสู่ระบบด้วยบัญชี My Finance เพื่อดูข้อมูลจริง',true);return}
   const user=data.user;state.user=user;
   gateText.textContent='กำลังโหลดข้อมูลจริงของบัญชีคุณ…';
-  const [rows,budgets,debts,bills,accounts,categories]=await Promise.all([
+  const [rows,budgets,debts,bills,accounts,categories,salary,rent,installments,carExpenses]=await Promise.all([
    pages('transactions','id,description,type,amount,status,transaction_date,created_at,categories(name,icon),accounts(name)',user.id,'transaction_date'),
    pages('budgets','id,name,is_active,monthly_limit,category_names',user.id),
    pages('debts','id,name,debt_type,is_active,original_amount,outstanding_amount,due_day',user.id),
    pages('bills','id,name,is_active,amount,due_day',user.id),
    pages('accounts','id,name,account_type,is_active,opening_balance',user.id),
-   pages('categories','id,name,type,icon',user.id)
+   pages('categories','id,name,type,icon',user.id),
+   pages('salary_records','id,salary_month,payment_date,net_amount,base_salary',user.id),
+   pages('rent_records','id,bill_month,full_amount,my_amount,status,payment_date',user.id),
+   pages('car_installments','id,installment_no,due_date,my_amount,scheduled_amount,status',user.id),
+   pages('car_expenses','id,expense_date,expense_type,amount',user.id)
   ]);
-  state.rows=rows;state.budgets=budgets;state.debts=debts;state.bills=bills;state.accounts=accounts;state.categories=categories;
+  state.rows=rows;state.budgets=budgets;state.debts=debts;state.bills=bills;state.accounts=accounts;state.categories=categories;state.salary=salary;state.rent=rent;state.installments=installments;state.carExpenses=carExpenses;
   if(!state.month)state.month=today().slice(0,7);
   showApp();
  }catch(e){setGate('โหลดข้อมูลจริงไม่สำเร็จ',false,e?.message||'เกิดข้อผิดพลาดในการเชื่อมต่อ')}
@@ -168,8 +172,8 @@ function changeMonth(value){if(!/^\d{4}-\d{2}$/.test(value))return;state.month=v
 function go(id){
  if(!state.loaded)return;
  const requested=id;
- if(['bills','accounts','categories'].includes(id)){renderExtra(id);id='extra'}
- if(!$(id)&&!['bills','accounts','categories'].includes(requested)){const names={bills:'บิลประจำ',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน',accounts:'บัญชี',categories:'หมวดหมู่',settings:'ตั้งค่า'};
+ if(['bills','accounts','categories','salary','rent','car'].includes(id)){renderExtra(id);id='extra'}
+ if(!$(id)&&!['bills','accounts','categories','salary','rent','car'].includes(requested)){const names={bills:'บิลประจำ',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน',accounts:'บัญชี',categories:'หมวดหมู่',settings:'ตั้งค่า'};
  $('extra-title').textContent=names[id]||'รายละเอียด';$('extra-content').textContent='หน้าทดลอง '+(names[id]||'')+' ยังไม่ได้ออกแบบใน Preview นี้ · ไม่มีการแก้ข้อมูลจริง';id='extra'}
  document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id===id));
  document.querySelectorAll('.nav [data-to]').forEach(el=>el.classList.toggle('active',el.dataset.to===id));
@@ -186,11 +190,14 @@ function updateCompare(page){
  const badge=$('compare-page');if(badge)badge.textContent=names[page]||page;
 }
 function renderExtra(page){
- const names={bills:'บิลประจำ',accounts:'บัญชี',categories:'หมวดหมู่'};
+ const names={bills:'บิลประจำ',accounts:'บัญชี',categories:'หมวดหมู่',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน'};
  $('extra-title').textContent=names[page];const root=$('extra-content');root.replaceChildren();
  let rows=[];
  if(page==='bills')rows=state.bills.map(x=>({title:x.name,meta:'ครบกำหนดวันที่ '+(x.due_day||'—')+' · '+(x.is_active===false?'ปิดใช้งาน':'เปิดใช้งาน'),amount:fmt(x.amount),icon:'📅'}));
  if(page==='accounts')rows=state.accounts.map(x=>({title:x.name,meta:x.account_type+' · '+(x.is_active===false?'ปิดใช้งาน':'เปิดใช้งาน'),amount:'ยอดตั้งต้น '+fmt(x.opening_balance),icon:'🏦'}));
+ if(page==='salary')rows=state.salary.map(x=>({title:'เงินเดือน '+(x.salary_month||'—'),meta:'วันรับเงิน '+(x.payment_date||'—')+' · เงินเดือนพื้นฐาน '+fmt(x.base_salary),amount:'สุทธิ '+fmt(x.net_amount),icon:'💰'}));
+ if(page==='rent')rows=state.rent.map(x=>({title:'ค่าห้อง '+(x.bill_month||'—'),meta:'ยอดเต็ม '+fmt(x.full_amount)+' · '+(x.status||'—'),amount:'ส่วนมิว '+fmt(x.my_amount),icon:'🏠'}));
+ if(page==='car')rows=[...state.installments.map(x=>({title:'ค่างวดรถ '+(x.installment_no||'—'),meta:'ครบกำหนด '+(x.due_date||'—')+' · '+(x.status||'—'),amount:'ส่วนมิว '+fmt(x.my_amount??x.scheduled_amount),icon:'🚗'})),...state.carExpenses.map(x=>({title:x.expense_type||'ค่าใช้รถ',meta:x.expense_date||'—',amount:fmt(x.amount),icon:'⛽'}))];
  if(page==='categories')rows=state.categories.map(x=>({title:x.name,meta:x.type==='expense'?'รายจ่าย':'รายรับ',amount:'',icon:x.icon||'🏷️'}));
  root.className='card';if(!rows.length){root.append(td('div','ยังไม่มีข้อมูล','meta'));return}
  for(const row of rows){const d=td('div','','item'),m=td('div','','grow');m.append(td('div',row.title,'mainline'),td('div',row.meta,'meta'));d.append(iconTile(row.icon),m,td('b',row.amount,'price'));root.append(d)}
