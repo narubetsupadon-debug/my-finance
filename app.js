@@ -141,7 +141,7 @@ function applyUiSettings(){
 function orderedQuickItems(){
  const byLabel=new Map(QUICK_DEFAULT.map(x=>[x.label,x]));
  const order=[...uiSettings.quickOrder,...QUICK_DEFAULT.map(x=>x.label).filter(x=>!uiSettings.quickOrder.includes(x))];
- return order.map(x=>byLabel.get(x)).filter(Boolean);
+ return order.map(label=>byLabel.get(label)).filter(Boolean).map(item=>{const category=categories.find(c=>c.type==='expense'&&c.is_active!==false&&c.name===item.label);return {...item,icon:category?.icon||item.icon,available:!!category};});
 }
 function renderSettings(){
  const account=$('defaultAccountSetting');
