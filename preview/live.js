@@ -74,7 +74,7 @@ function transactionNode(x){
 }
 function renderHome(){
  const amount=monthAmounts(),budget=allBudget();
- $('.big-money').textContent=fmt(amount.income-amount.expense);
+ document.querySelector('.big-money').textContent=fmt(amount.income-amount.expense);
  const cells=document.querySelectorAll('#home .slab b');if(cells[0])cells[0].textContent=fmt(amount.income);if(cells[1])cells[1].textContent=fmt(amount.expense);
  const homeBudget=document.querySelector('#home .pane>.card');
  if(homeBudget){
