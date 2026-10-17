@@ -305,3 +305,23 @@ html[data-resolved-theme=dark] .spent-panel{border-color:transparent}
 .home-welcome #helloTitle{font-size:clamp(19px,1.8vw,24px);font-weight:600;line-height:1.65;letter-spacing:0;white-space:normal;word-break:normal;overflow-wrap:break-word;text-wrap:balance;max-width:100%;margin:8px 0 0}
 @media(max-width:820px){.home-welcome #helloTitle{font-size:18px;line-height:1.7}.home-welcome{gap:12px;padding-bottom:16px}}
 @media(max-width:360px){.home-welcome #helloTitle{font-size:17px}}
+
+
+/* Wallet numeric resilience: prevent long amounts from spilling outside cards.
+   Layout-only changes; balances and calculations are untouched. */
+.wallet-card,.wallet-amount,.wallet-overview>div{min-width:0}
+.wallet-amount b,.wallet-overview b{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  line-height:1.45;
+}
+.wallet-available{flex-wrap:wrap}
+.wallet-available b{max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:right}
+@media(max-width:380px){
+  .wallet-amount b{font-size:clamp(21px,6.5vw,28px)}
+  .wallet-overview{gap:8px}
+  .wallet-overview>div{padding:14px 10px}
+  .wallet-overview b{font-size:clamp(14px,4vw,18px)}
+}
