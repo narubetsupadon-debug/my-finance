@@ -54,7 +54,7 @@ function renderDashboard(){
  $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
 
  const quick=orderedQuickItems().filter(x=>!uiSettings.quickHidden.includes(x.label))
- $('quickAdd').innerHTML=quick.map(({icon,label,desc})=>'<button class="quick-btn" onclick="quickAdd(\''+label+'\',\''+desc+'\')"><span>'+icon+'</span><b>'+label+'</b></button>').join('')+'<button class="quick-btn more" onclick="openTx()"><span>＋</span><b>อื่น ๆ</b></button>'
+ $('quickAdd').innerHTML=quick.map(({icon,label})=>'<button class="quick-btn" onclick="quickAdd(\''+label+'\')"><span>'+icon+'</span><b>'+label+'</b></button>').join('')+'<button class="quick-btn more" onclick="openTx()"><span>＋</span><b>หมวดอื่น ๆ</b></button>'
 
  const sums={};monthly.filter(x=>x.type==='expense').forEach(x=>{const n=x.categories?.name||'อื่นๆ';sums[n]=(sums[n]||0)+Number(x.amount)})
  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]),top=sorted[0]

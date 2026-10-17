@@ -3,7 +3,7 @@ import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=
 import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261017-quotes63';
 import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261017-subcustom2';
 import {createSummaryRenderer} from './app-summary.js?v=20261017-pdfsubs1';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261017-quotes63';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261017-quickfix2';
 import {createTransactionRenderer} from './app-transactions.js?v=20261017-quotes63';
 import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261017-quotes63';
 import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261017-quotes63';
@@ -97,20 +97,23 @@ async function testPush(){
 }
 
 const QUICK_DEFAULT=[
- {icon:'🍜',label:'อาหาร',desc:'อาหาร'},
- {icon:'☕',label:'กาแฟ',desc:'กาแฟ'},
- {icon:'🚗',label:'รถ',desc:'รถ'},
- {icon:'🛍️',label:'ซื้อของ',desc:'ซื้อของ'},
- {icon:'💳',label:'จ่ายบัตร',desc:'จ่ายบัตร'},
- {icon:'🧾',label:'บิล',desc:'บิล'}
+ {icon:'🍽️',label:'อาหารและเครื่องดื่ม',desc:''},
+ {icon:'🚘',label:'รถยนต์',desc:''},
+ {icon:'🛍️',label:'ช้อปปิ้ง',desc:''},
+ {icon:'💳',label:'หนี้/ผ่อน',desc:''},
+ {icon:'🧾',label:'บิล/สาธารณูปโภค',desc:''}
 ];
+const QUICK_LABEL_MIGRATION={อาหาร:'อาหารและเครื่องดื่ม',กาแฟ:'อาหารและเครื่องดื่ม',รถ:'รถยนต์',ซื้อของ:'ช้อปปิ้ง',จ่ายบัตร:'หนี้/ผ่อน',บิล:'บิล/สาธารณูปโภค'};
+function normalizeQuickLabels(labels){
+ return [...new Set(labels.map(label=>QUICK_LABEL_MIGRATION[label]||label))].filter(label=>QUICK_DEFAULT.some(x=>x.label===label));
+}
 const UI_DEFAULTS={accent:'purple',privacy:false,defaultAccount:'',dueReminder:true,budgetReminder:true,quickOrder:QUICK_DEFAULT.map(x=>x.label),quickHidden:[]};
 function readUiSettings(){
  try{
   const raw=JSON.parse(localStorage.getItem(UI_SETTINGS_KEY)||'{}');
   return {...UI_DEFAULTS,...raw,
-   quickOrder:Array.isArray(raw.quickOrder)?raw.quickOrder:UI_DEFAULTS.quickOrder,
-   quickHidden:Array.isArray(raw.quickHidden)?raw.quickHidden:[]
+   quickOrder:Array.isArray(raw.quickOrder)?normalizeQuickLabels(raw.quickOrder):UI_DEFAULTS.quickOrder,
+   quickHidden:Array.isArray(raw.quickHidden)?normalizeQuickLabels(raw.quickHidden):[]
   };
  }catch{return {...UI_DEFAULTS}}
 }
@@ -268,16 +271,19 @@ function editSavedTransaction(id,row){
  if(saved.source?.startsWith('bill_payment:')){showPage('bills');return;}
  showPage('transactions');window.openTx(id);
 }
-function quickCategoryMatch(label){
- const aliases={อาหาร:['อาหารและเครื่องดื่ม','อาหาร'],กาแฟ:['อาหารและเครื่องดื่ม','กาแฟ','อาหาร'],รถ:['รถยนต์','เดินทาง'],ซื้อของ:['ช้อปปิ้ง'],จ่ายบัตร:['หนี้/ผ่อน'],บิล:['บิล/สาธารณูปโภค']}
- const names=aliases[label]||[label]
- for(const name of names){const match=categories.find(c=>c.type==='expense'&&c.name===name);if(match)return match}
- return categories.find(c=>c.type==='expense'&&c.name==='อื่นๆ')||null
-}
-window.quickAdd=(label,desc='')=>{
+window.quickAdd=(label)=>{
  if($('txForm').querySelector('button[type=submit]').disabled)return;
- const cat=quickCategoryMatch(label); openTx(); $('txType').value='expense'; fillTxSelectors(); if(cat)$('txCategory').value=cat.id;syncTxSubcategory(label==='กาแฟ'?'กาแฟ':null); $('txDesc').value=desc||label; renderCardPaymentSuggestions(); if(label==='จ่ายบัตร'&&debts.some(d=>d.is_active&&Number(d.outstanding_amount||0)>0))$('cardPaymentSuggest')?.scrollIntoView({behavior:'smooth',block:'center'}); else if(window.innerWidth>820)$('txAmount').focus()
-}
+ const cat=categories.find(c=>c.type==='expense'&&c.is_active!==false&&c.name===label);
+ openTx();
+ $('txType').value='expense';
+ fillTxSelectors();
+ if(cat)$('txCategory').value=cat.id;
+ syncTxSubcategory();
+ $('txDesc').value='';
+ renderCardPaymentSuggestions();
+ if(label==='หนี้/ผ่อน'&&debts.some(d=>d.is_active&&Number(d.outstanding_amount||0)>0))$('cardPaymentSuggest')?.scrollIntoView({behavior:'smooth',block:'center'});
+ else if(window.innerWidth>820)$('txDesc').focus();
+};
 const nextDueDate=monthlyDue;
 
 // Original daily quotes; one unique quote per day over a 366-day cycle.
