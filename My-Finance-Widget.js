@@ -87,6 +87,16 @@ function budgetRing(data,size){
  ctx.drawTextInRect(percent===null?'—':percent+'%',new Rect(0,size*.36,size,size*.3));
  return ctx.getImage();
 }
+function usageBar(data,width=170,height=8){
+ const ctx=new DrawContext();ctx.size=new Size(width,height);ctx.opaque=false;ctx.respectScreenScale=true;
+ const frac=data.limit>0?Math.min(1,Math.max(0,data.spent/data.limit)):0;
+ const dot=3,step=4;
+ for(let x=0;x<=width-dot;x+=step){
+  ctx.setFillColor(new Color(x/width<frac?(data.spent>data.limit?'#ffc28c':'#8ab3ff'):'#303b50'));
+  ctx.fillEllipse(new Rect(x,0,dot,dot));ctx.fillEllipse(new Rect(x,height-dot,dot,dot));
+ }
+ return ctx.getImage();
+}
 function text(widget,value,size,color){const line=widget.addText(value);line.font=Font.semiboldSystemFont(size);line.textColor=new Color(color);line.minimumScaleFactor=.65;line.lineLimit=1;return line;}
 function money(cents){return '฿'+(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function cardMode(parameter){
@@ -120,7 +130,7 @@ function renderCards(widget,cards,checkedAt,selected){
  text(widget,'ยอดตามที่บันทึกในแอป',9,'a3a8be');
 }
 async function main(){
- const widget=new ListWidget();widget.backgroundColor=new Color('#171b32');const padding=config.widgetFamily==='small'?12:16;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
+ const widget=new ListWidget();widget.backgroundColor=new Color('#101722');const padding=12;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
  try{
   if(!config.runsInWidget&&Keychain.contains(SESSION_KEY)){
    const menu=new Alert();menu.title='My Finance Widget';menu.addAction('อัปเดต / ดูตัวอย่าง');menu.addDestructiveAction('ออกจากระบบวิดเจ็ต');menu.addCancelAction('ยกเลิก');
@@ -142,18 +152,30 @@ async function main(){
   ]);
   const data=totals(budgets,rows,day);
   const checkedAt=new Date();try{Keychain.set(CHECK_KEY,JSON.stringify({owner:session.user_id,at:checkedAt.getTime()}));}catch{}
-  const small=config.widgetFamily==='small';
-  text(widget,'MY FINANCE',11,'aaa7ff');widget.addSpacer(4);
-  const amountRow=widget.addStack();amountRow.layoutHorizontally();amountRow.centerAlignContent();
-  const amountCol=amountRow.addStack();amountCol.layoutVertically();text(amountCol,'วันนี้ใช้ไป',12,'d8d9e4');text(amountCol,money(data.today),small?22:28,'ffffff');
-  if(!small){amountCol.addSpacer(6);text(amountCol,'งบเดือนนี้เหลือ',12,'d8d9e4');text(amountCol,data.limit?money(data.remaining):'ยังไม่ตั้งงบ',22,'79dec4');}
-  amountRow.addSpacer(small?4:null);const graphCol=amountRow.addStack();graphCol.layoutVertically();
-  const ringSize=small?40:80;
-  const graph=graphCol.addImage(budgetRing(data,ringSize));graph.imageSize=new Size(ringSize,ringSize);
-  text(graphCol,data.limit?'งบเดือนนี้':'ยังไม่ตั้งงบ',small?8:10,'a3a8be');widget.addSpacer(3);
-  if(small){text(widget,'งบเดือนนี้เหลือ',12,'d8d9e4');text(widget,data.limit?money(data.remaining):'ยังไม่ตั้งงบ',20,'79dec4');}widget.addSpacer();
-  text(widget,'ข้อมูล ณ '+checkedLabel(checkedAt),10,'a3a8be');
-  text(widget,'อ่านสำเร็จ',9,'79dec4');
+  const family=config.widgetFamily||'medium',small=family==='small';
+  text(widget,'🍜 MY FINANCE',11,'93b8ff');
+  text(widget,'FOOD BUDGET · งบกิน',9,'94a3b8');
+  widget.addSpacer(small?7:10);
+  const remaining=data.remaining,percent=budgetPercent(data);
+  const primary=widget.addStack();primary.layoutHorizontally();primary.centerAlignContent();
+  const values=primary.addStack();values.layoutVertically();
+  text(values,'งบเดือนนี้เหลือ',small?10:12,'d8d9e4');
+  text(values,data.limit?money(remaining):'ยังไม่ตั้งงบ',small?19:25,data.spent>data.limit&&data.limit>0?'ffc28c':'79dec4');
+  if(!small){
+    primary.addSpacer();
+    const ring=primary.addImage(budgetRing(data,68));ring.imageSize=new Size(68,68);
+  }
+  widget.addSpacer(7);
+  const spentRow=widget.addStack();spentRow.layoutHorizontally();
+  text(spentRow,'ใช้ไป '+money(data.spent),small?9:11,'ffffff');spentRow.addSpacer();
+  text(spentRow,'จาก '+money(data.limit),small?9:11,'94a3b8');
+  widget.addSpacer(5);
+  const bar=widget.addImage(usageBar(data,small?120:170,8));
+  bar.imageSize=new Size(small?120:170,8);
+  widget.addSpacer(5);
+  text(widget,percent===null?'ยังไม่ตั้งงบ':'ใช้ไป '+percent+'%'+(data.spent>data.limit?' · เกินงบ':''),9,data.spent>data.limit?'ffc28c':'94a3b8');
+  if(!small){widget.addSpacer(4);text(widget,'วันนี้ใช้ไป '+money(data.today),11,'d8d9e4');}
+  widget.addSpacer();text(widget,'อัปเดต '+checkedLabel(checkedAt)+' · ตั้งรีเฟรช 10 นาที',8,'94a3b8');
  }catch(error){text(widget,'MY FINANCE',12,'aaa7ff');widget.addSpacer(10);const line=widget.addText(error.message||'เชื่อมต่อไม่ได้ กรุณาเปิด Scriptable');line.font=Font.systemFont(12);line.textColor=new Color('#ffffff');widget.addSpacer();const last=lastCheck();text(widget,last?'สำเร็จล่าสุด '+checkedLabel(last):'ยังไม่มีข้อมูลล่าสุด',10,'a3a8be');text(widget,'อัปเดตไม่สำเร็จ · แตะเปิดเว็บ',9,'ffc28c');}
  Script.setWidget(widget);if(!config.runsInWidget)await widget.presentMedium();Script.complete();
 }
