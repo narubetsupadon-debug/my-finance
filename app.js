@@ -773,6 +773,20 @@ function syncTxType(){
 }
 function changeTxType(type){$('txType').value=type;fillTxSelectors();if(!editing.id)applyRecentTxSelection();renderCardPaymentSuggestions()}
 document.querySelectorAll('[data-tx-type]').forEach(b=>b.onclick=()=>changeTxType(b.dataset.txType));
+const FOOD_MAIN='อาหารและเครื่องดื่ม';
+const FOOD_SUBS=[['อาหาร','🍜 อาหาร'],['กาแฟ','☕ กาแฟ'],['เครื่องดื่ม','🧋 เครื่องดื่ม'],['ขนม','🍰 ขนม']];
+function syncTxSubcategory(value){
+ const selected=categories.find(c=>c.id===$('txCategory').value);
+ const eligible=$('txType').value==='expense'&&selected?.name===FOOD_MAIN;
+ const wrap=$('txSubcategoryWrap'),select=$('txSubcategory');
+ if(!wrap||!select)return;
+ wrap.classList.toggle('hidden',!eligible);
+ select.disabled=!eligible;
+ select.required=eligible;
+ if(eligible){select.value=FOOD_SUBS.some(([key])=>key===value)?value:'อาหาร';}
+ else select.value='';
+}
+$('txCategory')?.addEventListener('change',()=>syncTxSubcategory());
 function fillTxSelectors(){
  syncTxType();
  const currentCat=$('txCategory').value,currentAccount=$('txAccount').value,currentFilter=$('txFilterCategory').value
@@ -781,6 +795,7 @@ function fillTxSelectors(){
  $('txAccount').innerHTML='<option value="">ไม่ระบุบัญชี</option>'+accounts.filter(a=>a.is_active!==false).map(a=>'<option value="'+a.id+'">'+esc(accountLabel(a))+'</option>').join('')
  $('txFilterCategory').innerHTML='<option value="">ทุกหมวด</option>'+categories.map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')
  $('txAccount').value=currentAccount; $('txFilterCategory').value=currentFilter;
+ syncTxSubcategory($('txSubcategory')?.value);
  renderCardPaymentSuggestions()
 }
 
@@ -912,15 +927,16 @@ window.openTx=(id=null)=>{
  $('txDialogTitle').textContent=id?'แก้ไขรายการ':'บันทึกรายการ';
  $('txDate').value=bangkokDay();$('txAccount').value='';$('txCategory').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
  fillTxSelectors();if(!id)applyRecentTxSelection();renderRepeatChoices();
- if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;}}
+ if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;syncTxSubcategory(x.subcategory||'');}}
  renderCardPaymentSuggestions();txBaseline=txFingerprint();$('txDialog').showModal();requestAnimationFrame(()=>{$('txForm').scrollTop=0;});
 }
 function txError(message){$('txError').dataset.saveState='failed';$('txError').textContent=message;$('txError').classList.remove('hidden');$('txError').scrollIntoView({block:'nearest'})}
 $('txForm').onsubmit=async e=>{
  e.preventDefault();const button=e.currentTarget.querySelector('button[type="submit"]');if(button.disabled)return;
- const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:transactions.find(x=>x.id===editing.id)?.status||'paid',note:$('txNote').value.trim()||null,source:transactions.find(x=>x.id===editing.id)?.source||'web'};
+ const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:transactions.find(x=>x.id===editing.id)?.status||'paid',note:$('txNote').value.trim()||null,source:transactions.find(x=>x.id===editing.id)?.source||'web',subcategory:$('txSubcategory')?.disabled?null:$('txSubcategory').value||null};
  if(!row.description||!Number.isFinite(row.amount)||row.amount<=0)return txError('กรอกรายละเอียดและยอดเงินให้ครบ');
  if(!row.category_id)return txError('เลือกหมวดหมู่ก่อนบันทึก');
+  if(!$('txSubcategory')?.disabled&&!row.subcategory)return txError('เลือกหมวดย่อยก่อนบันทึก');
  if(!editing.id&&!duplicateOverride){
   const duplicates=findDuplicateCandidates(row,transactions);
   if(duplicates.length){
@@ -941,7 +957,7 @@ $('txForm').onsubmit=async e=>{
  }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});else{showFinanceSaveError($('txError'),error);$('txError').scrollIntoView({block:'nearest'})}}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
 }
 $('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
-for(const id of ['txAmount','txDesc','txDate','txType','txCategory','txAccount','txNote']){
+for(const id of ['txAmount','txDesc','txDate','txType','txCategory','txSubcategory','txAccount','txNote']){
  $(id)?.addEventListener('input',()=>{duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden')});
  $(id)?.addEventListener('change',()=>{duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden')});
 }
