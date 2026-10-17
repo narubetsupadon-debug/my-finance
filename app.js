@@ -792,7 +792,7 @@ function syncTxSubcategory(value){
  const options=[...new Set([...defaults,...custom])];
  const select=$('txSubcategory'),wrap=$('txSubcategoryWrap'),add=$('txSubcategoryAdd');
  if(!select||!wrap)return;
- const enabled=$('txType').value==='expense'&&options.length>0;
+ const enabled=$('txType').value==='expense'&&!!cat;
  wrap.classList.toggle('hidden',!enabled);
  select.disabled=!enabled;
  select.required=false;
