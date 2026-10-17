@@ -12,11 +12,11 @@
 <button id="copy" type="button" disabled>คัดลอกสคริปต์บัตรเครดิต</button>
 <p id="status" role="status">กำลังโหลด…</p>
 <textarea id="code" readonly aria-label="สคริปต์บัตรเครดิต"></textarea>
-<p>เล็ก 1 บัตร · กลาง 2 บัตร · ใหญ่ 4 บัตร ยอดวงเงินเหลือใหญ่ขึ้น แสดงชื่อและวงเงินเหลือเป็นหลัก พร้อมยอดใช้ไป โดยไม่แสดงวงเงินเต็ม อ้างอิงข้อมูลที่บันทึกในแอป ไม่ใช่ยอดสดจากธนาคาร ขอรีเฟรชทุก 10 นาที แต่ iPhone เป็นผู้กำหนดเวลาที่ Widget อัปเดตจริง</p>
+<p>เรียงยอดใช้ไปจากมากไปน้อย · เล็ก 1 บัตร · กลาง 2 บัตร · ใหญ่ 4 บัตร ยอดวงเงินเหลือใหญ่ขึ้น แสดงชื่อและวงเงินเหลือเป็นหลัก พร้อมยอดใช้ไป โดยไม่แสดงวงเงินเต็ม อ้างอิงข้อมูลที่บันทึกในแอป ไม่ใช่ยอดสดจากธนาคาร ขอรีเฟรชทุก 10 นาที แต่ iPhone เป็นผู้กำหนดเวลาที่ Widget อัปเดตจริง</p>
 <p>กรอกรหัสผ่านใน Scriptable เท่านั้น สคริปต์อ่านข้อมูลตามสิทธิ์บัญชีและเก็บ session ใน Keychain</p>
 <a href="./#debts">เปิดเมนูบัตรใน My Finance</a>
 <script>
 const code=document.getElementById('code'),status=document.getElementById('status'),button=document.getElementById('copy');
-fetch('./My-Finance-Cards.js?v=cards-direct3',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.text()}).then(s=>{if(!s.includes("mode=cardMode('cards')"))throw Error();code.value=s;button.disabled=false;status.textContent='พร้อมคัดลอก · สคริปต์บัตรเครดิตค่ะ'}).catch(()=>{status.textContent='โหลดไม่สำเร็จ กรุณารีเฟรชอีกครั้งค่ะ'});
+fetch('./My-Finance-Cards.js?v=cards-order4',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.text()}).then(s=>{if(!s.includes("mode=cardMode('cards')"))throw Error();code.value=s;button.disabled=false;status.textContent='พร้อมคัดลอก · สคริปต์บัตรเครดิตค่ะ'}).catch(()=>{status.textContent='โหลดไม่สำเร็จ กรุณารีเฟรชอีกครั้งค่ะ'});
 button.onclick=async()=>{try{await navigator.clipboard.writeText(code.value);status.textContent='คัดลอกแล้วค่ะ เปิด Scriptable → + → วาง → ตั้งชื่อ My Finance Cards'}catch{code.focus();code.select();status.textContent='กดค้างในช่องโค้ด → เลือกทั้งหมด → คัดลอกค่ะ'}};
 </script></html>

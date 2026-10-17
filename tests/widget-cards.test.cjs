@@ -4,6 +4,7 @@ class Stack{constructor(){this.items=[]}addText(value){const item={value};this.i
 class ListWidget extends Stack{}
 const sandbox={Color,Size,Rect,DrawContext,ListWidget,Font:{semiboldSystemFont:()=>null,systemFont:()=>null},Keychain:{contains:()=>false,set(){}},DateFormatter:class{string(){return '14/10 10:30'}},config:{runsInWidget:true,widgetFamily:'medium'},Script:{setWidget(widget){sandbox.result=widget},complete(){}}};vm.createContext(sandbox);vm.runInContext(fs.readFileSync(require('path').join(__dirname,'../My-Finance-Cards.js'),'utf8').replace(/await main\(\);\s*$/,''),sandbox);
 
+assert.equal(sandbox.cardBalances([{id:'a',name:'A',debt_type:'credit_card',original_amount:1000,outstanding_amount:10},{id:'z',name:'Z',debt_type:'credit_card',original_amount:1000,outstanding_amount:100}])[0].id,'z');
 (async()=>{
  for(const inWidget of [false,true])for(const family of ['small','medium','large']){
  sandbox.config.runsInWidget=inWidget;sandbox.config.widgetFamily=family;

@@ -100,7 +100,7 @@ function cardBalances(rows,id=''){
   if(!Number.isFinite(limit)||!Number.isFinite(used)||limit<0||used<0)throw new Error('ข้อมูลวงเงินไม่ถูกต้อง กรุณาตรวจในเว็บ');
   const limitCents=Math.round(limit*100),usedCents=Math.round(used*100);
   return {id:x.id,name:x.name||'บัตรเครดิต',limit:limitCents,spent:usedCents,remaining:Math.max(0,limitCents-usedCents),over:Math.max(0,usedCents-limitCents)};
- }).sort((a,b)=>String(a.name).localeCompare(String(b.name),'th')||String(a.id).localeCompare(String(b.id)));
+ }).sort((a,b)=>b.spent-a.spent||String(a.name).localeCompare(String(b.name),'th')||String(a.id).localeCompare(String(b.id)));
 }
 function renderCards(widget,cards,checkedAt,selected){
  const family=config.widgetFamily||'medium',small=family==='small',capacity=small?1:family==='large'?4:2;
