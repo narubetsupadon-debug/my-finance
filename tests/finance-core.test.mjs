@@ -42,6 +42,7 @@ const retryDb=makeDb(),retrySave=core.createRetrySafeInsert();retryDb.offline=tr
 const invalidDb=makeDb(),correct=core.createRetrySafeInsert();invalidDb.failCode='23514';await assert.rejects(correct(invalidDb,'transactions',draftRow));invalidDb.failCode=null;await correct(invalidDb,'transactions',{...draftRow,amount:2});assert.equal(invalidDb.rows.size,1);
 for(let i=0;i<25;i++)core.recordFinanceError('load',{message:'secret password token',code:'NETWORK',body:draftRow});assert.equal(core.getFinanceDiagnostics().length,20);assert(!JSON.stringify(core.getFinanceDiagnostics()).includes('secret'));assert(!JSON.stringify(core.getFinanceDiagnostics()).includes('private text'));
 await assert.rejects(core.readAll(()=>({range:async()=>({data:[{id:'same'}]})}),1),/หน้าซ้ำ/);
+await assert.rejects(core.readAll(()=>({range:async()=>({data:[{id:'same'},{id:'same'}]})}),500),/หน้าซ้ำ/);
 console.log('PASS retry-safe writes: lost acknowledgement confirmed, offline retains ID, draft changes blocked, SQL correction allowed, satang sums, sanitized bounded diagnostics and repeated pagination rejected');
 
 const {financeSaveFeedback}=await import('../finance-core.js');

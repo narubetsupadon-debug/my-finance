@@ -12,8 +12,11 @@ export async function readAll(makeQuery, pageSize = 500) {
     const {data,error}=await makeQuery().range(from,from+pageSize-1);
     if(error){recordFinanceError('read',error);throw error;}
     if(!Array.isArray(data))throw new Error('ไม่ได้รับข้อมูลจากเซิร์ฟเวอร์');
-    if(data.some(x=>x?.id&&seen.has(x.id)))throw new Error('ได้รับข้อมูลหน้าซ้ำ กรุณาลองโหลดใหม่');
-    data.forEach(x=>{if(x?.id)seen.add(x.id)});rows.push(...data);
+    for(const item of data){
+      if(item?.id&&seen.has(item.id))throw new Error('ได้รับข้อมูลหน้าซ้ำ กรุณาลองโหลดใหม่');
+      if(item?.id)seen.add(item.id);
+    }
+    rows.push(...data);
     if(rows.length>100000)throw new Error('ข้อมูลเกินขอบเขตการโหลด กรุณาตรวจระบบ');
     if(data.length<pageSize)return rows;
   }
