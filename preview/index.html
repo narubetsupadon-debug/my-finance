@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#10243d">
+<title>My Finance | UI Preview</title>
+<style>
+:root{font-family:Inter,"Noto Sans Thai",system-ui,-apple-system,sans-serif;color:#17243c;background:#edf2f9;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}
+.shell{max-width:470px;min-height:100dvh;margin:auto;background:#f8faff;position:relative;padding-bottom:96px;box-shadow:0 0 30px #213a5911}
+.preview{background:#e7f0ff;color:#395da0;text-align:center;padding:8px 10px;font-size:11px;font-weight:700}
+.screen{display:none}.screen.active{display:block}.pane{padding:20px 16px 10px}
+.navy{background:#10243d;color:#fff;border-radius:0 0 26px 26px;padding:21px 18px 22px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:19px}.brand-icon{background:linear-gradient(135deg,#718bff,#4f46e5);color:white;font-weight:900;padding:12px;border-radius:14px;font-size:20px}.brand-title{font-size:17px;font-weight:750}.small{font-size:11px;color:#98abc7}.grow{flex:1}
+.icon-btn{border:0;background:#243a58;color:#fff;border-radius:13px;width:40px;height:40px;font-size:19px}
+.select-month{border:1px solid #35506e;background:#213853;color:#e8f1ff;padding:10px 14px;border-radius:13px;margin-bottom:13px;font-size:12px}
+.hero{background:#203955;border-radius:18px;padding:20px}.hero .muted{color:#c2d0e0}
+.big-money{font-size:32px;letter-spacing:-.04em;font-weight:800;margin:10px 0 5px;color:#86dfed}
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.slab{background:#203955;border-radius:16px;padding:14px;font-size:12px}.slab b{display:block;margin-top:6px;font-size:20px}
+.green{color:#68cba8!important}.pink{color:#ee858f!important}.blue{color:#4c7ff1!important}
+.card{background:#fff;border:1px solid #e7edf5;border-radius:17px;padding:16px;margin-bottom:12px;box-shadow:0 3px 14px #163a5908}
+.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:15px;font-weight:750;margin-bottom:13px}
+.link{color:#4c73d6;font-size:12px;font-weight:600;background:transparent;border:0;padding:3px}
+.row{display:flex;align-items:center;gap:11px;min-width:0}.row .grow{min-width:0}
+.tile{flex:0 0 43px;display:grid;place-items:center;width:43px;height:43px;border-radius:13px;background:#eef2fd;font-size:22px}
+.meta{font-size:11px;color:#7d8faa;line-height:1.5}.mainline{font-weight:700;font-size:13px}.price{font-weight:750;font-size:13px;white-space:nowrap}
+.bar{height:8px;background:#e9eff9;border-radius:12px;overflow:hidden;margin:12px 0 6px}.bar>div{height:100%;background:#68a9fa;border-radius:12px}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.quick button{background:transparent;border:0;color:#475979;font-size:11px;min-width:0}.quick .tile{margin:0 auto 5px;width:43px;height:43px}
+.item{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #ecf0f7}.item:first-of-type{border-top:0}
+.page-title{font-size:24px;margin:4px 0 5px;letter-spacing:-.02em}.page-note{font-size:12px;color:#8190a9;margin:0 0 17px}
+.pills{display:flex;gap:6px;margin:12px 0}.pill{border:0;border-radius:11px;padding:10px 12px;background:#e9eef8;color:#667d9e;flex:1;font-size:12px}.pill.active{background:#e2eaff;color:#356de1;font-weight:750}
+.input{display:block;width:100%;border:1px solid #e0e7f2;border-radius:12px;background:#fff;padding:12px;font-size:15px;color:#243653;outline-color:#6b95ed}
+.field{display:grid;gap:6px;margin:13px 0;font-size:12px;font-weight:650;color:#4c5e79}
+.primary{border:0;border-radius:13px;background:#4c75ef;color:#fff;padding:13px 17px;font-weight:700}
+.secondary{border:1px solid #dce5f4;border-radius:12px;background:white;color:#38537d;padding:10px 12px}
+.section-label{font-size:12px;color:#8292ad;font-weight:650;margin:17px 0 9px}
+.menu-row{width:100%;display:flex;gap:12px;align-items:center;background:transparent;border:0;border-top:1px solid #eff2f8;text-align:left;padding:13px 0;font-weight:650;color:#344461}
+.menu-row:first-of-type{border-top:0}.menu-row .tile{width:34px;height:34px;flex-basis:34px;font-size:18px}.chevron{margin-left:auto;color:#8ca0c0}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(470px,100%);display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.98);border-top:1px solid #e5ecf6;padding:9px 3px calc(10px + env(safe-area-inset-bottom));z-index:10}
+.nav button{border:0;background:transparent;display:grid;place-items:center;gap:4px;font-size:10px;color:#8495af}
+.nav button i{font-style:normal;font-size:20px;line-height:25px}.nav button.active{color:#4775eb;font-weight:800}
+.nav button.add i{display:grid;place-items:center;background:#4d71ed;color:white;border-radius:50%;height:39px;width:39px;font-size:27px}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{padding:15px;background:#fff;border:1px solid #e8edf6;border-radius:16px}
+.donut{height:156px;width:156px;margin:14px auto;border-radius:50%;background:conic-gradient(#f5a1a8 0 34%,#968cf3 34% 53%,#68c2f5 53% 70%,#f1bd6e 70% 88%,#77d4b1 88% 100%);display:grid;place-items:center}.donut:before{content:"฿15,567";height:106px;width:106px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:800}
+.alt{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid #edf1f7;font-size:13px}.alt:first-of-type{border:0}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#9a8ff3;margin-right:8px}
+.back{border:0;background:transparent;color:#5379de;padding:4px 0;font-weight:700}
+.note{background:#fff8e9;border-radius:11px;color:#8a652c;padding:11px 12px;font-size:11px;line-height:1.6}
+.hide{display:none!important}.notice{margin-top:10px;padding:10px;border-radius:12px;background:#e6f7f1;color:#246b55;font-size:12px}
+@media(min-width:750px){.shell{margin:25px auto;border-radius:25px;overflow:hidden;min-height:850px}.nav{border-radius:0 0 20px 20px}body{padding-bottom:35px}}
+</style></head><body><div class="shell">
+<div class="preview">🧪 UI TEST · ข้อมูลตัวอย่างเท่านั้น · ไม่เชื่อมข้อมูลจริง</div>
+<section id="home" class="screen active">
+ <div class="navy"><div class="brand"><div class="brand-icon">M</div><div class="grow"><div class="brand-title">My Finance</div><div class="small">ดูแลการเงินในแบบคุณ</div></div><button class="icon-btn" onclick="go('settings')" aria-label="ตั้งค่า">⚙</button></div>
+ <button class="select-month" onclick="go('calendar')">▦ &nbsp; ตุลาคม 2026 &nbsp;⌄</button>
+ <div class="hero"><div class="muted" style="font-size:12px">เงินคงเหลือ</div><div class="big-money">฿7,432.50</div><div class="small">รายรับหักรายจ่ายในเดือนนี้</div></div>
+ <div class="split"><div class="slab"><span class="green">↙</span> รายรับ<b>฿23,000</b></div><div class="slab"><span class="pink">↗</span> รายจ่าย<b>฿15,567</b></div></div></div>
+ <div class="pane">
+ <div class="card"><div class="heading">🍜 งบกิน <button class="link" onclick="go('budget')">ดูรายละเอียด ›</button></div>
+ <div class="row"><div class="tile" style="background:#ffe6eb">🍴</div><div class="grow"><div class="mainline">ใช้ไป ฿3,208</div><div class="meta">จาก ฿4,000</div></div><div style="text-align:right"><b>80%</b><div class="meta">เหลือ ฿792</div></div></div><div class="bar"><div style="width:80%"></div></div></div>
+ <div class="card"><div class="heading">บันทึกด่วน</div><div class="quick"><button onclick="startAdd('อาหาร')"><span class="tile">🍜</span>กิน</button><button onclick="startAdd('บ้าน')"><span class="tile">🏠</span>บ้าน</button><button onclick="startAdd('รถ')"><span class="tile">🚗</span>รถ</button><button onclick="startAdd('บัตร')"><span class="tile">💳</span>บัตร</button><button onclick="go('add')"><span class="tile">⋯</span>อื่น ๆ</button></div></div>
+ <div class="card"><div class="heading">รายการล่าสุด <button class="link" onclick="go('transactions')">ดูทั้งหมด ›</button></div><div id="home-items"></div></div>
+ </div>
+</section>
+<section id="transactions" class="screen"><div class="pane"><h1 class="page-title">รายการ</h1><p class="page-note">ตรวจสอบรายรับและรายจ่ายของคุณ</p>
+<div class="pills" id="filters"><button class="pill active" onclick="setFilter('all',this)">ทั้งหมด</button><button class="pill" onclick="setFilter('expense',this)">รายจ่าย</button><button class="pill" onclick="setFilter('income',this)">รายรับ</button></div>
+<input class="input" id="search" placeholder="⌕ ค้นหารายการ" oninput="renderTransactions()">
+<div class="card" style="margin-top:14px"><div class="heading">รายการตัวอย่าง</div><div id="tx-items"></div></div></div></section>
+<section id="add" class="screen"><div class="pane"><h1 class="page-title">บันทึกรายการ</h1><p class="page-note">ทดสอบหน้าตาฟอร์ม โดยไม่บันทึกลง My Finance จริง</p>
+<div class="pills" id="add-types"><button class="pill active" onclick="setType('expense',this)">รายจ่าย</button><button class="pill" onclick="setType('income',this)">รายรับ</button></div>
+<form class="card" onsubmit="saveMock(event)">
+<label class="field">จำนวนเงิน<input id="amount" class="input" type="number" min="0.01" step="0.01" required placeholder="฿ 0.00"></label>
+<label class="field">ชื่อรายการ<input id="tx-name" class="input" required placeholder="เช่น ข้าวกลางวัน"></label>
+<label class="field">หมวดหมู่<select id="category" class="input"><option>อาหาร</option><option>บ้าน</option><option>รถ</option><option>บัตร</option><option>อื่น ๆ</option><option>รายรับ</option></select></label>
+<label class="field">วันที่<input type="date" id="date" class="input" value="2026-10-17"></label>
+<label class="field">บัญชี / บัตร<select class="input"><option>เงินสด</option><option>บัญชีหลัก</option><option>บัตรเครดิต</option></select></label>
+<button class="primary" style="width:100%;margin-top:8px">ทดลองบันทึก</button><div class="note" style="margin-top:10px">รายการที่ทดลองเพิ่มจะอยู่แค่ในหน้าที่กำลังเปิด ไม่ถูกส่งไปยังเซิร์ฟเวอร์</div>
+</form></div></section>
+<section id="summary" class="screen"><div class="pane"><h1 class="page-title">สรุปการเงิน</h1><p class="page-note">ตุลาคม 2026 · ภาพรวมข้อมูลตัวอย่าง</p>
+<div class="cols"><div class="metric"><div class="meta">รายรับ</div><b>฿23,000</b></div><div class="metric"><div class="meta">รายจ่าย</div><b>฿15,567</b></div></div>
+<div class="card" style="margin-top:13px"><div class="heading">รายจ่ายตามหมวด</div><div class="donut"></div><div class="alt">🔴 อาหาร <b>34%</b></div><div class="alt">🟣 ค่าห้องเช่า <b>19%</b></div><div class="alt">🔵 รถของฉัน <b>17%</b></div><div class="alt">🟠 ซื้อของ <b>18%</b></div><div class="alt">🟢 อื่น ๆ <b>12%</b></div></div></div></section>
+<section id="budget" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title">งบประมาณ</h1><p class="page-note">ดูความคืบหน้าของแต่ละหมวด</p>
+<div class="card"><div class="heading">🍜 งบกิน <span class="blue">80%</span></div><div class="bar"><div style="width:80%"></div></div><div class="meta">ใช้ไป ฿3,208 / ฿4,000 · เหลือ ฿792</div></div>
+<div class="card"><div class="heading">งบอื่น ๆ</div><div class="alt">🏠 ค่าห้องเช่า <b>100%</b></div><div class="bar"><div style="background:#f09ca2;width:100%"></div></div><div class="alt">🚗 ค่าใช้รถ <b>70%</b></div><div class="bar"><div style="background:#81d5ae;width:70%"></div></div></div></div></section>
+<section id="cards" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title">บัตรและสินเชื่อ</h1><p class="page-note">ข้อมูลวงเงินสมมติสำหรับทดสอบดีไซน์</p><div id="card-items"></div></div></section>
+<section id="calendar" class="screen"><div class="pane"><button class="back" onclick="go('home')">‹ หน้าหลัก</button><h1 class="page-title">ปฏิทิน</h1><p class="page-note">ตุลาคม 2026</p><div class="card"><div class="heading">ตุลาคม 2026</div><div id="calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:6px;font-size:12px"></div></div><div class="card"><div class="heading">สรุปเดือนนี้</div>รายรับ ฿23,000 · รายจ่าย ฿15,567</div></div></section>
+<section id="more" class="screen"><div class="pane"><h1 class="page-title">เพิ่มเติม</h1><p class="page-note">การจัดการทั้งหมดในที่เดียว</p><div class="section-label">วางแผนเงิน</div><div class="card">
+<button class="menu-row" onclick="go('budget')"><span class="tile">🎯</span>งบประมาณ<span class="chevron">›</span></button><button class="menu-row" onclick="go('bills')"><span class="tile">📅</span>บิลประจำ<span class="chevron">›</span></button><button class="menu-row" onclick="go('cards')"><span class="tile">💳</span>บัตรและสินเชื่อ<span class="chevron">›</span></button></div>
+<div class="section-label">บันทึกเฉพาะเรื่อง</div><div class="card"><button class="menu-row" onclick="go('salary')"><span class="tile">💰</span>เงินเดือน<span class="chevron">›</span></button><button class="menu-row" onclick="go('rent')"><span class="tile">🏠</span>ค่าห้องเช่า<span class="chevron">›</span></button><button class="menu-row" onclick="go('car')"><span class="tile">🚗</span>รถของฉัน<span class="chevron">›</span></button></div>
+<div class="section-label">จัดการข้อมูล</div><div class="card"><button class="menu-row" onclick="go('accounts')"><span class="tile">🏦</span>บัญชี<span class="chevron">›</span></button><button class="menu-row" onclick="go('categories')"><span class="tile">🏷️</span>หมวดหมู่<span class="chevron">›</span></button><button class="menu-row" onclick="go('settings')"><span class="tile">⚙️</span>ตั้งค่า<span class="chevron">›</span></button></div></div></section>
+<section id="extra" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title" id="extra-title">รายละเอียด</h1><p class="page-note">ตัวอย่างหน้าจอเพื่อทดสอบรูปแบบเท่านั้น</p><div class="card" id="extra-content">หน้านี้ยังไม่มีข้อมูลจริง</div></div></section>
+<nav class="nav" aria-label="นำทางเวอร์ชันทดลอง"><button data-to="home" onclick="go('home')" class="active"><i>⌂</i>หน้าหลัก</button><button data-to="transactions" onclick="go('transactions')"><i>☷</i>รายการ</button><button data-to="add" class="add" onclick="go('add')"><i>+</i>เพิ่มรายการ</button><button data-to="summary" onclick="go('summary')"><i>◴</i>สรุป</button><button data-to="more" onclick="go('more')"><i>▦</i>เพิ่มเติม</button></nav>
+</div>
+<script>
+const tx=[{name:"7-Eleven",category:"อาหาร",amount:62,type:"expense",icon:"🏪",date:"17 ต.ค."},{name:"Grab",category:"เดินทาง",amount:165,type:"expense",icon:"🚗",date:"16 ต.ค."},{name:"ข้าวกลางวัน",category:"อาหาร",amount:85,type:"expense",icon:"🍜",date:"16 ต.ค."},{name:"เงินเดือน",category:"รายรับ",amount:23000,type:"income",icon:"💰",date:"15 ต.ค."}];
+let type="expense",filter="all";
+const money=n=>"฿"+Number(n).toLocaleString("th-TH",{maximumFractionDigits:2,minimumFractionDigits:2});
+function go(id){let target=document.getElementById(id);if(!target){const titles={bills:"บิลประจำ",salary:"เงินเดือน",rent:"ค่าห้องเช่า",car:"รถของฉัน",accounts:"บัญชี",categories:"หมวดหมู่",settings:"ตั้งค่า"};document.getElementById("extra-title").textContent=titles[id]||"รายละเอียด";document.getElementById("extra-content").textContent="หน้าจำลอง "+(titles[id]||"")+" · ยังไม่เชื่อมข้อมูลจริง";id="extra";}
+document.querySelectorAll(".screen").forEach(e=>e.classList.toggle("active",e.id===id));document.querySelectorAll(".nav [data-to]").forEach(e=>e.classList.toggle("active",e.dataset.to===id));window.scrollTo(0,0);if(id==="transactions")renderTransactions();if(id==="home")renderHome();}
+function entry(x){const d=document.createElement("div");d.className="item";const icon=document.createElement("div");icon.className="tile";icon.textContent=x.icon;const mid=document.createElement("div");mid.className="grow";const name=document.createElement("div");name.className="mainline";name.textContent=x.name;const sub=document.createElement("div");sub.className="meta";sub.textContent=x.category+" · "+x.date;mid.append(name,sub);const amount=document.createElement("b");amount.className="price "+(x.type==="income"?"green":"");amount.textContent=(x.type==="income"?"+":"−")+money(x.amount);d.append(icon,mid,amount);return d;}
+function renderHome(){const root=document.getElementById("home-items");root.replaceChildren(...tx.slice(0,3).map(entry));}
+function renderTransactions(){const q=document.getElementById("search").value.trim().toLowerCase();const items=tx.filter(x=>(filter==="all"||x.type===filter)&&(!q||(x.name+" "+x.category).toLowerCase().includes(q)));const root=document.getElementById("tx-items");root.replaceChildren(...items.map(entry));if(!items.length)root.textContent="ไม่พบรายการในตัวอย่าง";}
+function setFilter(f,b){filter=f;document.querySelectorAll("#filters .pill").forEach(x=>x.classList.toggle("active",x===b));renderTransactions()}
+function setType(t,b){type=t;document.querySelectorAll("#add-types .pill").forEach(x=>x.classList.toggle("active",x===b))}
+function startAdd(c){document.getElementById("category").value=c==="บัตร"?"บัตร":c;go("add")}
+function saveMock(e){e.preventDefault();const amt=Number(document.getElementById("amount").value);const name=document.getElementById("tx-name").value.trim();if(!(amt>0)||!name)return;const cat=document.getElementById("category").value;tx.unshift({name,category:cat,amount:amt,type,icon:type==="income"?"💰":"🧾",date:"ทดลอง"});e.target.reset();filter="all";document.querySelectorAll("#filters .pill").forEach((x,i)=>x.classList.toggle("active",i===0));go("transactions");alert("เพิ่มเฉพาะในตัวอย่างหน้าเว็บนี้ ไม่ได้บันทึกข้อมูลจริง");}
+const cardData=[["KBank Credit Card",3200,29000],["ttb Credit Card",4152,28000],["Shopee SPayLater",2296,55000],["Grab PayLater",292,3000]];
+const cardRoot=document.getElementById("card-items");cardData.forEach(c=>{const box=document.createElement("div");box.className="card";const h=document.createElement("div");h.className="heading";h.textContent=c[0];const r=document.createElement("div");r.className="row";r.innerHTML='<span class="meta">ยอดใช้</span><b class="price"></b><span class="grow"></span><span class="meta"></span>';r.querySelector("b").textContent=money(c[1]);r.lastElementChild.textContent="เหลือ "+money(c[2]-c[1]);const p=document.createElement("div");p.className="bar";const fill=document.createElement("div");fill.style.width=Math.min(100,c[1]/c[2]*100)+"%";p.append(fill);box.append(h,r,p);cardRoot.append(box)});
+const grid=document.getElementById("calendar-grid");["อา","จ","อ","พ","พฤ","ศ","ส"].forEach(x=>{const d=document.createElement("b");d.textContent=x;grid.append(d)});for(let n=0;n<4;n++)grid.append(document.createElement("div"));for(let n=1;n<=31;n++){const d=document.createElement("button");d.className="secondary";d.style.padding="8px 0";d.textContent=n;d.onclick=()=>{document.querySelectorAll("#calendar-grid button").forEach(e=>e.style.background="#fff");d.style.background="#d6e7ff"};grid.append(d)}
+renderHome();
+</script></body></html>
