@@ -10,7 +10,7 @@ const errorEl=document.getElementById('preview-error');
 const retry=document.getElementById('preview-retry');
 const content=document.querySelector('.shell');
 const banner=document.querySelector('.preview');
-const state={rows:[],budgets:[],debts:[],bills:[],month:'',filter:'all',type:'expense',loaded:false,user:null};
+const state={rows:[],budgets:[],debts:[],bills:[],accounts:[],categories:[],month:'',filter:'all',type:'expense',loaded:false,user:null};
 const $=id=>document.getElementById(id);
 const fmt=n=>'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
 const today=()=>new Date(Date.now()+7*3600000).toISOString().slice(0,10);
@@ -35,13 +35,15 @@ async function refresh(){
   if(error||!data?.user){setGate('กรุณาเข้าสู่ระบบด้วยบัญชี My Finance เพื่อดูข้อมูลจริง',true);return}
   const user=data.user;state.user=user;
   gateText.textContent='กำลังโหลดข้อมูลจริงของบัญชีคุณ…';
-  const [rows,budgets,debts,bills]=await Promise.all([
+  const [rows,budgets,debts,bills,accounts,categories]=await Promise.all([
    pages('transactions','id,description,type,amount,status,transaction_date,created_at,categories(name,icon),accounts(name)',user.id,'transaction_date'),
    pages('budgets','id,name,is_active,monthly_limit,category_names',user.id),
    pages('debts','id,name,debt_type,is_active,original_amount,outstanding_amount,due_day',user.id),
-   pages('bills','id,name,is_active,amount,due_day',user.id)
+   pages('bills','id,name,is_active,amount,due_day',user.id),
+   pages('accounts','id,name,account_type,is_active,opening_balance',user.id),
+   pages('categories','id,name,type,icon',user.id)
   ]);
-  state.rows=rows;state.budgets=budgets;state.debts=debts;state.bills=bills;
+  state.rows=rows;state.budgets=budgets;state.debts=debts;state.bills=bills;state.accounts=accounts;state.categories=categories;
   if(!state.month)state.month=today().slice(0,7);
   showApp();
  }catch(e){setGate('โหลดข้อมูลจริงไม่สำเร็จ',false,e?.message||'เกิดข้อผิดพลาดในการเชื่อมต่อ')}
@@ -53,7 +55,8 @@ loginForm.addEventListener('submit',async e=>{
   const email=$('preview-email').value.trim(),password=$('preview-password').value;
   const {error}=await db.auth.signInWithPassword({email,password});
   if(error)throw error;
-  $('preview-password').value='';await refresh();
+  $('preview-password').value='';await updateCompare('home');
+refresh();
  }catch(err){setGate('เข้าสู่ระบบไม่สำเร็จ',true,err.message||'กรุณาตรวจสอบอีเมลหรือรหัสผ่าน')}
  finally{submit.disabled=false}
 });
@@ -164,13 +167,34 @@ function renderAll(){renderMonthPicker();renderHome();renderTransactions();rende
 function changeMonth(value){if(!/^\d{4}-\d{2}$/.test(value))return;state.month=value;renderAll()}
 function go(id){
  if(!state.loaded)return;
- if(!$(id)){const names={bills:'บิลประจำ',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน',accounts:'บัญชี',categories:'หมวดหมู่',settings:'ตั้งค่า'};
+ const requested=id;
+ if(['bills','accounts','categories'].includes(id)){renderExtra(id);id='extra'}
+ if(!$(id)&&!['bills','accounts','categories'].includes(requested)){const names={bills:'บิลประจำ',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน',accounts:'บัญชี',categories:'หมวดหมู่',settings:'ตั้งค่า'};
  $('extra-title').textContent=names[id]||'รายละเอียด';$('extra-content').textContent='หน้าทดลอง '+(names[id]||'')+' ยังไม่ได้ออกแบบใน Preview นี้ · ไม่มีการแก้ข้อมูลจริง';id='extra'}
  document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id===id));
  document.querySelectorAll('.nav [data-to]').forEach(el=>el.classList.toggle('active',el.dataset.to===id));
  window.scrollTo({top:0,behavior:'instant'});
+ updateCompare(requested);
 }
 function startAdd(cat){go('add');const select=$('category');if([...select.options].some(o=>o.value===cat))select.value=cat}
 function saveMock(e){e.preventDefault();$('test-save-message').textContent='โหมด Preview อ่านข้อมูลจริงอย่างเดียว รายการนี้ไม่ได้ถูกบันทึก';$('test-save-message').hidden=false}
+
+const comparePaths={home:'#dashboard',transactions:'#transactions',add:'#transactions',summary:'#summary',budget:'#budget',cards:'#debts',bills:'#bills',accounts:'#accounts',categories:'#categories',calendar:'#dashboard',salary:'salary.html',rent:'rent.html',car:'car.html',settings:'#settings',more:'#dashboard'};
+function updateCompare(page){
+ const names={home:'ภาพรวม',transactions:'รายรับ–รายจ่าย',add:'บันทึกรายการ',summary:'สรุป',budget:'งบประมาณ',cards:'บัตรและสินเชื่อ',bills:'บิลประจำ',accounts:'บัญชี',categories:'หมวดหมู่',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน',settings:'ตั้งค่า',more:'เพิ่มเติม'};
+ const link=$('compare-real');if(link){const route=comparePaths[page]||'#dashboard';link.href=route.startsWith('#')?'../'+route:'../'+route;link.textContent='เปิดเว็บจริง: '+(names[page]||page)+' ↗';}
+ const badge=$('compare-page');if(badge)badge.textContent=names[page]||page;
+}
+function renderExtra(page){
+ const names={bills:'บิลประจำ',accounts:'บัญชี',categories:'หมวดหมู่'};
+ $('extra-title').textContent=names[page];const root=$('extra-content');root.replaceChildren();
+ let rows=[];
+ if(page==='bills')rows=state.bills.map(x=>({title:x.name,meta:'ครบกำหนดวันที่ '+(x.due_day||'—')+' · '+(x.is_active===false?'ปิดใช้งาน':'เปิดใช้งาน'),amount:fmt(x.amount),icon:'📅'}));
+ if(page==='accounts')rows=state.accounts.map(x=>({title:x.name,meta:x.account_type+' · '+(x.is_active===false?'ปิดใช้งาน':'เปิดใช้งาน'),amount:'ยอดตั้งต้น '+fmt(x.opening_balance),icon:'🏦'}));
+ if(page==='categories')rows=state.categories.map(x=>({title:x.name,meta:x.type==='expense'?'รายจ่าย':'รายรับ',amount:'',icon:x.icon||'🏷️'}));
+ root.className='card';if(!rows.length){root.append(td('div','ยังไม่มีข้อมูล','meta'));return}
+ for(const row of rows){const d=td('div','','item'),m=td('div','','grow');m.append(td('div',row.title,'mainline'),td('div',row.meta,'meta'));d.append(iconTile(row.icon),m,td('b',row.amount,'price'));root.append(d)}
+}
+
 Object.assign(window,{go,changeMonth,setFilter,setType,renderTransactions,startAdd,saveMock});
 refresh();
