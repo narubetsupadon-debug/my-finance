@@ -103,6 +103,19 @@
           <button class="btn primary welcome-add" onclick="openTx()">＋ บันทึกรายการ</button>
         </div>
 
+        <div class="clean-dashboard-overview" aria-label="สรุปการเงินเดือนนี้">
+          <div class="clean-balance-hero">
+            <div class="clean-hero-caption">เงินคงเหลือจากรายรับหักรายจ่ายเดือนนี้</div>
+            <div class="clean-balance-number"><button type="button" id="balanceTotal" class="value balance money total-link" aria-label="ดูรายละเอียดรายรับหักรายจ่าย">฿0</button></div>
+            <div class="clean-hero-note">ยอดตามรายการที่บันทึกใน My Finance</div>
+          </div>
+          <div class="clean-income-expense">
+            <div class="clean-metric"><span class="clean-metric-icon income-icon" aria-hidden="true">↙</span><div><div class="clean-metric-title">รายรับ</div><button type="button" id="incomeTotal" class="value income money total-link">฿0</button></div></div>
+            <div class="clean-metric"><span class="clean-metric-icon expense-icon" aria-hidden="true">↗</span><div><div class="clean-metric-title">รายจ่าย</div><button type="button" id="expenseTotal" class="value expense money total-link">฿0</button></div></div>
+          </div>
+          <div class="clean-debt-line">ยอดค้างบัตรและสินเชื่อ <strong id="debtTotal" class="money">฿0</strong></div>
+        </div>
+        
         <div class="daily-overview">
           <div class="daily-panel spent-panel">
             <div class="daily-label"><span aria-hidden="true">↗</span> วันนี้ใช้ไป</div>
@@ -144,12 +157,7 @@
 
         <details class="home-detail card section">
           <summary><span><strong>ภาพรวมเดือนนี้</strong><small id="monthLabel"></small></span><span class="detail-cue">ดูรายละเอียด <span aria-hidden="true">⌄</span></span></summary>
-          <p class="muted total-scope">รวมจ่ายแล้ว รอดำเนินการ และวันที่อนาคตในเดือนนี้ · ไม่รวมยกเลิก · แตะยอดดูรายการ</p><div class="grid4 section">
-            <div class="metric"><div class="label">รายรับ</div><button type="button" id="incomeTotal" class="value income money total-link" aria-label="ดูรายการประกอบยอด">฿0</button></div>
-            <div class="metric"><div class="label">รายจ่าย</div><button type="button" id="expenseTotal" class="value expense money total-link" aria-label="ดูรายการประกอบยอด">฿0</button></div>
-            <div class="metric"><div class="label">รายรับหักรายจ่าย</div><button type="button" id="balanceTotal" class="value balance money total-link" aria-label="ดูรายการประกอบยอด">฿0</button></div>
-            <div class="metric"><div class="label">ยอดบัตร / สินเชื่อ</div><div id="debtTotal" class="value expense money">฿0</div></div>
-          </div>
+          <p class="muted total-scope">รวมจ่ายแล้ว รอดำเนินการ และวันที่อนาคตในเดือนนี้ · ไม่รวมยกเลิก · แตะยอดดูรายการ</p><p class="muted">แตะสรุปเพื่อดูรายละเอียดหมวดรายจ่ายด้านล่าง</p>
           <h3 class="detail-heading">รายจ่ายตามหมวด</h3><div id="categoryChart"></div>
           <button class="btn soft section" data-page-jump="summary">เปิดสรุปและกราฟทั้งหมด →</button>
         </details>
