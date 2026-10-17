@@ -112,3 +112,51 @@ html[data-resolved-theme="light"] #dashboardPage .recent-card{background:#172d49
  .clean-metric-icon{display:none}
  .clean-metric .value{font-size:16px}
 }
+
+
+/* v3 correction: light page canvas, dark hero only, responsive desktop/mobile */
+html[data-resolved-theme="light"] #dashboardPage{
+ background:transparent!important;color:var(--text)!important;border-radius:0!important;padding:0!important;
+ --card:#fff;--text:#172033;--muted:#7b8497;--line:#e8ebf2;--green:#07875b;--red:#cf3f3f;
+}
+html[data-resolved-theme="light"] #dashboardPage .home-welcome{
+ background:transparent!important;color:var(--text)!important;padding:0!important;
+}
+html[data-resolved-theme="light"] #dashboardPage .home-welcome h1{color:var(--text)!important}
+html[data-resolved-theme="light"] #dashboardPage .home-welcome .welcome-date{color:var(--muted)!important}
+html[data-resolved-theme="light"] #dashboardPage .daily-overview{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html[data-resolved-theme="light"] #dashboardPage .daily-overview .next-panel{grid-column:auto!important}
+html[data-resolved-theme="light"] #dashboardPage .daily-panel,
+html[data-resolved-theme="light"] #dashboardPage .card,
+html[data-resolved-theme="light"] #dashboardPage .metric,
+html[data-resolved-theme="light"] #dashboardPage .summary-mini,
+html[data-resolved-theme="light"] #dashboardPage .quick-capture,
+html[data-resolved-theme="light"] #dashboardPage .recent-card{
+ background:#fff!important;color:#172033!important;border-color:#e7edf5!important;
+}
+html[data-resolved-theme="light"] #dashboardPage .daily-amount,
+html[data-resolved-theme="light"] #dashboardPage .value{color:#172033!important}
+html[data-resolved-theme="light"] #dashboardPage .daily-caption,
+html[data-resolved-theme="light"] #dashboardPage .daily-label,
+html[data-resolved-theme="light"] #dashboardPage .muted{color:#7b8497!important}
+html[data-resolved-theme="light"] #dashboardPage .bill-month-strip{background:#fff!important;color:#526178!important}
+html[data-resolved-theme="light"] #dashboardPage .quick-btn{background:#f4f7fc!important;color:#243957!important}
+html[data-resolved-theme="light"] #dashboardPage .clean-balance-hero{
+ background:linear-gradient(125deg,#10233c,#1b3555)!important;color:#fff!important;
+}
+html[data-resolved-theme="light"] #dashboardPage .clean-balance-number .value{color:#fff!important}
+html[data-resolved-theme="light"] #dashboardPage .clean-metric .value{color:#f8fbff!important}
+.clean-dashboard-overview{max-width:100%;min-width:0}
+.clean-dashboard-overview .clean-balance-hero{min-width:0}
+.clean-dashboard-overview .clean-balance-number{overflow:hidden}
+.clean-dashboard-overview .clean-income-expense{min-width:0}
+.clean-dashboard-overview .clean-metric{min-width:0}
+@media(max-width:820px){
+ html[data-resolved-theme="light"] #dashboardPage .daily-overview{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ html[data-resolved-theme="light"] #dashboardPage .daily-overview .next-panel{grid-column:1/-1!important}
+}
+@media(max-width:450px){
+ .clean-income-expense{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .clean-metric-icon{display:none}
+ .clean-metric .value{font-size:clamp(15px,4vw,20px)}
+}
