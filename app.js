@@ -941,7 +941,7 @@ $('txForm').onsubmit=async e=>{
  }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});else{showFinanceSaveError($('txError'),error);$('txError').scrollIntoView({block:'nearest'})}}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
 }
 $('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
-for(const id of ['txAmount','txDesc','txDate','txCategory','txAccount']){
+for(const id of ['txAmount','txDesc','txDate','txType','txCategory','txAccount','txNote']){
  $(id)?.addEventListener('input',()=>{duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden')});
  $(id)?.addEventListener('change',()=>{duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden')});
 }
