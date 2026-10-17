@@ -2,7 +2,7 @@ import {createCapacityMonitor} from './app-storage.js?v=20261017-quotes63';
 import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261017-quotes63';
 import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261017-quotes63';
 import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261017-subcustom2';
-import {createSummaryRenderer} from './app-summary.js?v=20261017-quotes63';
+import {createSummaryRenderer} from './app-summary.js?v=20261017-pdfsubs1';
 import {createDashboardRenderer} from './app-dashboard.js?v=20261017-quotes63';
 import {createTransactionRenderer} from './app-transactions.js?v=20261017-quotes63';
 import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261017-quotes63';
@@ -746,7 +746,7 @@ $('exportSummaryPdf').onclick=async()=>{
  const cancelled=()=>sessionRevision!==revision||user?.id!==owner||document.body.classList.contains('privacy-mode');
  clearSummaryPdf();button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='กำลังสร้าง PDF…';status.textContent='กำลังเตรียมรายงานตามช่วงเวลาและสถานะที่เลือก…';
  try{
-  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261017-quotes63');
+  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261017-pdfsubs1');
   if(cancelled())return;
   const result=await createSummaryPdf(report,{isCancelled:cancelled,onProgress:(page,total)=>{status.textContent=`กำลังสร้าง PDF หน้า ${page}/${total}…`;}});
   if(cancelled())return;

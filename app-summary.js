@@ -90,7 +90,7 @@ function renderSummary(){
   :valid.filter(x=>config.keys.includes(String(x.transaction_date).slice(0,7)))
  lastReport={label:config.label,scope:scope+' · ไม่รวมยกเลิก',paidOnly,mode:config.mode,
   keys:[...summaryTimelineKeys(config,today,rows)],
-  rows:rows.map(x=>({transaction_date:x.transaction_date,type:x.type,amount:x.amount,description:x.description,status:x.status,reportCategory:excelGroup(x)}))};
+  rows:rows.map(x=>({transaction_date:x.transaction_date,type:x.type,amount:x.amount,description:x.description,status:x.status,reportCategory:excelGroup(x),subcategory:x.subcategory||null}))};
  const foodSub=$('foodSubcategoryBreakdown');
  if(foodSub){
   const parts=rows.filter(x=>x.type==='expense'&&x.categories?.name==='อาหารและเครื่องดื่ม').reduce((out,x)=>{const k=x.subcategory||'อาหาร';out[k]=(out[k]||0)+Math.round(Number(x.amount||0)*100);return out},{});
