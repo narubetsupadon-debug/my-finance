@@ -13,7 +13,7 @@ export function buildSummaryReport(snapshot){
  const rows=snapshot.rows.map(row=>{
   const cents=Math.round(Number(row.amount)*100);
   if(!Number.isSafeInteger(cents)||cents<0||!['income','expense'].includes(row.type))throw Error('พบยอดรายการไม่ถูกต้อง กรุณาตรวจรายการก่อนส่งออก');
-  return {date:String(row.transaction_date),type:row.type,cents,description:String(row.description||'ไม่ระบุรายการ'),category:String(row.reportCategory||row.categories?.name||'อื่นๆ'),status:row.status||'paid'};
+  return {date:String(row.transaction_date),type:row.type,cents,description:String(row.description||'ไม่ระบุรายการ'),category:String(row.reportCategory||row.categories?.name||'อื่นๆ'),subcategory:String(row.subcategory||'').trim(),status:row.status||'paid'};
  }).sort((a,b)=>a.date.localeCompare(b.date));
  let income=0,expense=0;const categories=new Map(),periods=new Map(snapshot.keys.map(key=>[key,{key,income:0,expense:0}]));
  for(const row of rows){
@@ -74,20 +74,20 @@ function footer(p,page,total,created){
  p.text(`สร้าง ${created} • ส่วนต่างไม่ใช่ยอดเงินสดคงเหลือ`,36,820,7,COLORS.muted);
 }
 function heading(p,report){
- p.text('MY FINANCE',36,31,11,COLORS.teal);p.text('รายละเอียดรับเข้า–จ่ายออก',36,61,22);
+ p.text('MY FINANCE',36,31,11,COLORS.teal);p.text('รายละเอียดรายรับและรายจ่าย',36,61,20);
  p.text(report.label,36,100,10,COLORS.muted);p.text(report.scope,36,120,8.5,COLORS.muted);
 }
 function firstPage(report){
  const p=painter(),{box,text,line,ctx,fit,multiline}=p;
  box(0,0,W,H,COLORS.paper);box(0,0,W,178,COLORS.navy);
  text('MY FINANCE',36,30,12,'#ffffff');box(36,54,34,3,COLORS.teal);
- text('เงินเข้า–ออก ในภาพเดียว',36,70,26,'#ffffff');
+ text('ภาพรวมรายรับและรายจ่าย',36,70,24,'#ffffff');
  text(`${report.label} | ${report.rows.length.toLocaleString('th-TH')} รายการ`,36,115,10,'#d4e1e8');
  multiline(report.scope,36,139,520,9,'#d4e1e8');
- const cards=[['รับเข้าที่บันทึก',report.income,COLORS.teal],['จ่ายออกที่บันทึก',report.expense,COLORS.blue],['ส่วนต่าง',report.balance,COLORS.orange]];
+ const cards=[['รายรับรวม',report.income,COLORS.teal],['รายจ่ายรวม',report.expense,COLORS.blue],['รายรับสุทธิหลังหักรายจ่าย',report.balance,COLORS.orange]];
  cards.forEach(([label,value,color],i)=>{const x=36+i*178;box(x,194,167,81,'#ffffff',10);box(x+12,207,21,3,color);text(label,x+12,220,9,COLORS.muted);fit(money(value),x+154,242,145,20,color);});
  text('หน่วย: บาท • รับเข้า - จ่ายออก ไม่รวมยอดยกมา',36,287,8.5,COLORS.muted);
- box(36,312,523,214,'#ffffff',12);text('จ่ายไปกับอะไรบ้าง',52,327,16);
+ box(36,312,523,214,'#ffffff',12);text('สัดส่วนรายจ่ายตามหมวดหมู่',52,327,16);
  text(`สัดส่วนจากยอดจ่ายออก ${money(report.expense)} บาท`,52,352,8.5,COLORS.muted);
  const palette=[COLORS.teal,COLORS.blue,COLORS.gold,COLORS.other];
  let angle=-Math.PI/2;const cx=145,cy=445;
@@ -103,7 +103,7 @@ function firstPage(report){
  fit(money(report.expense),cx,435,90,13,COLORS.ink,'center');text(report.expense?'จ่ายออก':'ไม่มีรายจ่าย',cx,455,8,COLORS.muted,'center');
  if(!report.expense)text('ไม่มีรายจ่ายในช่วงที่เลือก',247,406,11,COLORS.muted);
  box(36,540,523,194,'#ffffff',12);text(`รับเข้า–จ่ายออก ${report.mode==='days'?'รายวัน':'รายเดือน'}`,52,555,15);
- text('ยอดตามวันที่รายการ • หน่วย: บาท',52,581,8.5,COLORS.muted);
+ text('แสดงยอดตามวันที่ทำรายการ • หน่วย: บาท',52,581,8.5,COLORS.muted);
  box(391,563,7,7,COLORS.teal);text('รับเข้า',404,559,8.5);box(472,563,7,7,COLORS.blue);text('จ่ายออก',485,559,8.5);
  const left=89,base=696,pw=453,ph=94,count=report.periods.length;
  const max=Math.max(100,...report.periods.flatMap(row=>[row.income,row.expense]))/100;
@@ -118,17 +118,17 @@ function firstPage(report){
  text('วันที่ไม่มีแท่ง = ไม่มีรายการบันทึกในชุดข้อมูล',52,717,7.8,COLORS.muted);
  const note=report.pending?`รวมรอดำเนินการ ${report.pending} รายการตามตัวกรอง ไม่ใช่ยอดจ่ายจริงทั้งหมด`:'รับเข้ารวมเงินคืน/เงินสมทบ จ่ายออกตามที่บันทึก อาจมีแลกเงิน โอนเงิน ลงทุน และให้ยืม';
  let y=746;y+=multiline(note,40,y,515,8)+3;
- multiline('ไม่ปรับหารครึ่งอาหารหรือค่าเช่า • รวมยอดชำระบัตร/สินเชื่อ • รายละเอียดและหมวดทั้งหมดอยู่หน้าถัดไป',40,y,515,8);
+ multiline('อ้างอิงยอดที่บันทึกโดยไม่ปรับสัดส่วนค่าอาหารหรือค่าเช่า • รวมยอดชำระหนี้ • ดูหมวดหลักและหมวดย่อยในหน้ารายละเอียด',40,y,515,8);
  return p;
 }
 function detailLayout(report){
  const measure=painter(),pages=[];let group=[],height=0;
  for(const row of report.rows){
-  const desc=measure.wrap(row.description,232,9),cat=measure.wrap(row.category,87,8);
-  const needed=Math.max(desc.length*13,cat.length*12,26)+7;
+  const desc=measure.wrap(row.description,232,9),cat=measure.wrap(row.category,87,8),sub=row.subcategory?measure.wrap('↳ '+row.subcategory,87,7.5):[];
+  const needed=Math.max(desc.length*13,cat.length*12+sub.length*11,26)+7;
   if(group.length&&height+needed>550){pages.push(group);group=[];height=0;}
   if(needed>550)throw Error('ข้อความในรายการยาวเกินไป กรุณาย่อรายละเอียดก่อนส่งออก');
-  group.push({...row,desc,cat,height:needed});height+=needed;
+  group.push({...row,desc,cat,sub,height:needed});height+=needed;
  }
  if(group.length||!pages.length)pages.push(group);
  measure.canvas.width=measure.canvas.height=0;return pages;
@@ -136,13 +136,13 @@ function detailLayout(report){
 function detailPage(report,rows,index,total){
  const p=painter();heading(p,report);
  p.box(36,145,523,25,COLORS.navy,4);
- [[42,'วันที่'],[101,'รายการ'],[342,'หมวด'],[447,'รับเข้า'],[506,'จ่ายออก']].forEach(([x,label])=>p.text(label,x,152,8,'#ffffff'));
+ [[42,'วันที่'],[101,'รายละเอียดรายการ'],[342,'หมวดหลัก / ย่อย'],[447,'รายรับ'],[506,'รายจ่าย']].forEach(([x,label])=>p.text(label,x,152,8,'#ffffff'));
  let y=177;
  rows.forEach((row,i)=>{
   if(i%2===0)p.box(36,y-2,523,row.height,'#f1f5f7');
   p.text(row.date.slice(8)+'/'+row.date.slice(5,7)+'/'+row.date.slice(2,4),42,y+3,8);
-  row.desc.forEach((s,j)=>p.text(s,101,y+3+j*13,9));row.cat.forEach((s,j)=>p.text(s,342,y+3+j*12,8));
-  p.text(row.status==='pending'?'รอดำเนินการ':'รับ/จ่ายแล้ว',42,y+16,6.5,COLORS.muted);
+  row.desc.forEach((s,j)=>p.text(s,101,y+3+j*13,9));row.cat.forEach((s,j)=>p.text(s,342,y+3+j*12,8));row.sub.forEach((s,j)=>p.text(s,342,y+3+row.cat.length*12+j*11,7.5,COLORS.blue));
+  p.text(row.status==='pending'?'รอดำเนินการ':'บันทึกแล้ว',42,y+16,6.5,COLORS.muted);
   p.fit(money(row.cents),row.type==='income'?489:552,y+3,58,9,row.type==='income'?COLORS.teal:COLORS.ink);
   y+=row.height;
  });
@@ -152,7 +152,7 @@ function detailPage(report,rows,index,total){
  p.text(isLast?`รวมทั้งรายงาน ${report.rows.length} รายการ`:`รวมหน้านี้ ${rows.length} รายการ`,42,y+14,9);
  const sum=type=>isLast?report[type]:rows.filter(r=>r.type===type).reduce((n,r)=>n+r.cents,0);
  p.fit(money(sum('income')),489,y+14,70,10,COLORS.teal);p.fit(money(sum('expense')),552,y+14,60,10,COLORS.blue);
- p.text('ยอดตามที่บันทึก • ไม่รวมรายการยกเลิก • สถานะตามตัวกรองหน้าสรุป',36,768,8,COLORS.muted);
+ p.text('ยอดตามข้อมูลที่บันทึก • ไม่รวมรายการยกเลิก • อ้างอิงตัวกรองจากหน้าสรุป',36,768,8,COLORS.muted);
  return p;
 }
 
