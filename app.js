@@ -798,6 +798,10 @@ function syncTxSubcategory(value){
  const defaults=SUBCATEGORY_DEFAULTS[cat?.name]||[];
  const custom=subcategories.filter(s=>s.category_id===cat?.id&&s.is_active!==false).map(s=>s.name);
  const options=[...new Set([...defaults,...custom])];
+ // Preserve an older child category only while editing its original parent.
+ const original=editing.id?transactions.find(t=>t.id===editing.id):null;
+ const legacy=original&&original.category_id===cat?.id?String(original.subcategory||'').trim():'';
+ if(legacy&&!options.includes(legacy))options.push(legacy);
  const select=$('txSubcategory'),wrap=$('txSubcategoryWrap'),add=$('txSubcategoryAdd');
  if(!select||!wrap)return;
  const enabled=$('txType').value==='expense'&&!!cat;
@@ -981,6 +985,8 @@ $('txForm').onsubmit=async e=>{
  if(!row.category_id)return txError('เลือกหมวดหมู่ก่อนบันทึก');
   const selectedCategory=categories.find(c=>c.id===row.category_id);
   const allowedSubcategories=[...(SUBCATEGORY_DEFAULTS[selectedCategory?.name]||[]),...subcategories.filter(s=>s.category_id===row.category_id&&s.is_active!==false).map(s=>s.name)];
+  const originalRow=editing.id?transactions.find(t=>t.id===editing.id):null;
+  if(originalRow?.category_id===row.category_id&&originalRow.subcategory)allowedSubcategories.push(originalRow.subcategory);
   if(!allowedSubcategories.includes(row.subcategory))row.subcategory=null;
   
  if(!editing.id&&!duplicateOverride){
