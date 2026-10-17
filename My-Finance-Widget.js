@@ -89,6 +89,36 @@ function budgetRing(data,size){
 }
 function text(widget,value,size,color){const line=widget.addText(value);line.font=Font.semiboldSystemFont(size);line.textColor=new Color(color);line.minimumScaleFactor=.65;line.lineLimit=1;return line;}
 function money(cents){return '฿'+(cents/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function cardMode(parameter){
+ const parts=String(parameter||'').trim().split(':');
+ return parts[0].toLowerCase()==='cards'?{id:parts.slice(1).join(':').trim()}:null;
+}
+function cardBalances(rows,id=''){
+ return rows.filter(x=>x.debt_type==='credit_card'&&(!id||String(x.id)===id)).map(x=>{
+  const limit=Number(x.original_amount||0),used=Number(x.outstanding_amount||0);
+  if(!Number.isFinite(limit)||!Number.isFinite(used)||limit<0||used<0)throw new Error('ข้อมูลวงเงินไม่ถูกต้อง กรุณาตรวจในเว็บ');
+  const limitCents=Math.round(limit*100),usedCents=Math.round(used*100);
+  return {id:x.id,name:x.name||'บัตรเครดิต',limit:limitCents,spent:usedCents,remaining:Math.max(0,limitCents-usedCents),over:Math.max(0,usedCents-limitCents)};
+ }).sort((a,b)=>String(a.name).localeCompare(String(b.name),'th')||String(a.id).localeCompare(String(b.id)));
+}
+function renderCards(widget,cards,checkedAt,selected){
+ const family=config.widgetFamily||'medium',small=family==='small',capacity=small?1:family==='large'?5:2;
+ widget.url=WEBSITE+'#debts';text(widget,'MY FINANCE · บัตร',11,'aaa7ff');widget.addSpacer(6);
+ if(!cards.length){text(widget,selected?'ไม่พบบัตรที่เลือก':'ยังไม่มีบัตรเครดิต',14,'ffffff');text(widget,'จัดการที่เมนูบัตรและสินเชื่อ',11,'a3a8be');}
+ for(const card of cards.slice(0,capacity)){
+  const row=widget.addStack();row.layoutHorizontally();row.centerAlignContent();
+  const col=row.addStack();col.layoutVertically();text(col,card.name,small?12:13,'ffffff');
+  text(col,'เหลือ '+money(card.remaining),small?17:20,card.over?'ffc28c':'79dec4');
+  text(col,'ใช้ '+money(card.spent),small?10:11,'d8d9e4');
+  text(col,'วงเงิน '+money(card.limit),small?10:11,'a3a8be');
+  if(card.over)text(col,'เกินวงเงิน '+money(card.over),10,'ffc28c');
+  if(!small){row.addSpacer();const ring=row.addImage(budgetRing(card,44));ring.imageSize=new Size(44,44);}
+  widget.addSpacer(8);
+ }
+ if(cards.length>capacity)text(widget,'อีก '+(cards.length-capacity)+' บัตร · แตะดูทั้งหมด',10,'aaa7ff');
+ widget.addSpacer();text(widget,'ข้อมูล ณ '+checkedLabel(checkedAt),10,'a3a8be');
+ text(widget,'ยอดตามที่บันทึกในแอป',9,'a3a8be');
+}
 async function main(){
  const widget=new ListWidget();widget.backgroundColor=new Color('#171b32');const padding=config.widgetFamily==='small'?12:16;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
  try{
@@ -98,7 +128,14 @@ async function main(){
     const session=JSON.parse(Keychain.get(SESSION_KEY));try{await api('/auth/v1/logout?scope=local',{token:session.access_token,method:'POST'});}catch{}Keychain.remove(SESSION_KEY);if(Keychain.contains(CHECK_KEY))Keychain.remove(CHECK_KEY);throw new Error('ออกจากระบบแล้ว ลบวิดเจ็ตบนหน้าจอด้วยค่ะ');
    }
   }
-  const session=await getSession(),day=currentDay(),month=day.slice(0,7),[y,m]=month.split('-').map(Number),next=new Date(Date.UTC(y,m,1)).toISOString().slice(0,10);
+  const session=await getSession(),mode=cardMode(typeof args==='undefined'?'':args.widgetParameter);
+  if(mode){
+   const rows=await readAll('debts','select=id,name,debt_type,original_amount,outstanding_amount',session),cards=cardBalances(rows,mode.id),checkedAt=new Date();
+   renderCards(widget,cards,checkedAt,mode.id);
+   try{Keychain.set(CHECK_KEY,JSON.stringify({owner:session.user_id,at:checkedAt.getTime()}));}catch{}
+   Script.setWidget(widget);if(!config.runsInWidget)await widget.presentMedium();Script.complete();return;
+  }
+  const day=currentDay(),month=day.slice(0,7),[y,m]=month.split('-').map(Number),next=new Date(Date.UTC(y,m,1)).toISOString().slice(0,10);
   const [rows,budgets]=await Promise.all([
    readAll('transactions','select=id,amount,type,status,transaction_date,categories(name)&transaction_date=gte.'+month+'-01&transaction_date=lt.'+next,session),
    readAll('budgets','select=id,is_active,monthly_limit,category_names',session)
