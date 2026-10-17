@@ -1,7 +1,7 @@
 import {createCapacityMonitor} from './app-storage.js?v=20261017-quotes63';
 import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261017-quotes63';
 import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261017-quotes63';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261017-quotes63';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261017-subcustom2';
 import {createSummaryRenderer} from './app-summary.js?v=20261017-quotes63';
 import {createDashboardRenderer} from './app-dashboard.js?v=20261017-quotes63';
 import {createTransactionRenderer} from './app-transactions.js?v=20261017-quotes63';
@@ -32,7 +32,7 @@ const formatAccountNumber=value=>{
 };
 function accountLabel(a){return String(a?.name||'')+(a?.account_number?' · •••• '+String(a.account_number).replace(/\D/g,'').slice(-4):'')}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
-let mode='login',user=null,categories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),rentRecords=[],duplicateOverride=false,lastSyncAt=null,sessionRevision=0
+let mode='login',user=null,categories=[],subcategories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),rentRecords=[],duplicateOverride=false,lastSyncAt=null,sessionRevision=0
 let summaryPdfUrl=null;
 function clearSummaryPdf(){if(summaryPdfUrl)URL.revokeObjectURL(summaryPdfUrl);summaryPdfUrl=null;$('summaryPdfStatus')?.replaceChildren();}
 
@@ -190,7 +190,7 @@ function clearSessionUI(){
  clearSummaryPdf();
  sessionRevision++;user=null;refreshCoordinator.dispose();capacityMonitor.clear();
  if(channel){supabase.removeChannel(channel);channel=null}
- categories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();rentRecords=[];lastSyncAt=null;
+ categories=[];subcategories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();rentRecords=[];lastSyncAt=null;
  document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());
  $('authSplash')?.classList.add('hidden');$('app').classList.add('hidden');$('authScreen').classList.remove('hidden');$('password').value='';
 } 
@@ -216,7 +216,7 @@ async function performLoad(){
   const data=await fetchFinanceData(supabase,loadingUser,readAll);
   if(user?.id!==loadingUser||sessionRevision!==revision)return false;
   if(editorOpen()){scheduleLoad();return false;}
-  categories=data.categories;accounts=data.accounts;transactions=data.transactions;
+  categories=data.categories;subcategories=data.subcategories;accounts=data.accounts;transactions=data.transactions;
   bills=data.bills;debts=data.debts;budgets=data.budgets;carExpenseTxIds=data.carExpenseTxIds;rentRecords=data.rentRecords;
   $('dataError').classList.add('hidden');setSyncStatus('ok');renderAll();return true;
  }catch(error){
@@ -773,20 +773,52 @@ function syncTxType(){
 }
 function changeTxType(type){$('txType').value=type;fillTxSelectors();if(!editing.id)applyRecentTxSelection();renderCardPaymentSuggestions()}
 document.querySelectorAll('[data-tx-type]').forEach(b=>b.onclick=()=>changeTxType(b.dataset.txType));
-const FOOD_MAIN='อาหารและเครื่องดื่ม';
-const FOOD_SUBS=[['อาหาร','🍜 อาหาร'],['กาแฟ','☕ กาแฟ'],['เครื่องดื่ม','🧋 เครื่องดื่ม'],['ขนม','🍰 ขนม']];
+const SUBCATEGORY_DEFAULTS={
+ 'อาหารและเครื่องดื่ม':['อาหาร','กาแฟ','เครื่องดื่ม','ขนม'],
+ 'รถยนต์':['ค่างวดรถ','น้ำมัน','ทางด่วน/ที่จอด','ซ่อมบำรุง','ประกัน/ภาษี','ล้างรถ','อื่นๆ'],
+ 'ช้อปปิ้ง':['ของใช้ส่วนตัว','เสื้อผ้า','ของใช้ในบ้าน','อุปกรณ์อิเล็กทรอนิกส์','อื่นๆ'],
+ 'ท่องเที่ยว':['เดินทาง','ที่พัก','อาหารระหว่างเที่ยว','กิจกรรม','ของฝาก','อื่นๆ'],
+ 'เดินทาง':['ขนส่งสาธารณะ','แท็กซี่/เรียกรถ','ค่าโดยสารอื่นๆ'],
+ 'บิล/สาธารณูปโภค':['ค่าไฟ','ค่าน้ำ','โทรศัพท์/อินเทอร์เน็ต','สมาชิก/รายเดือน','อื่นๆ'],
+ 'หนี้/ผ่อน':['ชำระบัตรเครดิต','ชำระสินเชื่อ','ผ่อนสินค้า','อื่นๆ'],
+ 'ห้องเช่า':['ค่าเช่าห้อง','ค่าน้ำ/ไฟ','ค่าใช้จ่ายเกี่ยวกับห้อง','อื่นๆ'],
+ 'บันเทิง':['เกม','ภาพยนตร์','สตรีมมิง','กิจกรรม','อื่นๆ'],
+ 'สุขภาพ':['ยา','พบแพทย์','ดูแลสุขภาพ','อื่นๆ']
+};
 function syncTxSubcategory(value){
- const selected=categories.find(c=>c.id===$('txCategory').value);
- const eligible=$('txType').value==='expense'&&selected?.name===FOOD_MAIN;
- const wrap=$('txSubcategoryWrap'),select=$('txSubcategory');
- if(!wrap||!select)return;
- wrap.classList.toggle('hidden',!eligible);
- select.disabled=!eligible;
- select.required=eligible;
- if(eligible){select.value=FOOD_SUBS.some(([key])=>key===value)?value:'อาหาร';}
- else select.value='';
+ const cat=categories.find(c=>c.id===$('txCategory').value);
+ const defaults=SUBCATEGORY_DEFAULTS[cat?.name]||[];
+ const custom=subcategories.filter(s=>s.category_id===cat?.id&&s.is_active!==false).map(s=>s.name);
+ const options=[...new Set([...defaults,...custom])];
+ const select=$('txSubcategory'),wrap=$('txSubcategoryWrap'),add=$('txSubcategoryAdd');
+ if(!select||!wrap)return;
+ const enabled=$('txType').value==='expense'&&!!cat;
+ wrap.classList.toggle('hidden',!enabled);
+ select.disabled=!enabled;
+ select.required=false;
+ select.replaceChildren(new Option('ไม่ระบุหมวดย่อย',''),...options.map(name=>new Option(name,name)));
+ if(value&&options.includes(value))select.value=value;
+ if(add)add.disabled=!enabled;
 }
 $('txCategory')?.addEventListener('change',()=>syncTxSubcategory());
+$('txSubcategoryAdd')?.addEventListener('click',async()=>{
+ const cat=categories.find(c=>c.id===$('txCategory').value);
+ if(!cat||!user)return;
+ const value=prompt('ตั้งชื่อหมวดย่อยใหม่สำหรับ '+cat.name+' (ไม่เกิน 40 ตัวอักษร)');
+ if(value===null)return;
+ const name=value.trim().replace(/\\s+/g,' ');
+ if(!name||name.length>40){showAppToast('ชื่อหมวดย่อยต้องมี 1–40 ตัวอักษร');return;}
+ const existing=[...(SUBCATEGORY_DEFAULTS[cat.name]||[]),...subcategories.filter(s=>s.category_id===cat.id).map(s=>s.name)];
+ if(existing.some(x=>x.toLocaleLowerCase('th-TH')===name.toLocaleLowerCase('th-TH'))){syncTxSubcategory(existing.find(x=>x.toLocaleLowerCase('th-TH')===name.toLocaleLowerCase('th-TH')));return;}
+ const button=$('txSubcategoryAdd');button.disabled=true;
+ try{
+  const {data,error}=await supabase.from('finance_subcategories').insert({user_id:user.id,category_id:cat.id,name}).select('*').single();
+  if(error)throw error;
+  subcategories.push(data);syncTxSubcategory(name);
+  showAppToast('เพิ่มหมวดย่อย '+name+' แล้ว ✅');
+ }catch(error){showAppToast('เพิ่มหมวดย่อยไม่ได้: '+financeSaveFeedback(error).message)}
+ finally{button.disabled=false;}
+});
 function fillTxSelectors(){
  syncTxType();
  const currentCat=$('txCategory').value,currentAccount=$('txAccount').value,currentFilter=$('txFilterCategory').value
@@ -936,7 +968,10 @@ $('txForm').onsubmit=async e=>{
  const row={user_id:user.id,transaction_date:$('txDate').value,type:$('txType').value,category_id:$('txCategory').value||null,account_id:$('txAccount').value||null,description:$('txDesc').value.trim(),amount:Number($('txAmount').value),status:transactions.find(x=>x.id===editing.id)?.status||'paid',note:$('txNote').value.trim()||null,source:transactions.find(x=>x.id===editing.id)?.source||'web',subcategory:$('txSubcategory')?.disabled?null:$('txSubcategory').value||null};
  if(!row.description||!Number.isFinite(row.amount)||row.amount<=0)return txError('กรอกรายละเอียดและยอดเงินให้ครบ');
  if(!row.category_id)return txError('เลือกหมวดหมู่ก่อนบันทึก');
-  if(!$('txSubcategory')?.disabled&&!row.subcategory)return txError('เลือกหมวดย่อยก่อนบันทึก');
+  const selectedCategory=categories.find(c=>c.id===row.category_id);
+  const allowedSubcategories=[...(SUBCATEGORY_DEFAULTS[selectedCategory?.name]||[]),...subcategories.filter(s=>s.category_id===row.category_id&&s.is_active!==false).map(s=>s.name)];
+  if(!allowedSubcategories.includes(row.subcategory))row.subcategory=null;
+  
  if(!editing.id&&!duplicateOverride){
   const duplicates=findDuplicateCandidates(row,transactions);
   if(duplicates.length){
