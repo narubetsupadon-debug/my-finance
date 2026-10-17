@@ -141,7 +141,7 @@ function renderCards(widget,cards,checkedAt,selected){
  widget.addSpacer();text(widget,'อัปเดต '+checkedLabel(checkedAt)+' · ตั้งรีเฟรช 10 นาที',8,'a3a8be');
 }
 async function main(){
- const widget=new ListWidget();widget.backgroundColor=new Color('#101522');const padding=12;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
+ const widget=new ListWidget();widget.backgroundColor=new Color('#101722');const padding=12;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
  try{
   if(!config.runsInWidget&&Keychain.contains(SESSION_KEY)){
    const menu=new Alert();menu.title='My Finance Widget';menu.addAction('อัปเดต / ดูตัวอย่าง');menu.addDestructiveAction('ออกจากระบบวิดเจ็ต');menu.addCancelAction('ยกเลิก');
