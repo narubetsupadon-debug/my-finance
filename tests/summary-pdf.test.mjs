@@ -7,7 +7,7 @@ const $=id=>{if(!elements.has(id))elements.set(id,{textContent:'',innerHTML:'',p
 const previous=globalThis.document;globalThis.document={querySelectorAll:()=>[]};
 let rows=[
  {transaction_date:'2026-10-02',type:'income',amount:'23000.10',status:'paid'},
- {transaction_date:'2026-10-03',type:'expense',amount:'10.01',status:'paid',categories:{name:'อาหาร'}},
+ {transaction_date:'2026-10-03',type:'expense',amount:'10.01',status:'paid',subcategory:'กาแฟ',categories:{name:'อาหารและเครื่องดื่ม'}},
  {transaction_date:'2026-10-03',type:'expense',amount:'0.20',status:'paid',categories:{name:'อาหาร'}},
  {transaction_date:'2026-10-05',type:'expense',amount:2000,status:'paid',source:'rent'},
  {transaction_date:'2026-10-20',type:'expense',amount:777,status:'paid'},
@@ -22,7 +22,9 @@ try{
  assert.equal(report.expense/100,Number($('sumExpense').textContent));
  assert.equal(report.balance/100,Number($('sumBalance').textContent));
  assert.equal(report.categories.find(x=>x.name==='ห้องเช่า').cents,200000,'PDF uses raw transaction amount, not the separate rent-share card');
- assert.equal(report.pending,1);assert.equal(report.keys.at(-1),'2026-10-20','Recorded future dates stay on the timeline');
+ assert.equal(report.pending,1);
+ assert.equal(report.rows.find(x=>x.cents===1001).subcategory,'กาแฟ','PDF keeps the saved subcategory for the detail table');
+ assert.equal(report.rows.find(x=>x.cents===20).subcategory,'','legacy rows without subcategory render normally');assert.equal(report.keys.at(-1),'2026-10-20','Recorded future dates stay on the timeline');
  snapshot.rows[0].amount=1;assert.notEqual(render.getReport().rows[0].amount,1,'Snapshot changes must not mutate app state');
  $('summaryStatus').value='paid';render();report=buildSummaryReport(render.getReport());
  assert.equal(report.expense,201021);assert.equal(report.pending,0);assert.equal(report.keys.at(-1),'2026-10-17');
