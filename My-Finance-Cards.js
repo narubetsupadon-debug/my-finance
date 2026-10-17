@@ -119,26 +119,26 @@ function renderCards(widget,cards,checkedAt,selected){
  widget.url=WEBSITE+'#debts';
  text(widget,'💳 MY FINANCE',11,'93b8ff');
  text(widget,'CREDIT CARDS',9,'94a3b8');
- widget.addSpacer(small?7:9);
+ widget.addSpacer(large?12:8);
  if(!cards.length){text(widget,selected?'ไม่พบบัตรที่เลือก':'ยังไม่มีบัตรเครดิต',14,'ffffff');text(widget,'จัดการที่เมนูบัตรและสินเชื่อ',11,'a3a8be');}
  for(const card of cards.slice(0,capacity)){
-  const heading=widget.addStack();heading.layoutHorizontally();heading.centerAlignContent();
-  text(heading,card.name,small?10:12,'ffffff');heading.addSpacer();
-  text(heading,money(card.spent),small?11:13,'ffffff');
-  widget.addSpacer(4);
-  const bar=widget.addImage(usageBar(card,small?120:large?255:170,8));
-  bar.imageSize=new Size(small?120:large?255:170,8);
-  widget.addSpacer(3);
   const row=widget.addStack();row.layoutHorizontally();row.centerAlignContent();
-  const percent=card.limit>0?Math.round(card.spent/card.limit*100):0;
-  text(row,'ใช้ไป '+percent+'%',9,'a3a8be');row.addSpacer();
-  text(row,'เหลือ '+money(card.remaining),small?9:10,card.over?'ffc28c':'79dec4');
-  text(widget,'ใช้ไป '+money(card.spent)+' · วงเงิน '+money(card.limit),9,'a3a8be');
-  if(card.over)text(widget,'เกินวงเงิน '+money(card.over),9,'ffc28c');
-  widget.addSpacer(large?11:7);
+  text(row,card.name,small?11:12,'ffffff');row.addSpacer();
+  text(row,money(card.spent),small?11:12,'ffffff');
+  widget.addSpacer(5);
+  const width=small?118:large?250:190;
+  const bar=widget.addImage(usageBar(card,width,8));bar.imageSize=new Size(width,8);
+  widget.addSpacer(5);
+  const detail=widget.addStack();detail.layoutHorizontally();detail.centerAlignContent();
+  const percent=card.limit?Math.round(card.spent/card.limit*100):0;
+  text(detail,'ใช้ '+percent+'% · วงเงิน '+money(card.limit),small?8:10,'94a3b8');detail.addSpacer();
+  text(detail,'เหลือ '+money(card.remaining),small?9:10,card.over?'ffc28c':'79dec4');
+  if(card.over){widget.addSpacer(2);text(widget,'เกินวงเงิน '+money(card.over),9,'ffc28c');}
+  widget.addSpacer(large?16:10);
  }
- if(cards.length>capacity)text(widget,'อีก '+(cards.length-capacity)+' บัตร · แตะดูทั้งหมด',10,'aaa7ff');
- widget.addSpacer();text(widget,'อัปเดต '+checkedLabel(checkedAt)+' · ตั้งรีเฟรช 10 นาที',8,'a3a8be');
+ if(cards.length>capacity)text(widget,'อีก '+(cards.length-capacity)+' บัตร · แตะดูทั้งหมด',10,'93b8ff');
+ widget.addSpacer();
+ text(widget,'อัปเดต '+checkedLabel(checkedAt),9,'94a3b8');
 }
 async function main(){
  const widget=new ListWidget();widget.backgroundColor=new Color('#101722');const padding=12;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
