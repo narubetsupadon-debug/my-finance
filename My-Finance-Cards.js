@@ -102,21 +102,43 @@ function cardBalances(rows,id=''){
   return {id:x.id,name:x.name||'บัตรเครดิต',limit:limitCents,spent:usedCents,remaining:Math.max(0,limitCents-usedCents),over:Math.max(0,usedCents-limitCents)};
  }).sort((a,b)=>b.spent-a.spent||String(a.name).localeCompare(String(b.name),'th')||String(a.id).localeCompare(String(b.id)));
 }
+function usageBar(card,width=170,height=8){
+ const ctx=new DrawContext();ctx.size=new Size(width,height);ctx.opaque=false;ctx.respectScreenScale=true;
+ const used=card.limit>0?Math.min(1,card.spent/card.limit):(card.spent>0?1:0);
+ // Tiny round dots form a crisp progress bar at any iPhone display scale.
+ const step=4,dot=3;
+ for(let x=0;x<=width-dot;x+=step){
+  ctx.setFillColor(new Color(x/width<used?(card.over?'#ffc28c':'#8ab3ff'):'#303b50'));
+  ctx.fillEllipse(new Rect(x,0,dot,dot));
+  ctx.fillEllipse(new Rect(x,height-dot,dot,dot));
+ }
+ return ctx.getImage();
+}
 function renderCards(widget,cards,checkedAt,selected){
- const family=config.widgetFamily||'medium',small=family==='small',capacity=small?1:family==='large'?4:2;
- widget.url=WEBSITE+'#debts';text(widget,'MY FINANCE · วงเงินเหลือใช้',10,'aaa7ff');widget.addSpacer(small?8:6);
+ const family=config.widgetFamily||'medium',small=family==='small',large=family==='large',capacity=small?1:large?4:2;
+ widget.url=WEBSITE+'#debts';
+ text(widget,'💳 MY FINANCE',11,'93b8ff');
+ text(widget,'CREDIT CARDS',9,'94a3b8');
+ widget.addSpacer(small?7:9);
  if(!cards.length){text(widget,selected?'ไม่พบบัตรที่เลือก':'ยังไม่มีบัตรเครดิต',14,'ffffff');text(widget,'จัดการที่เมนูบัตรและสินเชื่อ',11,'a3a8be');}
  for(const card of cards.slice(0,capacity)){
+  const heading=widget.addStack();heading.layoutHorizontally();heading.centerAlignContent();
+  text(heading,card.name,small?10:12,'ffffff');heading.addSpacer();
+  text(heading,money(card.spent),small?11:13,'ffffff');
+  widget.addSpacer(4);
+  const bar=widget.addImage(usageBar(card,small?120:large?255:170,8));
+  bar.imageSize=new Size(small?120:large?255:170,8);
+  widget.addSpacer(3);
   const row=widget.addStack();row.layoutHorizontally();row.centerAlignContent();
-  const col=row.addStack();col.layoutVertically();text(col,card.name,11,'d8d9e4');
-  text(col,'เหลือ '+money(card.remaining),small?22:family==='large'?25:22,card.over?'ffc28c':'79dec4');
-  text(col,'ใช้ไป '+money(card.spent)+' · วงเงิน '+money(card.limit),10,'d8d9e4');
-  if(card.over)text(col,'เกินวงเงิน '+money(card.over),9,'ffc28c');
-  if(!small){row.addSpacer();const ring=row.addImage(budgetRing(card,34));ring.imageSize=new Size(34,34);}
-  widget.addSpacer(family==='large'?9:4);
+  const percent=card.limit>0?Math.round(card.spent/card.limit*100):0;
+  text(row,'ใช้ไป '+percent+'%',9,'a3a8be');row.addSpacer();
+  text(row,'เหลือ '+money(card.remaining),small?9:10,card.over?'ffc28c':'79dec4');
+  text(widget,'ใช้ไป '+money(card.spent)+' · วงเงิน '+money(card.limit),9,'a3a8be');
+  if(card.over)text(widget,'เกินวงเงิน '+money(card.over),9,'ffc28c');
+  widget.addSpacer(large?11:7);
  }
  if(cards.length>capacity)text(widget,'อีก '+(cards.length-capacity)+' บัตร · แตะดูทั้งหมด',10,'aaa7ff');
- widget.addSpacer();text(widget,'อัปเดต '+checkedLabel(checkedAt),9,'a3a8be');
+ widget.addSpacer();text(widget,'อัปเดต '+checkedLabel(checkedAt)+' · ตั้งรีเฟรช 10 นาที',8,'a3a8be');
 }
 async function main(){
  const widget=new ListWidget();widget.backgroundColor=new Color('#101522');const padding=12;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
