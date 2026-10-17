@@ -785,6 +785,8 @@ const SUBCATEGORY_DEFAULTS={
  'บันเทิง':['เกม','ภาพยนตร์','สตรีมมิง','กิจกรรม','อื่นๆ'],
  'สุขภาพ':['ยา','พบแพทย์','ดูแลสุขภาพ','อื่นๆ']
 };
+const SUBCATEGORY_EMOJI={
+ 'อาหาร':'🍜','กาแฟ':'☕','เครื่องดื่ม':'🧋','ขนม':'🍰','ค่างวดรถ':'🚘','น้ำมัน':'⛽','ทางด่วน/ที่จอด':'🅿️','ซ่อมบำรุง':'🔧','ประกัน/ภาษี':'🛡️','ล้างรถ':'🧽','ของใช้ส่วนตัว':'🧴','เสื้อผ้า':'👕','ของใช้ในบ้าน':'🧺','อุปกรณ์อิเล็กทรอนิกส์':'📱','เดินทาง':'🚆','ที่พัก':'🛏️','อาหารระหว่างเที่ยว':'🍱','กิจกรรม':'🎟️','ของฝาก':'🎁','ขนส่งสาธารณะ':'🚇','แท็กซี่/เรียกรถ':'🚕','ค่าโดยสารอื่นๆ':'🎫','ค่าไฟ':'💡','ค่าน้ำ':'💧','โทรศัพท์/อินเทอร์เน็ต':'📶','สมาชิก/รายเดือน':'🔁','ชำระบัตรเครดิต':'💳','ชำระสินเชื่อ':'🏦','ผ่อนสินค้า':'📦','ค่าเช่าห้อง':'🏠','ค่าน้ำ/ไฟ':'🚿','ค่าใช้จ่ายเกี่ยวกับห้อง':'🛋️','เกม':'🎮','ภาพยนตร์':'🎬','สตรีมมิง':'📺','ยา':'💊','พบแพทย์':'🩺','ดูแลสุขภาพ':'🧘','อื่นๆ':'🏷️'};
 function syncTxSubcategory(value){
  const cat=categories.find(c=>c.id===$('txCategory').value);
  const defaults=SUBCATEGORY_DEFAULTS[cat?.name]||[];
@@ -796,7 +798,7 @@ function syncTxSubcategory(value){
  wrap.classList.toggle('hidden',!enabled);
  select.disabled=!enabled;
  select.required=false;
- select.replaceChildren(new Option('ไม่ระบุหมวดย่อย',''),...options.map(name=>new Option(name,name)));
+ select.replaceChildren(new Option('ไม่ระบุหมวดย่อย',''),...options.map(name=>new Option((SUBCATEGORY_EMOJI[name]||'✨')+' '+name,name)));
  if(value&&options.includes(value))select.value=value;
  if(add)add.disabled=!enabled;
 }
