@@ -1,5 +1,6 @@
 name: My Finance CI
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -23,3 +24,28 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npm test
+      - name: Package tested site
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          mkdir -p _site
+          cp ./*.html ./*.js ./*.css ./*.png ./*.svg ./manifest.webmanifest ./.nojekyll _site/
+      - name: Upload tested site
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy tested site
+        id: deployment
+        uses: actions/deploy-pages@v4
