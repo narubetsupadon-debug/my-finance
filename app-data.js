@@ -1,7 +1,7 @@
 // Shared data loading and refresh coordination for the main app.
 export async function fetchFinanceData(db,userId,readAll){
   const query=(table,select='*')=>db.from(table).select(select).eq('user_id',userId);
-  const [categories,accounts,transactions,bills,debts,budgets,carExpenses,rentRecords]=await Promise.all([
+  const [categories,accounts,transactions,bills,debts,budgets,carExpenses,rentRecords,subcategories]=await Promise.all([
     readAll(()=>query('categories').order('sort_order').order('name').order('id')),
     readAll(()=>query('accounts').eq('is_active',true).order('display_order').order('created_at').order('id')),
     readAll(()=>query('transactions','*,categories(name,icon),accounts(name)').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).order('id')),
@@ -9,10 +9,11 @@ export async function fetchFinanceData(db,userId,readAll){
     readAll(()=>query('debts').order('created_at').order('id')),
     readAll(()=>query('budgets').order('created_at').order('id')),
     readAll(()=>query('car_expenses','transaction_id').not('transaction_id','is',null).order('id')),
-    readAll(()=>query('rent_records').order('bill_month',{ascending:false}).order('id'))
+    readAll(()=>query('rent_records').order('bill_month',{ascending:false}).order('id')),
+    readAll(()=>query('finance_subcategories').order('name').order('id'))
   ]);
   return {
-    categories,accounts,transactions,bills,debts,budgets,rentRecords,
+    categories,accounts,transactions,bills,debts,budgets,rentRecords,subcategories,
     carExpenseTxIds:new Set(carExpenses.map(x=>x.transaction_id).filter(Boolean))
   };
 }
