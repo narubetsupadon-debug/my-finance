@@ -1,5 +1,5 @@
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261017-perf56';
-import {setupPayslipImport} from './salary-payslip.js?v=20261017-perf56';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261017-polish57';
+import {setupPayslipImport} from './salary-payslip.js?v=20261017-polish57';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const currencyFormatter=new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'});
 const retrySafeInsert=createRetrySafeInsert();

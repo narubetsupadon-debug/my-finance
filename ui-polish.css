@@ -202,4 +202,73 @@ html{scroll-behavior:auto}
 .budget-over{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--red) 10%,var(--card))}
 .rent-check-summary{border-left:3px solid var(--primary);padding:12px;background:var(--card);line-height:1.8;overflow-wrap:anywhere}
 .home-feed>.home-detail{margin-top:0}
+/* Refine the familiar layout: quiet surfaces, consistent controls and readable money. */
+body{background:var(--bg)}
+.topbar{box-shadow:none}
+.card,.daily-panel,.tx-day-card{box-shadow:none}
+.card:hover{box-shadow:none;border-color:var(--line)}
+.sidebar{border:1px solid var(--line)}
+.nav-group-label{font-size:11px;letter-spacing:.025em}
+.sidebar .navbtn{font-weight:500}
+.sidebar .navbtn.active{box-shadow:none}
+.section-heading h2,.summary-card-head h3,.settings-title h3{font-weight:600;line-height:1.55}
+.page-head{gap:16px;align-items:center}
+.page-head>div,.section-heading>div,.setting-row>div,.item>div{min-width:0}
+.page-head .muted,.section-heading p{line-height:1.7}
+.btn{border-radius:12px;font-weight:500;line-height:1.5}
+.btn.primary,.btn.primary:hover{box-shadow:none}
+.btn:active:not(:disabled),.quick-btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{transform:none}
+.field input,.field select,.field textarea,.filters input,.filters select{line-height:1.5}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.daily-label,.daily-caption,.budget-reference{line-height:1.7}
+.daily-amount,.summary-kpi .value,.metric .value{font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.summary-kpi .value,.metric .value{max-width:100%;overflow-wrap:anywhere}
+.summary-kpi .label{line-height:1.6}
+.summary-kpi{box-shadow:none}
+.quick-btn{box-shadow:none;font-size:13px}
+.quick-btn:hover{box-shadow:none}
+.home-detail>summary,.summary-details>summary{gap:12px;line-height:1.6}
+.home-detail>summary small,.summary-details>summary small{line-height:1.6}
+.item,.bill-item,.setting-row{gap:14px}
+.item .muted,.bill-item .muted{line-height:1.65}
+.settings-title{gap:12px;align-items:flex-start}
+.settings-title p{margin-top:4px;line-height:1.7}
+.settings-card .setting-row:last-child{border-bottom:0}
+.modal-actions{gap:10px}
+.auth-card{box-shadow:0 16px 48px rgba(0,0,0,.12)}
+html[data-resolved-theme=dark] .card,html[data-resolved-theme=dark] .daily-panel{border-color:var(--line)}
+html[data-resolved-theme=dark] .spent-panel{border-color:transparent}
+@media(min-width:821px){
+ .page-head{margin-bottom:24px}
+ .card{padding:24px}
+ .section{margin-top:20px}
+ .home-feed>.card{padding:24px}
+}
+@media(max-width:820px){
+ .page-head{gap:12px;margin-bottom:20px}
+ .page-head h2,.summary-hero h2{font-size:24px;line-height:1.5}
+ .page-head .muted{font-size:13px}
+ .card,.daily-panel{border-radius:20px}
+ .section-heading h2,.summary-card-head h3,.settings-title h3{font-size:17px}
+ .daily-label,.daily-caption,.budget-reference{font-size:12px}
+ .daily-label{gap:6px}
+ .daily-panel-foot{gap:8px;flex-wrap:wrap}
+ .quick-btn{font-size:12px;min-height:76px}
+ .summary-kpi .value{font-size:clamp(18px,4.8vw,25px);line-height:1.45}
+ .setting-row{flex-wrap:wrap}
+ .setting-row>select{max-width:100%}
+ .mobile-app-nav{box-shadow:0 6px 20px rgba(0,0,0,.12)!important}
+ .mobile-app-nav .app-nav-capture .app-nav-icon{box-shadow:none}
+}
+@media(max-width:360px){
+ .daily-panel{padding:16px 12px}
+ .daily-label{font-size:12px}
+ .daily-label>span:first-child{width:22px;height:22px}
+ .summary-kpi .value{font-size:18px}
+ .detail-cue{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .btn:active:not(:disabled),.quick-btn:active:not(:disabled){transform:none}
+}
 @media(max-width:650px){.summary-status-control{display:block}.summary-status-control select{display:block;width:100%;margin-top:6px}.detail-shortcuts>.btn{flex:1 1 140px}#transactionsPage .tx-filter-fields{grid-template-columns:minmax(0,1fr)}}
