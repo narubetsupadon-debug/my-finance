@@ -269,14 +269,14 @@ function editSavedTransaction(id,row){
  showPage('transactions');window.openTx(id);
 }
 function quickCategoryMatch(label){
- const aliases={อาหาร:['อาหาร'],กาแฟ:['กาแฟ','อาหาร'],รถ:['รถยนต์','เดินทาง'],ซื้อของ:['ช้อปปิ้ง'],จ่ายบัตร:['หนี้/ผ่อน'],บิล:['บิล/สาธารณูปโภค']}
+ const aliases={อาหาร:['อาหารและเครื่องดื่ม','อาหาร'],กาแฟ:['อาหารและเครื่องดื่ม','กาแฟ','อาหาร'],รถ:['รถยนต์','เดินทาง'],ซื้อของ:['ช้อปปิ้ง'],จ่ายบัตร:['หนี้/ผ่อน'],บิล:['บิล/สาธารณูปโภค']}
  const names=aliases[label]||[label]
  for(const name of names){const match=categories.find(c=>c.type==='expense'&&c.name===name);if(match)return match}
  return categories.find(c=>c.type==='expense'&&c.name==='อื่นๆ')||null
 }
 window.quickAdd=(label,desc='')=>{
  if($('txForm').querySelector('button[type=submit]').disabled)return;
- const cat=quickCategoryMatch(label); openTx(); $('txType').value='expense'; fillTxSelectors(); if(cat)$('txCategory').value=cat.id; $('txDesc').value=desc||label; renderCardPaymentSuggestions(); if(label==='จ่ายบัตร'&&debts.some(d=>d.is_active&&Number(d.outstanding_amount||0)>0))$('cardPaymentSuggest')?.scrollIntoView({behavior:'smooth',block:'center'}); else if(window.innerWidth>820)$('txAmount').focus()
+ const cat=quickCategoryMatch(label); openTx(); $('txType').value='expense'; fillTxSelectors(); if(cat)$('txCategory').value=cat.id;syncTxSubcategory(label==='กาแฟ'?'กาแฟ':null); $('txDesc').value=desc||label; renderCardPaymentSuggestions(); if(label==='จ่ายบัตร'&&debts.some(d=>d.is_active&&Number(d.outstanding_amount||0)>0))$('cardPaymentSuggest')?.scrollIntoView({behavior:'smooth',block:'center'}); else if(window.innerWidth>820)$('txAmount').focus()
 }
 const nextDueDate=monthlyDue;
 
@@ -790,7 +790,7 @@ $('txCategory')?.addEventListener('change',()=>syncTxSubcategory());
 function fillTxSelectors(){
  syncTxType();
  const currentCat=$('txCategory').value,currentAccount=$('txAccount').value,currentFilter=$('txFilterCategory').value
- $('txCategory').innerHTML='<option value="">เลือกหมวด</option>'+categories.filter(c=>c.type===$('txType').value).map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')
+ $('txCategory').innerHTML='<option value="">เลือกหมวด</option>'+categories.filter(c=>c.type===$('txType').value&&c.is_active!==false).map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')
  if(currentCat&&[...$('txCategory').options].some(o=>o.value===currentCat))$('txCategory').value=currentCat
  $('txAccount').innerHTML='<option value="">ไม่ระบุบัญชี</option>'+accounts.filter(a=>a.is_active!==false).map(a=>'<option value="'+a.id+'">'+esc(accountLabel(a))+'</option>').join('')
  $('txFilterCategory').innerHTML='<option value="">ทุกหมวด</option>'+categories.map(c=>'<option value="'+c.id+'">'+esc((c.icon||'')+' '+c.name)+'</option>').join('')
