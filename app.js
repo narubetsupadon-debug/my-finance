@@ -805,7 +805,7 @@ function syncTxSubcategory(value){
  select.disabled=!enabled;
  select.required=false;
  select.replaceChildren(new Option('ไม่ระบุหมวดย่อย',''),...options.map(name=>new Option((SUBCATEGORY_EMOJI[name]||'✨')+' '+name,name)));
- if(value&&options.includes(value))select.value=value;
+ select.value=value&&options.includes(value)?value:'';
  if(add)add.disabled=!enabled;
 }
 $('txCategory')?.addEventListener('change',()=>syncTxSubcategory());
@@ -965,7 +965,7 @@ window.openTx=(id=null)=>{
  duplicateOverride=false;$('txDuplicateWarning')?.classList.add('hidden');
  editing={type:'tx',id};$('txFavorite').checked=false;$('txError').classList.add('hidden');$('txExtra').open=false;$('txRepeatSection').open=false;
  $('txDialogTitle').textContent=id?'แก้ไขรายการ':'บันทึกรายการ';
- $('txDate').value=bangkokDay();$('txAccount').value='';$('txCategory').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
+ $('txDate').value=bangkokDay();$('txAccount').value='';$('txCategory').value='';$('txSubcategory').value='';$('txType').value='expense';$('txDesc').value='';$('txAmount').value='';$('txNote').value='';
  fillTxSelectors();if(!id)applyRecentTxSelection();renderRepeatChoices();
  if(id){const x=transactions.find(v=>v.id===id);if(x){$('txDate').value=x.transaction_date;$('txType').value=x.type;fillTxSelectors();$('txDesc').value=x.description;$('txAmount').value=x.amount;$('txCategory').value=x.category_id||'';$('txAccount').value=x.account_id||'';$('txNote').value=x.note||'';$('txFavorite').checked=readFavorites().some(f=>templateKey(f)===templateKey(x));$('txExtra').open=!!x.note;syncTxSubcategory(x.subcategory||'');}}
  renderCardPaymentSuggestions();txBaseline=txFingerprint();$('txDialog').showModal();requestAnimationFrame(()=>{$('txForm').scrollTop=0;});
