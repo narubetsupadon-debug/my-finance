@@ -3,7 +3,7 @@ import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=
 import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261017-quotes63';
 import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261017-subcustom2';
 import {createSummaryRenderer} from './app-summary.js?v=20261017-pdfsubs1';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261017-quickfix2';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261017-quickicons1';
 import {createTransactionRenderer} from './app-transactions.js?v=20261017-quotes63';
 import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261017-quotes63';
 import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261017-quotes63';
@@ -141,7 +141,7 @@ function applyUiSettings(){
 function orderedQuickItems(){
  const byLabel=new Map(QUICK_DEFAULT.map(x=>[x.label,x]));
  const order=[...uiSettings.quickOrder,...QUICK_DEFAULT.map(x=>x.label).filter(x=>!uiSettings.quickOrder.includes(x))];
- return order.map(x=>byLabel.get(x)).filter(Boolean);
+ return order.map(label=>byLabel.get(label)).filter(Boolean).map(item=>{const category=categories.find(c=>c.type==='expense'&&c.is_active!==false&&c.name===item.label);return {...item,icon:category?.icon||item.icon,available:!!category};});
 }
 function renderSettings(){
  const account=$('defaultAccountSetting');
