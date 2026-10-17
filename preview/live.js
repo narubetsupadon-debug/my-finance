@@ -140,18 +140,18 @@ function renderBudget(){
 function cardBrand(name){
  const n=String(name||'').toLowerCase().replace(/[\s_()-]+/g,'');
  if(/firstchoice|เฟิร์สช้อยส์|เฟิร์สช้อย/.test(n))return {file:'firstchoice.svg',label:'Krungsri First Choice'};
- if(/kbank|kplus|kasikorn|กสิกร/.test(n))return {file:'kbank.svg',label:'KBank'};
+ if(/kbank|kplus|kasikorn|กสิกร/.test(n))return {file:'kbank.png',label:'KBank'};
  if(/ttb|ทีทีบี|ทหารไทยธนชาต/.test(n))return {file:'ttb.svg',label:'ttb'};
  if(/shopee|spaylater|seasycash|ช้อปปี้/.test(n))return {file:'shopee.png',label:'Shopee'};
- if(/lazada|ลาซาด้า/.test(n))return {file:'lazada.png',label:'Lazada'};
- if(/grab|แกร็บ/.test(n))return {file:'grab.ico',label:'Grab'};
+ if(/lazada|ลาซาด้า/.test(n))return {file:'lazada.ico',label:'Lazada'};
+ if(/grab|แกร็บ/.test(n))return {file:'grab.png',label:'Grab'};
  return null;
 }
 function cardLogo(name,isCard){
  const brand=cardBrand(name),tile=td('span',isCard?'▤':'↗','wallet-symbol');
  if(!brand)return tile;
- tile.classList.add('wallet-brand');tile.replaceChildren();
- const img=document.createElement('img');img.src='./logos/'+brand.file;img.alt='โลโก้ '+brand.label;img.width=56;img.height=36;img.loading='lazy';img.decoding='async';
+ tile.classList.add('wallet-brand');tile.dataset.brand=brand.file.split('.')[0];tile.replaceChildren();
+ const img=document.createElement('img');img.src='./logos/'+brand.file;img.alt='โลโก้ '+brand.label;img.width=80;img.height=44;img.loading='lazy';img.decoding='async';
  img.addEventListener('error',()=>{tile.classList.remove('wallet-brand');tile.replaceChildren();tile.textContent=isCard?'▤':'↗'},{once:true});
  tile.append(img);return tile;
 }
