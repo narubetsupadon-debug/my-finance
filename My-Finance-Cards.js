@@ -103,25 +103,24 @@ function cardBalances(rows,id=''){
  }).sort((a,b)=>String(a.name).localeCompare(String(b.name),'th')||String(a.id).localeCompare(String(b.id)));
 }
 function renderCards(widget,cards,checkedAt,selected){
- const family=config.widgetFamily||'medium',small=family==='small',capacity=small?1:family==='large'?3:2;
- widget.url=WEBSITE+'#debts';text(widget,'MY FINANCE · บัตร',11,'aaa7ff');widget.addSpacer(6);
+ const family=config.widgetFamily||'medium',small=family==='small',capacity=small?1:family==='large'?4:2;
+ widget.url=WEBSITE+'#debts';text(widget,'MY FINANCE · วงเงินเหลือใช้',10,'aaa7ff');widget.addSpacer(small?8:6);
  if(!cards.length){text(widget,selected?'ไม่พบบัตรที่เลือก':'ยังไม่มีบัตรเครดิต',14,'ffffff');text(widget,'จัดการที่เมนูบัตรและสินเชื่อ',11,'a3a8be');}
  for(const card of cards.slice(0,capacity)){
   const row=widget.addStack();row.layoutHorizontally();row.centerAlignContent();
-  const col=row.addStack();col.layoutVertically();text(col,card.name,11,'ffffff');
-  text(col,'เหลือ '+money(card.remaining),small?17:18,card.over?'ffc28c':'79dec4');
+  const col=row.addStack();col.layoutVertically();text(col,card.name,11,'d8d9e4');
+  text(col,'เหลือ '+money(card.remaining),small?22:family==='large'?25:22,card.over?'ffc28c':'79dec4');
   if(small){text(col,'ใช้ '+money(card.spent),10,'d8d9e4');text(col,'วงเงิน '+money(card.limit),10,'a3a8be');}
   else text(col,'ใช้ '+money(card.spent)+' / วงเงิน '+money(card.limit),10,'d8d9e4');
-  if(card.over)text(col,'เกินวงเงิน '+money(card.over),10,'ffc28c');
-  if(!small){row.addSpacer();const ring=row.addImage(budgetRing(card,44));ring.imageSize=new Size(44,44);}
-  widget.addSpacer(5);
+  if(card.over)text(col,'เกินวงเงิน '+money(card.over),9,'ffc28c');
+  if(!small){row.addSpacer();const ring=row.addImage(budgetRing(card,34));ring.imageSize=new Size(34,34);}
+  widget.addSpacer(family==='large'?9:4);
  }
  if(cards.length>capacity)text(widget,'อีก '+(cards.length-capacity)+' บัตร · แตะดูทั้งหมด',10,'aaa7ff');
- widget.addSpacer();text(widget,'ข้อมูล ณ '+checkedLabel(checkedAt),10,'a3a8be');
- text(widget,'ยอดตามที่บันทึกในแอป',9,'a3a8be');
+ widget.addSpacer();text(widget,'อัปเดต '+checkedLabel(checkedAt)+' · ขอรอบ 10 นาที',9,'a3a8be');
 }
 async function main(){
- const widget=new ListWidget();widget.backgroundColor=new Color('#171b32');const padding=config.widgetFamily==='small'?12:16;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
+ const widget=new ListWidget();widget.backgroundColor=new Color('#101522');const padding=12;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
  try{
   if(!config.runsInWidget&&Keychain.contains(SESSION_KEY)){
    const menu=new Alert();menu.title='My Finance Widget';menu.addAction('อัปเดต / ดูตัวอย่าง');menu.addDestructiveAction('ออกจากระบบวิดเจ็ต');menu.addCancelAction('ยกเลิก');
