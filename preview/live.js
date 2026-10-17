@@ -172,5 +172,5 @@ function go(id){
 }
 function startAdd(cat){go('add');const select=$('category');if([...select.options].some(o=>o.value===cat))select.value=cat}
 function saveMock(e){e.preventDefault();$('test-save-message').textContent='โหมด Preview อ่านข้อมูลจริงอย่างเดียว รายการนี้ไม่ได้ถูกบันทึก';$('test-save-message').hidden=false}
-Object.assign(window,{go,changeMonth,setFilter,setType,startAdd,saveMock});
+Object.assign(window,{go,changeMonth,setFilter,setType,renderTransactions,startAdd,saveMock});
 refresh();
