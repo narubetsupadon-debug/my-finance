@@ -1,6 +1,6 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261017-quotes61';
-import {recurringBillMonthStatus} from './finance-core.js?v=20261017-quotes61';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-quotes61';
+import {sumTransactionAmounts} from './finance-core.js?v=20261017-quotes62';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261017-quotes62';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-quotes62';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,

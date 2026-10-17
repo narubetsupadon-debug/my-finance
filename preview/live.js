@@ -1,4 +1,4 @@
-import {dailyQuote} from './daily-quotes.js?v=20261017-quotes1';
+import {dailyQuote} from './daily-quotes.js?v=20261017-quotes2';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
 const BASE='https://mmvdhopogchcxwlstflk.supabase.co';

@@ -1,5 +1,5 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261017-quotes61';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-quotes61';
+import {sumTransactionAmounts} from './finance-core.js?v=20261017-quotes62';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-quotes62';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
