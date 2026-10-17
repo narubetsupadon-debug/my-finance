@@ -153,7 +153,7 @@ async function main(){
   text(graphCol,data.limit?'งบเดือนนี้':'ยังไม่ตั้งงบ',small?8:10,'a3a8be');widget.addSpacer(3);
   if(small){text(widget,'งบเดือนนี้เหลือ',12,'d8d9e4');text(widget,data.limit?money(data.remaining):'ยังไม่ตั้งงบ',20,'79dec4');}widget.addSpacer();
   text(widget,'ข้อมูล ณ '+checkedLabel(checkedAt),10,'a3a8be');
-  text(widget,'อ่านสำเร็จ · ขอรีเฟรช 10 นาที',9,'79dec4');
+  text(widget,'อ่านข้อมูลสำเร็จ',9,'79dec4');
  }catch(error){text(widget,'MY FINANCE',12,'aaa7ff');widget.addSpacer(10);const line=widget.addText(error.message||'เชื่อมต่อไม่ได้ กรุณาเปิด Scriptable');line.font=Font.systemFont(12);line.textColor=new Color('#ffffff');widget.addSpacer();const last=lastCheck();text(widget,last?'สำเร็จล่าสุด '+checkedLabel(last):'ยังไม่มีข้อมูลล่าสุด',10,'a3a8be');text(widget,'อัปเดตไม่สำเร็จ · แตะเปิดเว็บ',9,'ffc28c');}
  Script.setWidget(widget);if(!config.runsInWidget)await widget.presentMedium();Script.complete();
 }
