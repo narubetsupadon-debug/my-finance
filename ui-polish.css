@@ -299,3 +299,9 @@ html[data-resolved-theme=dark] .spent-panel{border-color:transparent}
 .wallet-list{min-width:0}.wallet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.wallet-grid>.wallet-card{margin-bottom:0;min-width:0}.wallet-section{margin-top:28px}.wallet-identity{min-width:0}.wallet-card h3{white-space:normal;overflow-wrap:anywhere}.wallet-overview b{font-size:clamp(18px,2.5vw,28px)}.wallet-inactive{margin-top:24px}.wallet-inactive>summary{padding:14px 0;cursor:pointer;color:var(--muted)}.wallet-more .actions{display:flex;gap:8px;margin-top:12px}.debt-logo-picker{display:flex;gap:14px;align-items:center}.debt-logo-picker select{flex:1;min-width:0}.debt-logo-picker [data-debt-logo-preview]{min-width:88px;display:flex;justify-content:center}.wallet-symbol{color:var(--primary2)}
 @media(max-width:820px){.wallet-grid{grid-template-columns:minmax(0,1fr)}.wallet-overview b{font-size:clamp(16px,4.6vw,23px)}.wallet-overview>div{padding:16px 12px}}
 @media(max-width:360px){.wallet-overview b{font-size:16px}.wallet-card{padding:18px}.debt-logo-picker{gap:8px}.debt-logo-picker [data-debt-logo-preview]{min-width:72px}}
+
+/* Daily quotes need reading text sizing rather than a large dashboard heading. */
+.home-welcome>div:first-child{flex:1;min-width:0}
+.home-welcome #helloTitle{font-size:clamp(19px,1.8vw,24px);font-weight:600;line-height:1.65;letter-spacing:0;white-space:normal;word-break:normal;overflow-wrap:break-word;text-wrap:balance;max-width:100%;margin:8px 0 0}
+@media(max-width:820px){.home-welcome #helloTitle{font-size:18px;line-height:1.7}.home-welcome{gap:12px;padding-bottom:16px}}
+@media(max-width:360px){.home-welcome #helloTitle{font-size:17px}}
