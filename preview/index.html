@@ -55,6 +55,7 @@
 .gate-card h1{font-size:21px;margin:16px 0 8px}.gate-card p{font-size:13px;line-height:1.7;color:#6a7e9a}
 .gate-card .gate-note{font-size:11px;margin:20px 0 0}.gate-error{color:#b02c40;font-size:12px;margin:9px 0}
 .donut:before{content:attr(data-amount)}
+.compare-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:#eaf1ff;border-bottom:1px solid #dbe6f6;font-size:11px;color:#566f95}.compare-toolbar a{font-weight:750;color:#3b67ca;text-decoration:none;text-align:right}.compare-toolbar strong{color:#274a88}
 </style></head><body><div id="preview-gate" aria-live="polite">
   <div class="gate-card"><div class="gate-brand">💙 My Finance <span class="gate-pill">PREVIEW</span></div>
    <h1>ทดสอบ UI ด้วยข้อมูลจริง</h1>
@@ -70,7 +71,7 @@
   </div>
  </div>
  <div class="shell" hidden>
-<div class="preview">🔒 LIVE PREVIEW · อ่านข้อมูลจริงหลังเข้าสู่ระบบ · ห้ามบันทึกข้อมูล</div>
+<div class="preview">🔒 LIVE PREVIEW · ข้อมูลจริง · อ่านอย่างเดียว</div><div class="compare-toolbar"><span>กำลังเทียบ: <strong id="compare-page">ภาพรวม</strong></span><a id="compare-real" target="_blank" rel="noopener noreferrer" href="../#dashboard">เปิดเว็บจริง: ภาพรวม ↗</a></div>
 <section id="home" class="screen active">
  <div class="navy"><div class="brand"><div class="brand-icon">M</div><div class="grow"><div class="brand-title">My Finance</div><div class="small">ดูแลการเงินในแบบคุณ</div></div><button class="icon-btn" onclick="go('settings')" aria-label="ตั้งค่า">⚙</button></div>
  <select id="monthPicker" class="select-month" aria-label="เลือกเดือน" onchange="changeMonth(this.value)"></select>
@@ -112,4 +113,4 @@
 <section id="extra" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title" id="extra-title">รายละเอียด</h1><p class="page-note">ตัวอย่างหน้าจอเพื่อทดสอบรูปแบบเท่านั้น</p><div class="card" id="extra-content">หน้านี้ยังไม่มีข้อมูลจริง</div></div></section>
 <nav class="nav" aria-label="นำทางเวอร์ชันทดลอง"><button data-to="home" onclick="go('home')" class="active"><i>⌂</i>หน้าหลัก</button><button data-to="transactions" onclick="go('transactions')"><i>☷</i>รายการ</button><button data-to="add" class="add" onclick="go('add')"><i>+</i>เพิ่มรายการ</button><button data-to="summary" onclick="go('summary')"><i>◴</i>สรุป</button><button data-to="more" onclick="go('more')"><i>▦</i>เพิ่มเติม</button></nav>
 </div>
-<script type="module" src="./live.js?v=20261017-live2"></script></body></html>
+<script type="module" src="./live.js?v=20261017-live3"></script></body></html>
