@@ -91,6 +91,12 @@ function renderSummary(){
  lastReport={label:config.label,scope:scope+' · ไม่รวมยกเลิก',paidOnly,mode:config.mode,
   keys:[...summaryTimelineKeys(config,today,rows)],
   rows:rows.map(x=>({transaction_date:x.transaction_date,type:x.type,amount:x.amount,description:x.description,status:x.status,reportCategory:excelGroup(x)}))};
+ const foodSub=$('foodSubcategoryBreakdown');
+ if(foodSub){
+  const parts=rows.filter(x=>x.type==='expense'&&x.categories?.name==='อาหารและเครื่องดื่ม').reduce((out,x)=>{const k=x.subcategory||'อาหาร';out[k]=(out[k]||0)+Math.round(Number(x.amount||0)*100);return out},{});
+  foodSub.hidden=!Object.keys(parts).length;
+  foodSub.textContent='🍽️ อาหารและเครื่องดื่ม · '+Object.entries(parts).map(([k,v])=>k+' '+money(v/100)).join(' · ');
+ }
  const inc=sumTransactionAmounts(rows,'income'),exp=sumTransactionAmounts(rows,'expense')
  $('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumBalance').textContent=money(inc-exp)
  $('summaryPeriodText').textContent='กำลังดู '+config.label
