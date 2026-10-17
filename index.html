@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
-<link rel="modulepreload" href="./app.js?v=20261017-quotes63">
+<link rel="modulepreload" href="./app.js?v=20261017-foodsub1">
 <link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261017-quotes63">
 <link rel="stylesheet" href="./style.css?v=20261017-quotes63">
 <link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261017-quotes63" media="(prefers-color-scheme: dark)">
@@ -256,7 +256,7 @@
         <div class="card section summary-chart-card summary-share-card">
           <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดหลักและสัดส่วนของยอดรายจ่ายที่เลือก</p></div><span class="summary-card-badge">100%</span></div>
           <div class="chart-box donut summary-donut"><canvas id="categoryPieChart" aria-label="กราฟสัดส่วนรายจ่ายตามช่วงเวลาที่เลือก" role="img"></canvas></div>
-          <p id="summaryPieEmpty" class="empty" hidden>ยังไม่มีรายจ่ายในช่วงนี้</p>
+          <div id="foodSubcategoryBreakdown" class="card" style="margin-top:12px" hidden></div><p id="summaryPieEmpty" class="empty" hidden>ยังไม่มีรายจ่ายในช่วงนี้</p>
         </div>
       </section>
 
@@ -445,7 +445,7 @@
   <details id="txRepeatSection" class="capture-repeat"><summary>↻ ใช้รายการโปรด / รายการเดิม</summary><div id="txRepeatList" class="repeat-list"></div></details>
   <div class="fields capture-fields">
     <div class="field full"><label for="txDesc">รายการอะไร?</label><input id="txDesc" required placeholder="เช่น ข้าวกลางวัน กาแฟ หรือของเข้าบ้าน" maxlength="250" enterkeyhint="next"></div>
-    <div class="field"><label for="txCategory">หมวดหมู่</label><select id="txCategory" required></select></div>
+    <div class="field"><label for="txCategory">หมวดหมู่</label><select id="txCategory" required></select></div><div class="field hidden" id="txSubcategoryWrap"><label for="txSubcategory">หมวดย่อย</label><select id="txSubcategory"><option value="อาหาร">🍜 อาหาร</option><option value="กาแฟ">☕ กาแฟ</option><option value="เครื่องดื่ม">🧋 เครื่องดื่ม</option><option value="ขนม">🍰 ขนม</option></select></div>
     <div class="field"><label for="txAccount">บัญชีที่ใช้</label><select id="txAccount"></select></div>
     <div id="cardPaymentSuggest" class="field full hidden"><label>เลือกบัตร / สินเชื่อ</label><div id="cardPaymentList" class="payment-suggest-grid"></div><div class="muted">ตรวจยอดที่จ่ายจริงก่อนบันทึก</div></div>
     <div class="field full date-field"><label for="txDate">วันที่</label><input id="txDate" type="date" required></div>
@@ -472,7 +472,7 @@
 <script src="./vendor/chart-4.4.7.umd.js?v=20261017-quotes63"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
 <script type="module" src="./slip-reader.js?v=20261017-quotes63"></script>
-<script type="module" src="./app.js?v=20261017-quotes63"></script>
+<script type="module" src="./app.js?v=20261017-foodsub1"></script>
 <script type="module" src="./app-nav.js?v=20261017-quotes63"></script></body>
 </html>
 
