@@ -56,6 +56,29 @@
 .gate-card .gate-note{font-size:11px;margin:20px 0 0}.gate-error{color:#b02c40;font-size:12px;margin:9px 0}
 .donut:before{content:attr(data-amount)}
 .compare-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:#eaf1ff;border-bottom:1px solid #dbe6f6;font-size:11px;color:#566f95}.compare-toolbar a{font-weight:750;color:#3b67ca;text-decoration:none;text-align:right}.compare-toolbar strong{color:#274a88}
+
+/* Cards preview: scoped styling, production stays unchanged. */
+#cards{background:#0e1420;color:#eef2fa;min-height:100dvh;padding-bottom:12px}
+#cards .pane{padding:22px 18px}#cards .back{color:#a9b5ff;margin-bottom:18px}
+#cards .page-title{font-size:27px;letter-spacing:-.035em}#cards .page-note{color:#99a7be;line-height:1.7}
+.wallet-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:20px 0;border-top:1px solid #273144;border-bottom:1px solid #273144;margin-bottom:28px}
+.wallet-overview span,.wallet-amount>span{display:block;color:#a1aec4;font-size:12px;margin-bottom:9px}
+.wallet-overview b{display:block;font-size:clamp(14px,4.3vw,20px);font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.03em}
+.wallet-section{display:flex;justify-content:space-between;align-items:center;margin:25px 0 12px}.wallet-section h2{font-size:16px;margin:0}.wallet-section>span{font-size:11px;color:#93a1b8}
+.wallet-card{border:1px solid #35415b;background:radial-gradient(ellipse at top right,#36447466,transparent 70%),#1c2539;border-radius:22px;padding:21px;margin-bottom:14px;box-shadow:0 8px 24px #0002}
+.wallet-loan{background:radial-gradient(ellipse at top right,#22605544,transparent 70%),#18272c;border-color:#2a4549}
+.wallet-head{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:26px}.wallet-identity{display:flex;gap:10px;align-items:center;min-width:0}
+.wallet-identity h3{margin:0;font-size:16px;line-height:1.5;overflow-wrap:anywhere}.wallet-symbol{font-size:22px;color:#bec8ff}.wallet-loan .wallet-symbol{color:#90d7c2}
+.wallet-tag{font-size:9px;letter-spacing:.12em;color:#c0c9e7;border:1px solid #536180;border-radius:6px;padding:5px 7px;flex-shrink:0}
+.wallet-amount{margin-bottom:21px}.wallet-amount b{display:block;font-size:clamp(23px,7.5vw,33px);letter-spacing:-.045em;line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums}
+.wallet-available{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:12px}.wallet-available>span{color:#b6c1d5}.wallet-available b{color:#98e2ce;white-space:nowrap;font-variant-numeric:tabular-nums}
+.wallet-bar{height:6px;background:#ffffff16;border-radius:10px;overflow:hidden;margin:13px 0 9px}.wallet-bar>div{height:100%;border-radius:10px;background:linear-gradient(90deg,#8595fa,#bdc4ff)}.wallet-bar .over{background:#ff9caa}
+.wallet-caption{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#aebbd2;flex-wrap:wrap}.wallet-alert{color:#ffb6be;font-size:11px}
+.wallet-footer{border-top:1px solid #ffffff15;margin-top:18px;padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:#b4c0d6}
+.wallet-more{position:relative}.wallet-more summary{display:grid;place-items:center;width:44px;height:44px;list-style:none;cursor:pointer;border-radius:12px;background:#ffffff0c;font-size:23px;color:#e3e9fc}.wallet-more summary::-webkit-details-marker{display:none}.wallet-more summary:focus-visible{outline:2px solid #adbbff;outline-offset:3px}
+.wallet-detail{position:absolute;right:0;bottom:50px;z-index:2;width:220px;max-width:65vw;background:#2b3750;border:1px solid #54617d;border-radius:12px;padding:14px;box-shadow:0 8px 20px #0004;color:#e6edff;line-height:1.7}
+.wallet-empty{border:1px dashed #3b465b;border-radius:18px;padding:22px;color:#a5b4ca;font-size:13px}.wallet-footnote{font-size:10px;line-height:1.8;color:#93a2bb;margin-top:23px}
+@media(max-width:360px){#cards .pane{padding:18px 13px}.wallet-card{padding:17px}.wallet-overview{gap:8px}.wallet-overview b{font-size:14px}.wallet-identity h3{font-size:14px}}
 </style></head><body><div id="preview-gate" aria-live="polite">
   <div class="gate-card"><div class="gate-brand">💙 My Finance <span class="gate-pill">PREVIEW</span></div>
    <h1>ทดสอบ UI ด้วยข้อมูลจริง</h1>
@@ -104,7 +127,7 @@
 <section id="budget" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title">งบประมาณ</h1><p class="page-note">ดูความคืบหน้าของแต่ละหมวด</p>
 <div class="card"><div class="heading">🍜 งบกิน <span class="blue">80%</span></div><div class="bar"><div style="width:80%"></div></div><div class="meta">ใช้ไป ฿3,208 / ฿4,000 · เหลือ ฿792</div></div>
 <div class="card"><div class="heading">งบอื่น ๆ</div><div class="alt">🏠 ค่าห้องเช่า <b>100%</b></div><div class="bar"><div style="background:#f09ca2;width:100%"></div></div><div class="alt">🚗 ค่าใช้รถ <b>70%</b></div><div class="bar"><div style="background:#81d5ae;width:70%"></div></div></div></div></section>
-<section id="cards" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title">บัตรและหนี้</h1><p class="page-note">ดึงข้อมูลบัตรจริงจากบัญชี My Finance ในโหมดอ่านอย่างเดียว</p><div id="card-items"></div></div></section>
+<section id="cards" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title">บัตรและสินเชื่อ</h1><p class="page-note">ดูยอดใช้ วงเงินเหลือ และภาระผ่อนในที่เดียว</p><div id="card-items"></div></div></section>
 <section id="calendar" class="screen"><div class="pane"><button class="back" onclick="go('home')">‹ หน้าหลัก</button><h1 class="page-title">ปฏิทิน</h1><p class="page-note">ตุลาคม 2026</p><div class="card"><div class="heading">ตุลาคม 2026</div><div id="calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:6px;font-size:12px"></div></div><div class="card"><div class="heading">สรุปเดือนนี้</div>รายรับ ฿23,000 · รายจ่าย ฿15,567</div></div></section>
 <section id="more" class="screen"><div class="pane"><h1 class="page-title">เพิ่มเติม</h1><p class="page-note">การจัดการทั้งหมดในที่เดียว</p><div class="section-label">วางแผนเงิน</div><div class="card">
 <button class="menu-row" onclick="go('budget')"><span class="tile">🎯</span>งบประมาณ<span class="chevron">›</span></button><button class="menu-row" onclick="go('bills')"><span class="tile">📅</span>บิลประจำ<span class="chevron">›</span></button><button class="menu-row" onclick="go('cards')"><span class="tile">💳</span>บัตรและหนี้<span class="chevron">›</span></button></div>
@@ -113,4 +136,4 @@
 <section id="extra" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title" id="extra-title">รายละเอียด</h1><p class="page-note">ตัวอย่างหน้าจอเพื่อทดสอบรูปแบบเท่านั้น</p><div class="card" id="extra-content">หน้านี้ยังไม่มีข้อมูลจริง</div></div></section>
 <nav class="nav" aria-label="นำทางเวอร์ชันทดลอง"><button data-to="home" onclick="go('home')" class="active"><i>⌂</i>หน้าหลัก</button><button data-to="transactions" onclick="go('transactions')"><i>☷</i>รายการ</button><button data-to="add" class="add" onclick="go('add')"><i>+</i>เพิ่ม</button><button data-to="summary" onclick="go('summary')"><i>◴</i>วิเคราะห์</button><button data-to="more" onclick="go('more')"><i>▦</i>เพิ่มเติม</button></nav>
 </div>
-<script type="module" src="./live.js?v=20261017-menu5"></script></body></html>
+<script type="module" src="./live.js?v=20261017-cards1"></script></body></html>

@@ -19,7 +19,7 @@ const sum=xs=>Math.round(xs.reduce((s,x)=>s+Math.round(valid(x.amount)*100),0))/
 function monthLabel(ym){const [y,m]=ym.split('-').map(Number);return new Intl.DateTimeFormat('th-TH',{month:'long',year:'numeric',timeZone:'Asia/Bangkok'}).format(new Date(Date.UTC(y,m-1,15)))}
 function iconTile(v){const node=document.createElement('div');node.className='tile';node.textContent=v;return node}
 function setGate(message,showLogin=false,error=''){gate.hidden=false;gateText.textContent=message;loginForm.hidden=!showLogin;errorEl.textContent=error;retry.hidden=!error;content.hidden=true}
-function showApp(){gate.hidden=true;content.hidden=false;state.loaded=true;banner.textContent='🔒 LIVE PREVIEW · ข้อมูลจริงของบัญชีที่ล็อกอิน · อ่านอย่างเดียว ไม่บันทึกข้อมูล';renderAll()}
+function showApp(){gate.hidden=true;content.hidden=false;state.loaded=true;banner.textContent='🔒 LIVE PREVIEW · ข้อมูลจริงของบัญชีที่ล็อกอิน · อ่านอย่างเดียว ไม่บันทึกข้อมูล';renderAll();if(location.hash==='#cards')go('cards')}
 async function pages(table,select,userId,order='id'){
  const out=[];for(let offset=0;offset<100000;offset+=500){
   const {data,error}=await db.from(table).select(select).eq('user_id',userId).order(order,{ascending:false}).range(offset,offset+499);
@@ -38,7 +38,7 @@ async function refresh(){
   const [rows,budgets,debts,bills,accounts,categories,salary,rent,installments,carExpenses]=await Promise.all([
    pages('transactions','id,description,type,amount,status,transaction_date,created_at,categories(name,icon),accounts(name)',user.id,'transaction_date'),
    pages('budgets','id,name,is_active,monthly_limit,category_names',user.id),
-   pages('debts','id,name,debt_type,is_active,original_amount,outstanding_amount,due_day',user.id),
+   pages('debts','id,name,debt_type,is_active,original_amount,outstanding_amount,due_day,installment_amount',user.id),
    pages('bills','id,name,is_active,amount,due_day',user.id),
    pages('accounts','id,name,account_type,is_active,opening_balance',user.id),
    pages('categories','id,name,type,icon',user.id),
@@ -139,15 +139,42 @@ function renderBudget(){
 }
 function renderCards(){
  const root=$('card-items');root.replaceChildren();
- const cards=state.debts.filter(x=>x.debt_type==='credit_card'&&x.is_active!==false).sort((a,b)=>valid(b.outstanding_amount)-valid(a.outstanding_amount));
- if(!cards.length){root.append(td('div','ยังไม่มีบัตรเครดิต','card'));return}
- for(const c of cards){
-  const used=valid(c.outstanding_amount),limit=valid(c.original_amount);
-  const card=td('div','','card'),head=td('div',c.name||'บัตรเครดิต','heading'),row=td('div','','row');
-  row.append(td('span','ยอดค้าง','meta'),td('b',fmt(used),'price'),td('span','','grow'),td('span','เหลือ '+fmt(Math.max(0,limit-used)),'meta'));
-  const bar=td('div','','bar'),fill=td('div','');fill.style.width=(limit?Math.min(100,used/limit*100):0)+'%';bar.append(fill);
-  card.append(head,row,bar,td('div','วงเงินเต็ม '+fmt(limit),'meta'));root.append(card);
+ const active=state.debts.filter(x=>x.is_active!==false);
+ const cards=active.filter(x=>x.debt_type==='credit_card').sort((a,b)=>valid(b.outstanding_amount)-valid(a.outstanding_amount));
+ const loans=active.filter(x=>x.debt_type!=='credit_card').sort((a,b)=>valid(b.outstanding_amount)-valid(a.outstanding_amount));
+ const total=xs=>xs.reduce((n,x)=>n+Math.round(valid(x.outstanding_amount)*100),0)/100;
+ const overview=td('div','','wallet-overview');
+ for(const [label,amount] of [['ยอดใช้บัตรรวม',total(cards)],['หนี้สินเชื่อคงเหลือ',total(loans)]]){
+  const cell=td('div','');cell.append(td('span',label),td('b',fmt(amount)));overview.append(cell);
  }
+ root.append(overview);
+ function section(label,items,isCard){
+  const title=td('div','','wallet-section');title.append(td('h2',label),td('span',items.length+' รายการ'));root.append(title);
+  if(!items.length){root.append(td('div',isCard?'ยังไม่มีบัตรเครดิตที่เปิดใช้งาน':'ยังไม่มีสินเชื่อที่เปิดใช้งาน','wallet-empty'));return}
+  for(const c of items){
+   const used=valid(c.outstanding_amount),limit=valid(c.original_amount),pct=limit>0?Math.max(0,Math.min(100,used/limit*100)):0;
+   const card=td('article','','wallet-card '+(isCard?'wallet-credit':'wallet-loan'));
+   const head=td('div','','wallet-head'),identity=td('div','','wallet-identity');
+   identity.append(td('span',isCard?'▤':'↗','wallet-symbol'),td('h3',c.name||(isCard?'บัตรเครดิต':'สินเชื่อ')));
+   head.append(identity,td('span',isCard?'CREDIT':'LOAN','wallet-tag'));card.append(head);
+   const amount=td('div','','wallet-amount');amount.append(td('span',isCard?'ยอดใช้ไป':'ยอดหนี้คงเหลือ'),td('b',fmt(used)));card.append(amount);
+   if(isCard){
+    const line=td('div','','wallet-available');line.append(td('span','วงเงินคงเหลือ'),td('b',limit>0?fmt(Math.max(0,limit-used)):'ยังไม่ระบุวงเงิน'));card.append(line);
+    const bar=td('div','','wallet-bar'),fill=td('div','');fill.style.width=pct+'%';if(used>limit&&limit>0)fill.className='over';bar.append(fill);card.append(bar);
+    const caption=td('div','','wallet-caption');caption.append(td('span',limit>0?'ใช้ไป '+Math.round(used/limit*100)+'%':'ยังไม่ระบุวงเงิน'),td('span',limit>0?'วงเงิน '+fmt(limit):'—'));card.append(caption);
+    if(used>limit&&limit>0)card.append(td('p','เกินวงเงิน '+fmt(used-limit),'wallet-alert'));
+   }else{
+    const payment=td('div','','wallet-available');payment.append(td('span','ค่างวด / รอบ'),td('b',valid(c.installment_amount)>0?fmt(c.installment_amount):'ยังไม่ระบุ'));card.append(payment);
+   }
+   const footer=td('div','','wallet-footer');
+   footer.append(td('span',valid(c.due_day)>0?'ครบกำหนดทุกวันที่ '+c.due_day:'ยังไม่ระบุวันครบกำหนด'));
+   const more=td('details','','wallet-more'),toggle=td('summary','⋯');toggle.setAttribute('aria-label','ดูรายละเอียด '+(c.name||''));
+   more.append(toggle,td('div',valid(c.installment_amount)>0?'ยอดชำระต่อรอบ '+fmt(c.installment_amount):'ยังไม่ระบุยอดชำระต่อรอบ','wallet-detail'));
+   footer.append(more);card.append(footer);root.append(card);
+  }
+ }
+ section('บัตรเครดิต',cards,true);section('สินเชื่อและผ่อนชำระ',loans,false);
+ root.append(td('p','ยอดคงเหลือปัจจุบัน · ไม่เปลี่ยนตามเดือนที่เลือก · Preview อ่านอย่างเดียว','wallet-footnote'));
 }
 function renderCalendar(){
  const grid=$('calendar-grid');grid.replaceChildren();
@@ -205,3 +232,4 @@ function renderExtra(page){
 
 Object.assign(window,{go,changeMonth,setFilter,setType,renderTransactions,startAdd,saveMock});
 refresh();
+
