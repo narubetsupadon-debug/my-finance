@@ -1,0 +1,73 @@
+/* My Finance · Clean Minimal 2026
+   Presentation only: no data models, calculations or event handlers changed. */
+:root{
+ --clean-blue:#4f78e8;--clean-navy:#10243d;--clean-soft:#f6f8fc;
+}
+body{letter-spacing:0;background:#f6f8fc}
+.card,.daily-panel,.settings-card,.summary-kpi,.summary-mini{
+ border-radius:18px;border-color:var(--line);box-shadow:0 2px 12px rgba(22,40,75,.035);
+}
+.btn,.quick-btn,.app-menu-item{transition:background-color .14s ease,border-color .14s ease}
+.btn:hover,.quick-btn:hover,.card:hover{transform:none}
+.field input,.field select,.field textarea,.filters input,.filters select{
+ border-radius:12px;box-shadow:none;
+}
+.money,.value,.daily-amount{font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.page-head h2,.section-heading h2{letter-spacing:-.02em}
+.app-menu-sheet{border-radius:22px 22px 0 0}
+.app-menu-item{border-radius:14px}
+.app-menu-item span:last-child{line-height:1.38}
+.app-menu-close{border-radius:14px}
+.mobile-app-nav{box-shadow:0 7px 20px rgba(20,40,70,.07)}
+/* Dashboard keeps the familiar My Finance navy personality.
+   Other sections remain calm, bright surfaces when Light is selected. */
+html[data-resolved-theme="light"] #dashboardPage{
+ --card:#162b46;--text:#eff5ff;--muted:#a5b7cf;--line:#304661;
+ --green:#83d6ba;--red:#ff9ca3;
+ color:#eff5ff;
+}
+html[data-resolved-theme="light"] #dashboardPage .daily-panel,
+html[data-resolved-theme="light"] #dashboardPage .card,
+html[data-resolved-theme="light"] #dashboardPage .metric,
+html[data-resolved-theme="light"] #dashboardPage .summary-mini{
+ background:#162b46;border-color:#2c4361;color:#eff5ff;
+ box-shadow:none;
+}
+html[data-resolved-theme="light"] #dashboardPage .home-welcome{
+ background:#10243d;color:#fff;border-radius:20px;padding:18px;
+}
+html[data-resolved-theme="light"] #dashboardPage .home-welcome h1{color:#fff}
+html[data-resolved-theme="light"] #dashboardPage .home-welcome .welcome-date{color:#adc0d7}
+html[data-resolved-theme="light"] #dashboardPage .daily-amount,
+html[data-resolved-theme="light"] #dashboardPage .value{color:#fff}
+html[data-resolved-theme="light"] #dashboardPage .daily-caption,
+html[data-resolved-theme="light"] #dashboardPage .daily-label,
+html[data-resolved-theme="light"] #dashboardPage .muted{color:#a5b7cf}
+html[data-resolved-theme="light"] #dashboardPage .quick-btn{
+ background:#eaf0fb;color:#243957;border:1px solid #d8e3f3;
+}
+html[data-resolved-theme="light"] #dashboardPage .spent-panel{
+ background:#10243d;border:1px solid #294469;
+}
+html[data-resolved-theme="light"] #dashboardPage .income{color:#83d6ba}
+html[data-resolved-theme="light"] #dashboardPage .expense{color:#ff9ca3}
+html[data-resolved-theme="dark"] body{background:#191f2b}
+html[data-resolved-theme="dark"] .card,
+html[data-resolved-theme="dark"] .daily-panel{box-shadow:none}
+@media(max-width:820px){
+ .content{min-width:0}
+ .card,.daily-panel{border-radius:17px}
+ .home-welcome{margin-bottom:14px}
+ .section{margin-top:14px}
+ .page-head{margin-bottom:14px}
+ .app-menu-head{margin-bottom:12px}
+ .app-menu-group+.app-menu-group{margin-top:14px}
+ .app-menu-grid{gap:8px}
+ .app-menu-item{min-height:58px;padding:10px;gap:8px;font-size:13px}
+ .app-menu-item .app-nav-icon{min-width:26px;flex:0 0 26px;font-size:19px}
+ .mobile-app-nav{border-radius:20px}
+ html[data-resolved-theme="light"] #dashboardPage .home-welcome{padding:15px}
+}
+@media(prefers-reduced-motion:reduce){
+ .btn,.quick-btn,.app-menu-item{transition:none}
+}
