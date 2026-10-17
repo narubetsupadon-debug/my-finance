@@ -1,9 +1,9 @@
 const homeApp=document.getElementById('app');
 const mount=homeApp||document.body;
-const primary=[['dashboard','📊','ภาพรวม'],['transactions','🧾','รายรับ–รายจ่าย'],['capture','＋','บันทึก'],['summary','📈','สรุป']];
+const primary=[['dashboard','📊','ภาพรวม'],['transactions','🧾','รายรับ–รายจ่าย'],['capture','＋','เพิ่ม'],['summary','📈','วิเคราะห์']];
 const groups=[
- ['วางแผนเงิน',[['budget','🎯','งบประมาณ'],['bills','📅','บิลประจำ'],['debts','💳','บัตรและสินเชื่อ']]],
- ['บันทึกเฉพาะเรื่อง',[['salary','💰','เงินเดือน','./salary.html'],['rent','🏠','ค่าห้องเช่า','./rent.html'],['car','🚗','รถของฉัน','./car.html']]],
+ ['วางแผนเงิน',[['budget','🎯','งบประมาณ'],['bills','📅','บิลประจำ'],['debts','💳','บัตรและหนี้']]],
+ ['บันทึกเฉพาะเรื่อง',[['salary','💰','เงินเดือน','./salary.html'],['rent','🏠','ค่าห้อง','./rent.html'],['car','🚗','ค่าใช้รถ','./car.html']]],
  ['จัดการข้อมูล',[['accounts','🏦','บัญชี'],['categories','🏷️','หมวดหมู่'],['settings','⚙️','ตั้งค่า']]]
 ];
 const secondary=groups.flatMap(([,items])=>items);
