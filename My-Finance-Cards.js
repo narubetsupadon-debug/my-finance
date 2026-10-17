@@ -110,8 +110,7 @@ function renderCards(widget,cards,checkedAt,selected){
   const row=widget.addStack();row.layoutHorizontally();row.centerAlignContent();
   const col=row.addStack();col.layoutVertically();text(col,card.name,11,'d8d9e4');
   text(col,'เหลือ '+money(card.remaining),small?22:family==='large'?25:22,card.over?'ffc28c':'79dec4');
-  if(small){text(col,'ใช้ '+money(card.spent),10,'d8d9e4');text(col,'วงเงิน '+money(card.limit),10,'a3a8be');}
-  else text(col,'ใช้ '+money(card.spent)+' / วงเงิน '+money(card.limit),10,'d8d9e4');
+  text(col,'ใช้ไป '+money(card.spent),10,'d8d9e4');
   if(card.over)text(col,'เกินวงเงิน '+money(card.over),9,'ffc28c');
   if(!small){row.addSpacer();const ring=row.addImage(budgetRing(card,34));ring.imageSize=new Size(34,34);}
   widget.addSpacer(family==='large'?9:4);
