@@ -137,6 +137,24 @@ function renderBudget(){
   card.append(head,bar,td('div','ใช้ไป '+fmt(used)+' / '+fmt(limit)+' · เหลือ '+fmt(Math.max(0,limit-used)),'meta'));pane.append(card);
  });
 }
+function cardBrand(name){
+ const n=String(name||'').toLowerCase().replace(/[\s_()-]+/g,'');
+ if(/firstchoice|เฟิร์สช้อยส์|เฟิร์สช้อย/.test(n))return {file:'firstchoice.svg',label:'Krungsri First Choice'};
+ if(/kbank|kplus|kasikorn|กสิกร/.test(n))return {file:'kbank.svg',label:'KBank'};
+ if(/ttb|ทีทีบี|ทหารไทยธนชาต/.test(n))return {file:'ttb.svg',label:'ttb'};
+ if(/shopee|spaylater|seasycash|ช้อปปี้/.test(n))return {file:'shopee.png',label:'Shopee'};
+ if(/lazada|ลาซาด้า/.test(n))return {file:'lazada.png',label:'Lazada'};
+ if(/grab|แกร็บ/.test(n))return {file:'grab.ico',label:'Grab'};
+ return null;
+}
+function cardLogo(name,isCard){
+ const brand=cardBrand(name),tile=td('span',isCard?'▤':'↗','wallet-symbol');
+ if(!brand)return tile;
+ tile.classList.add('wallet-brand');tile.replaceChildren();
+ const img=document.createElement('img');img.src='./logos/'+brand.file;img.alt='โลโก้ '+brand.label;img.width=56;img.height=36;img.loading='lazy';img.decoding='async';
+ img.addEventListener('error',()=>{tile.classList.remove('wallet-brand');tile.replaceChildren();tile.textContent=isCard?'▤':'↗'},{once:true});
+ tile.append(img);return tile;
+}
 function renderCards(){
  const root=$('card-items');root.replaceChildren();
  const active=state.debts.filter(x=>x.is_active!==false);
@@ -155,7 +173,7 @@ function renderCards(){
    const used=valid(c.outstanding_amount),limit=valid(c.original_amount),pct=limit>0?Math.max(0,Math.min(100,used/limit*100)):0;
    const card=td('article','','wallet-card '+(isCard?'wallet-credit':'wallet-loan'));
    const head=td('div','','wallet-head'),identity=td('div','','wallet-identity');
-   identity.append(td('span',isCard?'▤':'↗','wallet-symbol'),td('h3',c.name||(isCard?'บัตรเครดิต':'สินเชื่อ')));
+   identity.append(cardLogo(c.name,isCard),td('h3',c.name||(isCard?'บัตรเครดิต':'สินเชื่อ')));
    head.append(identity,td('span',isCard?'CREDIT':'LOAN','wallet-tag'));card.append(head);
    const amount=td('div','','wallet-amount');amount.append(td('span',isCard?'ยอดใช้ไป':'ยอดหนี้คงเหลือ'),td('b',fmt(used)));card.append(amount);
    if(isCard){
