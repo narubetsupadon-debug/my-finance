@@ -1,116 +1,20 @@
-<!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#10243d">
-<title>My Finance | UI Preview</title>
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f5f7fb"><title>My Finance · Preview เปรียบเทียบ</title>
 <style>
-:root{font-family:Inter,"Noto Sans Thai",system-ui,-apple-system,sans-serif;color:#17243c;background:#edf2f9;font-synthesis:none}
-*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}
-.shell{max-width:470px;min-height:100dvh;margin:auto;background:#f8faff;position:relative;padding-bottom:96px;box-shadow:0 0 30px #213a5911}
-.preview{background:#e7f0ff;color:#395da0;text-align:center;padding:8px 10px;font-size:11px;font-weight:700}
-.screen{display:none}.screen.active{display:block}.pane{padding:20px 16px 10px}
-.navy{background:#10243d;color:#fff;border-radius:0 0 26px 26px;padding:21px 18px 22px}
-.brand{display:flex;align-items:center;gap:10px;margin-bottom:19px}.brand-icon{background:linear-gradient(135deg,#718bff,#4f46e5);color:white;font-weight:900;padding:12px;border-radius:14px;font-size:20px}.brand-title{font-size:17px;font-weight:750}.small{font-size:11px;color:#98abc7}.grow{flex:1}
-.icon-btn{border:0;background:#243a58;color:#fff;border-radius:13px;width:40px;height:40px;font-size:19px}
-.select-month{border:1px solid #35506e;background:#213853;color:#e8f1ff;padding:10px 14px;border-radius:13px;margin-bottom:13px;font-size:12px}
-.hero{background:#203955;border-radius:18px;padding:20px}.hero .muted{color:#c2d0e0}
-.big-money{font-size:32px;letter-spacing:-.04em;font-weight:800;margin:10px 0 5px;color:#86dfed}
-.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
-.slab{background:#203955;border-radius:16px;padding:14px;font-size:12px}.slab b{display:block;margin-top:6px;font-size:20px}
-.green{color:#68cba8!important}.pink{color:#ee858f!important}.blue{color:#4c7ff1!important}
-.card{background:#fff;border:1px solid #e7edf5;border-radius:17px;padding:16px;margin-bottom:12px;box-shadow:0 3px 14px #163a5908}
-.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:15px;font-weight:750;margin-bottom:13px}
-.link{color:#4c73d6;font-size:12px;font-weight:600;background:transparent;border:0;padding:3px}
-.row{display:flex;align-items:center;gap:11px;min-width:0}.row .grow{min-width:0}
-.tile{flex:0 0 43px;display:grid;place-items:center;width:43px;height:43px;border-radius:13px;background:#eef2fd;font-size:22px}
-.meta{font-size:11px;color:#7d8faa;line-height:1.5}.mainline{font-weight:700;font-size:13px}.price{font-weight:750;font-size:13px;white-space:nowrap}
-.bar{height:8px;background:#e9eff9;border-radius:12px;overflow:hidden;margin:12px 0 6px}.bar>div{height:100%;background:#68a9fa;border-radius:12px}
-.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
-.quick button{background:transparent;border:0;color:#475979;font-size:11px;min-width:0}.quick .tile{margin:0 auto 5px;width:43px;height:43px}
-.item{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #ecf0f7}.item:first-of-type{border-top:0}
-.page-title{font-size:24px;margin:4px 0 5px;letter-spacing:-.02em}.page-note{font-size:12px;color:#8190a9;margin:0 0 17px}
-.pills{display:flex;gap:6px;margin:12px 0}.pill{border:0;border-radius:11px;padding:10px 12px;background:#e9eef8;color:#667d9e;flex:1;font-size:12px}.pill.active{background:#e2eaff;color:#356de1;font-weight:750}
-.input{display:block;width:100%;border:1px solid #e0e7f2;border-radius:12px;background:#fff;padding:12px;font-size:15px;color:#243653;outline-color:#6b95ed}
-.field{display:grid;gap:6px;margin:13px 0;font-size:12px;font-weight:650;color:#4c5e79}
-.primary{border:0;border-radius:13px;background:#4c75ef;color:#fff;padding:13px 17px;font-weight:700}
-.secondary{border:1px solid #dce5f4;border-radius:12px;background:white;color:#38537d;padding:10px 12px}
-.section-label{font-size:12px;color:#8292ad;font-weight:650;margin:17px 0 9px}
-.menu-row{width:100%;display:flex;gap:12px;align-items:center;background:transparent;border:0;border-top:1px solid #eff2f8;text-align:left;padding:13px 0;font-weight:650;color:#344461}
-.menu-row:first-of-type{border-top:0}.menu-row .tile{width:34px;height:34px;flex-basis:34px;font-size:18px}.chevron{margin-left:auto;color:#8ca0c0}
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(470px,100%);display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.98);border-top:1px solid #e5ecf6;padding:9px 3px calc(10px + env(safe-area-inset-bottom));z-index:10}
-.nav button{border:0;background:transparent;display:grid;place-items:center;gap:4px;font-size:10px;color:#8495af}
-.nav button i{font-style:normal;font-size:20px;line-height:25px}.nav button.active{color:#4775eb;font-weight:800}
-.nav button.add i{display:grid;place-items:center;background:#4d71ed;color:white;border-radius:50%;height:39px;width:39px;font-size:27px}
-.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{padding:15px;background:#fff;border:1px solid #e8edf6;border-radius:16px}
-.donut{height:156px;width:156px;margin:14px auto;border-radius:50%;background:conic-gradient(#f5a1a8 0 34%,#968cf3 34% 53%,#68c2f5 53% 70%,#f1bd6e 70% 88%,#77d4b1 88% 100%);display:grid;place-items:center}.donut:before{content:"฿15,567";height:106px;width:106px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:800}
-.alt{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid #edf1f7;font-size:13px}.alt:first-of-type{border:0}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#9a8ff3;margin-right:8px}
-.back{border:0;background:transparent;color:#5379de;padding:4px 0;font-weight:700}
-.note{background:#fff8e9;border-radius:11px;color:#8a652c;padding:11px 12px;font-size:11px;line-height:1.6}
-.hide{display:none!important}.notice{margin-top:10px;padding:10px;border-radius:12px;background:#e6f7f1;color:#246b55;font-size:12px}
-@media(min-width:750px){.shell{margin:25px auto;border-radius:25px;overflow:hidden;min-height:850px}.nav{border-radius:0 0 20px 20px}body{padding-bottom:35px}}
-[hidden]{display:none!important}
-#preview-gate{min-height:100dvh;display:grid;place-items:center;padding:20px;background:#edf2f9;color:#17243c}
-.gate-card{width:min(410px,100%);background:#fff;border-radius:23px;padding:25px;box-shadow:0 14px 45px #18345418}
-.gate-brand{font-weight:800;color:#29436c}.gate-pill{font-size:10px;color:#4c75ef;background:#edf2ff;border-radius:8px;padding:5px 8px;margin-left:5px}
-.gate-card h1{font-size:21px;margin:16px 0 8px}.gate-card p{font-size:13px;line-height:1.7;color:#6a7e9a}
-.gate-card .gate-note{font-size:11px;margin:20px 0 0}.gate-error{color:#b02c40;font-size:12px;margin:9px 0}
-.donut:before{content:attr(data-amount)}
-.compare-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:#eaf1ff;border-bottom:1px solid #dbe6f6;font-size:11px;color:#566f95}.compare-toolbar a{font-weight:750;color:#3b67ca;text-decoration:none;text-align:right}.compare-toolbar strong{color:#274a88}
-</style></head><body><div id="preview-gate" aria-live="polite">
-  <div class="gate-card"><div class="gate-brand">💙 My Finance <span class="gate-pill">PREVIEW</span></div>
-   <h1>ทดสอบ UI ด้วยข้อมูลจริง</h1>
-   <p id="gate-text">กำลังตรวจสอบการเข้าสู่ระบบ…</p>
-   <form id="preview-login" hidden>
-    <label class="field">อีเมล<input id="preview-email" class="input" type="email" autocomplete="email" required></label>
-    <label class="field">รหัสผ่าน<input id="preview-password" class="input" type="password" autocomplete="current-password" required></label>
-    <button class="primary" type="submit" style="width:100%">เข้าสู่ระบบ My Finance</button>
-   </form>
-   <div id="preview-error" role="alert" class="gate-error"></div>
-   <button id="preview-retry" class="secondary" type="button" hidden>ลองโหลดใหม่</button>
-   <p class="gate-note">เว็บทดสอบนี้ใช้ฐานข้อมูลเดียวกับ My Finance จริง แต่เปิดให้ดูอย่างเดียว ไม่มีการบันทึก แก้ไข หรือลบข้อมูล</p>
-  </div>
- </div>
- <div class="shell" hidden>
-<div class="preview">🔒 LIVE PREVIEW · ข้อมูลจริง · อ่านอย่างเดียว</div><div class="compare-toolbar"><span>กำลังเทียบ: <strong id="compare-page">ภาพรวม</strong></span><a id="compare-real" target="_blank" rel="noopener noreferrer" href="../#dashboard">เปิดเว็บจริง: ภาพรวม ↗</a></div>
-<section id="home" class="screen active">
- <div class="navy"><div class="brand"><div class="brand-icon">M</div><div class="grow"><div class="brand-title">My Finance</div><div class="small">ดูแลการเงินในแบบคุณ</div></div><button class="icon-btn" onclick="go('settings')" aria-label="ตั้งค่า">⚙</button></div>
- <select id="monthPicker" class="select-month" aria-label="เลือกเดือน" onchange="changeMonth(this.value)"></select>
- <div class="hero"><div class="muted" style="font-size:12px">เงินคงเหลือ</div><div class="big-money">฿7,432.50</div><div class="small">รายรับหักรายจ่ายในเดือนนี้</div></div>
- <div class="split"><div class="slab"><span class="green">↙</span> รายรับ<b>฿23,000</b></div><div class="slab"><span class="pink">↗</span> รายจ่าย<b>฿15,567</b></div></div></div>
- <div class="pane">
- <div class="card"><div class="heading">🍜 งบกิน <button class="link" onclick="go('budget')">ดูรายละเอียด ›</button></div>
- <div class="row"><div class="tile" style="background:#ffe6eb">🍴</div><div class="grow"><div class="mainline">ใช้ไป ฿3,208</div><div class="meta">จาก ฿4,000</div></div><div style="text-align:right"><b>80%</b><div class="meta">เหลือ ฿792</div></div></div><div class="bar"><div style="width:80%"></div></div></div>
- <div class="card"><div class="heading">บันทึกด่วน</div><div class="quick"><button onclick="startAdd('อาหาร')"><span class="tile">🍜</span>กิน</button><button onclick="startAdd('บ้าน')"><span class="tile">🏠</span>บ้าน</button><button onclick="startAdd('รถ')"><span class="tile">🚗</span>รถ</button><button onclick="startAdd('บัตร')"><span class="tile">💳</span>บัตร</button><button onclick="go('add')"><span class="tile">⋯</span>อื่น ๆ</button></div></div>
- <div class="card"><div class="heading">รายการล่าสุด <button class="link" onclick="go('transactions')">ดูทั้งหมด ›</button></div><div id="home-items"></div></div>
- </div>
+:root{font-family:Inter,"Noto Sans Thai",system-ui,-apple-system,sans-serif;color:#192842;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1480px;margin:auto;padding:18px}.heading{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.heading h1{font-size:21px;margin:2px 0 6px}.muted{color:#708099;font-size:13px}.brand{font-weight:800;color:#315ab9}.tag{background:#ecfdf5;color:#087653;border-radius:9px;padding:7px 10px;font-size:11px;font-weight:700}.changes{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:8px;margin:16px 0}.change{background:white;border:1px solid #e4eaf4;border-radius:14px;padding:11px 12px}.change small{display:block;color:#8190a7;margin:0 0 6px;font-size:11px}.change strong{font-size:13px}.change b{font-size:13px;color:#3b6ce0}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;background:white;border:1px solid #e4eaf4;border-radius:14px;padding:10px;margin:12px 0}.toolbar button{border:0;background:#f0f4fa;border-radius:9px;padding:10px 12px;font-size:12px;color:#536582;cursor:pointer}.toolbar button.active{background:#375fdb;color:white}.toolbar .right{margin-left:auto}.toolbar a{color:#3763d2;font-size:12px;text-decoration:none;font-weight:700}.grid{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:14px}.browser{background:white;border:1px solid #dbe4f2;border-radius:18px;overflow:hidden;box-shadow:0 9px 30px #27477310}.browser-head{padding:11px 14px;background:#e9edf5;display:flex;align-items:center;gap:7px;font-size:12px;color:#6e7f9b}.dot{width:9px;height:9px;border-radius:50%;background:#fd7e7e}.dot:nth-child(2){background:#f6cc60}.dot:nth-child(3){background:#5fd4a2}.screen{width:100%;height:1040px;border:0;display:block;pointer-events:none;background:white}.aside{align-self:start;background:#fff;border:1px solid #e1e8f3;border-radius:15px;padding:15px;font-size:12px;line-height:1.8}.aside h2{font-size:14px;margin:0 0 8px}.aside p{color:#647591}.aside a{color:#315fdb}.warning{padding:11px;background:#fff9e8;color:#866727;border-radius:10px;font-size:12px}.linkbutton{display:inline-block;border:1px solid #d5e0f3;border-radius:10px;padding:9px 12px;text-decoration:none;color:#315bd4;font-size:12px;font-weight:700}.legacy{font-size:12px;color:#7c8ba1}@media(max-width:860px){.wrap{padding:10px}.grid{display:block}.aside{margin-top:12px}.screen{height:950px}.changes{grid-template-columns:repeat(2,minmax(0,1fr))}.heading h1{font-size:18px}}@media(max-width:360px){.changes{grid-template-columns:1fr}}
+</style></head><body><main class="wrap">
+<div class="heading"><div><div class="brand">💙 MY FINANCE · PREVIEW</div><h1>เปรียบเทียบกับเว็บไซต์จริง ทีละเมนู</h1><div class="muted">หน้าจอด้านล่างแสดงเว็บจริงโดยตรง ส่วนรายการด้านบนคือชื่อเมนูที่กำลังเสนอเปลี่ยน</div></div><span class="tag">เว็บหลักไม่ถูกแก้ไข</span></div>
+<section class="changes" aria-label="รายการการเปลี่ยนชื่อเมนูที่เสนอ">
+ <div class="change"><small>เมนูด้านล่าง</small><strong>บันทึก → </strong><b>เพิ่ม</b></div>
+ <div class="change"><small>เมนูด้านล่าง</small><strong>สรุป → </strong><b>วิเคราะห์</b></div>
+ <div class="change"><small>เมนูเพิ่มเติม</small><strong>บัตรและสินเชื่อ → </strong><b>บัตรและหนี้</b></div>
+ <div class="change"><small>เมนูเพิ่มเติม</small><strong>ค่าห้องเช่า → </strong><b>ค่าห้อง</b></div>
+ <div class="change"><small>เมนูเพิ่มเติม</small><strong>รถของฉัน → </strong><b>ค่าใช้รถ</b></div>
 </section>
-<section id="transactions" class="screen"><div class="pane"><h1 class="page-title">รายการ</h1><p class="page-note">ตรวจสอบรายรับและรายจ่ายของคุณ</p>
-<div class="pills" id="filters"><button class="pill active" onclick="setFilter('all',this)">ทั้งหมด</button><button class="pill" onclick="setFilter('expense',this)">รายจ่าย</button><button class="pill" onclick="setFilter('income',this)">รายรับ</button></div>
-<input class="input" id="search" placeholder="⌕ ค้นหารายการ" oninput="renderTransactions()">
-<div class="card" style="margin-top:14px"><div class="heading">รายการตัวอย่าง</div><div id="tx-items"></div></div></div></section>
-<section id="add" class="screen"><div class="pane"><h1 class="page-title">บันทึกรายการ</h1><p class="page-note">ทดสอบหน้าตาฟอร์ม โดยไม่บันทึกลง My Finance จริง</p>
-<div class="pills" id="add-types"><button class="pill active" onclick="setType('expense',this)">รายจ่าย</button><button class="pill" onclick="setType('income',this)">รายรับ</button></div>
-<form class="card" onsubmit="saveMock(event)">
-<label class="field">จำนวนเงิน<input id="amount" class="input" type="number" min="0.01" step="0.01" required placeholder="฿ 0.00"></label>
-<label class="field">ชื่อรายการ<input id="tx-name" class="input" required placeholder="เช่น ข้าวกลางวัน"></label>
-<label class="field">หมวดหมู่<select id="category" class="input"><option>อาหาร</option><option>บ้าน</option><option>รถ</option><option>บัตร</option><option>อื่น ๆ</option><option>รายรับ</option></select></label>
-<label class="field">วันที่<input type="date" id="date" class="input" value="2026-10-17"></label>
-<label class="field">บัญชี / บัตร<select class="input"><option>เงินสด</option><option>บัญชีหลัก</option><option>บัตรเครดิต</option></select></label>
-<button class="primary" style="width:100%;margin-top:8px" type="submit">ดูผลทดลอง (ไม่บันทึก)</button><div id="test-save-message" class="notice" hidden role="status"></div><div class="note" style="margin-top:10px">ทดสอบหน้าตาฟอร์มเท่านั้น ไม่มีการสร้างรายการใหม่ในฐานข้อมูลจริง</div>
-</form></div></section>
-<section id="summary" class="screen"><div class="pane"><h1 class="page-title">วิเคราะห์การเงิน</h1><p class="page-note">ข้อมูลจากบัญชี My Finance · เดือนที่เลือก</p>
-<div class="cols"><div class="metric"><div class="meta">รายรับ</div><b>฿23,000</b></div><div class="metric"><div class="meta">รายจ่าย</div><b>฿15,567</b></div></div>
-<div class="card" style="margin-top:13px"><div class="heading">รายจ่ายตามหมวด</div><div class="donut" data-amount="—"></div><div class="alt">🔴 อาหาร <b>34%</b></div><div class="alt">🟣 ค่าห้องเช่า <b>19%</b></div><div class="alt">🔵 รถของฉัน <b>17%</b></div><div class="alt">🟠 ซื้อของ <b>18%</b></div><div class="alt">🟢 อื่น ๆ <b>12%</b></div></div></div></section>
-<section id="budget" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title">งบประมาณ</h1><p class="page-note">ดูความคืบหน้าของแต่ละหมวด</p>
-<div class="card"><div class="heading">🍜 งบกิน <span class="blue">80%</span></div><div class="bar"><div style="width:80%"></div></div><div class="meta">ใช้ไป ฿3,208 / ฿4,000 · เหลือ ฿792</div></div>
-<div class="card"><div class="heading">งบอื่น ๆ</div><div class="alt">🏠 ค่าห้องเช่า <b>100%</b></div><div class="bar"><div style="background:#f09ca2;width:100%"></div></div><div class="alt">🚗 ค่าใช้รถ <b>70%</b></div><div class="bar"><div style="background:#81d5ae;width:70%"></div></div></div></div></section>
-<section id="cards" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title">บัตรและหนี้</h1><p class="page-note">ดึงข้อมูลบัตรจริงจากบัญชี My Finance ในโหมดอ่านอย่างเดียว</p><div id="card-items"></div></div></section>
-<section id="calendar" class="screen"><div class="pane"><button class="back" onclick="go('home')">‹ หน้าหลัก</button><h1 class="page-title">ปฏิทิน</h1><p class="page-note">ตุลาคม 2026</p><div class="card"><div class="heading">ตุลาคม 2026</div><div id="calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:6px;font-size:12px"></div></div><div class="card"><div class="heading">สรุปเดือนนี้</div>รายรับ ฿23,000 · รายจ่าย ฿15,567</div></div></section>
-<section id="more" class="screen"><div class="pane"><h1 class="page-title">เพิ่มเติม</h1><p class="page-note">การจัดการทั้งหมดในที่เดียว</p><div class="section-label">วางแผนเงิน</div><div class="card">
-<button class="menu-row" onclick="go('budget')"><span class="tile">🎯</span>งบประมาณ<span class="chevron">›</span></button><button class="menu-row" onclick="go('bills')"><span class="tile">📅</span>บิลประจำ<span class="chevron">›</span></button><button class="menu-row" onclick="go('cards')"><span class="tile">💳</span>บัตรและหนี้<span class="chevron">›</span></button></div>
-<div class="section-label">บันทึกเฉพาะเรื่อง</div><div class="card"><button class="menu-row" onclick="go('salary')"><span class="tile">💰</span>เงินเดือน<span class="chevron">›</span></button><button class="menu-row" onclick="go('rent')"><span class="tile">🏠</span>ค่าห้อง<span class="chevron">›</span></button><button class="menu-row" onclick="go('car')"><span class="tile">🚗</span>ค่าใช้รถ<span class="chevron">›</span></button></div>
-<div class="section-label">จัดการข้อมูล</div><div class="card"><button class="menu-row" onclick="go('accounts')"><span class="tile">🏦</span>บัญชี<span class="chevron">›</span></button><button class="menu-row" onclick="go('categories')"><span class="tile">🏷️</span>หมวดหมู่<span class="chevron">›</span></button><button class="menu-row" onclick="go('settings')"><span class="tile">⚙️</span>ตั้งค่า<span class="chevron">›</span></button></div></div></section>
-<section id="extra" class="screen"><div class="pane"><button class="back" onclick="go('more')">‹ เพิ่มเติม</button><h1 class="page-title" id="extra-title">รายละเอียด</h1><p class="page-note">ตัวอย่างหน้าจอเพื่อทดสอบรูปแบบเท่านั้น</p><div class="card" id="extra-content">หน้านี้ยังไม่มีข้อมูลจริง</div></div></section>
-<nav class="nav" aria-label="นำทางเวอร์ชันทดลอง"><button data-to="home" onclick="go('home')" class="active"><i>⌂</i>หน้าหลัก</button><button data-to="transactions" onclick="go('transactions')"><i>☷</i>รายการ</button><button data-to="add" class="add" onclick="go('add')"><i>+</i>เพิ่ม</button><button data-to="summary" onclick="go('summary')"><i>◴</i>วิเคราะห์</button><button data-to="more" onclick="go('more')"><i>▦</i>เพิ่มเติม</button></nav>
-</div>
-<script type="module" src="./live.js?v=20261017-menu5"></script></body></html>
+<nav class="toolbar" aria-label="เลือกหน้าเทียบ"><button class="active" data-route="dashboard">ภาพรวม</button><button data-route="transactions">รายรับ–รายจ่าย</button><button data-route="summary">สรุป</button><button data-route="budget">งบประมาณ</button><button data-route="debts">บัตรและสินเชื่อ</button><button data-route="bills">บิลประจำ</button><button data-route="salary.html">เงินเดือน</button><button data-route="rent.html">ค่าห้อง</button><button data-route="car.html">ค่าใช้รถ</button><button data-route="settings">ตั้งค่า</button><a class="right" id="openLive" href="../#dashboard" target="_blank" rel="noopener">เปิดหน้านี้ในเว็บจริง ↗</a></nav>
+<div class="grid"><section class="browser" aria-label="เว็บจริงในกรอบเปรียบเทียบ"><div class="browser-head"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:6px" id="currentPage">My Finance · ภาพรวม</span></div><iframe title="My Finance เว็บไซต์จริง สำหรับดูเท่านั้น" class="screen" id="realSite" src="../#dashboard" loading="eager" tabindex="-1"></iframe></section>
+<aside class="aside"><h2>จุดที่เปลี่ยนตอนนี้</h2><p>ทดลองเฉพาะ <b>ชื่อเมนู 5 จุด</b> โดยโครงสร้างหน้าและระบบการเงินยังยึดเว็บจริงทั้งหมด</p><div class="warning">หน้าจอเว็บจริงที่ฝังอยู่ถูกปิดการกดเพื่อป้องกันการเผลอแก้ข้อมูลในระหว่างเทียบ กด “เปิดหน้านี้ในเว็บจริง” เมื่อต้องการใช้งาน</div><p>ล็อกอินบัญชี My Finance บนเว็บจริงก่อน หากหน้าจอแสดงหน้าเข้าสู่ระบบ ข้อมูลบัญชีเดียวกันจะใช้งานกับกรอบนี้ได้</p><p class="legacy">แบบดีไซน์ทดลองเก่าถูกเก็บไว้ที่ <a href="./ui-lab.html">UI Lab เดิม</a> ไม่ได้ลบ</p></aside></div>
+</main><script>
+const buttons=[...document.querySelectorAll('[data-route]')],frame=document.getElementById('realSite'),link=document.getElementById('openLive'),title=document.getElementById('currentPage');
+const labels={dashboard:'ภาพรวม',transactions:'รายรับ–รายจ่าย',summary:'สรุป',budget:'งบประมาณ',debts:'บัตรและสินเชื่อ',bills:'บิลประจำ','salary.html':'เงินเดือน','rent.html':'ค่าห้องเช่า','car.html':'รถของฉัน',settings:'ตั้งค่า'};
+for(const b of buttons)b.addEventListener('click',()=>{let r=b.dataset.route,href=r.endsWith('.html')?'../'+r:'../#'+r;frame.src=href;link.href=href;title.textContent='My Finance · '+(labels[r]||r);buttons.forEach(x=>x.classList.toggle('active',x===b));});
+</script></body></html>
