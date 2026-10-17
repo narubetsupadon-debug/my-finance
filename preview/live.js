@@ -173,7 +173,7 @@ function go(id){
  if(!state.loaded)return;
  const requested=id;
  if(['bills','accounts','categories','salary','rent','car'].includes(id)){renderExtra(id);id='extra'}
- if(!$(id)&&!['bills','accounts','categories','salary','rent','car'].includes(requested)){const names={bills:'บิลประจำ',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน',accounts:'บัญชี',categories:'หมวดหมู่',settings:'ตั้งค่า'};
+ if(!$(id)&&!['bills','accounts','categories','salary','rent','car'].includes(requested)){const names={bills:'บิลประจำ',salary:'เงินเดือน',rent:'ค่าห้อง',car:'ค่าใช้รถ',accounts:'บัญชี',categories:'หมวดหมู่',settings:'ตั้งค่า'};
  $('extra-title').textContent=names[id]||'รายละเอียด';$('extra-content').textContent='หน้าทดลอง '+(names[id]||'')+' ยังไม่ได้ออกแบบใน Preview นี้ · ไม่มีการแก้ข้อมูลจริง';id='extra'}
  document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id===id));
  document.querySelectorAll('.nav [data-to]').forEach(el=>el.classList.toggle('active',el.dataset.to===id));
@@ -185,7 +185,7 @@ function saveMock(e){e.preventDefault();$('test-save-message').textContent='โ�
 
 const comparePaths={home:'#dashboard',transactions:'#transactions',add:'#transactions',summary:'#summary',budget:'#budget',cards:'#debts',bills:'#bills',accounts:'#accounts',categories:'#categories',calendar:'#dashboard',salary:'salary.html',rent:'rent.html',car:'car.html',settings:'#settings',more:'#dashboard'};
 function updateCompare(page){
- const names={home:'ภาพรวม',transactions:'รายรับ–รายจ่าย',add:'บันทึกรายการ',summary:'สรุป',budget:'งบประมาณ',cards:'บัตรและสินเชื่อ',bills:'บิลประจำ',accounts:'บัญชี',categories:'หมวดหมู่',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน',settings:'ตั้งค่า',more:'เพิ่มเติม'};
+ const names={home:'ภาพรวม',transactions:'รายรับ–รายจ่าย',add:'เพิ่มรายการ',summary:'วิเคราะห์',budget:'งบประมาณ',cards:'บัตรและหนี้',bills:'บิลประจำ',accounts:'บัญชี',categories:'หมวดหมู่',salary:'เงินเดือน',rent:'ค่าห้องเช่า',car:'รถของฉัน',settings:'ตั้งค่า',more:'เพิ่มเติม'};
  const link=$('compare-real');if(link){const route=comparePaths[page]||'#dashboard';link.href=route.startsWith('#')?'../'+route:'../'+route;link.textContent='เปิดเว็บจริง: '+(names[page]||page)+' ↗';}
  const badge=$('compare-page');if(badge)badge.textContent=names[page]||page;
 }
