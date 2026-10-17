@@ -1,3 +1,4 @@
+import {dailyQuote} from './daily-quotes.js?v=20261017-quotes1';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
 const BASE='https://mmvdhopogchcxwlstflk.supabase.co';
@@ -80,6 +81,7 @@ function transactionNode(x){
  const amount=td('b',(x.type==='income'?'+':'−')+fmt(x.amount),'price '+(x.type==='income'?'green':''));d.append(tile,mid,amount);return d;
 }
 function renderHome(){
+ const quote=dailyQuote();$('daily-quote-text').textContent=quote.text;$('daily-quote-text').dataset.day=quote.day;
  const amount=monthAmounts(),budget=allBudget();
  document.querySelector('.big-money').textContent=fmt(amount.income-amount.expense);
  const cells=document.querySelectorAll('#home .slab b');if(cells[0])cells[0].textContent=fmt(amount.income);if(cells[1])cells[1].textContent=fmt(amount.expense);
@@ -254,3 +256,11 @@ function renderExtra(page){
 Object.assign(window,{go,changeMonth,setFilter,setType,renderTransactions,startAdd,saveMock});
 refresh();
 
+
+// Only changes when Bangkok's calendar day changes, including after returning to the app.
+let quoteDay='';
+function refreshQuote(){const quote=dailyQuote();if(quote.day===quoteDay)return;const node=$('daily-quote-text');if(node){node.textContent=quote.text;node.dataset.day=quote.day;quoteDay=quote.day;}}
+refreshQuote();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshQuote()});
+window.addEventListener('focus',refreshQuote);
+setInterval(()=>{if(!document.hidden)refreshQuote()},60000);
