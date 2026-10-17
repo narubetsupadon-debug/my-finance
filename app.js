@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261017-pdf55';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261017-pdf55';
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261017-pdf55';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261017-pdf55';
-import {createSummaryRenderer} from './app-summary.js?v=20261017-pdf55';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261017-pdf55';
-import {createTransactionRenderer} from './app-transactions.js?v=20261017-pdf55';
-import {createPlanningRenderer} from './app-planning.js?v=20261017-pdf55';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261017-pdf55';
+import {createCapacityMonitor} from './app-storage.js?v=20261017-perf56';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261017-perf56';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261017-perf56';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261017-perf56';
+import {createSummaryRenderer} from './app-summary.js?v=20261017-perf56';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261017-perf56';
+import {createTransactionRenderer} from './app-transactions.js?v=20261017-perf56';
+import {createPlanningRenderer} from './app-planning.js?v=20261017-perf56';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261017-perf56';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -19,8 +19,10 @@ if(typeof Chart!=='undefined'){
 }
 const supabase=createClient(url,key,{global:{fetch:createFinanceFetch()}})
 const $=id=>document.getElementById(id)
-const money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n||0))
-const fmtDate=s=>s?new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'2-digit'}).format(new Date(s+'T00:00:00')):''
+const currencyFormatter=new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2});
+const dateFormatter=new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'2-digit'}),dateLabels=new Map();
+const money=n=>document.body?.classList.contains('privacy-mode')?'฿ ••••':currencyFormatter.format(Number(n||0));
+const fmtDate=s=>{if(!s)return '';if(!dateLabels.has(s)){if(dateLabels.size>=400)dateLabels.clear();dateLabels.set(s,dateFormatter.format(new Date(s+'T00:00:00')));}return dateLabels.get(s);};
 const formatAccountNumber=value=>{
  const n=String(value||'').replace(/\D/g,'');if(!n)return '';
  if(n.length===10)return n.slice(0,3)+'-'+n.slice(3,4)+'-'+n.slice(4,9)+'-'+n.slice(9);
@@ -184,6 +186,7 @@ async function requestLogout(button){
 $('logout').onclick=()=>requestLogout($('logout'));
 $('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settingsLogout')));
 function clearSessionUI(){
+ transactionRenderer.dispose();
  clearSummaryPdf();
  sessionRevision++;user=null;refreshCoordinator.dispose();capacityMonitor.clear();
  if(channel){supabase.removeChannel(channel);channel=null}
@@ -227,7 +230,7 @@ function editorOpen(){return !!($('txDialog')?.open||$('entityDialog')?.open)}
 const refreshCoordinator=createRefreshCoordinator({
  refresh:performLoad,
  onError:error=>recordFinanceError('refresh',error),
- isBlocked:editorOpen,
+ isBlocked:()=>editorOpen()||document.hidden,
  getDelay:()=>Math.max(180,360-(performance.now()-lastNavigationAt))
 });
 async function loadAll(){return refreshCoordinator.run()}
@@ -332,7 +335,10 @@ function checkDailyRollover(){
 }
 setInterval(checkDailyRollover, 60000);
 document.addEventListener('visibilitychange', () => {
- if (!document.hidden) checkDailyRollover();
+ if (!document.hidden){
+  checkDailyRollover();
+  if(user){if(!lastSyncAt||Date.now()-lastSyncAt.getTime()>60000)scheduleLoad();else refreshCoordinator.flush();}
+ }
 });
 
 const renderDashboard=createDashboardRenderer({
@@ -366,7 +372,7 @@ const transactionRenderer=createTransactionRenderer({
 function filteredTx(){return transactionRenderer.filteredTx()}
 function renderTransactions(){return transactionRenderer.renderTransactions()}
 function renderTxList(el,arr,compact=false){return transactionRenderer.renderTxList(el,arr,compact)}
-function renderCategories(){for(const type of ['expense','income']){const el=$(type==='expense'?'expenseCats':'incomeCats'),arr=categories.filter(c=>c.type===type);el.innerHTML=arr.length?arr.map(c=>'<div class="category-card"><div class="left"><span class="icon">'+esc(c.icon||'🏷️')+'</span><span class="name">'+esc(c.name)+'<small class="muted category-usage">ใช้ใน '+transactions.filter(t=>t.category_id===c.id).length+' รายการ</small></span></div><div class="actions"><button class="btn small soft" data-edit="category" data-id="'+c.id+'">แก้</button><button class="btn small danger" data-del="categories" data-id="'+c.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีหมวด</div>'}}
+function renderCategories(){const usage=new Map();for(const t of transactions)usage.set(t.category_id,(usage.get(t.category_id)||0)+1);for(const type of ['expense','income']){const el=$(type==='expense'?'expenseCats':'incomeCats'),arr=categories.filter(c=>c.type===type);el.innerHTML=arr.length?arr.map(c=>'<div class="category-card"><div class="left"><span class="icon">'+esc(c.icon||'🏷️')+'</span><span class="name">'+esc(c.name)+'<small class="muted category-usage">ใช้ใน '+(usage.get(c.id)||0)+' รายการ</small></span></div><div class="actions"><button class="btn small soft" data-edit="category" data-id="'+c.id+'">แก้</button><button class="btn small danger" data-del="categories" data-id="'+c.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีหมวด</div>'}}
 function renderAccounts(){const active=accounts.filter(a=>a.is_active!==false);$('accountList').innerHTML=active.length?active.map(a=>'<div class="item"><div><b>🏦 '+esc(a.name)+'</b><span class="muted">'+(a.account_number?'เลขที่บัญชี '+esc('•••• '+String(a.account_number).replace(/\s/g,'').slice(-4))+' · ':'')+esc(a.account_type)+(a.note?' · '+esc(a.note):'')+'</span></div><span class="amount"><small class="muted">ยอดตั้งต้น</small> '+money(a.opening_balance)+'</span><div class="actions"><button class="btn small soft" data-edit="account" data-id="'+a.id+'">แก้ไข</button><button class="btn small danger" data-del="accounts" data-id="'+a.id+'">ลบ</button></div></div>').join(''):'<div class="empty">ยังไม่มีบัญชี</div>'}
 const planningRenderer=createPlanningRenderer({
  $,
@@ -402,7 +408,7 @@ $('exportSummaryPdf').onclick=async()=>{
  const cancelled=()=>sessionRevision!==revision||user?.id!==owner||document.body.classList.contains('privacy-mode');
  clearSummaryPdf();button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='กำลังสร้าง PDF…';status.textContent='กำลังเตรียมรายงานตามช่วงเวลาและสถานะที่เลือก…';
  try{
-  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261017-pdf55');
+  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261017-perf56');
   if(cancelled())return;
   const result=await createSummaryPdf(report,{isCancelled:cancelled,onProgress:(page,total)=>{status.textContent=`กำลังสร้าง PDF หน้า ${page}/${total}…`;}});
   if(cancelled())return;
@@ -506,7 +512,7 @@ document.addEventListener('change',e=>{
  if(input.checked)hidden.delete(label);else hidden.add(label);
  writeUiSettings({quickHidden:[...hidden]});renderSettings();renderDashboard();
 });
-for(const id of ['txFilterType','txFilterCategory','txFilterMonth','txFilterAccount','txFilterStatus'])$(id).onchange=renderTransactions;$('txSearch').oninput=renderTransactions;$('txType').onchange=()=>changeTxType($('txType').value);$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary;$('summaryStatus').onchange=renderSummary
+for(const id of ['txFilterType','txFilterCategory','txFilterMonth','txFilterAccount','txFilterStatus'])$(id).onchange=renderTransactions;$('txSearch').oninput=()=>transactionRenderer.scheduleSearch();$('txType').onchange=()=>changeTxType($('txType').value);$('txCategory').onchange=renderCardPaymentSuggestions;$('summaryYear').onchange=renderSummary;$('summaryMonth').onchange=renderSummary;$('summaryStatus').onchange=renderSummary
 document.addEventListener('click',e=>{const range=e.target.closest('[data-summary-range]');if(range){renderSummary.setRange?.(range.dataset.summaryRange)}})
 
 

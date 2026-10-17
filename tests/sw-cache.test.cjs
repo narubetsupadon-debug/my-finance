@@ -9,6 +9,8 @@ vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../sw.js
 async function request(path,mode='cors'){let promise;handlers.fetch({request:{method:'GET',url:origin+path,mode},respondWith:p=>promise=p,waitUntil:()=>{}});return promise;}
 (async()=>{
  cache.set(origin+'/car.js?v=current',response('cached'));
+ cache.set(origin+'/fonts/Sarabun-Regular.ttf?v=current',response('font'));
+ assert.equal((await request('/fonts/Sarabun-Regular.ttf?v=current')).label,'font');assert.equal(calls,0,'versioned Thai font must load from cache without waiting for network');
  assert.equal((await request('/car.js?v=current')).label,'cached');assert.equal(calls,0,'same-version assets must not wait for network');
  assert.equal((await request('/car.js?v=new')).label,'network');assert.equal(calls,1,'a release version must load its own asset');
  cache.set(origin+'/car.html',response('old-html'));

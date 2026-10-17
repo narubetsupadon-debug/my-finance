@@ -1,6 +1,6 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261017-pdf55';
-import {recurringBillMonthStatus} from './finance-core.js?v=20261017-pdf55';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-pdf55';
+import {sumTransactionAmounts} from './finance-core.js?v=20261017-perf56';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261017-perf56';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-perf56';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
@@ -12,12 +12,13 @@ function renderDashboard(){
  const transactions=getTransactions(),bills=getBills(),debts=getDebts(),uiSettings=getUiSettings();
  refreshDailyGreeting();
  const now=bangkokDate(),today=bangkokDay(),y=now.getFullYear(),m=now.getMonth()
- const monthly=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===y&&d.getMonth()===m&&x.status!=='cancelled'})
+ const monthKey=today.slice(0,7);
+ const monthly=transactions.filter(x=>String(x.transaction_date).slice(0,7)===monthKey&&x.status!=='cancelled')
  const prevDate=new Date(y,m-1,1),py=prevDate.getFullYear(),pm=prevDate.getMonth()
- const previous=transactions.filter(x=>{const d=new Date(x.transaction_date+'T00:00:00');return d.getFullYear()===py&&d.getMonth()===pm&&x.status!=='cancelled'})
+ const previousKey=py+'-'+String(pm+1).padStart(2,'0');
+ const previous=transactions.filter(x=>String(x.transaction_date).slice(0,7)===previousKey&&x.status!=='cancelled')
  const inc=sumTransactionAmounts(monthly,'income')
  const exp=sumTransactionAmounts(monthly,'expense')
- const prevExp=sumTransactionAmounts(previous,'expense')
  const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=sumTransactionAmounts(todayRows)
  const bsum=budgetTotals(),dailyLeft=bsum.daily,pct=bsum.limit?Math.min(100,bsum.spent/bsum.limit*100):0
  const billStates=bills.filter(b=>b.is_active&&(b.frequency==='monthly'||!b.frequency)).map(b=>recurringBillMonthStatus(b,transactions,today));

@@ -1,5 +1,5 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261017-pdf55';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-pdf55';
+import {sumTransactionAmounts} from './finance-core.js?v=20261017-perf56';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-perf56';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
@@ -25,7 +25,8 @@ export function rentShareTotals(rows,records=[]){
 // Summary page renderer. Keeps summary grouping and chart state out of app.js.
 export function createSummaryRenderer({$,money,esc,bangkokDay,getTransactions,getRentRecords=()=>[],ChartCtor=null}){
  const openTotals=createTotalDetails({$,money,fmtDate:date=>date});
- let pieChart=null,lastReport=null;
+ let pieChart=null,lastReport=null,chartSignature='',yearChoices='',monthChoicesReady=false;
+ const monthNames=new Intl.DateTimeFormat('th-TH',{month:'long'});
 
 function excelGroup(x){
  if(x.source==='rent')return 'ห้องเช่า'
@@ -49,8 +50,8 @@ function monthKeyOffset(key,offset){
  const d=new Date(y,m+offset,1)
  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')
 }
-function rangeConfig(){
- const today=bangkokDay(),currentMonth=today.slice(0,7),year=today.slice(0,4)
+function rangeConfig(today=bangkokDay()){
+ const currentMonth=today.slice(0,7),year=today.slice(0,4)
  if(selectedRange==='3m'||selectedRange==='6m'){
   const count=selectedRange==='3m'?3:6
   const keys=Array.from({length:count},(_,i)=>monthKeyOffset(currentMonth,i-(count-1)))
@@ -67,27 +68,28 @@ function rangeConfig(){
  }
  return{mode:'days',monthKey:currentMonth,label:new Date(Number(year),Number(currentMonth.slice(5,7))-1,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'}),badge:'รายวัน'}
 }
-function setupSummaryFilters(){
+function setupSummaryFilters(today){
  const transactions=getTransactions()
- const years=[...new Set([bangkokDay().slice(0,4),...transactions.map(x=>String(x.transaction_date).slice(0,4)).filter(Boolean)])].sort((a,b)=>b.localeCompare(a))
- const ys=$('summaryYear'),current=ys.value||bangkokDay().slice(0,4)
- ys.innerHTML=years.map(y=>'<option value="'+y+'" '+(y===current?'selected':'')+'>'+y+'</option>').join('')
- if(!ys.value&&years.length)ys.value=years[0]
- const ms=$('summaryMonth'),mv=ms.value||bangkokDay().slice(5,7)
- ms.innerHTML='<option value="all">ทั้งปี</option>'+Array.from({length:12},(_,i)=>{const v=String(i+1).padStart(2,'0'),label=new Date(2026,i,1).toLocaleDateString('th-TH',{month:'long'});return '<option value="'+v+'" '+(v===mv?'selected':'')+'>'+label+'</option>'}).join('')
+ const years=[...new Set([today.slice(0,4),...transactions.map(x=>String(x.transaction_date).slice(0,4)).filter(Boolean)])].sort((a,b)=>b.localeCompare(a))
+ const ys=$('summaryYear'),current=ys.value||today.slice(0,4),nextYears=years.join('|');
+ if(nextYears!==yearChoices){ys.innerHTML=years.map(y=>'<option value="'+y+'">'+y+'</option>').join('');yearChoices=nextYears;}
+ ys.value=years.includes(current)?current:years[0];
+ const ms=$('summaryMonth'),mv=ms.value||today.slice(5,7);
+ if(!monthChoicesReady){ms.innerHTML='<option value="all">ทั้งปี</option>'+Array.from({length:12},(_,i)=>{const v=String(i+1).padStart(2,'0'),label=monthNames.format(new Date(2026,i,1));return '<option value="'+v+'">'+label+'</option>'}).join('');monthChoicesReady=true;}
+ ms.value=mv;
 }
 function renderSummary(){
- const transactions=getTransactions()
- setupSummaryFilters()
+ const transactions=getTransactions(),today=bangkokDay();
+ setupSummaryFilters(today)
  const paidOnly=$('summaryStatus')?.value==='paid';
- const config=rangeConfig(),valid=transactions.filter(x=>x.status!=='cancelled'&&(!paidOnly||((x.status||'paid')==='paid'&&String(x.transaction_date)<=bangkokDay())))
+ const config=rangeConfig(today),valid=transactions.filter(x=>x.status!=='cancelled'&&(!paidOnly||((x.status||'paid')==='paid'&&String(x.transaction_date)<=today)))
  const scope=paidOnly?'เฉพาะรับ/จ่ายแล้วถึงวันนี้':'รวมรอดำเนินการและวันที่อนาคต';
  if($('summaryScope'))$('summaryScope').textContent=scope+' · ไม่รวมยกเลิก · รวมยอดชำระบัตร/สินเชื่อ · แตะยอดดูรายการ';
  const rows=config.mode==='days'
   ?valid.filter(x=>String(x.transaction_date).slice(0,7)===config.monthKey)
   :valid.filter(x=>config.keys.includes(String(x.transaction_date).slice(0,7)))
  lastReport={label:config.label,scope:scope+' · ไม่รวมยกเลิก',paidOnly,mode:config.mode,
-  keys:[...summaryTimelineKeys(config,bangkokDay(),rows)],
+  keys:[...summaryTimelineKeys(config,today,rows)],
   rows:rows.map(x=>({transaction_date:x.transaction_date,type:x.type,amount:x.amount,description:x.description,status:x.status,reportCategory:excelGroup(x)}))};
  const inc=sumTransactionAmounts(rows,'income'),exp=sumTransactionAmounts(rows,'expense')
  $('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumBalance').textContent=money(inc-exp)
@@ -125,8 +127,14 @@ function renderSummary(){
  const expensePercent=value=>expenseTotal>0?(Number(value)/expenseTotal*100):0
  $('summaryPieEmpty').hidden=pieCats.length>0;
  $('categoryPieChart').parentElement.hidden=pieCats.length===0;
- if(pieChart)pieChart.destroy()
- if(ChartCtor&&pieCats.length)pieChart=new ChartCtor($('categoryPieChart'),{type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},options:{color:chartTextColor,responsive:true,maintainAspectRatio:false,cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:chartTextColor,boxWidth:12,usePointStyle:true,generateLabels:chart=>{const ds=chart.data.datasets[0]||{data:[]};return chart.data.labels.map((label,i)=>({text:label+' '+expensePercent(ds.data[i]).toFixed(1)+'%',fontColor:chartTextColor,fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,hidden:!chart.getDataVisibility(i),index:i}))}}},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+expensePercent(c.raw).toFixed(1)+'%)'}}}}})
+ const nextSignature=JSON.stringify([pieCats,chartTextColor,document.body?.classList.contains('privacy-mode')]);
+ if(!pieCats.length){if(pieChart)pieChart.destroy();pieChart=null;chartSignature='';}
+ if(ChartCtor&&pieCats.length&&nextSignature!==chartSignature){
+ const chartConfig={type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},options:{color:chartTextColor,responsive:true,maintainAspectRatio:false,animation:{duration:180},cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:chartTextColor,boxWidth:12,usePointStyle:true,generateLabels:chart=>{const ds=chart.data.datasets[0]||{data:[]};return chart.data.labels.map((label,i)=>({text:label+' '+expensePercent(ds.data[i]).toFixed(1)+'%',fontColor:chartTextColor,fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,hidden:!chart.getDataVisibility(i),index:i}))}}},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+expensePercent(c.raw).toFixed(1)+'%)'}}}}};
+ if(pieChart&&typeof pieChart.update==='function'&&JSON.stringify(pieChart.data.labels)===JSON.stringify(chartConfig.data.labels)){pieChart.data=chartConfig.data;pieChart.options=chartConfig.options;pieChart.update('none');}
+ else{if(pieChart)pieChart.destroy();pieChart=new ChartCtor($('categoryPieChart'),chartConfig);}
+ chartSignature=nextSignature;
+ }
 
 
 }
