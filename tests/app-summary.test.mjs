@@ -27,6 +27,12 @@ try{
  const render=createSummaryRenderer({$,money:String,esc:String,bangkokDay:()=> '2026-10-07',getTransactions:()=>transactions,ChartCtor:Chart});
  render();
  assert.equal(charts.length,1,'Summary renders just one chart');
+ assert.equal($('summaryPieTotal').textContent,'2250');
+ assert.match($('foodSubcategoryBreakdown').innerHTML,/<details class="summary-category">/);
+ assert.doesNotMatch($('foodSubcategoryBreakdown').innerHTML,/<details[^>]* open/);
+ assert.match($('foodSubcategoryBreakdown').innerHTML,/88.9%/);
+ assert.equal(charts[0].config.options.plugins.legend.display,false);
+
  const pie=charts[0].config;
  const legend=c=>c.options.plugins.legend.labels.generateLabels({data:c.data,getDataVisibility:()=>true});
  assert.equal(legend(pie)[0].fontColor,'#475569');

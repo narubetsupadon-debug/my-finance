@@ -209,7 +209,7 @@ async function page(html,js,data,expose,storage={},options={}){
  p.w.document.querySelector('[data-tx-type="income"]').click();
   assert.equal(p.el('txType').value,'income');assert.equal(p.el('txCategory').value,'');
  assert.equal(p.w.document.querySelector('[data-tx-type="income"]').getAttribute('aria-pressed'),'true');
- p.w.quickAdd('อาหาร');assert.equal(p.el('txType').value,'expense');assert.equal(p.el('txDesc').value,'อาหาร');assert.equal(p.el('txCategory').value,'cat');
+ p.w.quickAdd('อาหาร');assert.equal(p.el('txType').value,'expense');assert.equal(p.el('txDesc').value,'','Quick category keeps the description ready for the actual purchase');assert.equal(p.el('txCategory').value,'cat');
  p.w.quickAdd('กาแฟ');assert.equal(p.el('txCategory').value,'coffee');
  // linked car transaction must route to car management instead of opening the generic editor
  const linkedEdit=p.w.document.querySelector('[data-edit="tx"][data-id="t1"]');if(linkedEdit)linkedEdit.click();

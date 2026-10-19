@@ -1,5 +1,5 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261017-quotes63';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261017-quotes63';
+import {sumTransactionAmounts} from './finance-core.js?v=20261019-analysis1';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261019-analysis1';
 // Current-month charts end at today; retain any explicitly recorded later date.
 export function summaryTimelineKeys(config,today,rows=[]){
  if(config.mode!=='days')return config.keys;
@@ -91,12 +91,6 @@ function renderSummary(){
  lastReport={label:config.label,scope:scope+' · ไม่รวมยกเลิก',paidOnly,mode:config.mode,
   keys:[...summaryTimelineKeys(config,today,rows)],
   rows:rows.map(x=>({transaction_date:x.transaction_date,type:x.type,amount:x.amount,description:x.description,status:x.status,reportCategory:excelGroup(x),subcategory:x.subcategory||null}))};
- const foodSub=$('foodSubcategoryBreakdown');
- if(foodSub){
-  const parts=rows.filter(x=>x.type==='expense'&&x.categories?.name==='อาหารและเครื่องดื่ม').reduce((out,x)=>{const k=x.subcategory||'อาหาร';out[k]=(out[k]||0)+Math.round(Number(x.amount||0)*100);return out},{});
-  foodSub.hidden=!Object.keys(parts).length;
-  foodSub.textContent='🍽️ อาหารและเครื่องดื่ม · '+Object.entries(parts).map(([k,v])=>k+' '+money(v/100)).join(' · ');
- }
  const inc=sumTransactionAmounts(rows,'income'),exp=sumTransactionAmounts(rows,'expense')
  $('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumBalance').textContent=money(inc-exp)
  $('summaryPeriodText').textContent='กำลังดู '+config.label
@@ -132,12 +126,26 @@ function renderSummary(){
  const pieCats=allCategories.length>6?[...allCategories.slice(0,5),['หมวดที่เหลือ',allCategories.slice(5).reduce((sum,[,value])=>sum+value,0)]]:allCategories;
  const expenseTotal=pieCats.reduce((sum,[,value])=>sum+Number(value),0)
  const expensePercent=value=>expenseTotal>0?(Number(value)/expenseTotal*100):0
+ const breakdown=$('foodSubcategoryBreakdown');
+ if(breakdown){
+  breakdown.hidden=!pieCats.length;
+  breakdown.innerHTML=pieCats.map(([name,value],index)=>{
+   const members=name==='หมวดที่เหลือ'?allCategories.slice(5):[[name,value]];
+   const children=members.flatMap(([category,total])=>{
+    const sub=rows.filter(x=>x.type==='expense'&&excelGroup(x)===category).reduce((out,x)=>{const key=x.subcategory||category;out[key]=(out[key]||0)+Math.round(Number(x.amount||0)*100);return out},{});
+    return Object.entries(sub).sort((a,b)=>b[1]-a[1]).map(([label,cents])=>({label:members.length>1&&label!==category?category+' · '+label:label,value:cents/100}));
+   });
+   return '<details class="summary-category"><summary><span class="summary-category-dot" style="background:'+palette[index]+'"></span><span class="summary-category-name">'+esc(name)+'</span><span class="summary-category-numbers"><strong class="money">'+esc(money(value))+'</strong><small>'+expensePercent(value).toFixed(1)+'%</small></span><span class="summary-category-chevron" aria-hidden="true">⌄</span></summary><div class="summary-category-children">'+children.map(child=>'<div><span>'+esc(child.label)+'</span><strong class="money">'+esc(money(child.value))+'</strong></div>').join('')+'</div></details>';
+  }).join('');
+ }
+ if($('summaryPieTotal')){$('summaryPieTotal').textContent=money(expenseTotal);if($('summaryPieTotal').parentElement)$('summaryPieTotal').parentElement.hidden=!pieCats.length;}
+
  $('summaryPieEmpty').hidden=pieCats.length>0;
  $('categoryPieChart').parentElement.hidden=pieCats.length===0;
  const nextSignature=JSON.stringify([pieCats,chartTextColor,document.body?.classList.contains('privacy-mode')]);
  if(!pieCats.length){if(pieChart)pieChart.destroy();pieChart=null;chartSignature='';}
  if(ChartCtor&&pieCats.length&&nextSignature!==chartSignature){
- const chartConfig={type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},options:{color:chartTextColor,responsive:true,maintainAspectRatio:false,animation:{duration:180},cutout:'66%',plugins:{legend:{position:'bottom',labels:{color:chartTextColor,boxWidth:12,usePointStyle:true,generateLabels:chart=>{const ds=chart.data.datasets[0]||{data:[]};return chart.data.labels.map((label,i)=>({text:label+' '+expensePercent(ds.data[i]).toFixed(1)+'%',fontColor:chartTextColor,fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,hidden:!chart.getDataVisibility(i),index:i}))}}},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+expensePercent(c.raw).toFixed(1)+'%)'}}}}};
+ const chartConfig={type:'doughnut',data:{labels:pieCats.map(x=>x[0]),datasets:[{data:pieCats.map(x=>x[1]),backgroundColor:pieCats.map((_,i)=>palette[i%palette.length]),borderWidth:0}]},options:{color:chartTextColor,responsive:true,maintainAspectRatio:false,animation:{duration:180},cutout:'66%',plugins:{legend:{display:false,position:'bottom',labels:{color:chartTextColor,boxWidth:12,usePointStyle:true,generateLabels:chart=>{const ds=chart.data.datasets[0]||{data:[]};return chart.data.labels.map((label,i)=>({text:label+' '+expensePercent(ds.data[i]).toFixed(1)+'%',fontColor:chartTextColor,fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,hidden:!chart.getDataVisibility(i),index:i}))}}},tooltip:{callbacks:{label:c=>c.label+': '+money(c.raw)+' ('+expensePercent(c.raw).toFixed(1)+'%)'}}}}};
  if(pieChart&&typeof pieChart.update==='function'&&JSON.stringify(pieChart.data.labels)===JSON.stringify(chartConfig.data.labels)){pieChart.data=chartConfig.data;pieChart.options=chartConfig.options;pieChart.update('none');}
  else{if(pieChart)pieChart.destroy();pieChart=new ChartCtor($('categoryPieChart'),chartConfig);}
  chartSignature=nextSignature;
