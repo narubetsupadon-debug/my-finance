@@ -1,0 +1,42 @@
+/* Preview only: existing application data and calculation stay intact. */
+body{padding-top:35px!important;background:var(--bg,#f7f7fc)}
+#dashboardPage{max-width:1100px;margin:auto}
+#dashboardPage .home-welcome{margin:12px 0 26px;align-items:center}
+#dashboardPage .home-welcome h1{font-size:clamp(23px,2.5vw,34px);letter-spacing:-.6px;line-height:1.45}
+#dashboardPage .welcome-date{font-size:13px;margin-bottom:9px}
+#dashboardPage .daily-overview{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#dashboardPage .daily-panel{border-radius:25px;padding:28px;min-height:230px;box-shadow:0 8px 30px #25204406}
+#dashboardPage .spent-panel{background:linear-gradient(120deg,#5141ad,#7763d6);color:#fff;border:0;position:relative;overflow:hidden}
+#dashboardPage .spent-panel:after{content:'';width:180px;height:180px;border:35px solid #ffffff08;border-radius:50%;position:absolute;right:-60px;bottom:-70px;pointer-events:none}
+#dashboardPage .spent-panel .daily-label,#dashboardPage .spent-panel .text-action,#dashboardPage .spent-panel .daily-panel-foot{color:#f0edff}
+#dashboardPage .daily-amount{font-size:clamp(28px,3vw,44px);font-weight:750;white-space:nowrap;letter-spacing:-1px;line-height:1.3;margin:15px 0 20px}
+#dashboardPage .budget-panel{position:relative;text-align:left;padding-right:140px;background:var(--card);border:1px solid var(--line)}
+#dashboardPage #budgetRemainDash{color:#24876c}
+#dashboardPage .budget-reference{font-size:12px}
+#dashboardPage .budget-meter{display:none}
+#dashboardPage .budget-ring{position:absolute;right:24px;top:62px;width:96px;height:96px;border-radius:50%;background:conic-gradient(#66bea6 var(--progress,0%),#edf0f4 0);display:grid;place-items:center}
+#dashboardPage .budget-ring:before{content:'';position:absolute;inset:9px;background:var(--card);border-radius:50%}
+#dashboardPage .budget-ring span{position:relative;text-align:center;font-size:21px;font-weight:700;line-height:1.2}
+#dashboardPage .budget-ring small{display:block;font-size:10px;color:var(--muted);font-weight:400;margin-top:5px}
+#dashboardPage .next-panel{display:none}
+#dashboardPage .card{border-radius:23px;box-shadow:0 4px 20px #25204404;border:1px solid var(--line);padding:24px}
+#dashboardPage .quick-capture{background:transparent;border:0;box-shadow:none;padding:0;margin:24px 0}
+#dashboardPage .quick-capture .section-heading{display:none}
+#dashboardPage .quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+#dashboardPage .quick-btn{min-height:72px;border:1px solid var(--line);border-radius:18px;background:var(--card);padding:12px;font-size:13px}
+#dashboardPage .quick-btn:nth-child(n+5){display:none}
+#dashboardPage .home-feed{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:start}
+#dashboardPage .home-feed>.card{margin:0;min-width:0}
+#dashboardPage .section-heading h2,#dashboardPage summary strong{font-size:17px}
+#dashboardPage .home-feed .home-detail>summary{padding:0 0 14px}
+#dashboardPage .home-feed .home-detail .detail-cue{display:none}
+#dashboardPage .upcoming-list{margin-top:0}
+#dashboardPage .upcoming-list>*{padding-block:17px}
+#dashboardPage .home-detail .value{font-size:clamp(20px,2.3vw,30px);white-space:nowrap}
+#dashboardPage .home-detail .grid4{gap:16px}
+#dashboardPage .bill-month-strip{font-size:12px;margin-top:15px}
+.topbar{box-shadow:none}.sidebar{box-shadow:none}.btn.primary{background:#6755c3;border-color:#6755c3}
+@media(min-width:901px){.layout{grid-template-columns:200px minmax(0,1fr);max-width:1440px;gap:40px;padding-top:24px}.sidebar{top:130px}.topin{max-width:1392px}.sidebar .navbtn{font-size:13px}.content{min-width:0}}
+@media(max-width:900px){#dashboardPage .home-welcome{margin-top:8px}#dashboardPage .daily-overview{gap:14px}#dashboardPage .daily-panel{padding:22px;min-height:210px}#dashboardPage .budget-panel{padding-right:110px}#dashboardPage .budget-ring{right:16px;width:80px;height:80px}#dashboardPage .home-feed{grid-template-columns:1fr}.topbar{top:35px}}
+@media(max-width:600px){.layout{padding:18px 18px 120px}#dashboardPage .daily-overview{grid-template-columns:1fr}#dashboardPage .daily-panel{min-height:180px;padding:24px}#dashboardPage .spent-panel .daily-panel-foot{margin-top:12px;display:flex;justify-content:space-between}#dashboardPage .daily-amount{font-size:36px;margin:12px 0}#dashboardPage .budget-panel{min-height:180px;padding-right:135px}#dashboardPage .budget-ring{width:90px;height:90px;right:24px;top:44px}#dashboardPage .daily-label{font-size:13px}#dashboardPage .daily-caption{font-size:12px}#dashboardPage .card{padding:20px}#dashboardPage .quick-grid{gap:8px}#dashboardPage .quick-btn{min-height:78px;padding:10px 4px;font-size:12px}#dashboardPage .home-welcome h1{font-size:24px}#dashboardPage .home-detail .grid4{grid-template-columns:1fr 1fr}.home-welcome .welcome-add{display:none}}
+@media(max-width:360px){#dashboardPage .daily-amount{font-size:29px}#dashboardPage .budget-panel{padding-right:110px}#dashboardPage .budget-ring{right:16px;width:76px;height:76px}}
