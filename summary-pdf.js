@@ -2,8 +2,8 @@
 // one page is rendered at a time to bound memory on phones. No financial data
 // is sent to a PDF service or persisted in the service-worker cache.
 const COLORS={navy:'#142d40',ink:'#203a4c',muted:'#607586',teal:'#168d8b',blue:'#4975ba',gold:'#cf9226',other:'#a1afbc',orange:'#bd7046',line:'#dfe7ec',paper:'#fafcfd'};
-const FONT_URL=new URL('./fonts/Sarabun-Regular.ttf?v=20261019-analysis1',import.meta.url).href;
-const PDF_URL=new URL('./vendor/jspdf-4.2.1.umd.min.js?v=20261019-analysis1',import.meta.url).href;
+const FONT_URL=new URL('./fonts/Sarabun-Regular.ttf?v=20261020-dashboard1',import.meta.url).href;
+const PDF_URL=new URL('./vendor/jspdf-4.2.1.umd.min.js?v=20261020-dashboard1',import.meta.url).href;
 const W=595.28,H=841.89,SCALE=2;
 const number=new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const money=cents=>number.format(cents/100);

@@ -17,6 +17,6 @@
 <a href="./#debts">เปิดเมนูบัตรใน My Finance</a>
 <script>
 const code=document.getElementById('code'),status=document.getElementById('status'),button=document.getElementById('copy');
-fetch('./My-Finance-Cards.js?v=20261019-analysis1',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.text()}).then(s=>{if(!s.includes("mode=cardMode('cards')"))throw Error();code.value=s;button.disabled=false;status.textContent='พร้อมคัดลอก · สคริปต์บัตรเครดิตค่ะ'}).catch(()=>{status.textContent='โหลดไม่สำเร็จ กรุณารีเฟรชอีกครั้งค่ะ'});
+fetch('./My-Finance-Cards.js?v=20261020-dashboard1',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.text()}).then(s=>{if(!s.includes("mode=cardMode('cards')"))throw Error();code.value=s;button.disabled=false;status.textContent='พร้อมคัดลอก · สคริปต์บัตรเครดิตค่ะ'}).catch(()=>{status.textContent='โหลดไม่สำเร็จ กรุณารีเฟรชอีกครั้งค่ะ'});
 button.onclick=async()=>{try{await navigator.clipboard.writeText(code.value);status.textContent='คัดลอกแล้วค่ะ เปิด Scriptable → + → วาง → ตั้งชื่อ My Finance Cards'}catch{code.focus();code.select();status.textContent='กดค้างในช่องโค้ด → เลือกทั้งหมด → คัดลอกค่ะ'}};
 </script></html>

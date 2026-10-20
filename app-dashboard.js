@@ -1,6 +1,6 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261019-analysis1';
-import {recurringBillMonthStatus} from './finance-core.js?v=20261019-analysis1';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261019-analysis1';
+import {sumTransactionAmounts} from './finance-core.js?v=20261020-dashboard1';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261020-dashboard1';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261020-dashboard1';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
@@ -51,6 +51,11 @@ function renderDashboard(){
  const budgetNames=new Set(getBudgets().filter(b=>b.is_active).flatMap(b=>b.category_names||[]));
  const budgetRows=expenseRows.filter(x=>budgetNames.has(x.categories?.name));
  bindTotal($,'budgetCard',()=>openInsightDetails('งบเดือนนี้',[{label:'ยอดใช้ในหมวดของงบ',rows:budgetRows}],criteria+' · งบรวม '+money(bsum.limit)+' หักใช้ '+money(bsum.spent)+' = เหลือ '+money(bsum.remain)+' (ขั้นต่ำ 0) · หมวดร่วมกันนับรายจ่ายครั้งเดียว'));
+ if($('budgetRingDash')){
+  $('budgetRingDash').style.setProperty('--progress',pct+'%');
+  $('budgetRingDash').classList.toggle('is-over',bsum.spent>bsum.limit&&bsum.limit>0);
+  $('budgetRingPct').textContent=bsum.limit?Math.round(pct)+'%':'—';
+ }
  $('budgetPctDash').textContent=Math.round(pct)+'%';$('budgetProgressDash').style.width=pct+'%';$('budgetProgressDash').classList.toggle('over',bsum.spent>bsum.limit)
 
  const quick=orderedQuickItems().filter(x=>x.available!==false&&!uiSettings.quickHidden.includes(x.label))

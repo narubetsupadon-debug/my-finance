@@ -20,6 +20,7 @@ globalThis.document={
 };
 
 const dueDebts=[];
+let budget={daily:0,limit:0,spent:0,remain:0};
 const renderDashboard=createDashboardRenderer({
   $,
   money:n=>'฿'+Number(n||0).toFixed(2),
@@ -33,7 +34,7 @@ const renderDashboard=createDashboardRenderer({
   getBills:()=>[],
   getDebts:()=>dueDebts,
   getUiSettings:()=>({dueReminder:true,budgetReminder:true,quickHidden:[]}),
-  budgetTotals:()=>({daily:0,limit:0,spent:0,remain:0}),
+  budgetTotals:()=>budget,
   orderedQuickItems:()=>[],
   showPage(){},
   renderTxList(){},
@@ -49,3 +50,12 @@ assert.match(elements.get('upcomingList').innerHTML,/upcoming-amount is-unset">�
 assert.match(elements.get('upcomingList').innerHTML,/upcoming-amount money">฿1784.00/);
 assert.equal(elements.get('nextBillAmount').textContent,'ยังไม่ระบุยอด');
 console.log('PASS app-dashboard: isolated dependencies include bills');
+
+assert.equal(elements.get('budgetRingPct').textContent,'—');
+budget={daily:100,limit:4000,spent:2000,remain:2000};renderDashboard();
+assert.equal(elements.get('budgetRingPct').textContent,'50%');
+assert.equal(elements.get('budgetRemainDash').textContent,'฿2000.00');
+budget={daily:0,limit:4000,spent:4500,remain:0};renderDashboard();
+assert.equal(elements.get('budgetRingPct').textContent,'100%');
+assert.match(elements.get('homeBudgetStatus').textContent,/เกินงบ/);
+console.log('PASS dashboard ring: unset budget, half used, over budget and remaining amount');
