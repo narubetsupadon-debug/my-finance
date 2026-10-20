@@ -45,3 +45,36 @@
 #dashboardPage .daily-amount{font-size:min(40px,calc(145cqi / var(--amount-chars,12)))}
 #dashboardPage .budget-ring.is-over{background:conic-gradient(var(--red,#df5555) 100%,#edf0f4 0)}
 #dashboardPage .budget-meter{display:flex;position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+
+/* Mobile hotfix: override legacy two-column !important rules. */
+#dashboardPage .daily-overview{grid-template-columns:repeat(2,minmax(0,1fr))}
+#dashboardPage .budget-panel{
+ display:grid;grid-template-columns:minmax(0,1fr) 96px;column-gap:20px;
+ align-content:center;align-items:center;padding:28px;
+}
+#dashboardPage .budget-panel>.daily-label,
+#dashboardPage .budget-panel>.daily-amount,
+#dashboardPage .budget-panel>.daily-caption,
+#dashboardPage .budget-panel>.budget-reference{grid-column:1;min-width:0}
+#dashboardPage .budget-panel>.budget-ring{
+ position:relative;inset:auto;grid-column:2;grid-row:1 / 5;
+ width:96px;height:96px;align-self:center;
+}
+#dashboardPage .budget-panel>.daily-label{font-size:13px;line-height:1.6}
+#dashboardPage .budget-panel>.daily-caption{line-height:1.7}
+#dashboardPage .budget-reference{line-height:1.7;overflow-wrap:normal;word-break:normal}
+#dashboardPage .budget-reference>span{white-space:nowrap;display:inline-block}
+#dashboardPage .budget-panel>.daily-amount{font-size:clamp(24px,3vw,36px)}
+@media(max-width:900px){
+ #dashboardPage .daily-overview{grid-template-columns:minmax(0,1fr)!important}
+ #dashboardPage .daily-panel{min-height:180px;height:auto;min-width:0}
+ #dashboardPage .budget-panel{padding:24px;grid-template-columns:minmax(0,1fr) 90px;column-gap:18px}
+ #dashboardPage .budget-panel>.budget-ring{width:90px;height:90px}
+ #dashboardPage .budget-panel>.daily-amount{font-size:clamp(24px,6vw,34px);margin:10px 0}
+}
+@media(max-width:360px){
+ #dashboardPage .budget-panel{padding:20px;grid-template-columns:minmax(0,1fr) 72px;column-gap:12px}
+ #dashboardPage .budget-panel>.budget-ring{width:72px;height:72px}
+ #dashboardPage .budget-ring span{font-size:18px}
+ #dashboardPage .budget-ring small{font-size:9px}
+}
