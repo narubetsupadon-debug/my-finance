@@ -1,0 +1,28 @@
+<!doctype html><html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Finance · Mobile layout checks</title><style>body{font:14px system-ui;background:#eef0f5;color:#26324b;margin:24px}h1{font-size:22px}.frames{display:flex;gap:20px;align-items:start;flex-wrap:wrap}iframe{height:720px;border:1px solid #ccd1df;background:white}section{min-width:0}h2{font-size:14px}#result{white-space:pre-wrap}</style><h1>ตรวจหน้าจอมือถือ · ข้อมูลจำลองสำหรับทดสอบ</h1><p>แสดงเฉพาะ HTML/CSS ไม่เข้าสู่ระบบและไม่เชื่อมข้อมูลการเงิน</p><pre id="result">กำลังตรวจ…</pre><div class="frames" id="frames"></div><script type="module">
+const pages=['index.html','car.html','rent.html','salary.html'];
+const result=document.getElementById('result');let failures=0,count=0;const checks=[];
+for(const file of pages){
+ const raw=await fetch('../'+file,{cache:'no-store'}).then(r=>r.text());
+ for(const width of [320,390,430]){
+  const doc=new DOMParser().parseFromString(raw,'text/html');doc.querySelectorAll('script,link[rel="manifest"],.auth-splash,#auth,#authBox,#authCard,.topbar,.sidebar,.mobile-nav,.bottom-nav').forEach(x=>x.remove());
+  const base=doc.createElement('base');base.href=new URL('../',location.href).href;doc.head.prepend(base);
+  if(file==='index.html'){
+   const app=doc.getElementById('app');app.classList.remove('hidden');doc.querySelectorAll('.page').forEach(x=>x.classList.toggle('hidden',x.id!=='dashboardPage'));
+   doc.getElementById('todaySpent').textContent='฿1,234,567.89';doc.getElementById('budgetRemainDash').textContent='฿1,234,567.89';
+   for(const id of ['todaySpent','budgetRemainDash'])doc.getElementById(id).style.setProperty('--amount-chars',13);
+   doc.getElementById('budgetRingPct').textContent='95%';doc.getElementById('homeBudgetStatus').textContent='เฉลี่ยได้อีกวันละ ฿15.57';doc.getElementById('budgetSpentDash').textContent='฿3,813.22';doc.getElementById('budgetLimitDash').textContent='฿4,000.00';
+  }else doc.querySelectorAll('[id$="App"]').forEach(x=>x.classList.remove('hidden'));
+  doc.querySelectorAll('.money:not(.daily-amount)').forEach(x=>{if(!x.children.length)x.textContent='฿1,234,567.89'});
+  doc.querySelectorAll('input[type=date]').forEach(x=>x.value='2026-10-21');
+  doc.querySelectorAll('dialog').forEach(x=>x.remove());
+  const section=document.createElement('section'),h=document.createElement('h2'),frame=document.createElement('iframe');h.textContent=file+' · '+width+' px';section.append(h,frame);document.getElementById('frames').append(section);frame.style.width=width+'px';frame.title=h.textContent;
+  await new Promise(resolve=>{frame.onload=resolve;frame.srcdoc=doc.documentElement.outerHTML});
+  const w=frame.contentWindow,d=frame.contentDocument;await d.fonts.ready;
+  const overflow=d.documentElement.scrollWidth>w.innerWidth;
+  const moneyOverflow=[...d.querySelectorAll('.daily-amount')].filter(x=>x.getBoundingClientRect().width>0&&x.scrollWidth>x.clientWidth+2);
+  let paired=true;if(file==='index.html'){const a=d.querySelector('.spent-panel').getBoundingClientRect(),b=d.querySelector('.budget-panel').getBoundingClientRect();paired=Math.abs(a.top-b.top)<2&&a.right<=b.left;}
+  const ok=!overflow&&!moneyOverflow.length&&paired;failures+=ok?0:1;count++;checks.push((ok?'PASS':'FAIL')+' '+file+' '+width+'px · page overflow='+overflow+' · money overflow='+moneyOverflow.length+' · paired='+paired);
+  result.textContent=checks.join('\n')+'\n'+count+'/12 checked · '+failures+' failures';
+ }
+}
+</script></html>
