@@ -1,5 +1,5 @@
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261020-mobile3';
-import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261020-mobile3';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert} from './finance-core.js?v=20261021-stability1';
+import {rentCategories,rentAmounts,duplicateRentMonth,availableRentPayments} from './rent-core.js?v=20261021-stability1';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const detailDateFormatter=new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'numeric'});
 const currencyFormatter=new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'});

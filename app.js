@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261020-mobile3';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261020-mobile3';
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261020-mobile3';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261020-mobile3';
-import {createSummaryRenderer} from './app-summary.js?v=20261020-mobile3';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261020-mobile3';
-import {createTransactionRenderer} from './app-transactions.js?v=20261020-mobile3';
-import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261020-mobile3';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261020-mobile3';
+import {createCapacityMonitor} from './app-storage.js?v=20261021-stability1';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261021-stability1';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261021-stability1';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261021-stability1';
+import {createSummaryRenderer} from './app-summary.js?v=20261021-stability1';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261021-stability1';
+import {createTransactionRenderer} from './app-transactions.js?v=20261021-stability1';
+import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261021-stability1';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261021-stability1';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -192,6 +192,7 @@ function clearSessionUI(){
  transactionRenderer.dispose();
  clearSummaryPdf();
  sessionRevision++;user=null;refreshCoordinator.dispose();capacityMonitor.clear();
+ clearTimeout(window.__toastTimer);$('appToast')?.classList.add('hidden');$('appToast')?.replaceChildren();
  if(channel){supabase.removeChannel(channel);channel=null}
  categories=[];subcategories=[];accounts=[];transactions=[];bills=[];debts=[];budgets=[];carExpenseTxIds=new Set();rentRecords=[];lastSyncAt=null;
  document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());
@@ -252,7 +253,15 @@ function showAppToast(message,action=null,state=''){
  }else window.__toastTimer=setTimeout(()=>el.classList.add('hidden'),4000);
 }
 function savedNotice(label,refreshed,action){
- showAppToast(label+(refreshed?' · โหลดข้อมูลล่าสุดแล้ว':' · โหลดข้อมูลล่าสุดไม่ได้ กรุณากดโหลดใหม่ ไม่ต้องบันทึกซ้ำ'),refreshed?action:{label:'โหลดใหม่',run:async()=>savedNotice(label,await loadAll(),action)},'success');
+ showAppToast(label+(refreshed?' · โหลดข้อมูลล่าสุดแล้ว':' · โหลดข้อมูลล่าสุดไม่ได้ กรุณากดโหลดใหม่ ไม่ต้องบันทึกซ้ำ'),refreshed?action:{label:'โหลดใหม่',run:()=>refreshSavedNotice(label,action)},'success');
+}
+async function refreshSavedNotice(label,action){
+ // The write is confirmed already. Show success while the readback is pending.
+ const owner=user?.id;
+ showAppToast(label+' · กำลังโหลดข้อมูลล่าสุด…',null,'success');
+ clearTimeout(window.__toastTimer);
+ const refreshed=await loadAll();
+ if(user?.id===owner)savedNotice(label,refreshed,action);
 }
 function viewSavedTransaction(row){
  $('txFilterType').value='all';$('txFilterCategory').value='';$('txFilterAccount').value='';$('txFilterStatus').value='all';$('txFilterMonth').value=row.transaction_date.slice(0,7);$('txSearch').value=row.description;
@@ -752,7 +761,7 @@ $('exportSummaryPdf').onclick=async()=>{
  const cancelled=()=>sessionRevision!==revision||user?.id!==owner||document.body.classList.contains('privacy-mode');
  clearSummaryPdf();button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='กำลังสร้าง PDF…';status.textContent='กำลังเตรียมรายงานตามช่วงเวลาและสถานะที่เลือก…';
  try{
-  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261020-mobile3');
+  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261021-stability1');
   if(cancelled())return;
   const result=await createSummaryPdf(report,{isCancelled:cancelled,onProgress:(page,total)=>{status.textContent=`กำลังสร้าง PDF หน้า ${page}/${total}…`;}});
   if(cancelled())return;
@@ -1005,7 +1014,7 @@ $('txForm').onsubmit=async e=>{
   if(r.error)throw r.error;
   savedId=savedId||r.data?.id;committed=true;if(!editing.id)rememberTxSelection(row);const favoriteSaved=saveFavorite(row);$('txDialog').close();
   const label='บันทึกรายการสำเร็จแล้ว ✅'+(row.status==='cancelled'?' · รายการยกเลิก ไม่นับรวมยอด':'')+(!favoriteSaved?' · เก็บรายการโปรดในเครื่องนี้ไม่ได้':'');
-  savedNotice(label,await loadAll(),{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});
+  await refreshSavedNotice(label,{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});
  }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});else{showFinanceSaveError($('txError'),error);$('txError').scrollIntoView({block:'nearest'})}}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
 }
 $('txDuplicateContinue')?.addEventListener('click',()=>{duplicateOverride=true;$('txDuplicateWarning')?.classList.add('hidden');$('txForm').requestSubmit()});
@@ -1072,7 +1081,7 @@ $('entityForm').onsubmit=async e=>{
  try{
   const q=editing.id?supabase.from(table).update(fd).eq('id',editing.id).eq('user_id',user.id):supabase.from(table).insert(fd);
   const {error}=await q.select('id').single();if(error)throw error;
-  committed=true;$('entityDialog').close();savedNotice('บันทึก'+({category:'หมวดหมู่',account:'บัญชี',bill:'บิล',budget:'งบประมาณ',debt:'บัตร/สินเชื่อ'}[entityType])+'แล้ว ✅',await loadAll(),{label:'ดูข้อมูล',run:()=>showPage({category:'categories',account:'accounts',bill:'bills',budget:'budget',debt:'debts'}[entityType])});
+  committed=true;$('entityDialog').close();await refreshSavedNotice('บันทึก'+({category:'หมวดหมู่',account:'บัญชี',bill:'บิล',budget:'งบประมาณ',debt:'บัตร/สินเชื่อ'}[entityType])+'แล้ว ✅',{label:'ดูข้อมูล',run:()=>showPage({category:'categories',account:'accounts',bill:'bills',budget:'budget',debt:'debts'}[entityType])});
  }catch(error){if(committed)savedNotice('บันทึกข้อมูลสำเร็จแล้ว',false,{label:'ดูข้อมูล',run:()=>showPage(table==='budgets'?'budget':table)});else alert(financeSaveFeedback(error).message)}finally{unlock();button.disabled=false}
 }
 

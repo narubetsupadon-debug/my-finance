@@ -348,3 +348,7 @@ html[data-resolved-theme=dark] .spent-panel{border-color:transparent}
 .summary-category-children>div>span{min-width:0;overflow-wrap:anywhere}.summary-category-children strong{white-space:nowrap;font-variant-numeric:tabular-nums}
 
 .summary-donut-center[hidden],.summary-category-list[hidden]{display:none!important}
+
+/* Keep the chart's intrinsic canvas size inside narrow cards, including while loading. */
+.chart-box{min-width:0}
+.chart-box canvas{max-width:100%}

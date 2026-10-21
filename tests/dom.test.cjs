@@ -293,6 +293,13 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.equal(expense.el('carApp').classList.contains('hidden'),true);
  assert.equal(expense.el('carExpenseDialog').open,false);expense.close();
 
+ // A confirmed save must not display stale feedback after sign-out during readback.
+ const ackRace=await page('index.html','app.js',{categories,accounts,transactions:[]},'clearSessionUI');
+ ackRace.w.openTx();ackRace.el('txDesc').value='save then sign out';ackRace.el('txAmount').value='1';ackRace.el('txCategory').value='cat';
+ let ackRead;ackRace.state.readGate=new Promise(r=>ackRead=r);
+ const ackSave=ackRace.el('txForm').onsubmit({preventDefault(){},currentTarget:ackRace.el('txForm')});
+ await new Promise(r=>setTimeout(r,0));ackRace.api.clearSessionUI();ackRead();await ackSave;
+ assert.equal(ackRace.el('appToast').classList.contains('hidden'),true);assert.equal(ackRace.el('appToast').textContent,'');ackRace.close();
  // Freeze form controls until save completes, including Escape/cancel.
  const pending=await page('index.html','app.js',{categories,accounts,transactions:[],budgets:[{id:'zero',user_id:'user',name:'zero',monthly_limit:0,category_names:[],is_active:true}]},'currentPushSubscription');
  pending.w.openEntity('budget','zero');assert.equal(pending.el('entityFields').querySelector('[name=monthly_limit]').value,'0');pending.el('entityDialog').close();
@@ -302,7 +309,13 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.equal(pending.el('txDesc').disabled,true);
  const cancel=new pending.w.Event('cancel',{cancelable:true});pending.el('txDialog').dispatchEvent(cancel);assert.equal(cancel.defaultPrevented,true);
  pending.w.quickAdd('กาแฟ');assert.equal(pending.el('txDesc').value,'test');
- finishWrite();await save;assert.equal(pending.el('txDesc').disabled,false);
+ let finishReadback;pending.state.readGate=new Promise(r=>finishReadback=r);
+ finishWrite();await new Promise(r=>setTimeout(r,0));
+ assert.equal(pending.el('txDialog').open,false);
+ assert.equal(pending.el('appToast').dataset.saveState,'success');
+ assert.match(pending.el('appToast').textContent,/สำเร็จ.*กำลังโหลด/,'Confirmed save must be visible before readback completes');
+ assert.equal(pending.el('txDesc').disabled,true);
+ finishReadback();await save;assert.equal(pending.el('txDesc').disabled,false);
  pending.state.signOutError={message:'network failed'};await pending.el('logout').onclick();
  assert.equal(pending.el('app').classList.contains('hidden'),false);assert.match(pending.el('appToast').textContent,/ออกจากระบบไม่สำเร็จ/);
  // No service-worker registration must return promptly instead of waiting forever.

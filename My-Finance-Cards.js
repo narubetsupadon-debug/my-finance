@@ -95,7 +95,7 @@ function cardMode(parameter){
  return parts[0].toLowerCase()==='cards'?{id:parts.slice(1).join(':').trim()}:null;
 }
 function cardBalances(rows,id=''){
- return rows.filter(x=>x.debt_type==='credit_card'&&(!id||String(x.id)===id)).map(x=>{
+ return rows.filter(x=>x.debt_type==='credit_card'&&x.is_active!==false&&(!id||String(x.id)===id)).map(x=>{
   const limit=Number(x.original_amount||0),used=Number(x.outstanding_amount||0);
   if(!Number.isFinite(limit)||!Number.isFinite(used)||limit<0||used<0)throw new Error('ข้อมูลวงเงินไม่ถูกต้อง กรุณาตรวจในเว็บ');
   const limitCents=Math.round(limit*100),usedCents=Math.round(used*100);
@@ -138,7 +138,7 @@ function renderCards(widget,cards,checkedAt,selected){
  }
  if(cards.length>capacity)text(widget,'อีก '+(cards.length-capacity)+' บัตร · แตะดูทั้งหมด',10,'93b8ff');
  widget.addSpacer();
- text(widget,'อัปเดต '+checkedLabel(checkedAt),9,'94a3b8');
+ text(widget,'สำเร็จ '+checkedLabel(checkedAt)+' · ขอ 10น.',9,'94a3b8');
 }
 async function main(){
  const widget=new ListWidget();widget.backgroundColor=new Color('#101722');const padding=12;widget.setPadding(padding,padding,padding,padding);widget.url=WEBSITE;widget.refreshAfterDate=new Date(Date.now()+10*60000);
@@ -151,7 +151,7 @@ async function main(){
   }
   const session=await getSession(),mode=cardMode('cards');
   if(mode){
-   const rows=await readAll('debts','select=id,name,debt_type,original_amount,outstanding_amount',session),cards=cardBalances(rows,mode.id),checkedAt=new Date();
+   const rows=await readAll('debts','select=id,name,debt_type,is_active,original_amount,outstanding_amount&is_active=eq.true',session),cards=cardBalances(rows,mode.id),checkedAt=new Date();
    renderCards(widget,cards,checkedAt,mode.id);
    try{Keychain.set(CHECK_KEY,JSON.stringify({owner:session.user_id,at:checkedAt.getTime()}));}catch{}
    Script.setWidget(widget);if(!config.runsInWidget)await widget.presentMedium();Script.complete();return;

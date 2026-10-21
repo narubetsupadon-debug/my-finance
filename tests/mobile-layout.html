@@ -21,7 +21,7 @@ for(const file of pages){
   const w=frame.contentWindow,d=frame.contentDocument;await d.fonts.ready;
   const overflow=d.documentElement.scrollWidth>w.innerWidth;
   const moneyOverflow=[...d.querySelectorAll('.daily-amount')].filter(x=>x.getBoundingClientRect().width>0&&x.scrollWidth>x.clientWidth+2);
-  let paired=true;if(file.startsWith('index.html')){const a=d.querySelector('.spent-panel').getBoundingClientRect(),b=d.querySelector('.budget-panel').getBoundingClientRect();paired=Math.abs(a.top-b.top)<2&&a.right<=b.left;}
+  let paired=true;if(file==='index.html'){const a=d.querySelector('.spent-panel').getBoundingClientRect(),b=d.querySelector('.budget-panel').getBoundingClientRect();paired=Math.abs(a.top-b.top)<2&&a.right<=b.left;}
   const ok=!overflow&&!moneyOverflow.length&&paired;failures+=ok?0:1;count++;checks.push((ok?'PASS':'FAIL')+' '+file+' '+width+'px · page overflow='+overflow+' · money overflow='+moneyOverflow.length+' · paired='+paired);
   result.textContent=checks.join('\n')+'\n'+count+'/'+total+' checked · '+failures+' failures';
  }

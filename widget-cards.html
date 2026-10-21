@@ -9,6 +9,7 @@
 <li>กด <b>▶</b> เพื่อดูตัวอย่าง หากมีหน้าต่างเข้าสู่ระบบ ใช้บัญชีเดียวกับ My Finance</li>
 <li>บนหน้าจอโฮม กด Widget ค้าง → <b>แก้ไขวิดเจ็ต</b> → ช่อง <b>Script</b> เลือก <b>My Finance Cards</b> ช่อง Parameter เว้นว่าง</li>
 </ol>
+<p>รุ่น 21 ต.ค. 2569 · แสดงเฉพาะบัตรที่เปิดใช้งาน ขออัปเดตอีก 10 นาที โดย iOS กำหนดเวลาทำงานจริง ดูเวลาข้างคำว่า “สำเร็จ” เพื่อเช็กข้อมูลล่าสุด หากใช้สคริปต์เดิม ให้คัดลอกไปแทนโค้ดใน Scriptable เดิมแล้วกด ▶</p>
 <button id="copy" type="button" disabled>คัดลอกสคริปต์บัตรเครดิต</button>
 <p id="status" role="status">กำลังโหลด…</p>
 <textarea id="code" readonly aria-label="สคริปต์บัตรเครดิต"></textarea>
@@ -17,6 +18,6 @@
 <a href="./#debts">เปิดเมนูบัตรใน My Finance</a>
 <script>
 const code=document.getElementById('code'),status=document.getElementById('status'),button=document.getElementById('copy');
-fetch('./My-Finance-Cards.js?v=20261020-mobile3',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.text()}).then(s=>{if(!s.includes("mode=cardMode('cards')"))throw Error();code.value=s;button.disabled=false;status.textContent='พร้อมคัดลอก · สคริปต์บัตรเครดิตค่ะ'}).catch(()=>{status.textContent='โหลดไม่สำเร็จ กรุณารีเฟรชอีกครั้งค่ะ'});
+fetch('./My-Finance-Cards.js?v=20261021-stability1',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.text()}).then(s=>{if(!s.includes("mode=cardMode('cards')"))throw Error();code.value=s;button.disabled=false;status.textContent='พร้อมคัดลอก · สคริปต์บัตรเครดิตค่ะ'}).catch(()=>{status.textContent='โหลดไม่สำเร็จ กรุณารีเฟรชอีกครั้งค่ะ'});
 button.onclick=async()=>{try{await navigator.clipboard.writeText(code.value);status.textContent='คัดลอกแล้วค่ะ เปิด Scriptable → + → วาง → ตั้งชื่อ My Finance Cards'}catch{code.focus();code.select();status.textContent='กดค้างในช่องโค้ด → เลือกทั้งหมด → คัดลอกค่ะ'}};
 </script></html>

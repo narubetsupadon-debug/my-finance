@@ -104,7 +104,7 @@ function cardMode(parameter){
  return parts[0].toLowerCase()==='cards'?{id:parts.slice(1).join(':').trim()}:null;
 }
 function cardBalances(rows,id=''){
- return rows.filter(x=>x.debt_type==='credit_card'&&(!id||String(x.id)===id)).map(x=>{
+ return rows.filter(x=>x.debt_type==='credit_card'&&x.is_active!==false&&(!id||String(x.id)===id)).map(x=>{
   const limit=Number(x.original_amount||0),used=Number(x.outstanding_amount||0);
   if(!Number.isFinite(limit)||!Number.isFinite(used)||limit<0||used<0)throw new Error('ข้อมูลวงเงินไม่ถูกต้อง กรุณาตรวจในเว็บ');
   const limitCents=Math.round(limit*100),usedCents=Math.round(used*100);
@@ -140,7 +140,7 @@ async function main(){
   }
   const session=await getSession(),mode=cardMode(typeof args==='undefined'?'':args.widgetParameter);
   if(mode){
-   const rows=await readAll('debts','select=id,name,debt_type,original_amount,outstanding_amount',session),cards=cardBalances(rows,mode.id),checkedAt=new Date();
+   const rows=await readAll('debts','select=id,name,debt_type,is_active,original_amount,outstanding_amount&is_active=eq.true',session),cards=cardBalances(rows,mode.id),checkedAt=new Date();
    renderCards(widget,cards,checkedAt,mode.id);
    try{Keychain.set(CHECK_KEY,JSON.stringify({owner:session.user_id,at:checkedAt.getTime()}));}catch{}
    Script.setWidget(widget);if(!config.runsInWidget)await widget.presentMedium();Script.complete();return;
@@ -171,7 +171,7 @@ async function main(){
   text(detail,pct===null?'ยังไม่ตั้งงบ':'ใช้ไป '+pct+'%',9,data.limit&&data.spent>data.limit?'ffc28c':'94a3b8');
   if(!small){detail.addSpacer();text(detail,'วันนี้ '+money(data.today),9,'94a3b8');}
   widget.addSpacer();
-  text(widget,'อัปเดต '+checkedLabel(checkedAt),9,'94a3b8');
+  text(widget,'สำเร็จ '+checkedLabel(checkedAt)+' · ขอ 10น.',9,'94a3b8');
  }catch(error){text(widget,'MY FINANCE',12,'aaa7ff');widget.addSpacer(10);const line=widget.addText(error.message||'เชื่อมต่อไม่ได้ กรุณาเปิด Scriptable');line.font=Font.systemFont(12);line.textColor=new Color('#ffffff');widget.addSpacer();const last=lastCheck();text(widget,last?'สำเร็จล่าสุด '+checkedLabel(last):'ยังไม่มีข้อมูลล่าสุด',10,'a3a8be');text(widget,'อัปเดตไม่สำเร็จ · แตะเปิดเว็บ',9,'ffc28c');}
  Script.setWidget(widget);if(!config.runsInWidget)await widget.presentMedium();Script.complete();
 }
