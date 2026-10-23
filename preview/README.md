@@ -69,3 +69,9 @@ Note: The preview currently implements live read-only core screens. Secondary pa
 - Test-only summary wrapper reads the original renderer's scoped report. It rotates the largest three individual expense records in descending amount order every 5 seconds; income is excluded. Label explicitly states displayed ordinal. Ties use descending date then description. Original report values/filters and PDF remain unchanged.
 - Manual arrows, dots, swipe and pause. Auto cycling stops on hidden tabs/pages, pointer hover, focused card and open detail dialog. Reduced-motion preference starts paused. Zero/one records have no carousel controls. Changing report data or period resets the displayed rank to 1.
 - The import map affects this Test document only, and the wrapper imports production source with a distinct query to avoid recursion. No additional API queries, financial writes or production changes.
+
+## Top-five flowing carousel — current Test
+
+- Five highest individual expense records from the original selected report scope. Each slide uses its own rank, description, amount and date. Smooth horizontal transition every 5 seconds; a first-slide clone provides a forward loop, then an invisible position reset.
+- Persistent “ดูรายละเอียดทั้งหมด” opens all available top-five records in order; moving slides have no click-to-open action. Manual arrows, dots, swipe, pause and reduced-motion behavior remain supported.
+- Zero/one-item states, changing data/period, hidden pages and open dialogs retain their existing safeguards. No additional data API access or production changes.
