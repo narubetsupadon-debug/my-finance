@@ -50,3 +50,9 @@ Note: The preview currently implements live read-only core screens. Secondary pa
 - Current month compares to the same day of the previous month (clamped to its last date). Past months compare full month. Missing prior spending has no invented percentage. Weekly bins cover the entire calendar month including days 29–31.
 - Up to four categories initially; expand to all, tap a category or total for source rows. One deterministic top-category observation. No forecasts or inferred savings claims.
 - Supabase read/auth failure hides financial content and provides retry/sign-in, never sample data. Dark mode follows device preferences. Production remains unchanged until explicit approval.
+
+## Proportion card only — revised scope
+
+- `proportion.html#summary` uses the current production document and modules with the existing read-only Test guard. Only the expense proportion card receives presentation overrides.
+- The donut is hidden and the original category rows get bars from their already-rendered percentages. Original totals, filters, grouping, expandable subcategories and calculations remain intact. No weekly dashboard changes.
+- `analysis.html` is an earlier separate experiment, not the approved scope for this revision. Production files are unchanged.
