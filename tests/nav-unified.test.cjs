@@ -4,7 +4,7 @@ const css=read('nav-unified.css'),nav=read('app-nav.js');
 const pages=['index.html','test.html','rent.html','car.html','salary.html'];
 for(const p of pages){
  const html=read('preview/'+p);
- const link='../nav-unified.css?v=20261023-quality02';
+ const link='../nav-unified.css?v=20261023-hidefix04';
  assert.equal(html.split(link).length-1,1,'One unified navigation CSS per Test page: '+p);
  assert.ok(html.indexOf('mobile-compact.css')<html.indexOf(link),'Unified nav CSS must load last: '+p);
  assert.match(html,/PREVIEW_READ_ONLY/,'Test must not change financial records: '+p);
