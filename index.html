@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
-<link rel="modulepreload" href="./app.js?v=20261023-release101">
+<link rel="modulepreload" href="./app.js?v=20261023-push-live">
 <link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261023-release101">
 <link rel="stylesheet" href="./style.css?v=20261023-release101">
 <link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261023-release101" media="(prefers-color-scheme: dark)">
@@ -23,7 +23,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=walletfinal">
 <link rel="stylesheet" href="./ui-polish.css?v=20261023-release101">
 <link rel="stylesheet" href="./dashboard-design.css?v=20261023-release101">
-<link rel="stylesheet" href="./summary-proportion.css?v=20261023-release101"><script defer src="./summary-proportion.js?v=20261023-release101"></script></head>
+<link rel="stylesheet" href="./summary-proportion.css?v=20261023-release101"><link rel="stylesheet" href="./push-settings.css?v=20261023-push-live"><script defer src="./summary-proportion.js?v=20261023-release101"></script></head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
   <div class="auth-splash-card">
@@ -394,27 +394,20 @@
             </div>
           </div>
 
-          <div class="card settings-card notification-settings">
-            <div class="settings-title"><span>🔔</span><div><h3>การแจ้งเตือน</h3><p>แยกชัด ๆ ระหว่างแจ้งเตือนมือถือกับข้อความบนหน้า Home</p></div></div>
-
-            <div class="notification-block">
-              <div class="notification-block-title"><span>📱</span><div><b>แจ้งเตือนบนมือถือ</b><small id="pushStatusText">กำลังตรวจสอบสถานะ…</small></div></div>
-              <label class="setting-row toggle-row push-master-row">
-                <div><b>เปิด Push Notification</b><small>เด้งแจ้งเตือนแม้ไม่ได้เปิด My Finance อยู่</small></div>
-                <span class="switch"><input id="pushDeviceSetting" type="checkbox" aria-label="เปิดแจ้งเตือนบนมือถือ"><span></span></span>
-              </label>
-              <div class="push-summary">
-                <div><span>💳</span><div><b>บิลและบัตรเครดิต</b><small>เตือนเมื่อครบกำหนดวันนี้หรือพรุ่งนี้</small></div></div>
-                <span id="pushStatusBadge" class="pill">ยังไม่เปิด</span>
-              </div>
-              <div class="push-time-note">⏰ ส่งเวลา <b>08:00 น.</b> ตามเวลาไทย</div>
-              <div class="row push-actions">
-                <button id="testPushBtn" type="button" class="btn soft hidden">🔔 ทดสอบแจ้งเตือน</button>
-              </div>
-              <button id="enablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">เปิดแจ้งเตือน</button>
-              <button id="disablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">ปิดแจ้งเตือน</button>
+          <div class="card settings-card notification-settings settings-push-feature">
+            <div class="settings-title"><span>🔔</span><div><h3>แจ้งเตือนบนมือถือ</h3><p>เชื่อมต่อและส่งข้อความทดสอบถึงเครื่องนี้</p></div><span id="pushStatusBadge" class="pill">กำลังตรวจสอบ</span></div>
+            <p id="pushStatusText" class="push-connection" role="status">กำลังตรวจสอบการเชื่อมต่อ…</p>
+            <p id="pushInstallHint" hidden>สำหรับ iPhone ต้องเปิดผ่านไอคอน My Finance ที่เพิ่มไปยังหน้าจอโฮม</p>
+            <label class="setting-row toggle-row"><div><b>เปิดแจ้งเตือนเครื่องนี้</b><small>เมื่อมีบิลหรือบัตรใกล้ครบกำหนด</small></div><span class="switch"><input id="pushDeviceSetting" type="checkbox" aria-label="เปิดแจ้งเตือนบนมือถือ"><span></span></span></label>
+            <div class="push-setup-steps">
+              <div class="push-setup-step"><span>1</span><div><b>เชื่อมต่อเครื่องนี้</b><small>ขอสิทธิ์รับการแจ้งเตือน</small></div><button id="enablePushBtn" type="button" class="btn soft">เชื่อมต่อ</button></div>
+              <div class="push-setup-step"><span>2</span><div><b>ส่งทดสอบถึงโทรศัพท์</b><small>ตรวจแบนเนอร์และผลรับจริง</small></div><button id="testPushBtn" type="button" class="btn primary" disabled>ส่งทดสอบ</button></div>
             </div>
-
+            <div id="pushTestResult" class="push-test-result" role="status">ยังไม่ได้ส่งทดสอบ</div>
+            <div class="push-repair-actions"><button id="reconnectPushBtn" type="button" class="text-action">↻ เชื่อมต่อเครื่องนี้ใหม่</button><button id="checkPushBtn" type="button" class="text-action">ตรวจอีกครั้ง</button><button id="localPushBtn" type="button" class="text-action" disabled>ทดสอบแสดงบนเครื่อง</button></div>
+            <p class="push-repair-note">เชื่อมต่อใหม่จะเปลี่ยนเฉพาะทะเบียนแจ้งเตือนบนอุปกรณ์นี้ ไม่ลบข้อมูลการเงินหรือทะเบียนเครื่องอื่น</p>
+            <button id="disablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">ปิดแจ้งเตือน</button>
+            <p class="push-schedule">⏰ แจ้งเตือนบิลและบัตรเครดิตตามกำหนดเดิม เวลา 08:00 น. (ประเทศไทย)</p>
             <div class="notification-block home-notification-block">
               <div class="notification-block-title"><span>🏠</span><div><b>การเตือนในหน้า Home</b><small>เป็นข้อความที่เห็นตอนเปิดเว็บไซต์ ไม่ใช่ Push</small></div></div>
               <label class="setting-row toggle-row">
@@ -480,7 +473,7 @@
 <script src="./vendor/chart-4.4.7.umd.js?v=20261023-release101"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
 <script type="module" src="./slip-reader.js?v=20261023-release101"></script>
-<script type="module" src="./app.js?v=20261023-release101"></script>
+<script type="module" src="./app.js?v=20261023-push-live"></script>
 <script type="module" src="./app-nav.js?v=20261023-release101"></script></body>
 </html>
 
