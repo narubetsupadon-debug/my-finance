@@ -19,5 +19,6 @@ assert.match(css,/\.mobile-app-nav \.app-nav-tab\{min-width:0;min-height:54px\}/
 assert.match(rentCss,/\.mobile-app-nav\.is-scroll-hidden\{[\s\S]*?display:grid!important/,'Rent navigation stays visible');
 assert.doesNotMatch(css,/\.mobile-app-nav\s*\{[^}]*display\s*:\s*none/,'Do not hide app navigation');
 assert.match(nav,/primary\.forEach\(x=>/,'Primary nav destinations must stay active');
+assert.match(css,/body:has\(\.finance-detail-page\) \.mobile-app-nav\.is-scroll-hidden/,'Detail screens must keep navigation visible on scroll');
 assert.equal((css.match(/\{/g)||[]).length,(css.match(/\}/g)||[]).length,'CSS braces must balance');
 console.log('PASS mobile compact: 4 page stylesheets, cache, rent navigation, car and salary save targets');
