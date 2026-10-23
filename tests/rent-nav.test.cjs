@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const html=fs.readFileSync(path.join(root,'rent.html'),'utf8');
+const css=fs.readFileSync(path.join(root,'rent.css'),'utf8');
+const nav=fs.readFileSync(path.join(root,'app-nav.js'),'utf8');
+assert.match(html,/href="\.\/index\.html">← กลับภาพรวม/,'Visible back link must remain');
+assert.match(html,/src="\.\/app-nav\.js\?v=/,'Main mobile navigation must be included');
+assert.match(nav,/mount\.append\(nav,sheet,captureSheet\)/,'Mobile navigation is mounted');
+assert.doesNotMatch(css,/\.mobile-app-nav\{display:none\s*!important\}/,'Must never hide the five-button nav on rent');
+assert.match(css,/\.mobile-app-nav\.is-scroll-hidden\{[\s\S]*?display:grid!important/,'Rent nav must remain available when scrolling');
+assert.match(css,/padding-bottom:calc\(106px \+ env\(safe-area-inset-bottom,0px\)\)/,'Reserve space for nav at bottom');
+assert.match(css,/overflow-y:auto/,'Rent form should scroll inside the reserved region');
+assert.match(css,/#saveRent\{width:100%;min-height:48px/,'Save button must be touch-friendly');
+console.log('PASS rent navigation: bottom tabs restored, back link retained, form scrolls clear of nav');
