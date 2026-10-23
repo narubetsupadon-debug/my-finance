@@ -108,7 +108,8 @@
 /* Identical scroll-away behavior on every Test screen, including rent. */
 @media(max-width:820px){
  .mobile-app-nav.is-scroll-hidden,
- body:has(.rent-wrap) .mobile-app-nav.is-scroll-hidden{
+ body:has(.rent-wrap) .mobile-app-nav.is-scroll-hidden,
+ body:has(.finance-detail-page) .mobile-app-nav.is-scroll-hidden{
   transform:translateY(calc(100% + 24px + env(safe-area-inset-bottom,0px)))!important;
   opacity:0!important;
   pointer-events:none!important;
