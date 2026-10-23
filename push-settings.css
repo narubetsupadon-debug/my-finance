@@ -59,3 +59,14 @@
 #settingsPage>#appUsageGuide{border-radius:16px}
 #settingsPage .settings-grid button:focus-visible,#settingsPage .settings-grid select:focus-visible,#settingsPage .settings-grid input:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
 @media(max-width:760px){#settingsPage{padding-inline:8px}#settingsPage .settings-grid{grid-template-columns:none;display:flex}#settingsPage .settings-grid>.settings-card{grid-column:auto}#settingsPage .settings-card>.setting-row{flex-wrap:wrap}#settingsPage .settings-card>.toggle-row{flex-wrap:nowrap}#settingsPage .settings-card>.settings-title{padding:15px}#settingsPage .push-setup-steps{grid-template-columns:1fr}#settingsPage .push-setup-step{flex-wrap:wrap}}
+
+/* Compact phone header, useful visible sync state and accessible category toggles. */
+#settingsPage .settings-grid>.settings-group-heading[role="button"]{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:42px;border-radius:10px}
+#settingsPage .settings-grid>.settings-group-heading[role="button"]::after{content:"⌄";font-size:20px;font-weight:400;transition:transform .18s ease}
+#settingsPage .settings-grid>.settings-group-heading[aria-expanded="false"]::after{transform:rotate(-90deg)}
+#settingsPage .settings-grid>.settings-group-heading:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+#settingsPage .settings-grid>[hidden]{display:none!important}
+#syncStatusBar[data-state="error"]{border:1px solid #e5a39c}
+#syncStatusBar[data-state="ok"]{opacity:.84}
+@media(max-width:760px){.topbar .brand{font-size:clamp(16px,4.7vw,20px)}.topbar .brand-icon{width:32px;height:32px}.topbar .userbox #userEmail{display:none}.topbar .topin{gap:8px}#settingsPage>.page-head{margin-bottom:8px}#settingsPage .settings-grid>.settings-group-heading{margin:12px 0 5px;padding:0 10px}#settingsPage .settings-grid>.settings-card>.settings-title{min-height:56px;padding:12px 14px}}
+@media(prefers-reduced-motion:reduce){#settingsPage .settings-grid>.settings-group-heading::after{transition:none}}
