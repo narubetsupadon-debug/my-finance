@@ -25,11 +25,8 @@
     box-shadow:0 9px 29px rgba(23,31,57,.15)!important;
     backdrop-filter:blur(16px)!important;
     -webkit-backdrop-filter:blur(16px)!important;
-    transform:none!important;
-    opacity:1!important;
     visibility:visible!important;
-    pointer-events:auto!important;
-    transition:none!important;
+    transition:transform .2s ease,opacity .2s ease!important;
     z-index:50!important;
   }
   .mobile-app-nav>.app-nav-tab,
@@ -103,4 +100,21 @@
   .mobile-app-nav>.app-nav-tab[data-destination=transactions]{
     font-size:9px!important;
   }
+}
+
+/* Identical scroll-away behavior on every Test screen, including rent. */
+@media(max-width:820px){
+ .mobile-app-nav.is-scroll-hidden,
+ body:has(.rent-wrap) .mobile-app-nav.is-scroll-hidden{
+  transform:translateY(calc(100% + 24px + env(safe-area-inset-bottom,0px)))!important;
+  opacity:0!important;
+  pointer-events:none!important;
+ }
+ .mobile-app-nav:not(.is-scroll-hidden),
+ body:has(.rent-wrap) .mobile-app-nav:not(.is-scroll-hidden){
+  transform:none!important;opacity:1!important;pointer-events:auto!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .mobile-app-nav{transition:none!important}
 }
