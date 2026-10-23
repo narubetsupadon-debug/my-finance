@@ -68,7 +68,7 @@ async function currentPushSubscription(){
 async function refreshPushStatus(){
  const text=$('pushStatusText'),badge=$('pushStatusBadge'),on=$('enablePushBtn'),test=$('testPushBtn'),toggle=$('pushDeviceSetting');
  if(!text||!badge)return;
- const ios=/iPhone|iPad|iPod/.test(navigator.userAgent),standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+ const ios=/iPhone|iPad|iPod/.test(navigator.userAgent),standalone=window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true;
  const supported='Notification'in window&&'serviceWorker'in navigator&&'PushManager'in window&&(!ios||standalone);
  const hint=$('pushInstallHint');if(hint)hint.hidden=!ios||standalone;
  if(!supported){
