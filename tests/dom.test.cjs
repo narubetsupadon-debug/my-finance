@@ -6,6 +6,7 @@ const appStorage=fs.readFileSync(root+'app-storage.js','utf8').replaceAll('expor
 const appData=fs.readFileSync(root+'app-data.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const appSummary=fs.readFileSync(root+'app-summary.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const expenseAnalysis=fs.readFileSync(root+'expense-analysis.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
+const financeTrends=fs.readFileSync(root+'finance-trends.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const appDashboard=fs.readFileSync(root+'app-dashboard.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const appTransactions=fs.readFileSync(root+'app-transactions.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const appPlanning=fs.readFileSync(root+'app-planning.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
@@ -37,7 +38,7 @@ async function page(html,js,data,expose,storage={},options={}){
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  let code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
  if(js==='salary.js')code=code.replace('document,canRead:', 'document,readPdf:async()=>window.mockPayslipDraft,canRead:');
- const api=await w.eval('(async()=>{'+core+'\n'+appStorage+'\n'+appData+'\n'+expenseAnalysis+'\n'+totalDetails+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+rentCore+'\n'+backupCore+'\n'+code+'\nreturn {'+expose+'};})()');
+ const api=await w.eval('(async()=>{'+core+'\n'+appStorage+'\n'+appData+'\n'+expenseAnalysis+'\n'+financeTrends+'\n'+totalDetails+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+rentCore+'\n'+backupCore+'\n'+code+'\nreturn {'+expose+'};})()');
  return {w,api,state,close:()=>w.close(),el:id=>w.document.getElementById(id)};
 }
 (async()=>{
