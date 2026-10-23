@@ -6,7 +6,7 @@ assert.match(css,/opacity:0!important/);
 assert.match(css,/pointer-events:none!important/);
 assert.match(css,/\.mobile-app-nav:not\(\.is-scroll-hidden\)/);
 assert.doesNotMatch(css,/transition:none!important;\s*z-index/,'Do not suppress sliding');
-assert.match(script,/scroller\.addEventListener\('scroll'/);
+assert.match(script,/rent\.addEventListener\('scroll'/);
 assert.match(script,/distance>=24/);
 assert.match(script,/distance<=-12/);
 for(const f of ['index','test','rent','car','salary']){
