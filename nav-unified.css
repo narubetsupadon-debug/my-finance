@@ -4,7 +4,8 @@
   .mobile-app-nav,
   .mobile-app-nav.is-scroll-hidden,
   body:has(.rent-wrap) .mobile-app-nav,
-  body:has(.rent-wrap) .mobile-app-nav.is-scroll-hidden{
+  body:has(.rent-wrap) .mobile-app-nav.is-scroll-hidden,
+ body:has(.finance-detail-page) .mobile-app-nav.is-scroll-hidden{
     display:grid!important;
     position:fixed!important;
     grid-template-columns:repeat(5,minmax(0,1fr))!important;
@@ -102,6 +103,8 @@
   }
 }
 
+/* The shared detail-page compact stylesheet used a stronger selector that kept
+   car and salary tabs visible. Include every detail page in the scroll states. */
 /* Identical scroll-away behavior on every Test screen, including rent. */
 @media(max-width:820px){
  .mobile-app-nav.is-scroll-hidden,
@@ -111,7 +114,8 @@
   pointer-events:none!important;
  }
  .mobile-app-nav:not(.is-scroll-hidden),
- body:has(.rent-wrap) .mobile-app-nav:not(.is-scroll-hidden){
+ body:has(.rent-wrap) .mobile-app-nav:not(.is-scroll-hidden),
+ body:has(.finance-detail-page) .mobile-app-nav:not(.is-scroll-hidden){
   transform:none!important;opacity:1!important;pointer-events:auto!important;
  }
 }
