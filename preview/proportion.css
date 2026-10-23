@@ -58,3 +58,11 @@
 #summaryPage .highest-empty{flex:0 0 100%;padding:35px 14px;color:var(--muted);font-size:12px;text-align:center}
 @media(max-width:380px){#summaryPage .highest-slide{grid-template-columns:26px minmax(0,1fr) auto;padding:11px;gap:8px}#summaryPage .highest-amount{font-size:12px}#summaryPage .highest-heading h4,#summaryPage #summaryHighestAll{font-size:10px}}
 @media(prefers-reduced-motion:reduce){#summaryPage .highest-track{transition:none!important;will-change:auto}}
+#summaryPage #summaryCenterLabel{max-width:100%;overflow-wrap:anywhere;line-height:1.35;font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#summaryPage #summarySelectedPercent{font-size:10px;color:var(--muted);line-height:1.4}
+#summaryPage .summary-circle-actions{display:flex;justify-content:center;min-height:15px;margin:-10px 0 6px}
+#summaryPage #summarySelectionReset{border:0;border-radius:20px;padding:7px 14px;background:#4fc5cb18;color:#289ca4;font:inherit;font-size:11px;cursor:pointer}
+#summaryPage #summarySelectionReset[hidden],#summaryPage #summarySelectedPercent[hidden]{display:none!important}
+#summaryPage .summary-share-card .summary-category.selected-category>summary{background:#4fc5cb12;border-radius:12px;box-shadow:inset 3px 0 #4fc5cb;padding-left:8px;padding-right:8px}
+#summaryPage #categoryPieChart{cursor:pointer;touch-action:pan-y}
+#summaryPage #categoryPieChart:focus-visible{outline:2px solid #4fc5cb;outline-offset:6px;border-radius:50%}

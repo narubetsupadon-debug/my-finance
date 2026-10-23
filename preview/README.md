@@ -75,3 +75,9 @@ Note: The preview currently implements live read-only core screens. Secondary pa
 - Five highest individual expense records from the original selected report scope. Each slide uses its own rank, description, amount and date. Smooth horizontal transition every 5 seconds; a first-slide clone provides a forward loop, then an invisible position reset.
 - Persistent “ดูรายละเอียดทั้งหมด” opens all available top-five records in order; moving slides have no click-to-open action. Manual arrows, dots, swipe, pause and reduced-motion behavior remain supported.
 - Zero/one-item states, changing data/period, hidden pages and open dialogs retain their existing safeguards. No additional data API access or production changes.
+
+## Interactive donut center — current Test
+
+- Tapping a donut segment or a category summary shows the exact plotted category name, amount and percentage in the center. Selected arc is offset and matching row highlighted. Original category detail expansion remains native.
+- Reset action restores the total; clicking blank chart area or Escape also resets. Arrow keys/Home/End support chart selection without a pointer. Labels/text are inserted with textContent and amounts keep privacy-mode money classes.
+- Category/period rerender clears selection to the new report total, including empty state. Selection changes no report data, list filters or top-five rankings. The “หมวดที่เหลือ” segment uses its actual grouped amount.

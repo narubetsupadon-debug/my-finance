@@ -42,7 +42,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance · สัดส่วนรายจ่าย Test</title>
-<script type="importmap">{"imports":{"./app-summary.js?v=20261021-stability1":"./preview/proportion-summary.js?v=20261023-top5flow"}}</script><link rel="preconnect" href="https://esm.sh" crossorigin>
+<script type="importmap">{"imports":{"./app-summary.js?v=20261021-stability1":"./preview/proportion-summary.js?v=20261023-select6"}}</script><link rel="preconnect" href="https://esm.sh" crossorigin>
 <link rel="modulepreload" href="./app.js?v=20261021-stability1">
 <link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261021-stability1">
 <link rel="stylesheet" href="./style.css?v=20261021-stability1">
@@ -56,7 +56,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=walletfinal">
 <link rel="stylesheet" href="./ui-polish.css?v=20261021-stability1">
 <link rel="stylesheet" href="./dashboard-design.css?v=20261021-stability1">
-<link rel="stylesheet" href="./preview/proportion.css?v=20261023-top5flow"><script defer src="./preview/proportion.js?v=20261023-top5flow"></script></head>
+<link rel="stylesheet" href="./preview/proportion.css?v=20261023-select6"><script defer src="./preview/proportion.js?v=20261023-select6"></script></head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
   <div class="auth-splash-card">
@@ -290,8 +290,8 @@
 
         <div class="card section summary-chart-card summary-share-card">
           <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดหลักและสัดส่วนของยอดรายจ่ายที่เลือก</p></div><span class="summary-card-badge">แยกตามหมวด</span></div>
-          <div class="highest-heading"><h4>รายจ่ายสูงสุด 5 อันดับ</h4><button id="summaryHighestAll" type="button" disabled>ดูรายละเอียดทั้งหมด ›</button></div><div id="summaryHighest" class="summary-highest highest-viewport" role="region" aria-roledescription="carousel" aria-label="รายจ่ายสูงสุด 5 อันดับ" aria-live="off"><div id="summaryHighestTrack" class="highest-track"></div></div><div id="summaryHighestControls" class="highest-controls" hidden aria-label="เลื่อนรายจ่ายอันดับสูงสุด"><button id="summaryHighestPrev" type="button" aria-label="รายจ่ายอันดับก่อนหน้า">‹</button><div id="summaryHighestDots" class="highest-dots"></div><button id="summaryHighestNext" type="button" aria-label="รายจ่ายอันดับถัดไป">›</button><button id="summaryHighestPause" type="button" aria-pressed="false">Ⅱ หยุด</button></div><div class="summary-donut-wrap"><div class="chart-box donut summary-donut"><canvas id="categoryPieChart" aria-label="กราฟสัดส่วนรายจ่ายตามช่วงเวลาที่เลือก" role="img"></canvas></div><div class="summary-donut-center"><small>รายจ่ายรวม</small><strong id="summaryPieTotal" class="money">—</strong></div></div>
-          <p class="summary-category-help">แตะหมวดเพื่อดูรายละเอียด</p><div id="foodSubcategoryBreakdown" class="summary-category-list" hidden></div><p id="summaryPieEmpty" class="empty" hidden>ยังไม่มีรายจ่ายในช่วงนี้</p>
+          <div class="highest-heading"><h4>รายจ่ายสูงสุด 5 อันดับ</h4><button id="summaryHighestAll" type="button" disabled>ดูรายละเอียดทั้งหมด ›</button></div><div id="summaryHighest" class="summary-highest highest-viewport" role="region" aria-roledescription="carousel" aria-label="รายจ่ายสูงสุด 5 อันดับ" aria-live="off"><div id="summaryHighestTrack" class="highest-track"></div></div><div id="summaryHighestControls" class="highest-controls" hidden aria-label="เลื่อนรายจ่ายอันดับสูงสุด"><button id="summaryHighestPrev" type="button" aria-label="รายจ่ายอันดับก่อนหน้า">‹</button><div id="summaryHighestDots" class="highest-dots"></div><button id="summaryHighestNext" type="button" aria-label="รายจ่ายอันดับถัดไป">›</button><button id="summaryHighestPause" type="button" aria-pressed="false">Ⅱ หยุด</button></div><div class="summary-donut-wrap"><div class="chart-box donut summary-donut"><canvas id="categoryPieChart" aria-label="กราฟสัดส่วนรายจ่ายตามช่วงเวลาที่เลือก" role="img"></canvas></div><div class="summary-donut-center" aria-live="polite" aria-atomic="true"><small id="summaryCenterLabel">รายจ่ายรวม</small><strong id="summaryPieTotal" class="money">—</strong><span id="summarySelectedPercent" hidden></span></div></div>
+          <div class="summary-circle-actions"><button id="summarySelectionReset" type="button" hidden>กลับไปดูยอดรวม ↺</button></div><p class="summary-category-help">แตะสีบนวงกลมเพื่อดูยอดหมวด · แตะชื่อหมวดเพื่อดูหมวดย่อย</p><div id="foodSubcategoryBreakdown" class="summary-category-list" hidden></div><p id="summaryPieEmpty" class="empty" hidden>ยังไม่มีรายจ่ายในช่วงนี้</p>
         </div>
       </section>
 
