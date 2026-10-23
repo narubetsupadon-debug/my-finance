@@ -38,6 +38,21 @@ function clearSummaryPdf(){if(summaryPdfUrl)URL.revokeObjectURL(summaryPdfUrl);s
 
 const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
 const PUSH_ENDPOINT='https://mmvdhopogchcxwlstflk.supabase.co/functions/v1/push-reminders';
+const PUSH_DIAGNOSTIC_CACHE='my-finance-push-device-diagnostic-v1';
+const PUSH_RECEIPT_URL=new URL('last-receipt',new URL('./',location.href)).href;
+function showPushReceipt(data){
+ if(data?.type!=='push-received'||!Number.isFinite(Number(data.at)))return false;
+ const result=$('pushTestResult');if(!result)return false;
+ const time=new Date(Number(data.at)).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+ result.textContent='เครื่องได้รับ Push ล่าสุด '+time+(data.displayRequested?' · สั่งแสดงการแจ้งเตือนแล้ว ✅':' · ยังแสดงการแจ้งเตือนไม่สำเร็จ ⚠️');
+ return true;
+}
+async function readPushReceipt(){
+ try{if(!('caches' in window))return false;const cache=await caches.open(PUSH_DIAGNOSTIC_CACHE);const response=await cache.match(PUSH_RECEIPT_URL);return response?showPushReceipt(await response.json()):false;}catch{return false;}
+}
+async function clearPushReceipt(){
+ try{if('caches' in window){const cache=await caches.open(PUSH_DIAGNOSTIC_CACHE);await cache.delete(PUSH_RECEIPT_URL);}}catch{/* Push still works when diagnostic cache is unavailable. */}
+}
 function b64urlToUint8Array(base64String){
  const padding='='.repeat((4-base64String.length%4)%4);
  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
@@ -85,21 +100,25 @@ async function enablePush({renew=false}={}){
  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64urlToUint8Array(cfg.publicKey)});
  const j=sub.toJSON();
  await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:j.keys||{}}});
- await refreshPushStatus();$('pushTestResult').textContent='เชื่อมต่อแล้ว กดส่งทดสอบเพื่อดูข้อความบนโทรศัพท์ค่ะ';showAppToast('เชื่อมต่อเครื่องนี้แล้ว 🔔');
+ await clearPushReceipt();await refreshPushStatus();$('pushTestResult').textContent='เชื่อมต่อแล้ว กดส่งทดสอบเพื่อดูข้อความบนโทรศัพท์ค่ะ';showAppToast('เชื่อมต่อเครื่องนี้แล้ว 🔔');
 }
 async function disablePush(){
  const sub=await currentPushSubscription();if(sub){
   const endpoint=sub.endpoint;await pushCall('unsubscribe',{endpoint});
   await sub.unsubscribe();
  }
- await refreshPushStatus();showAppToast('ปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว');
+ await clearPushReceipt();await refreshPushStatus();showAppToast('ปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว');
 }
 async function testPush(){
  $('pushTestResult').textContent='กำลังส่งถึงเครื่องนี้…';
  const sub=await currentPushSubscription();if(!sub)throw new Error('เปิดแจ้งเตือนบนอุปกรณ์นี้ก่อนค่ะ');
  const json=sub.toJSON();await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:json.keys||{}}});
+ await clearPushReceipt(); // Do not confuse a previous delivery with this attempt.
  const r=await pushCall('test',{endpoint:sub.endpoint});
- const message=r.sent?'ผู้ให้บริการรับข้อความแล้ว กลับหน้าจอโฮมหรือดูศูนย์การแจ้งเตือนค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองเชื่อมต่อเครื่องนี้ใหม่ค่ะ');$('pushTestResult').textContent=message;showAppToast(message);
+ const message=r.sent?'ผู้ให้บริการตอบรับคำขอแล้ว รอเครื่องรับ Push · ตรวจแบนเนอร์หรือศูนย์การแจ้งเตือนค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองเชื่อมต่อเครื่องนี้ใหม่ค่ะ');
+ const received=r.sent?await readPushReceipt():false;
+ if(!received)$('pushTestResult').textContent=message;
+ showAppToast(message);
 }
 
 const QUICK_DEFAULT=[
@@ -217,7 +236,7 @@ $('syncRetryBtn')?.addEventListener('click',()=>void loadAll());
 window.addEventListener('online',()=>{if(!user)return;setSyncStatus('syncing','กลับมาออนไลน์แล้ว · กำลังอัปเดต…');void loadAll()});
 window.addEventListener('offline',()=>setSyncStatus('error','ออฟไลน์ · ข้อมูลอาจยังไม่ล่าสุด'));
 
-async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authSplash')?.classList.add('hidden');$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();handleNavigationRoute()}
+async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authSplash')?.classList.add('hidden');$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();handleNavigationRoute();void readPushReceipt()}
 async function performLoad(){
  if(!user)return false;
  const loadingUser=user.id,revision=sessionRevision;
@@ -1179,4 +1198,5 @@ document.querySelectorAll('#summaryPage details').forEach(details=>details.addEv
 $('reconnectPushBtn')?.addEventListener('click',async()=>{for(const id of ['reconnectPushBtn','testPushBtn','enablePushBtn'])$(id).disabled=true;try{await enablePush({renew:true});}catch(error){$('pushTestResult').textContent='เชื่อมต่อใหม่ไม่สำเร็จ: '+error.message;}finally{await refreshPushStatus();}});
 $('checkPushBtn')?.addEventListener('click',()=>refreshPushStatus());
 $('localPushBtn')?.addEventListener('click',async()=>{try{const reg=await navigator.serviceWorker.getRegistration(new URL('./',location.href).href);if(reg?.scope!==new URL('./',location.href).href)throw Error('ยังไม่พบทะเบียน Test');await reg.showNotification('My Finance · ทดสอบบนเครื่อง',{body:'ทดสอบการแสดงแจ้งเตือนบนโทรศัพท์',tag:'my-finance-settings-local'});$('pushTestResult').textContent='ขอให้เครื่องแสดงข้อความแล้ว ตรวจแบนเนอร์หรือศูนย์การแจ้งเตือนค่ะ';}catch(error){$('pushTestResult').textContent='แสดงไม่สำเร็จ: '+error.message;}});
-navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='push-received')$('pushTestResult').textContent='เครื่องรับข้อความแล้ว · '+new Date(event.data.at).toLocaleTimeString('th-TH')+(event.data.displayRequested?' · ขอให้ระบบแสดงแจ้งเตือนแล้ว':' · ระบบแสดงไม่สำเร็จ');});
+navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='push-received')showPushReceipt(event.data);});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&user)void readPushReceipt();});
