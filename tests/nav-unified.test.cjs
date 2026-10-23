@@ -19,6 +19,6 @@ assert.match(css,/safe-area-inset-bottom/,'iPhone safe area preserved');
 assert.doesNotMatch(css,/display:none!important/,'Never hide the menu');
 assert.equal((css.match(/\{/g)||[]).length,(css.match(/\}/g)||[]).length,'CSS braces balanced');
 for(const p of ['index.html','rent.html','car.html','salary.html']){
- assert.ok(!read(p).includes('nav-unified.css'),'Production stays untouched until approval: '+p);
+ assert.match(read(p),/nav-unified\.css\?v=20261023-quality02&navux=01/,'Approved unified CSS in production: '+p);
 }
 console.log('PASS unified bottom nav: all five test views, same fixed layout and read-only production isolation');

@@ -14,7 +14,7 @@ for(const f of ['index','test','rent','car','salary']){
  assert.match(html,/\.\/nav-scroll\.js\?v=20261023-scroll01/,'Scroll sync module missing '+f);
  assert.match(html,/PREVIEW_READ_ONLY/,'Preview guard missing '+f);
 }
-for(const f of ['index','rent','car','salary'])assert.doesNotMatch(read(f+'.html'),/nav-scroll\.js/,'Production must stay unchanged');
+assert.match(read('rent.html'),/nav-scroll\.js\?v=20261023-quality02&navux=01/,'Rent must listen to inner scrolling in production');
 console.log('PASS preview adaptive nav: hide on scroll down, reveal on scroll up; five screens guarded');
 assert.match(css,/body:has\(\.finance-detail-page\) \.mobile-app-nav\.is-scroll-hidden/,'Car and salary must hide menu on downward scroll');
 assert.match(css,/body:has\(\.finance-detail-page\) \.mobile-app-nav:not\(\.is-scroll-hidden\)/,'Car and salary must reveal on upward scroll');
