@@ -37,7 +37,7 @@ async function page(html,js,data,expose,storage={},options={}){
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
  let code=fs.readFileSync(root+js,'utf8').replace(/^import .*$/gm,'');
  if(js==='salary.js')code=code.replace('document,canRead:', 'document,readPdf:async()=>window.mockPayslipDraft,canRead:');
- const api=await w.eval('(async()=>{'+core+'\n'+appStorage+'\n'+appData+'\n'+expenseAnalysis+'\n+totalDetails+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+rentCore+'\n'+backupCore+'\n'+code+'\nreturn {'+expose+'};})()');
+ const api=await w.eval('(async()=>{'+core+'\n'+appStorage+'\n'+appData+'\n'+expenseAnalysis+'\n'+totalDetails+'\n'+appSummary+'\n'+appDashboard+'\n'+appTransactions+'\n'+appPlanning+'\n'+appSafety+'\n'+payslip+'\n'+rentCore+'\n'+backupCore+'\n'+code+'\nreturn {'+expose+'};})()');
  return {w,api,state,close:()=>w.close(),el:id=>w.document.getElementById(id)};
 }
 (async()=>{
