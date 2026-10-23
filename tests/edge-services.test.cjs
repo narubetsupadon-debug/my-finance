@@ -6,7 +6,7 @@ function createClient(url,key,options){clients.push({key,options});return {
  rpc:async()=>{configCalls++;return configError?{error:new Error('sensitive database detail')}:{data:cfg,error:null};},
  from:table=>({upsert:async row=>{writes.push({key,table,row});return {error:null};},select(){return this;},delete(){return this;},eq(){return this;},then(resolve){writes.push({key,table,delete:true});return Promise.resolve({data:subscriptions,error:null}).then(resolve);}})
 };}
-const context={Deno:{env:{get:name=>({SUPABASE_URL:'https://fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'service-fixture',SUPABASE_ANON_KEY:'anon-fixture'})[name]},serve:fn=>serve=fn},createClient,webpush:{setVapidDetails(){},sendNotification:async subscription=>sentEndpoints.push(subscription.endpoint)},Response,URL,Date,Intl,Map,Uint8Array,crypto,btoa,console:{error(){}}};
+const context={Deno:{env:{get:name=>({SUPABASE_URL:'https://fixture.invalid',SUPABASE_SERVICE_ROLE_KEY:'service-fixture',SUPABASE_ANON_KEY:'anon-fixture'})[name]},serve:fn=>serve=fn},createClient,webpush:{setVapidDetails(){},sendNotification:async (subscription,payload,options)=>{assert.equal(options.vapidDetails.subject,'https://narubetsupadon-debug.github.io/my-finance/');assert.equal(options.vapidDetails.privateKey,'fixture-private');assert.equal(options.timeout,10000);sentEndpoints.push(subscription.endpoint);}},Response,URL,Date,Intl,Map,Uint8Array,crypto,btoa,console:{error(){}}};
 const source=fs.readFileSync(path.join(__dirname,'../supabase/functions/push-reminders/index.ts'),'utf8').replace(/^import .*$/gm,'');
 vm.runInNewContext(source,context);
 function req(action,token,extra={}){return {method:'POST',headers:new Headers(token?{authorization:'Bearer '+token}:{}),json:async()=>({action,...extra})};}
@@ -25,7 +25,8 @@ function req(action,token,extra={}){return {method:'POST',headers:new Headers(to
   assert.equal(writes.length,before,'rejected URL must never be saved');
  }
  subscriptions=[{id:'safe',endpoint:'https://web.push.apple.com/Qfixture',p256dh:'fixture',auth:'fixture'},...rejected.map((endpoint,i)=>({id:'bad'+i,endpoint,p256dh:'fixture',auth:'fixture'}))];
- const testResult=await serve(req('test','valid'));assert.equal(testResult.status,200);assert.equal((await testResult.json()).sent,1);
+ assert.equal((await serve(req('test','valid'))).status,400,'test requires current endpoint');
+ const testResult=await serve(req('test','valid',{endpoint:'https://web.push.apple.com/Qfixture'}));assert.equal(testResult.status,200);assert.equal((await testResult.json()).sent,1);
  assert.deepEqual(sentEndpoints,['https://web.push.apple.com/Qfixture'],'stored unsafe URLs must never reach the sender');
  assert.equal((await serve(req('unsubscribe','valid',{endpoint:'https://fcm.googleapis.com/wpush/v2/fixture'}))).status,200);assert.equal(writes.at(-1).key,'anon-fixture');
  assert.equal((await serve(req('run'))).status,401,'cron must require its separate server secret');

@@ -20,7 +20,28 @@ function validPushEndpoint(value){
 async function authUser(req){const a=req.headers.get("authorization")||"";if(!a.toLowerCase().startsWith("bearer "))return null;const {data,error}=await admin.auth.getUser(a.slice(7));return error?null:data.user;}
 function rand(){const b=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...b)).replaceAll("+","-").replaceAll("/","_").replaceAll("=","");}
 async function config(){const {data,error}=await admin.rpc("get_push_server_config");if(error)throw error;if(data?.vapid_private&&data?.vapid_public&&data?.cron_secret)return data;const k=webpush.generateVAPIDKeys();const secret=data?.cron_secret||rand();const {error:e}=await admin.rpc("store_push_server_config",{p_vapid_private:k.privateKey,p_vapid_public:k.publicKey,p_cron_secret:secret});if(e)throw e;return {vapid_private:k.privateKey,vapid_public:k.publicKey,cron_secret:secret};}
-async function sendUser(uid,payload,cfg){webpush.setVapidDetails("mailto:noreply@myfinance.local",cfg.vapid_public,cfg.vapid_private);const {data,error}=await admin.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("user_id",uid).eq("enabled",true);if(error)throw error;let sent=0;for(const s of data||[]){if(!validPushEndpoint(s.endpoint)){console.error("push endpoint rejected",s.id);continue;}try{await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},JSON.stringify(payload),{TTL:86400});sent++;}catch(e){const st=Number(e?.statusCode||0);if(st===404||st===410)await admin.from("push_subscriptions").delete().eq("id",s.id);else console.error("push error",st,String(e));}}return sent;}
+const WEBSITE="https://narubetsupadon-debug.github.io/my-finance/";
+function safeReason(error){
+ try{const body=typeof error?.body==='string'?JSON.parse(error.body):null;const reason=body?.reason||body?.error?.status;
+ if(['BadJwtToken','BadCryptoKey','BadEncryption','Forbidden','Unregistered','UNREGISTERED','INVALID_ARGUMENT','SENDER_ID_MISMATCH','PERMISSION_DENIED','UNAUTHENTICATED','THIRD_PARTY_AUTH_ERROR','UNAVAILABLE','QUOTA_EXCEEDED'].includes(reason))return reason;}catch{}
+ const status=Number(error?.statusCode||0);return status===403?'Forbidden':status===404||status===410?'SubscriptionExpired':'ProviderRequestFailed';
+}
+async function sendUser(uid,payload,cfg,endpoint=null,outcome=null){
+ const query=admin.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("user_id",uid).eq("enabled",true);
+ if(endpoint)query.eq("endpoint",endpoint);
+ const {data,error}=await query;if(error)throw error;let sent=0;
+ for(const s of data||[]){
+  if(endpoint&&s.endpoint!==endpoint)continue;
+  if(!validPushEndpoint(s.endpoint)){console.error("push endpoint rejected");continue;}
+  if(outcome)outcome.attempted++;
+  try{await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},JSON.stringify(payload),{TTL:endpoint?60:86400,timeout:10000,vapidDetails:{subject:WEBSITE,publicKey:cfg.vapid_public,privateKey:cfg.vapid_private}});sent++;}
+  catch(e){const status=Number(e?.statusCode||0),reason=safeReason(e);if(outcome){outcome.status=status;outcome.reason=reason;}
+   if(status===404||status===410)await admin.from("push_subscriptions").delete().eq("user_id",uid).eq("id",s.id);
+   console.error(JSON.stringify({service:'push-reminders',status,reason}));
+  }
+ }
+ return sent;
+}
 function bkk(){return new Date(Date.now()+7*3600000)}
 function iso(d){return d.toISOString().slice(0,10)}
 function dueIso(day){const n=bkk(),y=n.getUTCFullYear(),m=n.getUTCMonth(),d=n.getUTCDate();const md=(yy,mm)=>Math.min(Math.max(1,day),new Date(Date.UTC(yy,mm+1,0)).getUTCDate());let t=Date.UTC(y,m,md(y,m));if(t<Date.UTC(y,m,d)){let yy=y,mm=m+1;if(mm>11){mm=0;yy++}t=Date.UTC(yy,mm,md(yy,mm));}return iso(new Date(t));}
@@ -40,4 +61,9 @@ Deno.serve(async(req)=>{if(req.method==="OPTIONS")return json({ok:true});if(req.
       const {error}=await scoped.from("push_subscriptions").delete().eq("user_id",user.id).eq("endpoint",endpoint);
       if(error)throw error;return json({ok:true});
     }
-    if(action==="test"){const sent=await sendUser(user.id,{title:"🔔 ทดสอบ My Finance",body:"การแจ้งเตือนบนอุปกรณ์นี้ทำงานแล้ว 🎉",url:"./#settings",tag:"push-test"},cfg);return json({ok:true,sent});}if(action==="run"){const got=req.headers.get("x-cron-secret")||"";if(!got||got!==cfg.cron_secret)return json({error:"unauthorized"},401);return json({ok:true,...await runReminders(cfg)});}return json({error:"unknown_action"},400);}catch(e){console.error(e);return json({error:"server_error"},500);}});
+    if(action==="test"){
+      if(!validPushEndpoint(body.endpoint))return json({error:"current_device_required"},400);
+      const outcome={attempted:0,status:0,reason:null};
+      const sent=await sendUser(user.id,{title:"🔔 ทดสอบ My Finance",body:"ข้อความทดสอบแจ้งเตือนจาก My Finance",url:WEBSITE+"#settings",tag:"push-test"},cfg,body.endpoint,outcome);
+      return json({ok:true,sent,delivery:sent?"provider_accepted":null,reason:sent?null:(outcome.reason||(outcome.attempted?"ProviderRequestFailed":"DeviceNotRegistered")),status:outcome.status});
+    }if(action==="run"){const got=req.headers.get("x-cron-secret")||"";if(!got||got!==cfg.cron_secret)return json({error:"unauthorized"},401);return json({ok:true,...await runReminders(cfg)});}return json({error:"unknown_action"},400);}catch{console.error("push-reminders internal_error");return json({error:"server_error"},500);}});

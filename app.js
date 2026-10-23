@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261021-stability1';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261021-stability1';
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261021-stability1';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261021-stability1';
-import {createSummaryRenderer} from './app-summary.js?v=20261021-stability1';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261021-stability1';
-import {createTransactionRenderer} from './app-transactions.js?v=20261021-stability1';
-import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261021-stability1';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261021-stability1';
+import {createCapacityMonitor} from './app-storage.js?v=20261023-release101';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261023-release101';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261023-release101';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261023-release101';
+import {createSummaryRenderer} from './summary-highest.js?v=20261023-release101';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261023-release101';
+import {createTransactionRenderer} from './app-transactions.js?v=20261023-release101';
+import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-release101';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261023-release101';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -54,7 +54,7 @@ async function pushCall(action,payload={}){
 }
 async function currentPushSubscription(){
  if(!('serviceWorker' in navigator)||!('PushManager' in window))return null;
- const reg=await navigator.serviceWorker.getRegistration();return reg?reg.pushManager.getSubscription():null;
+ const reg=await navigator.serviceWorker.getRegistration(new URL('./',location.href).href);return reg?.scope===new URL('./',location.href).href?reg.pushManager.getSubscription():null;
 }
 async function refreshPushStatus(){
  const text=$('pushStatusText'),badge=$('pushStatusBadge'),on=$('enablePushBtn'),test=$('testPushBtn'),off=$('disablePushBtn'),toggle=$('pushDeviceSetting');
@@ -77,9 +77,11 @@ async function enablePush(){
  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window))throw new Error('อุปกรณ์นี้ยังไม่รองรับ Web Push');
  const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('ยังไม่ได้อนุญาต Notification');
  const cfg=await pushCall('config');
- const reg=await navigator.serviceWorker.getRegistration();
- if(!reg?.active)throw new Error('ระบบแจ้งเตือนยังไม่พร้อม กรุณารีเฟรชแล้วลองใหม่');
+ const reg=await navigator.serviceWorker.getRegistration(new URL('./',location.href).href);
+ if(!reg?.active||reg.scope!==new URL('./',location.href).href)throw new Error('ระบบแจ้งเตือนยังไม่พร้อม กรุณารีเฟรชแล้วลองใหม่');
  let sub=await reg.pushManager.getSubscription();
+ const existingKey=sub?.options?.applicationServerKey,expectedKey=b64urlToUint8Array(cfg.publicKey);
+ if(existingKey){const actual=new Uint8Array(existingKey);if(actual.length!==expectedKey.length||actual.some((value,index)=>value!==expectedKey[index])){const endpoint=sub.endpoint;await sub.unsubscribe();await pushCall('unsubscribe',{endpoint});sub=null;}}
  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64urlToUint8Array(cfg.publicKey)});
  const j=sub.toJSON();
  await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:j.keys||{}}});
@@ -93,7 +95,10 @@ async function disablePush(){
  await refreshPushStatus();showAppToast('ปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว');
 }
 async function testPush(){
- const r=await pushCall('test');showAppToast(r.sent?'ส่งแจ้งเตือนทดสอบแล้ว 🔔':'ยังไม่พบ subscription ของอุปกรณ์นี้');
+ const sub=await currentPushSubscription();if(!sub)throw new Error('เปิดแจ้งเตือนบนอุปกรณ์นี้ก่อนค่ะ');
+ const json=sub.toJSON();await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:json.keys||{}}});
+ const r=await pushCall('test',{endpoint:sub.endpoint});
+ showAppToast(r.sent?'ผู้ให้บริการรับข้อความแล้ว ตรวจแบนเนอร์หรือศูนย์การแจ้งเตือนค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองปิดแล้วเปิดแจ้งเตือนบนเครื่องนี้ใหม่ค่ะ'));
 }
 
 const QUICK_DEFAULT=[
@@ -761,7 +766,7 @@ $('exportSummaryPdf').onclick=async()=>{
  const cancelled=()=>sessionRevision!==revision||user?.id!==owner||document.body.classList.contains('privacy-mode');
  clearSummaryPdf();button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='กำลังสร้าง PDF…';status.textContent='กำลังเตรียมรายงานตามช่วงเวลาและสถานะที่เลือก…';
  try{
-  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261021-stability1');
+  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261023-release101');
   if(cancelled())return;
   const result=await createSummaryPdf(report,{isCancelled:cancelled,onProgress:(page,total)=>{status.textContent=`กำลังสร้าง PDF หน้า ${page}/${total}…`;}});
   if(cancelled())return;

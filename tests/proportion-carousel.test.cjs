@@ -1,13 +1,13 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom');
 function harness(reduced=false){
- const dom=new JSDOM(fs.readFileSync('preview/proportion.html','utf8'),{url:'https://narubetsupadon-debug.github.io/my-finance/preview/proportion.html#summary',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window,$=id=>w.document.getElementById(id);
+ const dom=new JSDOM(fs.readFileSync(process.env.RELEASE_UI?'index.html':'preview/proportion.html','utf8'),{url:'https://narubetsupadon-debug.github.io/my-finance/preview/proportion.html#summary',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window,$=id=>w.document.getElementById(id);
  $('app').classList.remove('hidden');$('summaryPage').classList.remove('hidden');
  const scheduled=new Map();let next=0,opened=null,report={label:'ตุลาคม',scope:'เฉพาะจ่ายแล้ว',rows:[]},rangeCalls=0,renderCalls=0;
  w.setTimeout=fn=>{const id=++next;scheduled.set(id,fn);return id;};w.clearTimeout=id=>scheduled.delete(id);
  w.matchMedia=()=>({matches:reduced,addEventListener:()=>{}});
  w.createOriginal=()=>{const original=()=>{renderCalls++;$('summaryPieTotal').textContent='฿999';};original.getReport=()=>report;original.setRange=()=>{rangeCalls++;original();};return original;};
  w.createTotalDetails=()=> (...args)=>{opened=args;$('insightDetailDialog').setAttribute('open','');};
- w.eval(fs.readFileSync('preview/proportion-summary.js','utf8').replace(/^import .*$/gm,'').replace(/^export \*.*$/gm,'').replace(/^export /gm,'')+'\nwindow.testRank=rankedExpenses;window.makeSummary=createSummaryRenderer;');
+ w.eval(fs.readFileSync(process.env.RELEASE_UI?'summary-highest.js':'preview/proportion-summary.js','utf8').replace(/^import .*$/gm,'').replace(/^export \*.*$/gm,'').replace(/^export /gm,'')+'\nwindow.testRank=rankedExpenses;window.makeSummary=createSummaryRenderer;');
  const renderer=w.makeSummary({$,money:n=>'฿'+Number(n).toFixed(2)});
  return {w,$,renderer,setReport:rows=>{report={...report,rows};renderer();},tick:()=>{const entry=scheduled.entries().next().value;assert(entry,'Expected a single active timer');scheduled.delete(entry[0]);entry[1]();},timers:()=>scheduled.size,opened:()=>opened,report:()=>report,rangeCalls:()=>rangeCalls,close:()=>w.close()};
 }

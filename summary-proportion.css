@@ -1,0 +1,68 @@
+/* Refined donut and category list; all selectors are scoped to this one summary card. */
+#summaryPage .summary-share-card{border-radius:25px;padding:24px;box-shadow:0 8px 30px #27174505}
+#summaryPage .summary-share-card .summary-card-head{align-items:flex-start}
+#summaryPage .summary-share-card .summary-card-head p{font-size:12px;line-height:1.7;margin-top:6px}
+#summaryPage .summary-share-card .summary-card-badge{font-size:11px;white-space:nowrap;border-radius:20px}
+#summaryPage .summary-share-card .summary-donut-wrap{position:relative;width:100%;max-width:250px;margin:24px auto 22px;padding:0;min-height:0}
+#summaryPage .summary-share-card .summary-donut{height:250px!important;filter:drop-shadow(0 5px 8px #7963e80b)}
+#summaryPage .summary-share-card .summary-donut-center{position:absolute;inset:0;transform:none;padding:0 46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;pointer-events:none}
+#summaryPage .summary-share-card .summary-donut-center small{font-size:11px;letter-spacing:.02em;color:var(--muted)}
+#summaryPage .summary-share-card .summary-donut-center strong{font-size:clamp(16px,4.8vw,21px);font-weight:750;line-height:1.4;letter-spacing:-.03em;font-variant-numeric:tabular-nums;max-width:100%;overflow-wrap:anywhere}
+#summaryPage .summary-share-card .summary-category-help{font-size:11px;color:var(--muted);margin:0 0 5px;text-align:center}
+#summaryPage .summary-share-card .summary-category{border-top:1px solid var(--line)}
+#summaryPage .summary-share-card .summary-category:first-child{border-top:0}
+#summaryPage .summary-share-card .summary-category>summary{display:grid;grid-template-columns:12px minmax(0,1fr) auto 12px;gap:11px;padding:16px 1px;align-items:center;min-height:65px}
+#summaryPage .summary-share-card .summary-category-dot{width:11px;height:11px;border-radius:4px}
+#summaryPage .summary-share-card .summary-category-name{font-size:14px;font-weight:600;line-height:1.6}
+#summaryPage .summary-share-card .summary-category-numbers{display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-variant-numeric:tabular-nums}
+#summaryPage .summary-share-card .summary-category-numbers strong{font-size:14px;line-height:1.5}
+#summaryPage .summary-share-card .summary-category-numbers small{font-size:11px;color:var(--muted);line-height:1.5}
+#summaryPage .summary-share-card .summary-category-chevron{font-size:12px;opacity:.7}
+#summaryPage .summary-share-card .summary-category-children{margin:0 0 12px 23px;padding:10px 13px;border-radius:14px;background:var(--bg)}
+#summaryPage .summary-share-card .summary-category-children>div{font-size:12px;gap:10px}
+@media(max-width:380px){#summaryPage .summary-share-card{padding:17px}#summaryPage .summary-share-card .summary-donut-wrap{max-width:224px}#summaryPage .summary-share-card .summary-donut{height:224px!important}#summaryPage .summary-share-card .summary-donut-center{padding:0 41px}#summaryPage .summary-share-card .summary-category>summary{gap:8px;grid-template-columns:10px minmax(0,1fr) auto 10px}#summaryPage .summary-share-card .summary-category-name,#summaryPage .summary-share-card .summary-category-numbers strong{font-size:13px}#summaryPage .summary-share-card .summary-category-children>div{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){#summaryPage .summary-share-card *{transition:none!important}}
+/* Reference direction: aqua donut, coral expense amounts and a live highest expense row. */
+#summaryPage .summary-share-card .summary-donut-center strong{color:#ec7b71}
+#summaryPage .summary-share-card .summary-category-numbers strong{color:#ec7b71}
+#summaryPage .summary-share-card .summary-highest{display:grid;grid-template-columns:32px minmax(0,1fr) auto 10px;gap:10px;align-items:center;border:1px solid var(--line);border-radius:17px;background:var(--bg);color:var(--text);font:inherit;text-align:left;padding:14px;margin:18px 0 0;width:100%;cursor:pointer}
+#summaryPage .summary-highest:disabled{opacity:1;cursor:default}
+#summaryPage .highest-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:11px;color:#269fa9;background:#4fc5cb20;font-size:19px}
+#summaryPage .highest-info{display:flex;flex-direction:column;min-width:0;gap:2px}
+#summaryPage .highest-info small{font-size:10px;font-weight:500;color:var(--muted)}
+#summaryPage .highest-info strong{font-size:12px;line-height:1.5;font-weight:650;overflow-wrap:anywhere}
+#summaryPage .highest-info>span{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+#summaryPage #summaryHighestAmount{font-size:13px;white-space:nowrap;color:#ec7b71;font-variant-numeric:tabular-nums}
+#summaryPage .highest-chevron{color:var(--muted)}
+@media(max-width:380px){#summaryPage .summary-share-card .summary-highest{padding:11px;gap:8px;grid-template-columns:26px minmax(0,1fr) auto 8px}#summaryPage .highest-icon{width:26px;height:26px}#summaryPage #summaryHighestAmount{font-size:12px}}
+#summaryPage .summary-highest{touch-action:pan-y;min-height:100px}
+#summaryPage .highest-info{min-height:55px;justify-content:center}
+#summaryPage .highest-controls{display:flex;align-items:center;justify-content:center;gap:10px;margin:9px 0 0}
+#summaryPage .highest-controls[hidden]{display:none!important}
+#summaryPage .highest-controls>button{border:0;background:var(--bg);color:var(--muted);border-radius:10px;width:32px;min-height:32px;font-size:20px;cursor:pointer}
+#summaryPage .highest-dots{display:flex;align-items:center;gap:2px}
+#summaryPage .highest-dot{border:0;background:none;width:25px;height:32px;display:grid;place-items:center;cursor:pointer;padding:0}
+#summaryPage .highest-dot:before{content:'';display:block;width:6px;height:6px;border-radius:9px;background:var(--line)}
+#summaryPage .highest-dot[aria-current=true]:before{width:16px;background:#4fc5cb}
+#summaryPage #summaryHighestPause{width:auto;min-width:62px;font:inherit;font-size:11px;padding:0 9px}
+#summaryPage .highest-controls button:focus-visible{outline:2px solid #4fc5cb;outline-offset:2px}
+#summaryPage .highest-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:20px}
+#summaryPage .highest-heading h4{font-size:12px;font-weight:650;margin:0;color:var(--text)}
+#summaryPage #summaryHighestAll{border:0;background:none;color:#289ca4;font:inherit;font-size:11px;padding:9px 0;cursor:pointer;white-space:nowrap}
+#summaryPage #summaryHighestAll:disabled{color:var(--muted);cursor:default}
+#summaryPage .summary-share-card #summaryHighest{display:block;overflow:hidden;padding:0;margin-top:5px;cursor:default;min-height:102px;contain:layout paint}
+#summaryPage .highest-track{display:flex;width:100%;will-change:transform}
+#summaryPage .highest-slide{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;flex:0 0 100%;min-width:0;max-width:100%;min-height:102px;padding:14px}
+#summaryPage .highest-slide .highest-info strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#summaryPage .highest-amount{font-size:13px;white-space:nowrap;color:#ec7b71;font-variant-numeric:tabular-nums}
+#summaryPage .highest-empty{flex:0 0 100%;padding:35px 14px;color:var(--muted);font-size:12px;text-align:center}
+@media(max-width:380px){#summaryPage .highest-slide{grid-template-columns:26px minmax(0,1fr) auto;padding:11px;gap:8px}#summaryPage .highest-amount{font-size:12px}#summaryPage .highest-heading h4,#summaryPage #summaryHighestAll{font-size:10px}}
+@media(prefers-reduced-motion:reduce){#summaryPage .highest-track{transition:none!important;will-change:auto}}
+#summaryPage #summaryCenterLabel{max-width:100%;overflow-wrap:anywhere;line-height:1.35;font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#summaryPage #summarySelectedPercent{font-size:10px;color:var(--muted);line-height:1.4}
+#summaryPage .summary-circle-actions{display:flex;justify-content:center;min-height:15px;margin:-10px 0 6px}
+#summaryPage #summarySelectionReset{border:0;border-radius:20px;padding:7px 14px;background:#4fc5cb18;color:#289ca4;font:inherit;font-size:11px;cursor:pointer}
+#summaryPage #summarySelectionReset[hidden],#summaryPage #summarySelectedPercent[hidden]{display:none!important}
+#summaryPage .summary-share-card .summary-category.selected-category>summary{background:#4fc5cb12;border-radius:12px;box-shadow:inset 3px 0 #4fc5cb;padding-left:8px;padding-right:8px}
+#summaryPage #categoryPieChart{cursor:pointer;touch-action:pan-y}
+#summaryPage #categoryPieChart:focus-visible{outline:2px solid #4fc5cb;outline-offset:6px;border-radius:50%}

@@ -10,6 +10,14 @@ Version tracking starts at **1.0.0** on 2026-10-21. Earlier releases are not ass
 - Update the service worker cache when publishing. Change JS/CSS query versions when those assets change, keeping shared versions consistent.
 - Record the release here, run the checks relevant to the changes, and verify the published version. Preview work does not increment the production version until promoted.
 
+## 1.0.1 — 2026-10-23
+
+- Promoted the owner-approved aqua donut, selected-category center values and top-five expense carousel from Test. Period scopes, financial records and calculation rules remain unchanged.
+- Added a stable all-details action, manual carousel controls, pause and reduced-motion support.
+- Replaced the push sender's rejected `.local` VAPID subject with the tested website URL; retained existing keys and 08:00 Bangkok schedule.
+- Test notifications target the signed-in user's current registered endpoint and report provider acceptance separately from actual device display.
+- Updated installed-app cache and Settings version to 1.0.1.
+
 ## 1.0.0 — 2026-10-21
 
 - Added app version, release date, and expandable release notes to Settings.
