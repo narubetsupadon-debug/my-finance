@@ -1,0 +1,55 @@
+/* iPhone Settings repair: prevent stretched cards and narrow date text.
+   Scope exclusively to Settings; keep existing actions and data unchanged. */
+@media(max-width:820px){
+ #settingsPage .settings-grid{
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;
+  gap:0!important;min-width:0!important;width:100%!important
+ }
+ #settingsPage .settings-grid>.settings-card{
+  display:block!important;flex:0 0 auto!important;align-self:stretch!important;
+  width:100%!important;height:auto!important;min-height:0!important;
+  max-height:none!important;margin:0 0 10px!important;padding:0!important;
+  box-sizing:border-box!important
+ }
+ #settingsPage .settings-grid>.settings-card>.settings-title{
+  min-height:0!important;height:auto!important;padding:14px 16px!important
+ }
+ #settingsPage .settings-grid>.settings-card>.setting-row,
+ #settingsPage .settings-grid>.settings-card>.setting-block{
+  min-height:0!important;height:auto!important
+ }
+ #settingsPage .settings-card .health-actions{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;gap:10px!important;
+  margin:0 16px 16px!important;min-width:0!important;width:auto!important
+ }
+ #settingsPage .health-actions #healthCheckedAt{
+  display:block!important;grid-column:1/-1!important;min-width:0!important;
+  width:100%!important;flex:none!important;white-space:normal!important;
+  word-break:normal!important;overflow-wrap:break-word!important;
+  font-size:12px!important;line-height:1.5!important
+ }
+ #settingsPage .health-actions #runHealthCheck,
+ #settingsPage .health-actions #exportFinanceBackup{
+  min-width:0!important;width:100%!important;min-height:46px!important;
+  white-space:normal!important;overflow-wrap:break-word!important;
+  padding:10px 9px!important;line-height:1.4!important
+ }
+ #settingsPage .setting-row>div,
+ #settingsPage .settings-title>div,
+ #settingsPage .setting-block,
+ #settingsPage .health-summary{min-width:0!important;max-width:100%!important}
+ #settingsPage .settings-grid>.settings-card .health-row{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;gap:8px!important
+ }
+ #settingsPage .health-row>span{min-width:0;overflow-wrap:break-word}
+ #settingsPage .health-row>b{max-width:46vw;overflow-wrap:break-word}
+ #settingsPage .setting-block .quick-settings-list{margin-bottom:0}
+ #settingsPage .settings-card .setting-row.session-row{gap:12px}
+ #settingsPage .session-row .btn{min-height:46px}
+}
+@media(max-width:370px){
+ #settingsPage .settings-card .health-actions{grid-template-columns:minmax(0,1fr)!important}
+ #settingsPage .health-actions #healthCheckedAt{grid-column:1!important}
+}

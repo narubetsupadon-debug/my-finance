@@ -1,0 +1,16 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),path=require('node:path');
+const read=p=>fs.readFileSync(path.join(__dirname,'..',p),'utf8');
+const css=read('settings-mobile-fix.css'),html=read('index.html'),sw=read('sw.js');
+assert.match(html,/settings-mobile-fix\.css\?v=20261023-quality02&settingsfix=01/);
+assert.match(sw,/settings-mobile-fix\.css\?v=20261023-quality02&settingsfix=01/);
+assert.match(css,/\.settings-grid>\.settings-card\{/);
+assert.match(css,/height:auto!important/);
+assert.match(css,/#healthCheckedAt\{/);
+assert.match(css,/grid-column:1\/-1!important/);
+assert.match(css,/word-break:normal!important/);
+assert.match(css,/#runHealthCheck/);
+assert.match(css,/#exportFinanceBackup/);
+assert.match(html,/id="healthCheckedAt"/);
+assert.match(html,/id="settingsLogout"/);
+assert.equal((css.match(/\{/g)||[]).length,(css.match(/\}/g)||[]).length);
+console.log('PASS iPhone settings layout and health date spacing; controls preserved');
