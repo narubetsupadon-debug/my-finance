@@ -32,3 +32,12 @@ Note: The preview currently implements live read-only core screens. Secondary pa
 - Compare current sender subject and the website URL candidate. Record the provider reason before inferring a cause. Provider acceptance is separate from the user's confirmation that the alert appeared.
 - Logs contain only provider, numeric status, an allowlisted reason and subject variant. Never record raw error bodies, endpoints, auth tokens or VAPID keys.
 - Production promotion requires the owner's explicit approval after testing, then a new production version.
+
+## Current-device notification test — 1.0.1-preview.2
+
+- `push-device/` is an independently installable TEST app, with a distinct manifest ID and a service worker scoped to that directory. On iPhone, install/open this Test icon before requesting permission.
+- Only a deliberate click requests notification permission and creates a browser push subscription. The subscription is sent transiently to authenticated `test_current`; it is never written to the production database. No production registration is changed or removed.
+- Local display test calls the scoped worker's showNotification. Remote test sends one generic TEST message to this browser's subscription with validated provider and key format; it uses the candidate website subject.
+- The worker displays push data before any asynchronous receipt storage. Local receipt records contain only receive time and display-request status; no endpoints, tokens, amounts or identities are stored. Receipt confirms worker delivery, not banner visibility.
+- Authentication uses a separate storage key. Test receipt cache is scoped by name and URL. No production cache deletion, fetch interception, registration replacement, financial write or cron change.
+- Existing registration comparison remains available, explicitly separate from the fresh current-device test.

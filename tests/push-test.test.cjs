@@ -18,6 +18,13 @@ const req=(body,token='valid',origin='https://narubetsupadon-debug.github.io')=>
  setup();providerError={statusCode:410,body:'secret endpoint echoed here'};const expired=await (await handler(req({action:'test',subscriptionId:rows[0].id,subjectMode:'website'}))).json();assert.equal(expired.expired,true);assert.equal(expired.reason,'SubscriptionExpired');assert.equal(writes,0);
  setup();providerError={statusCode:403,body:JSON.stringify({reason:'SECRET_TOKEN_DO_NOT_LOG'})};assert.equal((await (await handler(req({action:'test',subscriptionId:rows[0].id,subjectMode:'website'}))).json()).reason,'Forbidden');
  for(const secret of ['private-fixture','cron-fixture','Qfixture','fixture-p256','fixture-auth','SECRET_TOKEN_DO_NOT_LOG'])assert(!log.join(' ').includes(secret));
+ setup();providerError=null;const transient={endpoint:'https://web.push.apple.com/new-transient-test',keys:{p256dh:'B'+'a'.repeat(86),auth:'a'.repeat(22)}};
+ const beforeQueries=queries.length,beforeSend=sendCalls.length;
+ assert.equal((await handler(req({action:'test_current',subscription:transient},''))).status,401);
+ for(const endpoint of ['http://web.push.apple.com/a','https://evil.test/a','https://web.push.apple.com.evil.test/a','https://web.push.apple.com:8443/a','https://name@web.push.apple.com/a'])assert.equal((await handler(req({action:'test_current',subscription:{...transient,endpoint}}))).status,400);
+ assert.equal((await handler(req({action:'test_current',subscription:{...transient,keys:{p256dh:'invalid',auth:'a'.repeat(22)}}}))).status,400);
+ const fresh=await (await handler(req({action:'test_current',subscription:transient}))).json();assert.equal(fresh.sent,1);assert.equal(sendCalls.length,beforeSend+1);assert.equal(sendCalls.at(-1).endpoint,transient.endpoint);assert.equal(subjectModes.at(-1).subject,'https://narubetsupadon-debug.github.io/my-finance/');assert.equal(queries.length,beforeQueries);assert.equal(writes,0);assert.equal((await handler(req({action:'test_current',subscription:transient}))).status,429);
+ assert(!log.join(' ').includes('new-transient-test'));
  assert(queries.some(([k,v])=>k==='user_id'&&v==='owner'));assert(queries.some(([k,v])=>k==='enabled'&&v===true));
  console.log('PASS push TEST: auth, owner/device isolation, read-only diagnosis, single send, cooldown, VAPID variants, safe reasons, expired registration and secret-free logs; no live sends');
 })().catch(e=>{console.error(e);process.exit(1)});

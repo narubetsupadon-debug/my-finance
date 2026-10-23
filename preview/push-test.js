@@ -31,5 +31,5 @@ $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const butt
 $('inspect').addEventListener('click',inspect);$('device').addEventListener('change',controls);
 $('sendCurrent').addEventListener('click',()=>send('current'));$('sendWebsite').addEventListener('click',()=>send('website'));
 $('received').addEventListener('click',()=>{$('confirmation').textContent='ยืนยันว่าแจ้งเตือนถึงเครื่องแล้วค่ะ ผลนี้แสดงเฉพาะหน้านี้';});
-$('notReceived').addEventListener('click',()=>{$('confirmation').textContent='ผู้ให้บริการตอบรับแล้ว แต่ยังไม่ยืนยันการแสดงบนเครื่อง ตรวจโหมดโฟกัสและการอนุญาตแจ้งเตือนก่อนค่ะ';});
+$('notReceived').addEventListener('click',()=>{$('confirmation').textContent='ผู้ให้บริการตอบรับแล้ว แต่ทะเบียนที่เลือกอาจเป็นของการติดตั้งเดิม ให้เปิด My Finance Test สำหรับเครื่องนี้จากลิงค์ด้านบนเพื่อลงทะเบียนและทดสอบโดยตรงค่ะ';});
 void inspect();

@@ -31,13 +31,19 @@ async function handler(req){
  try{
   const {data:auth,error:authError}=await admin.auth.getUser(bearer.slice(7));if(authError||!auth?.user)return json({error:'unauthorized'},401);
   const user=auth.user,body=await req.json().catch(()=>null);
-  if(!body||!['diagnose','test'].includes(body.action))return json({error:'unknown_action'},400);
+  if(!body||!['diagnose','test','test_current'].includes(body.action))return json({error:'unknown_action'},400);
   if(body.action==='test'&&(!/^[0-9a-f-]{36}$/i.test(String(body.subscriptionId||''))||!['current','website'].includes(body.subjectMode)))return json({error:'invalid_test'},400);
-  const {data:rows,error}=await admin.from('push_subscriptions').select('id,endpoint,p256dh,auth,updated_at').eq('user_id',user.id).eq('enabled',true).order('updated_at',{ascending:false});
-  if(error)throw error;
+  let rows=[];
+  if(body.action!=='test_current'){const result=await admin.from('push_subscriptions').select('id,endpoint,p256dh,auth,updated_at').eq('user_id',user.id).eq('enabled',true).order('updated_at',{ascending:false});
+  if(result.error)throw result.error;rows=result.data||[];}
   const {data:cfg,error:cfgError}=await admin.rpc('get_push_server_config');if(cfgError||!cfg?.vapid_public||!cfg?.vapid_private)return json({error:'server_config_unavailable'},503);
   if(body.action==='diagnose')return json({ok:true,publicKey:cfg.vapid_public,devices:(rows||[]).map(s=>({id:s.id,provider:providerOf(s.endpoint)||'Unsupported',updatedAt:s.updated_at,current:s.endpoint===body.currentEndpoint})),productionSubject:'mailto:noreply@myfinance.local',testSubject:WEBSITE});
-  const sub=(rows||[]).find(s=>s.id===body.subscriptionId);if(!sub)return json({error:'device_not_found'},404);
+  let sub;
+  if(body.action==='test_current'){
+   const incoming=body.subscription,keys=incoming?.keys;
+   if(!incoming||!providerOf(incoming.endpoint)||!/^B[A-Za-z0-9_-]{86}$/.test(keys?.p256dh||'')||!/^[A-Za-z0-9_-]{22}$/.test(keys?.auth||''))return json({error:'invalid_subscription'},400);
+   sub={endpoint:incoming.endpoint,p256dh:keys.p256dh,auth:keys.auth};body.subjectMode='website';
+  }else{sub=(rows||[]).find(s=>s.id===body.subscriptionId);if(!sub)return json({error:'device_not_found'},404);}
   const provider=providerOf(sub.endpoint);if(!provider)return json({error:'unsupported_provider'},400);
   const now=Date.now();for(const [id,at]of attempts)if(now-at>=60000)attempts.delete(id);
   if(attempts.has(user.id))return json({error:'wait_before_retry',retryAfterSeconds:60},429);
@@ -45,7 +51,7 @@ async function handler(req){
   const subject=body.subjectMode==='website'?WEBSITE:'mailto:noreply@myfinance.local';
   try{
    // Only one owned device per deliberate click. No cron, subscription writes, or key rotation.
-   await webpush.sendNotification({endpoint:sub.endpoint,keys:{p256dh:sub.p256dh,auth:sub.auth}},JSON.stringify({title:'🔔 My Finance · TEST',body:'ข้อความทดสอบแจ้งเตือน กรุณากลับไปยืนยันผลในหน้า Test',url:WEBSITE+'preview/push-test.html',tag:'my-finance-push-test'}),{TTL:60,timeout:10000,vapidDetails:{subject,publicKey:cfg.vapid_public,privateKey:cfg.vapid_private}});
+   await webpush.sendNotification({endpoint:sub.endpoint,keys:{p256dh:sub.p256dh,auth:sub.auth}},JSON.stringify({title:'🔔 My Finance · TEST',body:'ข้อความทดสอบแจ้งเตือน กรุณากลับไปยืนยันผลในหน้า Test',url:WEBSITE+(body.action==='test_current'?'preview/push-device/':'preview/push-test.html'),tag:'my-finance-push-test'}),{TTL:60,timeout:10000,vapidDetails:{subject,publicKey:cfg.vapid_public,privateKey:cfg.vapid_private}});
    console.log(JSON.stringify({service:'push-reminders-test',provider,status:201,subjectMode:body.subjectMode}));
    return json({ok:true,sent:1,provider,subjectMode:body.subjectMode,delivery:'provider_accepted'});
   }catch(e){const status=Number(e?.statusCode||0),reason=safeReason(e);
