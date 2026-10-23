@@ -1,0 +1,23 @@
+const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
+let handler,identity='owner',configCalls=0,sendCalls=[],subjectModes=[],providerError=null,queries=[],log=[],writes=0;
+const rows=[{id:'11111111-1111-1111-1111-111111111111',user_id:'owner',enabled:true,endpoint:'https://web.push.apple.com/Qfixture',p256dh:'fixture-p256',auth:'fixture-auth',updated_at:'2026-10-23T01:00:00Z'},{id:'22222222-2222-2222-2222-222222222222',user_id:'other',enabled:true,endpoint:'https://fcm.googleapis.com/wpush/secret-endpoint-token',p256dh:'other-secret',auth:'other-auth'}];
+const cfg={vapid_public:'public-fixture',vapid_private:'private-fixture',cron_secret:'cron-fixture'};
+const admin={auth:{getUser:async token=>token==='valid'?{data:{user:{id:identity}}}:{error:{message:'bad'}}},from(table){let selected=rows;const q={select(){return q},eq(k,v){queries.push([k,v]);selected=selected.filter(x=>x[k]===v);return q},order(){return q},then(resolve){return Promise.resolve({data:selected,error:null}).then(resolve)},delete(){writes++;throw Error('No writes')},upsert(){writes++;throw Error('No writes')}};return q},rpc:async name=>{assert.equal(name,'get_push_server_config');configCalls++;return {data:cfg}}};
+function setup(){const context={Deno:{env:{get:()=>''},serve:fn=>handler=fn},createClient:()=>admin,webpush:{sendNotification:async(sub,payload,opts)=>{sendCalls.push(sub);subjectModes.push(opts.vapidDetails);if(providerError)throw providerError;return {statusCode:201}}},Response,Headers,URL,Date,Map,Set,JSON,console:{error:x=>log.push(x),log:x=>log.push(x)}};vm.runInNewContext(fs.readFileSync('supabase/functions/push-reminders-test/index.ts','utf8').replace(/^import .*$/gm,''),context);return context;}
+const req=(body,token='valid',origin='https://narubetsupadon-debug.github.io')=>({method:'POST',headers:new Headers({...token?{authorization:'Bearer '+token}:{},origin}),json:async()=>body});
+(async()=>{
+ setup();assert.equal((await handler(req({action:'diagnose'},''))).status,401);assert.equal(configCalls,0);
+ assert.equal((await handler(req({action:'diagnose'},'valid','https://evil.test'))).status,403);
+ const diag=await (await handler(req({action:'diagnose',currentEndpoint:rows[0].endpoint}))).json();assert.equal(diag.devices.length,1);assert.equal(diag.devices[0].current,true);assert.equal(diag.devices[0].provider,'Apple');assert.equal(sendCalls.length,0);
+ const shown=JSON.stringify(diag);for(const secret of ['private-fixture','cron-fixture','Qfixture','fixture-p256','fixture-auth'])assert(!shown.includes(secret));
+ const foreign=await handler(req({action:'test',subscriptionId:rows[1].id,subjectMode:'website'}));assert.equal(foreign.status,404);assert.equal(sendCalls.length,0);
+ const send=await (await handler(req({action:'test',subscriptionId:rows[0].id,subjectMode:'website'}))).json();assert.equal(send.sent,1);assert.equal(send.delivery,'provider_accepted');assert.equal(subjectModes[0].subject,'https://narubetsupadon-debug.github.io/my-finance/');assert.equal(sendCalls[0].endpoint,rows[0].endpoint);
+ assert.equal((await handler(req({action:'test',subscriptionId:rows[0].id,subjectMode:'website'}))).status,429);assert.equal(sendCalls.length,1);
+ setup();providerError={statusCode:403,body:JSON.stringify({reason:'BadJwtToken',secret:'private-fixture'})};
+ const fail=await (await handler(req({action:'test',subscriptionId:rows[0].id,subjectMode:'current'}))).json();assert.equal(fail.sent,0);assert.equal(fail.reason,'BadJwtToken');assert.equal(fail.status,403);assert.equal(subjectModes.at(-1).subject,'mailto:noreply@myfinance.local');
+ setup();providerError={statusCode:410,body:'secret endpoint echoed here'};const expired=await (await handler(req({action:'test',subscriptionId:rows[0].id,subjectMode:'website'}))).json();assert.equal(expired.expired,true);assert.equal(expired.reason,'SubscriptionExpired');assert.equal(writes,0);
+ setup();providerError={statusCode:403,body:JSON.stringify({reason:'SECRET_TOKEN_DO_NOT_LOG'})};assert.equal((await (await handler(req({action:'test',subscriptionId:rows[0].id,subjectMode:'website'}))).json()).reason,'Forbidden');
+ for(const secret of ['private-fixture','cron-fixture','Qfixture','fixture-p256','fixture-auth','SECRET_TOKEN_DO_NOT_LOG'])assert(!log.join(' ').includes(secret));
+ assert(queries.some(([k,v])=>k==='user_id'&&v==='owner'));assert(queries.some(([k,v])=>k==='enabled'&&v===true));
+ console.log('PASS push TEST: auth, owner/device isolation, read-only diagnosis, single send, cooldown, VAPID variants, safe reasons, expired registration and secret-free logs; no live sends');
+})().catch(e=>{console.error(e);process.exit(1)});
