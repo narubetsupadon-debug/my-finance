@@ -12,5 +12,5 @@ assert.match(css,/min-height:46px/,'Keep large save targets');
 assert.match(css,/overflow-x:auto/,'Period chips should not spill on small screens');
 assert.doesNotMatch(css,/mobile-app-nav|is-scroll-hidden|display:none!important/,'Do not override the five-tab scroll behavior');
 assert.equal((css.match(/\{/g)||[]).length,(css.match(/\}/g)||[]).length,'Stylesheet braces balanced');
-for(const p of ['index.html','rent.html','car.html','salary.html'])assert.ok(!read(p).includes('mobile-polish.css'),'Do not change production '+p);
+for(const p of ['index.html','rent.html','car.html','salary.html'])assert.match(read(p),/mobile-polish\.css\?v=20261023-quality02&navux=01/,'Approved mobile polish released: '+p);
 console.log('PASS preview mobile polish across all Test pages without altering nav or finance data');
