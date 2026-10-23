@@ -16,3 +16,7 @@ for(const f of ['index','test','rent','car','salary']){
 }
 for(const f of ['index','rent','car','salary'])assert.doesNotMatch(read(f+'.html'),/nav-scroll\.js/,'Production must stay unchanged');
 console.log('PASS preview adaptive nav: hide on scroll down, reveal on scroll up; five screens guarded');
+assert.match(css,/body:has\(\.finance-detail-page\) \.mobile-app-nav\.is-scroll-hidden/,'Car and salary must hide menu on downward scroll');
+assert.match(css,/body:has\(\.finance-detail-page\) \.mobile-app-nav:not\(\.is-scroll-hidden\)/,'Car and salary must reveal on upward scroll');
+assert.match(script,/if\(rent\)rent\.addEventListener/,'Inner scroll only needs rent listener');
+assert.doesNotMatch(script,/window\.addEventListener\('scroll'/,'Do not add duplicate window scroll listeners');
