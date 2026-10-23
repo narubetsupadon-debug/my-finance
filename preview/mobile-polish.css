@@ -1,0 +1,42 @@
+/* Test-only mobile polish: consistent controls and compact spacing.
+   Does not alter financial data, menu scroll states, or production CSS. */
+@media(max-width:820px){
+ html{-webkit-text-size-adjust:100%}
+ .finance-detail-page,.content>.page{min-width:0}
+ .finance-detail-page .card,.content>.page .card{min-width:0}
+ .finance-detail-page input,.finance-detail-page select,.finance-detail-page textarea,
+ .content>.page input,.content>.page select,.content>.page textarea{
+   max-width:100%;min-width:0;box-sizing:border-box;
+ }
+ .finance-detail-page input,.finance-detail-page select,.finance-detail-page textarea,
+ .content>.page input,.content>.page select,.content>.page textarea{font-size:16px}
+ .finance-detail-page .field small,.content>.page .field small{overflow-wrap:anywhere}
+ .finance-detail-page .modal-actions button,.content>.page .modal-actions button{min-height:46px}
+ .finance-detail-page .btn:focus-visible,.content>.page .btn:focus-visible,
+ .finance-detail-page input:focus-visible,.content>.page input:focus-visible{
+   outline:2px solid var(--primary);outline-offset:2px
+ }
+ .finance-detail-page .card .row>h2,.finance-detail-page .card .row>h3{min-width:0;overflow-wrap:anywhere}
+ .finance-detail-page .card .row>.btn{flex-shrink:0}
+ .car-wrap .car-expense-list{gap:8px}
+ .car-wrap .car-expense-list .car-expense-item{min-height:54px}
+ .car-wrap .car-expense-head>div{min-width:0}
+ .car-wrap #carExpenseFilter{max-width:100%;min-height:44px}
+ .salary-wrap .salary-history .row{gap:8px}
+ .salary-wrap .salary-details>summary{min-height:44px;display:flex;align-items:center;gap:8px}
+ .salary-wrap .salary-net .row{min-width:0}
+ .salary-wrap .salary-net .value{overflow-wrap:anywhere}
+ #transactionsPage .tx-toolbar{min-width:0}
+ #transactionsPage .tx-search-box{min-width:0}
+ #transactionsPage .tx-search-box input{width:100%;min-width:0}
+ #summaryPage .summary-period-picker{min-width:0}
+ #summaryPage .summary-range-chips{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+ #settingsPage .settings-card{min-width:0;overflow-wrap:anywhere}
+ #dashboardPage .daily-panel{min-width:0}
+ #dashboardPage .daily-amount{overflow-wrap:anywhere}
+}
+@media(max-width:380px){
+ .car-wrap .car-expense-metrics>.metric{min-width:0}
+ .salary-wrap .salary-head{flex-wrap:wrap}
+ #transactionsPage .tx-page-head{flex-wrap:wrap}
+}
