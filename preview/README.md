@@ -81,3 +81,11 @@ Note: The preview currently implements live read-only core screens. Secondary pa
 - Tapping a donut segment or a category summary shows the exact plotted category name, amount and percentage in the center. Selected arc is offset and matching row highlighted. Original category detail expansion remains native.
 - Reset action restores the total; clicking blank chart area or Escape also resets. Arrow keys/Home/End support chart selection without a pointer. Labels/text are inserted with textContent and amounts keep privacy-mode money classes.
 - Category/period rerender clears selection to the new report total, including empty state. Selection changes no report data, list filters or top-five rankings. The “หมวดที่เหลือ” segment uses its actual grouped amount.
+
+## Settings and registration repair Test
+
+- `settings/` is a separately installable PWA for previewing the reorganized Settings page and current-device notification reset. Its worker scope/manifest ID are isolated under `/my-finance/preview/settings/`.
+- Current Test reset removes only the browser subscription of this Test icon. Test subscribe/unsubscribe are local-only adapters; no production registrations are changed. Remote tests use authenticated `push-reminders-test.test_current` with the current transient subscription. No permission prompts or sends occur until a click. Financial API writes remain blocked.
+- Test Settings order: notifications, appearance/entry/privacy, data/backup, account, help/about. Persistent connection/test feedback replaces relying on brief toasts alone.
+- Live incident: function calls at 12:14–12:15 Bangkok returned 500 after Data API push_subscriptions writes returned 403. Owner RLS policies existed, but authenticated INSERT/UPDATE/DELETE table grants were revoked. `database/push_registration_permissions.sql` repairs only those missing grants while retaining RLS. A rolled-back authenticated-role transaction verified owner insert/update and cross-owner SELECT/UPDATE/DELETE rejection; no fixture records remain. The repair is applied to production independently of this pending Settings UI preview.
+- Do not promote the Settings UI until owner approval. Production app remains 1.0.1.

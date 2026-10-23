@@ -31,8 +31,8 @@ create policy "push subscriptions update own" on public.push_subscriptions
 drop policy if exists "push subscriptions delete own" on public.push_subscriptions;
 create policy "push subscriptions delete own" on public.push_subscriptions
  for delete to authenticated using ((select auth.uid())=user_id);
-grant select on public.push_subscriptions to authenticated;
-revoke insert,update,delete on public.push_subscriptions from authenticated;
+-- Authenticated client writes are constrained by the owner-only RLS policies above.
+grant select,insert,update,delete on public.push_subscriptions to authenticated;
 
 create table if not exists private.push_notification_log (
   id bigserial primary key,
