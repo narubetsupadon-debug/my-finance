@@ -1,6 +1,6 @@
-const CACHE='my-finance-v121-app-version-1.0.1';
-const SHELL=['./summary-proportion.css?v=20261023-release101','./summary-proportion.js?v=20261023-release101','./summary-highest.js?v=20261023-release101','./','./index.html','./style.css?v=20261023-release101','./minimal-dark.css?v=20261023-release101','./theme.js?v=20261023-release101','./app.js?v=20261023-release101','./app-data.js?v=20261023-release101','./app-summary.js?v=20261023-release101','./app-dashboard.js?v=20261023-release101','./app-transactions.js?v=20261023-release101','./app-planning.js?v=20261023-release101','./app-safety.js?v=20261023-release101','./finance-core.js?v=20261023-release101','./finance-backup.js?v=20261023-release101','./app-nav.js?v=20261023-release101','./rent.html','./rent.css?v=20261023-release101','./rent.js?v=20261023-release101','./rent-core.js?v=20261023-release101','./car.html','./car.css?v=20261023-release101','./car.js?v=20261023-release101','./salary.html','./salary.js?v=20261023-release101','./salary-payslip.js?v=20261023-release101','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261023-release101','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
-SHELL.push('./ui-polish.css?v=20261023-release101','./dashboard-design.css?v=20261023-release101');
+const CACHE='my-finance-v122-push-live';
+const SHELL=['./summary-proportion.css?v=20261023-release101','./summary-proportion.js?v=20261023-release101','./summary-highest.js?v=20261023-release101','./','./index.html','./style.css?v=20261023-release101','./minimal-dark.css?v=20261023-release101','./theme.js?v=20261023-release101','./app.js?v=20261023-push-live','./app-data.js?v=20261023-release101','./app-summary.js?v=20261023-release101','./app-dashboard.js?v=20261023-release101','./app-transactions.js?v=20261023-release101','./app-planning.js?v=20261023-release101','./app-safety.js?v=20261023-release101','./finance-core.js?v=20261023-release101','./finance-backup.js?v=20261023-release101','./app-nav.js?v=20261023-release101','./rent.html','./rent.css?v=20261023-release101','./rent.js?v=20261023-release101','./rent-core.js?v=20261023-release101','./car.html','./car.css?v=20261023-release101','./car.js?v=20261023-release101','./salary.html','./salary.js?v=20261023-release101','./salary-payslip.js?v=20261023-release101','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261023-release101','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+SHELL.push('./ui-polish.css?v=20261023-release101','./dashboard-design.css?v=20261023-release101','./push-settings.css?v=20261023-push-live');
 SHELL.push('./app-storage.js?v=20261023-release101');
 SHELL.push('./expense-analysis.js?v=20261023-release101');
 SHELL.push('./total-details.js?v=20261023-release101');
@@ -25,14 +25,22 @@ self.addEventListener('fetch',e=>{
 });
 
 
-self.addEventListener('push',event=>{
+self.addEventListener('push',event=>event.waitUntil((async()=>{
  let data={title:'💙 My Finance',body:'มีรายการที่อยากเตือนมิว',url:'./',tag:'my-finance'};
  try{if(event.data)data={...data,...event.data.json()}}catch{}
- event.waitUntil(self.registration.showNotification(data.title,{
-  body:data.body,icon:'./app-icon-192.png',badge:'./app-icon.svg',tag:data.tag||'my-finance',
-  data:{url:data.url||'./'},renotify:false
- }));
-});
+ let displayed=false;
+ try{
+  await self.registration.showNotification(data.title,{body:data.body,icon:'./app-icon-192.png',badge:'./app-icon.svg',tag:data.tag||'my-finance',data:{url:data.url||'./'},renotify:false});
+  displayed=true;
+ }finally{
+  try{
+   const receipt={type:'push-received',at:Date.now(),displayRequested:displayed};
+   const cache=await caches.open('finance-push-receipt-v1');
+   await cache.put(new Request(new URL('last-receipt',self.registration.scope)),new Response(JSON.stringify(receipt),{headers:{'Content-Type':'application/json'}}));
+   const windows=await self.clients.matchAll({type:'window'});for(const client of windows)client.postMessage(receipt);
+  }catch{}
+ }
+})()));
 self.addEventListener('notificationclick',event=>{
  event.notification.close();
  const target=new URL(event.notification.data?.url||'./',self.registration.scope).href;
