@@ -20,3 +20,9 @@ assert.match(css,/body:has\(\.finance-detail-page\) \.mobile-app-nav\.is-scroll-
 assert.match(css,/body:has\(\.finance-detail-page\) \.mobile-app-nav:not\(\.is-scroll-hidden\)/,'Car and salary must reveal on upward scroll');
 assert.match(script,/if\(rent\)rent\.addEventListener/,'Inner scroll only needs rent listener');
 assert.doesNotMatch(script,/window\.addEventListener\('scroll'/,'Do not add duplicate window scroll listeners');
+
+const navRules=read('nav-unified.css');
+assert.match(navRules,/body:has\(\.finance-detail-page\) \.mobile-app-nav\.is-scroll-hidden\s*\{/,'Detail pages must have an explicit hide state');
+for(const page of ['index','test','rent','car','salary']){
+ assert.match(read('preview/'+page+'.html'),/nav-unified\.css\?v=20261023-hidefix04/,'Fresh nav CSS needed on '+page);
+}
