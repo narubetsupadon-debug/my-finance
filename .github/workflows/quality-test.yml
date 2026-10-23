@@ -14,7 +14,7 @@ jobs:
       - name: Syntax checks
         run: |
           for file in app-safety.js app-data.js app-dashboard.js app-transactions.js app-nav.js sw.js theme.js; do
-            node --experimental-default-type=module --check "$file"
+            node --check "$file"
           done
       - name: Finance logic regression checks
-        run: node --experimental-default-type=module --test tests/quality.test.mjs
+        run: node --test tests/quality.test.mjs
