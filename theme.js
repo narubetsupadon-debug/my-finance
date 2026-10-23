@@ -68,3 +68,41 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arrangeSettings,{once:true});
   else arrangeSettings();
 })();
+
+/* Progressive settings sections: headings act as accessible collapse controls. */
+(function(){
+ function initSettingsSections(){
+  const grid=document.querySelector('#settingsPage>.settings-grid');
+  if(!grid||grid.dataset.collapsible==='true')return;
+  grid.dataset.collapsible='true';
+  let section=null;
+  for(const node of [...grid.children]){
+   if(node.classList.contains('settings-group-heading')){
+    section=node;
+    const id=(node.id||node.textContent.trim()).replace(/[^a-zA-Z0-9\u0E00-\u0E7F]/g,'-');
+    const storageKey='finance-settings-open-'+id;
+    const stored=(()=>{try{return localStorage.getItem(storageKey)}catch{return null}})();
+    const expanded=stored===null?true:stored==='true';
+    node.dataset.expanded=String(expanded);
+    node.setAttribute('role','button');
+    node.setAttribute('tabindex','0');
+    node.setAttribute('aria-expanded',String(expanded));
+    node.setAttribute('title','แตะเพื่อยุบหรือขยายหมวด');
+    const toggle=()=>{
+      const next=node.dataset.expanded!=='true';
+      node.dataset.expanded=String(next);
+      node.setAttribute('aria-expanded',String(next));
+      let item=node.nextElementSibling;
+      while(item&&!item.classList.contains('settings-group-heading')){
+       item.hidden=!next;
+       item=item.nextElementSibling;
+      }
+      try{localStorage.setItem(storageKey,String(next))}catch{}
+    };
+    node.addEventListener('click',toggle);
+    node.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}});
+   } else if(section?.dataset.expanded==='false'){node.hidden=true;}
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initSettingsSections,{once:true});else initSettingsSections();
+})();
