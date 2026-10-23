@@ -41,22 +41,47 @@
 <link rel="stylesheet" href="../ui-polish.css?v=20261023-quality02">
 <link rel="stylesheet" href="../mobile-compact.css?v=20261023-quality02">
 <link rel="stylesheet" href="../nav-unified.css?v=20261023-hidefix04">
+<link rel="stylesheet" href="./rent-refresh.css?v=20261023-rentui01">
 </head><body><header class="topbar"><div class="topin"><div class="brand"><img class="brand-icon" src="../app-icon.svg?v=20261023-quality02" width="36" height="36" alt="">My Finance</div><a class="btn small ghost" href="./index.html">← กลับภาพรวม</a></div></header>
-<main class="rent-wrap finance-detail-page"><div class="detail-page-heading"><div class="eyebrow">ค่าใช้จ่ายของฉัน</div><h1>ค่าห้องเช่า</h1><p class="muted">เดือนบิลบอกว่าเป็นค่าห้องเดือนไหน วันที่จ่ายจริงใช้ลงรายรับ–รายจ่าย</p></div>
+<main class="rent-wrap finance-detail-page"><div class="detail-page-heading"><div class="eyebrow">ค่าใช้จ่ายของฉัน</div><h1>ค่าห้องเช่า</h1><p class="muted">เก็บข้อมูลค่าเช่ารายเดือน พร้อมดูประวัติและยอดที่ต้องจ่าย</p></div>
 <p id="rentMessage" class="detail-load-status" data-loading="true" role="status" aria-live="polite">กำลังเปิดข้อมูลของคุณ…</p><a id="rentSavedLink" href="./index.html#transactions" hidden>ดูรายการจ่ายที่บันทึก →</a>
 <div id="rentApp" class="hidden"><section class="card section"><div class="row"><h2 id="rentTitle">เพิ่มค่าห้องเช่า</h2><button id="newRent" class="btn soft" type="button">＋ บิลใหม่</button></div>
-<form id="rentForm"><p id="rentError" class="expense" role="alert"></p><div class="fields">
-<div class="field"><label for="rentMonth">ค่าห้องของเดือน</label><input id="rentMonth" type="month" required></div>
-
-<div class="field"><label for="rentDate">วันที่จ่ายจริง</label><input id="rentDate" type="date" required></div>
-<div class="field"><label for="rentFull">ยอดบิลเต็ม (บาท)</label><input id="rentFull" type="number" min="0.01" max="999999999999.99" step="0.01" inputmode="decimal" required></div>
-<div class="field"><label for="rentMy">ส่วนมิว (บาท)</label><input id="rentMy" type="number" min="0" max="999999999999.99" step="0.01" inputmode="decimal" required><button id="rentHalf" class="btn small ghost" type="button">แบ่งครึ่ง 50%</button></div>
-<div class="field"><label for="rentStatus">สถานะ</label><select id="rentStatus"><option value="paid">จ่ายแล้ว</option><option value="pending">ยังไม่จ่าย</option></select></div>
-<div class="field"><label for="rentAccount">บัญชีที่จ่ายยอดเต็ม</label><select id="rentAccount"></select></div>
-<div class="field"><label for="rentCategory">หมวดค่าห้องเช่า</label><select id="rentCategory" required></select></div>
-<div class="field"><label for="rentExisting">เคยลงรายจ่ายนี้แล้ว?</label><select id="rentExisting"><option value="">ยังไม่ได้ลง — สร้างรายการจ่ายครั้งเดียว</option></select><small class="muted">เลือกรายการเดิมเพื่อเชื่อม ยอด วันจ่าย และบัญชีจะเติมตามรายการนั้น</small></div>
-<div class="field full"><label for="rentNote">หมายเหตุ</label><textarea id="rentNote" maxlength="2000" placeholder="เช่น ค่าห้องเดือนกันยายน จ่ายต้นเดือนตุลาคม"></textarea></div>
-</div><p id="rentPreview" class="rent-check-summary" aria-live="polite"></p><p class="muted">รายจ่ายหลักใช้ยอดจ่ายเต็ม ส่วนมิวใช้สรุปภาระค่าห้อง เงินที่แฟนโอนคืนให้บันทึกเป็นรายรับตามวันที่รับจริง</p><div class="modal-actions"><button id="saveRent" class="btn primary" type="submit">บันทึกค่าห้องเช่า</button></div></form></section>
+<form id="rentForm">
+<p id="rentError" class="expense" role="alert"></p>
+<div class="rent-form-section rent-primary">
+ <div class="rent-section-title"><span class="rent-step">01</span><div><h3>ข้อมูลบิล</h3><p>เลือกเดือนที่คิดค่าเช่าและวันที่จ่ายจริง</p></div></div>
+ <div class="fields rent-date-fields">
+  <div class="field"><label for="rentMonth">เดือนค่าห้อง</label><input id="rentMonth" type="month" required></div>
+  <div class="field"><label for="rentDate">วันที่จ่ายจริง</label><input id="rentDate" type="date" required></div>
+ </div>
+</div>
+<div class="rent-form-section rent-primary">
+ <div class="rent-section-title"><span class="rent-step">02</span><div><h3>ยอดค่าเช่า</h3><p>บันทึกยอดเต็มและส่วนที่รับผิดชอบ</p></div></div>
+ <div class="fields rent-money-fields">
+  <div class="field"><label for="rentFull">ยอดบิลเต็ม (บาท)</label><input id="rentFull" type="number" min="0.01" max="999999999999.99" step="0.01" inputmode="decimal" required></div>
+  <div class="field"><label for="rentMy">ส่วนมิว (บาท)</label><input id="rentMy" type="number" min="0" max="999999999999.99" step="0.01" inputmode="decimal" required></div>
+ </div>
+ <button id="rentHalf" class="btn small soft rent-half-button" type="button">½ แบ่งยอดครึ่งหนึ่ง</button>
+</div>
+<div class="rent-form-section rent-payment-section">
+ <div class="rent-section-title"><span class="rent-step">03</span><div><h3>การชำระเงิน</h3><p>เลือกสถานะ บัญชี และหมวดรายจ่าย</p></div></div>
+ <div class="fields rent-payment-fields">
+  <div class="field"><label for="rentStatus">สถานะ</label><select id="rentStatus"><option value="paid">จ่ายแล้ว</option><option value="pending">ยังไม่จ่าย</option></select></div>
+  <div class="field"><label for="rentAccount">บัญชีที่จ่ายยอดเต็ม</label><select id="rentAccount"></select></div>
+  <div class="field full"><label for="rentCategory">หมวดค่าห้องเช่า</label><select id="rentCategory" required></select></div>
+ </div>
+</div>
+<details class="rent-advanced">
+ <summary><span>📝 รายละเอียดเพิ่มเติม</span><span class="rent-detail-hint">เชื่อมรายจ่ายเดิม / หมายเหตุ</span></summary>
+ <div class="fields rent-extra-fields">
+  <div class="field full"><label for="rentExisting">เคยลงรายจ่ายนี้แล้ว?</label><select id="rentExisting"><option value="">ยังไม่ได้ลง — สร้างรายการจ่ายครั้งเดียว</option></select><small class="muted">เลือกรายการเดิมเพื่อเชื่อม ยอด วันจ่าย และบัญชีจะเติมตามรายการนั้น</small></div>
+  <div class="field full"><label for="rentNote">หมายเหตุ</label><textarea id="rentNote" maxlength="2000" placeholder="เช่น ค่าห้องเดือนกันยายน จ่ายต้นเดือนตุลาคม"></textarea></div>
+ </div>
+</details>
+<p id="rentPreview" class="rent-check-summary" aria-live="polite"></p>
+<div class="rent-explain">ยอดบิลเต็มใช้ในรายจ่ายหลัก ส่วนยอดของมิวใช้สรุปภาระค่าห้อง หากได้รับเงินคืนให้บันทึกเป็นรายรับตามวันที่รับจริง</div>
+<div class="modal-actions"><button id="saveRent" class="btn primary" type="submit">บันทึกค่าห้องเช่า</button></div>
+</form></section>
 <section class="card section"><h2>ประวัติตามเดือนบิล</h2><p class="muted">แสดงเฉพาะบิลที่เพิ่มในหน้านี้ ข้อมูลนำเข้าเดิมยังอยู่ในรายการรายรับ–รายจ่าย</p><div id="rentHistory" class="rent-history"></div></section></div></main>
 <script type="module" src="../rent.js?v=20261023-quality02"></script><script type="module" src="../app-nav.js?v=20261023-quality02"></script><script type="module" src="./nav-scroll.js?v=20261023-scroll01"></script></body></html>
 
