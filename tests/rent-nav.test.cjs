@@ -16,5 +16,5 @@ assert.match(css,/#saveRent\{width:100%;min-height:48px/,'Save button must be to
 console.log('PASS rent navigation: bottom tabs restored, back link retained, form scrolls clear of nav');
 
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
-assert.match(html,/rent\\.css\\?v=20261023-quality02&navfix=03/,'Rent page must request fresh CSS after navigation fix');
-assert.match(sw,/rent\\.css\\?v=20261023-quality02&navfix=03/,'Offline cache must precache exactly the rent CSS URL');
+assert.match(html,/rent\.css\?v=20261023-quality02&navfix=03/,'Rent page must request fresh CSS after navigation fix');
+assert.match(sw,/rent\.css\?v=20261023-quality02&navfix=03/,'Offline cache must precache exactly the rent CSS URL');
