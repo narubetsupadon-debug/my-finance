@@ -76,8 +76,8 @@ async function refreshPushStatus(){
   toggle.disabled=true;toggle.checked=false;for(const id of ['enablePushBtn','testPushBtn','reconnectPushBtn','localPushBtn'])$(id).disabled=true;return;
  }
  const sub=await currentPushSubscription().catch(()=>null),granted=Notification.permission==='granted';
- text.textContent=sub&&granted?'เครื่องนี้เชื่อมต่อแล้ว':Notification.permission==='denied'?'iPhone บล็อกการแจ้งเตือนไว้':'ยังไม่เชื่อมต่อเครื่องนี้';
- badge.textContent=sub&&granted?'เชื่อมต่อแล้ว':'รอเชื่อมต่อ';badge.classList.toggle('income',!!sub&&granted);
+ text.textContent=sub&&granted?'เครื่องนี้มีทะเบียน Push แล้ว · ส่งทดสอบเพื่อยืนยันการรับ':Notification.permission==='denied'?'iPhone บล็อกการแจ้งเตือนไว้':'ยังไม่เชื่อมต่อเครื่องนี้';
+ badge.textContent=sub&&granted?'พร้อมทดสอบ':'รอเชื่อมต่อ';badge.classList.toggle('income',!!sub&&granted);
  toggle.checked=!!sub&&granted;toggle.disabled=Notification.permission==='denied';
  on.classList.toggle('hidden',!!sub&&granted);on.disabled=toggle.disabled;
  test.classList.remove('hidden');test.disabled=!sub||!granted;
@@ -117,7 +117,7 @@ async function testPush(){
  const json=sub.toJSON();await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:json.keys||{}}});
  await clearPushReceipt();
  const r=await pushCall('test',{endpoint:sub.endpoint});
- const message=r.sent?'ผู้ให้บริการรับข้อความแล้ว ตรวจแบนเนอร์หรือศูนย์การแจ้งเตือนค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองเชื่อมต่อเครื่องนี้ใหม่ค่ะ');
+ const message=r.sent?'ผู้ให้บริการรับคำขอส่งแล้ว · ยังไม่ยืนยันว่าโทรศัพท์แสดงแจ้งเตือน ตรวจผลบนเครื่องอีกครั้งค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองเชื่อมต่อเครื่องนี้ใหม่ค่ะ');
  const received=r.sent?await readPushReceipt():false;
  if(!received&&$('pushTestResult'))$('pushTestResult').textContent=message;
  showAppToast(message);
