@@ -1,20 +1,24 @@
-/* Only the expense proportion card changes. Retain original rows, filters, values and details. */
-#summaryPage .summary-share-card{border-radius:24px;padding:24px;box-shadow:0 8px 28px #27174505}
-#summaryPage .summary-share-card .summary-card-head p{font-size:12px;line-height:1.6}
-#summaryPage .summary-share-card .summary-donut{display:none!important}
-#summaryPage .summary-share-card .summary-donut-wrap{max-width:none;margin:18px 0 20px;padding:15px 18px;border-radius:16px;background:var(--bg);min-height:0}
-#summaryPage .summary-share-card .summary-donut-center{position:static;inset:auto;transform:none;padding:0;flex-direction:row;justify-content:space-between;gap:12px;text-align:left}
-#summaryPage .summary-share-card .summary-donut-center strong{font-size:clamp(18px,5vw,25px);white-space:nowrap}
-#summaryPage .summary-share-card .summary-category-help{font-size:11px;margin-bottom:4px}
-#summaryPage .summary-share-card .summary-category{border-top:0}
-#summaryPage .summary-share-card .summary-category>summary{display:grid;grid-template-columns:12px minmax(0,1fr) auto 12px;gap:8px 10px;padding:17px 0;align-items:center}
+/* Refined donut and category list; all selectors are scoped to this one summary card. */
+#summaryPage .summary-share-card{border-radius:25px;padding:24px;box-shadow:0 8px 30px #27174505}
+#summaryPage .summary-share-card .summary-card-head{align-items:flex-start}
+#summaryPage .summary-share-card .summary-card-head p{font-size:12px;line-height:1.7;margin-top:6px}
+#summaryPage .summary-share-card .summary-card-badge{font-size:11px;white-space:nowrap;border-radius:20px}
+#summaryPage .summary-share-card .summary-donut-wrap{position:relative;width:100%;max-width:250px;margin:24px auto 22px;padding:0;min-height:0}
+#summaryPage .summary-share-card .summary-donut{height:250px!important;filter:drop-shadow(0 5px 8px #7963e80b)}
+#summaryPage .summary-share-card .summary-donut-center{position:absolute;inset:0;transform:none;padding:0 46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;pointer-events:none}
+#summaryPage .summary-share-card .summary-donut-center small{font-size:11px;letter-spacing:.02em;color:var(--muted)}
+#summaryPage .summary-share-card .summary-donut-center strong{font-size:clamp(16px,4.8vw,21px);font-weight:750;line-height:1.4;letter-spacing:-.03em;font-variant-numeric:tabular-nums;max-width:100%;overflow-wrap:anywhere}
+#summaryPage .summary-share-card .summary-category-help{font-size:11px;color:var(--muted);margin:0 0 5px;text-align:center}
+#summaryPage .summary-share-card .summary-category{border-top:1px solid var(--line)}
+#summaryPage .summary-share-card .summary-category:first-child{border-top:0}
+#summaryPage .summary-share-card .summary-category>summary{display:grid;grid-template-columns:12px minmax(0,1fr) auto 12px;gap:11px;padding:16px 1px;align-items:center;min-height:65px}
 #summaryPage .summary-share-card .summary-category-dot{width:11px;height:11px;border-radius:4px}
 #summaryPage .summary-share-card .summary-category-name{font-size:14px;font-weight:600;line-height:1.6}
-#summaryPage .summary-share-card .summary-category-numbers{flex-direction:row;align-items:baseline;gap:10px;line-height:1.5}
-#summaryPage .summary-share-card .summary-category-numbers strong{font-size:14px}
-#summaryPage .summary-share-card .summary-category-numbers small{font-size:11px;min-width:39px;text-align:right}
-.proportion-track{display:block;grid-column:2/4;height:7px;border-radius:20px;overflow:hidden;background:var(--line)}
-.proportion-fill{display:block;height:100%;border-radius:20px}
-#summaryPage .summary-share-card .summary-category-children{margin:0 0 8px 22px;padding:10px 13px;border-radius:14px}
+#summaryPage .summary-share-card .summary-category-numbers{display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-variant-numeric:tabular-nums}
+#summaryPage .summary-share-card .summary-category-numbers strong{font-size:14px;line-height:1.5}
+#summaryPage .summary-share-card .summary-category-numbers small{font-size:11px;color:var(--muted);line-height:1.5}
+#summaryPage .summary-share-card .summary-category-chevron{font-size:12px;opacity:.7}
+#summaryPage .summary-share-card .summary-category-children{margin:0 0 12px 23px;padding:10px 13px;border-radius:14px;background:var(--bg)}
 #summaryPage .summary-share-card .summary-category-children>div{font-size:12px;gap:10px}
-@media(max-width:420px){#summaryPage .summary-share-card{padding:18px}#summaryPage .summary-share-card .summary-category>summary{grid-template-columns:10px minmax(0,1fr) auto 10px;column-gap:8px}#summaryPage .summary-share-card .summary-category-numbers{flex-direction:column;gap:0;align-items:flex-end}#summaryPage .summary-share-card .summary-category-name{font-size:13px}#summaryPage .summary-share-card .summary-category-numbers strong{font-size:13px}#summaryPage .summary-share-card .summary-category-children>div{flex-wrap:wrap}}
+@media(max-width:380px){#summaryPage .summary-share-card{padding:17px}#summaryPage .summary-share-card .summary-donut-wrap{max-width:224px}#summaryPage .summary-share-card .summary-donut{height:224px!important}#summaryPage .summary-share-card .summary-donut-center{padding:0 41px}#summaryPage .summary-share-card .summary-category>summary{gap:8px;grid-template-columns:10px minmax(0,1fr) auto 10px}#summaryPage .summary-share-card .summary-category-name,#summaryPage .summary-share-card .summary-category-numbers strong{font-size:13px}#summaryPage .summary-share-card .summary-category-children>div{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){#summaryPage .summary-share-card *{transition:none!important}}

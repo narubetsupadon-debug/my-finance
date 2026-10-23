@@ -56,3 +56,9 @@ Note: The preview currently implements live read-only core screens. Secondary pa
 - `proportion.html#summary` uses the current production document and modules with the existing read-only Test guard. Only the expense proportion card receives presentation overrides.
 - The donut is hidden and the original category rows get bars from their already-rendered percentages. Original totals, filters, grouping, expandable subcategories and calculations remain intact. No weekly dashboard changes.
 - `analysis.html` is an earlier separate experiment, not the approved scope for this revision. Production files are unchanged.
+
+## Proportion donut — owner preference, current Test
+
+- The current `proportion.html#summary` keeps a compact donut (224–250px), a centered total, harmonized colors, small segment gaps and rounded ends. Each category retains its amount, percentage and expandable subcategories below it.
+- The presentation script uses Chart.js's existing chart instance and changes only drawing options and colors after category rendering. It never changes dataset values, filters, calculations or financial records.
+- Supersedes the prior horizontal-bar design. The rest of the summary and production remain unchanged.
