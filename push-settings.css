@@ -16,3 +16,11 @@
 #settingsPage .settings-title>div{min-width:0}
 #settingsPage .settings-title p,#settingsPage .setting-row small{overflow-wrap:anywhere}
 @media(max-width:760px){#settingsPage .settings-grid{grid-template-columns:minmax(0,1fr);gap:12px}#settingsPage .settings-grid>.settings-card{grid-column:1/-1}#settingsPage .settings-grid>.settings-group-heading{margin-top:18px}#settingsPage .settings-card{border-radius:18px;padding:17px}#settingsPage .settings-title{gap:10px}#settingsPage .settings-title>span:first-child{width:38px;height:38px}#settingsPage .settings-title h3{font-size:15px}#settingsPage .push-repair-actions{gap:6px 14px}#settingsPage .push-setup-step{padding:12px}#settingsPage .setting-row{gap:10px}}
+
+/* Put frequently used settings ahead of help and release information without moving DOM nodes. */
+#settingsPage{display:flex;flex-direction:column;align-items:stretch}
+#settingsPage>.page-head{order:0}
+#settingsPage>.settings-grid{order:1}
+#settingsPage>section[aria-labelledby="appVersionTitle"]{order:2;margin-top:28px}
+#settingsPage>section[aria-labelledby="appVersionTitle"]::before{content:"ℹ️ คู่มือและข้อมูลแอป";display:block;font-size:13px;font-weight:800;margin:0 0 14px;border-bottom:1px solid var(--line);padding-bottom:12px}
+#settingsPage>#appUsageGuide{order:3}
