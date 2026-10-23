@@ -1,0 +1,11 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom');
+(async()=>{const {analyze,money}=await import('../preview/analysis-core.mjs');
+async function run(signedIn=true,fail=false){const dom=new JSDOM(fs.readFileSync('preview/analysis.html','utf8'),{url:'https://narubetsupadon-debug.github.io/my-finance/preview/analysis.html',runScripts:'outside-only'}),w=dom.window;let reads=0;w.analyze=analyze;w.money=money;w.document.getElementById('detail').showModal=function(){this.open=true};w.document.getElementById('detail').close=function(){this.open=false};
+ const now=new Date(Date.now()+7*3600000).toISOString().slice(0,7),rows=Array.from({length:5},(_,i)=>({id:String(i),type:'expense',amount:i+1,status:'paid',transaction_date:now+'-01',description:'fixture '+i,categories:{name:'หมวด '+i,icon:'▦'}}));
+ w.createClient=()=>({auth:{getUser:async()=>({data:{user:signedIn?{id:'owner-fixture'}:null}}),onAuthStateChange:()=>{}},from:table=>{reads++;assert.equal(table,'transactions');const q={select:()=>q,eq:(key,value)=>{assert.equal(key,'user_id');assert.equal(value,'owner-fixture');return q},order:()=>q,range:async()=>fail?{error:{message:'fixture'}}:{data:rows}};return q;}});
+ w.eval(fs.readFileSync('preview/analysis.js','utf8').replace(/^import .*$/gm,''));await new Promise(r=>setTimeout(r,0));const $=id=>w.document.getElementById(id);
+ if(!signedIn){assert.equal(reads,0);assert.equal($('login').hidden,false);assert.equal($('content').hidden,true);}
+ else if(fail){assert.equal($('content').hidden,true);assert.equal($('retry').hidden,false);assert.equal($('total').textContent,'');}
+ else{assert.equal($('content').hidden,false);assert.match($('total').textContent,/15\.00/);assert.equal($('categories').children.length,4);$('toggleCategories').click();assert.equal($('categories').children.length,5);$('total').click();assert.equal($('detail').open,true);assert.equal($('detailRows').children.length,5);assert.match($('chart').textContent,/1–7/);assert.match($('insightTitle').textContent,/หมวด 4/);}
+ w.close();}
+ await run(false);await run(true,true);await run();console.log('PASS calm analysis UI: sign-in before reads, ownership filter, error gate, no placeholder totals, category expand and source details');})().catch(error=>{console.error(error);process.exit(1)});

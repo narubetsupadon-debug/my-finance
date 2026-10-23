@@ -41,3 +41,12 @@ Note: The preview currently implements live read-only core screens. Secondary pa
 - The worker displays push data before any asynchronous receipt storage. Local receipt records contain only receive time and display-request status; no endpoints, tokens, amounts or identities are stored. Receipt confirms worker delivery, not banner visibility.
 - Authentication uses a separate storage key. Test receipt cache is scoped by name and URL. No production cache deletion, fetch interception, registration replacement, financial write or cron change.
 - Existing registration comparison remains available, explicitly separate from the fresh current-device test.
+
+## Calm analysis preview — 23 October 2026
+
+- `analysis.html` implements the approved calm mobile layout using authenticated real transactions only. No fixture amounts or browser service-worker registration.
+- The user filter and existing RLS apply to all paginated transaction reads. Only publishable key is in the browser. No database writes or new backend functions.
+- Shows paid expenses through Bangkok today, includes debt repayments, excludes pending/cancelled/future rows. Totals and category bars use the same rows and integer cents. Linked rent/car/salary tables are not added again; recorded rent amounts are not divided again.
+- Current month compares to the same day of the previous month (clamped to its last date). Past months compare full month. Missing prior spending has no invented percentage. Weekly bins cover the entire calendar month including days 29–31.
+- Up to four categories initially; expand to all, tap a category or total for source rows. One deterministic top-category observation. No forecasts or inferred savings claims.
+- Supabase read/auth failure hides financial content and provides retry/sign-in, never sample data. Dark mode follows device preferences. Production remains unchanged until explicit approval.
