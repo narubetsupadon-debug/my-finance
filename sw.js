@@ -8,7 +8,7 @@ SHELL.push('./slip-reader.js?v=20261023-quality02');
 SHELL.push('./summary-pdf.js?v=20261023-quality02','./fonts/Sarabun-Regular.ttf?v=20261023-release101','./vendor/jspdf-4.2.1.umd.min.js?v=20261023-quality02','./vendor/chart-4.4.7.umd.js?v=20261023-quality02');
 SHELL.push('./preview/logos/grab.png','./preview/logos/lazada.ico','./preview/logos/shopee.png','./preview/logos/kbank.png','./preview/logos/ttb.svg','./preview/logos/firstchoice.svg');
 SHELL.push('./mobile-compact.css?v=20261023-quality02');
-SHELL.push('./nav-unified.css?v=20261023-releaseux01','./mobile-polish.css?v=20261023-releaseux01','./rent-refresh.css?v=20261023-releaseux01','./nav-scroll.js?v=20261023-releaseux01');
+SHELL.push('./nav-unified.css?v=20261023-quality02&navux=01','./mobile-polish.css?v=20261023-quality02&navux=01','./rent-refresh.css?v=20261023-quality02&navux=01','./nav-scroll.js?v=20261023-quality02&navux=01');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
