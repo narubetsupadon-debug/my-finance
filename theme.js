@@ -54,3 +54,17 @@
   applyUiPreferences();
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
 })();
+/* Settings navigation: move actual nodes, preserving listeners and input state. */
+(function(){
+  function arrangeSettings(){
+    const page=document.getElementById('settingsPage');
+    const grid=page?.querySelector(':scope > .settings-grid');
+    const about=page?.querySelector(':scope > section[aria-labelledby="appVersionTitle"]');
+    const guide=page?.querySelector(':scope > #appUsageGuide');
+    if(!page||!grid||!about||!guide||page.dataset.settingsArranged==='yes')return;
+    page.append(about,guide);
+    page.dataset.settingsArranged='yes';
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arrangeSettings,{once:true});
+  else arrangeSettings();
+})();
