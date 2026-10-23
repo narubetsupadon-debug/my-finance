@@ -38,6 +38,15 @@ function clearSummaryPdf(){if(summaryPdfUrl)URL.revokeObjectURL(summaryPdfUrl);s
 
 const UI_SETTINGS_KEY='my-finance-ui-settings-v1';
 const PUSH_ENDPOINT='https://mmvdhopogchcxwlstflk.supabase.co/functions/v1/push-reminders';
+const PUSH_RECEIPT_CACHE='finance-push-receipt-v1';
+const PUSH_RECEIPT_PATH=new URL('last-receipt',new URL('./',location.href)).href;
+async function clearPushReceipt(){try{if('caches'in window){const c=await caches.open(PUSH_RECEIPT_CACHE);await c.delete(PUSH_RECEIPT_PATH);}}catch{}}
+function showPushReceipt(data){
+ if(data?.type!=='push-received'||!Number.isFinite(Number(data.at)))return false;
+ const el=$('pushTestResult');if(!el)return false;
+ el.textContent='โทรศัพท์ได้รับ Push ล่าสุด '+new Date(Number(data.at)).toLocaleTimeString('th-TH')+(data.displayRequested?' · ระบบขอแสดงแจ้งเตือนแล้ว ✅':' · แสดงแจ้งเตือนไม่สำเร็จ ⚠️');return true;
+}
+async function readPushReceipt(){try{if(!('caches'in window))return false;const c=await caches.open(PUSH_RECEIPT_CACHE),r=await c.match(PUSH_RECEIPT_PATH);return r?showPushReceipt(await r.json()):false;}catch{return false;}}
 function b64urlToUint8Array(base64String){
  const padding='='.repeat((4-base64String.length%4)%4);
  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
@@ -57,48 +66,61 @@ async function currentPushSubscription(){
  const reg=await navigator.serviceWorker.getRegistration(new URL('./',location.href).href);return reg?.scope===new URL('./',location.href).href?reg.pushManager.getSubscription():null;
 }
 async function refreshPushStatus(){
- const text=$('pushStatusText'),badge=$('pushStatusBadge'),on=$('enablePushBtn'),test=$('testPushBtn'),off=$('disablePushBtn'),toggle=$('pushDeviceSetting');
+ const text=$('pushStatusText'),badge=$('pushStatusBadge'),on=$('enablePushBtn'),test=$('testPushBtn'),toggle=$('pushDeviceSetting');
  if(!text||!badge)return;
- if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window)){
-  text.textContent='อุปกรณ์หรือเบราว์เซอร์นี้ยังไม่รองรับ';badge.textContent='ไม่รองรับ';if(toggle){toggle.checked=false;toggle.disabled=true;}
-  on?.classList.add('hidden');test?.classList.add('hidden');off?.classList.add('hidden');return;
+ const ios=/iPhone|iPad|iPod/.test(navigator.userAgent),standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+ const supported='Notification'in window&&'serviceWorker'in navigator&&'PushManager'in window&&(!ios||standalone);
+ const hint=$('pushInstallHint');if(hint)hint.hidden=!ios||standalone;
+ if(!supported){
+  text.textContent=ios?'เปิดไอคอน My Finance บนหน้าจอโฮมก่อนค่ะ':'เบราว์เซอร์นี้ไม่รองรับ Push';badge.textContent='ยังไม่พร้อม';
+  toggle.disabled=true;toggle.checked=false;for(const id of ['enablePushBtn','testPushBtn','reconnectPushBtn','localPushBtn'])$(id).disabled=true;return;
  }
- const sub=await currentPushSubscription().catch(()=>null);
- if(sub&&Notification.permission==='granted'){
-  text.textContent='เปิดอยู่บนอุปกรณ์นี้';badge.textContent='เปิดอยู่';badge.classList.add('income');if(toggle){toggle.checked=true;toggle.disabled=false;}
-  on?.classList.add('hidden');test?.classList.remove('hidden');off?.classList.remove('hidden');
- }else{
-  text.textContent=Notification.permission==='denied'?'ถูกบล็อกในตั้งค่าของเบราว์เซอร์':'ปิดอยู่บนอุปกรณ์นี้';
-  badge.textContent=Notification.permission==='denied'?'ถูกบล็อก':'ปิดอยู่';badge.classList.remove('income');if(toggle){toggle.checked=false;toggle.disabled=Notification.permission==='denied';}
-  on?.classList.add('hidden');test?.classList.add('hidden');off?.classList.add('hidden');
- }
+ const sub=await currentPushSubscription().catch(()=>null),granted=Notification.permission==='granted';
+ text.textContent=sub&&granted?'เครื่องนี้เชื่อมต่อแล้ว':Notification.permission==='denied'?'iPhone บล็อกการแจ้งเตือนไว้':'ยังไม่เชื่อมต่อเครื่องนี้';
+ badge.textContent=sub&&granted?'เชื่อมต่อแล้ว':'รอเชื่อมต่อ';badge.classList.toggle('income',!!sub&&granted);
+ toggle.checked=!!sub&&granted;toggle.disabled=Notification.permission==='denied';
+ on.classList.toggle('hidden',!!sub&&granted);on.disabled=toggle.disabled;
+ test.classList.remove('hidden');test.disabled=!sub||!granted;
+ $('reconnectPushBtn').disabled=toggle.disabled;
+ $('localPushBtn').disabled=!granted;
 }
-async function enablePush(){
+async function enablePush({renew=false}={}){
  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window))throw new Error('อุปกรณ์นี้ยังไม่รองรับ Web Push');
  const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('ยังไม่ได้อนุญาต Notification');
  const cfg=await pushCall('config');
  const reg=await navigator.serviceWorker.getRegistration(new URL('./',location.href).href);
  if(!reg?.active||reg.scope!==new URL('./',location.href).href)throw new Error('ระบบแจ้งเตือนยังไม่พร้อม กรุณารีเฟรชแล้วลองใหม่');
  let sub=await reg.pushManager.getSubscription();
+ if(renew&&sub){
+  $('pushTestResult').textContent='กำลังล้างทะเบียนเดิมของเครื่องนี้…';
+  const endpoint=sub.endpoint;
+  if(!await sub.unsubscribe())throw new Error('ยกเลิกทะเบียนบนเครื่องไม่สำเร็จ');
+  sub=null;
+  try{await pushCall('unsubscribe',{endpoint});}catch(error){console.warn('Old push registration cleanup pending',error);}
+ }
  const existingKey=sub?.options?.applicationServerKey,expectedKey=b64urlToUint8Array(cfg.publicKey);
  if(existingKey){const actual=new Uint8Array(existingKey);if(actual.length!==expectedKey.length||actual.some((value,index)=>value!==expectedKey[index])){const endpoint=sub.endpoint;await sub.unsubscribe();await pushCall('unsubscribe',{endpoint});sub=null;}}
  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64urlToUint8Array(cfg.publicKey)});
  const j=sub.toJSON();
  await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:j.keys||{}}});
- await refreshPushStatus();showAppToast('เปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว 🔔');
+ await clearPushReceipt();await refreshPushStatus();if($('pushTestResult'))$('pushTestResult').textContent='เชื่อมต่อแล้ว · พร้อมส่งทดสอบ';showAppToast('เปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว 🔔');
 }
 async function disablePush(){
  const sub=await currentPushSubscription();if(sub){
   const endpoint=sub.endpoint;await pushCall('unsubscribe',{endpoint});
   await sub.unsubscribe();
  }
- await refreshPushStatus();showAppToast('ปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว');
+ await clearPushReceipt();await refreshPushStatus();showAppToast('ปิดแจ้งเตือนบนอุปกรณ์นี้แล้ว');
 }
 async function testPush(){
  const sub=await currentPushSubscription();if(!sub)throw new Error('เปิดแจ้งเตือนบนอุปกรณ์นี้ก่อนค่ะ');
  const json=sub.toJSON();await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:json.keys||{}}});
+ await clearPushReceipt();
  const r=await pushCall('test',{endpoint:sub.endpoint});
- showAppToast(r.sent?'ผู้ให้บริการรับข้อความแล้ว ตรวจแบนเนอร์หรือศูนย์การแจ้งเตือนค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองปิดแล้วเปิดแจ้งเตือนบนเครื่องนี้ใหม่ค่ะ'));
+ const message=r.sent?'ผู้ให้บริการรับข้อความแล้ว ตรวจแบนเนอร์หรือศูนย์การแจ้งเตือนค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองเชื่อมต่อเครื่องนี้ใหม่ค่ะ');
+ const received=r.sent?await readPushReceipt():false;
+ if(!received&&$('pushTestResult'))$('pushTestResult').textContent=message;
+ showAppToast(message);
 }
 
 const QUICK_DEFAULT=[
@@ -216,7 +238,7 @@ $('syncRetryBtn')?.addEventListener('click',()=>void loadAll());
 window.addEventListener('online',()=>{if(!user)return;setSyncStatus('syncing','กลับมาออนไลน์แล้ว · กำลังอัปเดต…');void loadAll()});
 window.addEventListener('offline',()=>setSyncStatus('error','ออฟไลน์ · ข้อมูลอาจยังไม่ล่าสุด'));
 
-async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authSplash')?.classList.add('hidden');$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();handleNavigationRoute()}
+async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authSplash')?.classList.add('hidden');$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();handleNavigationRoute();void readPushReceipt()}
 async function performLoad(){
  if(!user)return false;
  const loadingUser=user.id,revision=sessionRevision;
@@ -1173,3 +1195,21 @@ window.addEventListener('finance:theme',()=>{if(user)renderSummary();});
 document.querySelectorAll('#summaryPage details').forEach(details=>details.addEventListener('toggle',()=>{if(details.open&&typeof Chart!=='undefined')requestAnimationFrame(()=>details.querySelectorAll('canvas').forEach(canvas=>Chart.getChart?.(canvas)?.resize()));}));
 
 
+
+
+$('reconnectPushBtn')?.addEventListener('click',async e=>{
+ const btn=e.currentTarget;btn.disabled=true;$('testPushBtn').disabled=true;
+ try{await enablePush({renew:true});}catch(err){$('pushTestResult').textContent='เชื่อมต่อใหม่ไม่สำเร็จ: '+err.message;showAppToast(err.message);}
+ finally{await refreshPushStatus();}
+});
+$('checkPushBtn')?.addEventListener('click',()=>{void refreshPushStatus();void readPushReceipt();});
+$('localPushBtn')?.addEventListener('click',async e=>{
+ const btn=e.currentTarget;btn.disabled=true;
+ try{const reg=await navigator.serviceWorker.getRegistration(new URL('./',location.href).href);
+ if(!reg?.active||reg.scope!==new URL('./',location.href).href)throw Error('ยังไม่พบ Service Worker ของเครื่องนี้');
+ await reg.showNotification('My Finance · ทดสอบบนเครื่อง',{body:'ข้อความทดสอบแสดงแจ้งเตือนบนโทรศัพท์',tag:'my-finance-local-test'});
+ $('pushTestResult').textContent='ขอแสดงแจ้งเตือนบนเครื่องแล้ว ตรวจแบนเนอร์หรือศูนย์การแจ้งเตือนค่ะ';
+ }catch(err){$('pushTestResult').textContent='แสดงบนเครื่องไม่สำเร็จ: '+err.message;}finally{await refreshPushStatus();}
+});
+navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='push-received')showPushReceipt(event.data);});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&user)void readPushReceipt();});
