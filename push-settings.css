@@ -24,3 +24,38 @@
 #settingsPage>section[aria-labelledby="appVersionTitle"]{order:2;margin-top:28px}
 #settingsPage>section[aria-labelledby="appVersionTitle"]::before{content:"ℹ️ คู่มือและข้อมูลแอป";display:block;font-size:13px;font-weight:800;margin:0 0 14px;border-bottom:1px solid var(--line);padding-bottom:12px}
 #settingsPage>#appUsageGuide{order:3}
+
+/* iOS-style settings list — presentation only, preserves original controls. */
+#settingsPage{max-width:760px;padding:8px 12px max(42px,env(safe-area-inset-bottom));}
+#settingsPage>.page-head{margin:0 0 18px;padding:8px 2px 4px}
+#settingsPage>.page-head h2{font-size:clamp(28px,5vw,34px);font-weight:800}
+#settingsPage .settings-grid{display:flex;flex-direction:column;gap:0;align-items:stretch;width:100%}
+#settingsPage .settings-grid>.settings-group-heading{width:100%;margin:22px 0 9px;padding:0 12px;border:0;color:var(--muted);font-size:12px;font-weight:750;letter-spacing:.02em}
+#settingsPage .settings-grid>.settings-group-heading:first-child{margin-top:4px}
+#settingsPage .settings-grid>.settings-card{width:100%;height:auto;margin:0 0 10px!important;padding:0!important;overflow:visible;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 12px rgba(20,28,49,.035)}
+#settingsPage .settings-grid>.settings-card>.settings-title{display:flex;padding:16px 17px;gap:12px;min-height:70px}
+#settingsPage .settings-grid>.settings-card>.settings-title>span:first-child{width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--primary) 12%,var(--bg));font-size:21px}
+#settingsPage .settings-title h3{font-size:15px;font-weight:760}
+#settingsPage .settings-title p{font-size:11px;line-height:1.5;margin-top:3px}
+#settingsPage .settings-card>.setting-row{margin:0 17px;padding:15px 0;border-top:1px solid var(--line);min-height:58px;align-items:center}
+#settingsPage .settings-card>.setting-row b{font-size:13px}
+#settingsPage .settings-card>.setting-row small{font-size:11px}
+#settingsPage .settings-card>.setting-block,#settingsPage .settings-card>.theme-choice-grid,#settingsPage .settings-card>.capacity-item,#settingsPage .settings-card>.health-summary,#settingsPage .settings-card>.notification-block{margin-left:17px;margin-right:17px}
+#settingsPage .settings-card>.theme-choice-grid{margin-top:0;margin-bottom:16px}
+#settingsPage .settings-card>.setting-block{padding-top:14px;padding-bottom:16px;border-top:1px solid var(--line)}
+#settingsPage .settings-card>.capacity-item{padding:12px 0;border-top:1px solid var(--line)}
+#settingsPage .settings-card>.health-summary{padding-bottom:8px}
+#settingsPage .settings-card>.health-actions,#settingsPage .settings-card>.capacity-actions{margin:0 17px 16px}
+#settingsPage .settings-card>.capacity-note,#settingsPage .settings-card>.push-repair-note,#settingsPage .settings-card>.push-schedule{margin-left:17px;margin-right:17px}
+#settingsPage .settings-grid>.settings-push-feature{border-color:var(--line)!important}
+#settingsPage .push-connection{margin:0 17px 10px}
+#settingsPage #pushInstallHint{margin:0 17px 10px}
+#settingsPage .push-setup-steps{margin:8px 17px 12px}
+#settingsPage .push-test-result{margin:10px 17px}
+#settingsPage .push-repair-actions{margin:8px 17px}
+#settingsPage .notification-block{border-top:1px solid var(--line);padding-top:12px;margin-top:13px;margin-bottom:16px}
+#settingsPage>section[aria-labelledby="appVersionTitle"]{padding:0 17px 14px;margin-top:25px}
+#settingsPage>section[aria-labelledby="appVersionTitle"]::before{margin:0 -5px 3px;padding-top:16px}
+#settingsPage>#appUsageGuide{border-radius:16px}
+#settingsPage .settings-grid button:focus-visible,#settingsPage .settings-grid select:focus-visible,#settingsPage .settings-grid input:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+@media(max-width:760px){#settingsPage{padding-inline:8px}#settingsPage .settings-grid{grid-template-columns:none;display:flex}#settingsPage .settings-grid>.settings-card{grid-column:auto}#settingsPage .settings-card>.setting-row{flex-wrap:wrap}#settingsPage .settings-card>.toggle-row{flex-wrap:nowrap}#settingsPage .settings-card>.settings-title{padding:15px}#settingsPage .push-setup-steps{grid-template-columns:1fr}#settingsPage .push-setup-step{flex-wrap:wrap}}
