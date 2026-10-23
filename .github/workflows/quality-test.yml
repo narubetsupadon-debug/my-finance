@@ -1,0 +1,20 @@
+name: My Finance quality checks
+on:
+  push:
+    branches: [test-quality-pass-20261023]
+  workflow_dispatch:
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          for file in app-safety.js app-data.js app-dashboard.js app-transactions.js app-nav.js sw.js theme.js; do
+            node --experimental-default-type=module --check "$file"
+          done
+      - name: Finance logic regression checks
+        run: node --experimental-default-type=module --test tests/quality.test.mjs
