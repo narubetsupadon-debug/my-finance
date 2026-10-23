@@ -1,11 +1,11 @@
-const CACHE='my-finance-v122-push-live';
-const SHELL=['./summary-proportion.css?v=20261023-release101','./summary-proportion.js?v=20261023-release101','./summary-highest.js?v=20261023-release101','./','./index.html','./style.css?v=20261023-release101','./minimal-dark.css?v=20261023-release101','./theme.js?v=20261023-release101','./app.js?v=20261023-release101','./app-data.js?v=20261023-release101','./app-summary.js?v=20261023-release101','./app-dashboard.js?v=20261023-release101','./app-transactions.js?v=20261023-release101','./app-planning.js?v=20261023-release101','./app-safety.js?v=20261023-release101','./finance-core.js?v=20261023-release101','./finance-backup.js?v=20261023-release101','./app-nav.js?v=20261023-release101','./rent.html','./rent.css?v=20261023-release101','./rent.js?v=20261023-release101','./rent-core.js?v=20261023-release101','./car.html','./car.css?v=20261023-release101','./car.js?v=20261023-release101','./salary.html','./salary.js?v=20261023-release101','./salary-payslip.js?v=20261023-release101','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261023-release101','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
-SHELL.push('./ui-polish.css?v=20261023-release101','./dashboard-design.css?v=20261023-release101','./push-settings.css?v=20261023-release101');
-SHELL.push('./app-storage.js?v=20261023-release101');
-SHELL.push('./expense-analysis.js?v=20261023-release101');
-SHELL.push('./total-details.js?v=20261023-release101');
-SHELL.push('./slip-reader.js?v=20261023-release101');
-SHELL.push('./summary-pdf.js?v=20261023-release101','./fonts/Sarabun-Regular.ttf?v=20261023-release101','./vendor/jspdf-4.2.1.umd.min.js?v=20261023-release101','./vendor/chart-4.4.7.umd.js?v=20261023-release101');
+const CACHE='my-finance-quality02-test';
+const SHELL=['./summary-proportion.css?v=20261023-quality02','./summary-proportion.js?v=20261023-quality02','./summary-highest.js?v=20261023-quality02','./','./index.html','./style.css?v=20261023-quality02','./minimal-dark.css?v=20261023-quality02','./theme.js?v=20261023-quality02','./app.js?v=20261023-quality02','./app-data.js?v=20261023-quality02','./app-summary.js?v=20261023-quality02','./app-dashboard.js?v=20261023-quality02','./app-transactions.js?v=20261023-quality02','./app-planning.js?v=20261023-quality02','./app-safety.js?v=20261023-quality02','./finance-core.js?v=20261023-quality02','./finance-backup.js?v=20261023-quality02','./app-nav.js?v=20261023-quality02','./rent.html','./rent.css?v=20261023-quality02','./rent.js?v=20261023-quality02','./rent-core.js?v=20261023-quality02','./car.html','./car.css?v=20261023-quality02','./car.js?v=20261023-quality02','./salary.html','./salary.js?v=20261023-quality02','./salary-payslip.js?v=20261023-quality02','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261023-quality02','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
+SHELL.push('./ui-polish.css?v=20261023-quality02','./dashboard-design.css?v=20261023-quality02','./push-settings.css?v=20261023-quality02');
+SHELL.push('./app-storage.js?v=20261023-quality02');
+SHELL.push('./expense-analysis.js?v=20261023-quality02');
+SHELL.push('./total-details.js?v=20261023-quality02');
+SHELL.push('./slip-reader.js?v=20261023-quality02');
+SHELL.push('./summary-pdf.js?v=20261023-quality02','./fonts/Sarabun-Regular.ttf?v=20261023-release101','./vendor/jspdf-4.2.1.umd.min.js?v=20261023-quality02','./vendor/chart-4.4.7.umd.js?v=20261023-quality02');
 SHELL.push('./preview/logos/grab.png','./preview/logos/lazada.ico','./preview/logos/shopee.png','./preview/logos/kbank.png','./preview/logos/ttb.svg','./preview/logos/firstchoice.svg');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
@@ -49,4 +49,5 @@ self.addEventListener('notificationclick',event=>{
   return clients.openWindow?clients.openWindow(target):undefined;
  }));
 });
+
 

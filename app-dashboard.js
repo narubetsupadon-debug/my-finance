@@ -1,6 +1,7 @@
-import {sumTransactionAmounts} from './finance-core.js?v=20261023-release101';
-import {recurringBillMonthStatus} from './finance-core.js?v=20261023-release101';
-import {createTotalDetails,bindTotal} from './total-details.js?v=20261023-release101';
+import {analyzeExpenses} from './expense-analysis.js?v=20261023-quality02';
+import {sumTransactionAmounts} from './finance-core.js?v=20261023-quality02';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261023-quality02';
+import {createTotalDetails,bindTotal} from './total-details.js?v=20261023-quality02';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
@@ -17,6 +18,21 @@ function renderDashboard(){
  const prevDate=new Date(y,m-1,1),py=prevDate.getFullYear(),pm=prevDate.getMonth()
  const previousKey=py+'-'+String(pm+1).padStart(2,'0');
  const previous=transactions.filter(x=>String(x.transaction_date).slice(0,7)===previousKey&&x.status!=='cancelled')
+ // Compare equal calendar-day windows, excluding repayments and unconfirmed expenses.
+ const report=analyzeExpenses({transactions,budgets:getBudgets(),config:{mode:'days',monthKey},today});
+ const comparison=report.comparison;
+ const anchor=$('homeBillStatus');
+ if(anchor){
+  let el=$('homeSpendTrend');
+  if(!el){el=document.createElement('p');el.id='homeSpendTrend';el.className='home-spend-trend';anchor.closest('.bill-month-strip')?.insertAdjacentElement('afterend',el);}
+  if(el){
+   const delta=comparison.deltaCents||0;
+   const sign=delta>0?'เพิ่มขึ้น':delta<0?'ลดลง':'เท่าเดิม';
+   const ready=comparison.state==='ready'&&comparison.percent!==null;
+   el.textContent=ready?'📉 รายจ่ายที่จ่ายแล้ว เทียบช่วงวันเดียวกันเดือนก่อน: '+sign+' '+money(Math.abs(delta)/100)+' ('+Math.abs(comparison.percent).toFixed(1)+'%)':'📉 เปรียบเทียบรายจ่าย: ยังมีข้อมูลไม่เพียงพอในช่วงเดียวกันของเดือนก่อน';
+   el.hidden=!report.selected.length&&comparison.state==='insufficient';
+  }
+ }
  const inc=sumTransactionAmounts(monthly,'income')
  const exp=sumTransactionAmounts(monthly,'expense')
  const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=sumTransactionAmounts(todayRows)

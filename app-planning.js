@@ -1,5 +1,5 @@
-import {createTotalDetails} from './total-details.js?v=20261023-release101';
-import {recurringBillMonthStatus} from './finance-core.js?v=20261023-release101';
+import {createTotalDetails} from './total-details.js?v=20261023-quality02';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261023-quality02';
 
 // Fixed provider assets: never interpolate user-controlled image URLs.
 export const debtLogoBrands={

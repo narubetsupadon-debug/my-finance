@@ -70,3 +70,23 @@
 #syncStatusBar[data-state="ok"]{opacity:.84}
 @media(max-width:760px){.topbar .brand{font-size:clamp(16px,4.7vw,20px)}.topbar .brand-icon{width:32px;height:32px}.topbar .userbox #userEmail{display:none}.topbar .topin{gap:8px}#settingsPage>.page-head{margin-bottom:8px}#settingsPage .settings-grid>.settings-group-heading{margin:12px 0 5px;padding:0 10px}#settingsPage .settings-grid>.settings-card>.settings-title{min-height:56px;padding:12px 14px}}
 @media(prefers-reduced-motion:reduce){#settingsPage .settings-grid>.settings-group-heading::after{transition:none}}
+
+/* Test UX pass: mobile readability, actionable push states and reduced motion. */
+#settingsPage #pushStatusBadge{white-space:normal;text-align:center;line-height:1.4}
+#settingsPage #pushStatusText{overflow-wrap:anywhere}
+#settingsPage .push-test-result{user-select:text}
+#settingsPage .push-setup-step:focus-within{outline:2px solid var(--primary);outline-offset:2px}
+#settingsPage button:disabled{opacity:.52;cursor:not-allowed}
+#settingsPage .settings-card .setting-row>div{flex:1 1 210px;min-width:0}
+#settingsPage .settings-card .setting-row select{max-width:100%;min-width:0}
+#syncStatusBar[data-state="syncing"]{opacity:1}
+#syncStatusBar[data-state="error"] #syncRetryBtn{min-height:36px;min-width:70px}
+@media(max-width:480px){
+ #settingsPage .push-setup-steps{gap:9px}
+ #settingsPage .push-setup-step>button{min-width:110px}
+ #settingsPage #pushStatusBadge{font-size:10px}
+ #dashboardPage .quick-grid button{touch-action:manipulation}
+}
+@media(prefers-reduced-motion:reduce){
+ #settingsPage *,#dashboardPage .daily-panel{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}

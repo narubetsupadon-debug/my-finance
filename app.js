@@ -1,12 +1,12 @@
-import {createCapacityMonitor} from './app-storage.js?v=20261023-release101';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261023-release101';
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261023-release101';
-import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261023-release101';
-import {createSummaryRenderer} from './summary-highest.js?v=20261023-release101';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261023-release101';
-import {createTransactionRenderer} from './app-transactions.js?v=20261023-release101';
-import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-release101';
-import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261023-release101';
+import {createCapacityMonitor} from './app-storage.js?v=20261023-quality02';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261023-quality02';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError} from './finance-core.js?v=20261023-quality02';
+import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261023-quality02';
+import {createSummaryRenderer} from './summary-highest.js?v=20261023-quality02';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261023-quality02';
+import {createTransactionRenderer} from './app-transactions.js?v=20261023-quality02';
+import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-quality02';
+import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261023-quality02';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
@@ -76,8 +76,8 @@ async function refreshPushStatus(){
   toggle.disabled=true;toggle.checked=false;for(const id of ['enablePushBtn','testPushBtn','reconnectPushBtn','localPushBtn'])$(id).disabled=true;return;
  }
  const sub=await currentPushSubscription().catch(()=>null),granted=Notification.permission==='granted';
- text.textContent=sub&&granted?'เครื่องนี้เชื่อมต่อแล้ว':Notification.permission==='denied'?'iPhone บล็อกการแจ้งเตือนไว้':'ยังไม่เชื่อมต่อเครื่องนี้';
- badge.textContent=sub&&granted?'เชื่อมต่อแล้ว':'รอเชื่อมต่อ';badge.classList.toggle('income',!!sub&&granted);
+ text.textContent=sub&&granted?'เครื่องนี้มีทะเบียน Push แล้ว · ส่งทดสอบเพื่อยืนยันการรับ':Notification.permission==='denied'?'iPhone บล็อกการแจ้งเตือนไว้':'ยังไม่เชื่อมต่อเครื่องนี้';
+ badge.textContent=sub&&granted?'พร้อมทดสอบ':'รอเชื่อมต่อ';badge.classList.toggle('income',!!sub&&granted);
  toggle.checked=!!sub&&granted;toggle.disabled=Notification.permission==='denied';
  on.classList.toggle('hidden',!!sub&&granted);on.disabled=toggle.disabled;
  test.classList.remove('hidden');test.disabled=!sub||!granted;
@@ -117,7 +117,7 @@ async function testPush(){
  const json=sub.toJSON();await pushCall('subscribe',{subscription:{endpoint:sub.endpoint,keys:json.keys||{}}});
  await clearPushReceipt();
  const r=await pushCall('test',{endpoint:sub.endpoint});
- const message=r.sent?'ผู้ให้บริการรับข้อความแล้ว ตรวจแบนเนอร์หรือศูนย์การแจ้งเตือนค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองเชื่อมต่อเครื่องนี้ใหม่ค่ะ');
+ const message=r.sent?'ผู้ให้บริการรับคำขอส่งแล้ว · ยังไม่ยืนยันว่าโทรศัพท์แสดงแจ้งเตือน ตรวจผลบนเครื่องอีกครั้งค่ะ':'ส่งไม่สำเร็จ: '+(r.reason||'ลองเชื่อมต่อเครื่องนี้ใหม่ค่ะ');
  const received=r.sent?await readPushReceipt():false;
  if(!received&&$('pushTestResult'))$('pushTestResult').textContent=message;
  showAppToast(message);
@@ -788,7 +788,7 @@ $('exportSummaryPdf').onclick=async()=>{
  const cancelled=()=>sessionRevision!==revision||user?.id!==owner||document.body.classList.contains('privacy-mode');
  clearSummaryPdf();button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='กำลังสร้าง PDF…';status.textContent='กำลังเตรียมรายงานตามช่วงเวลาและสถานะที่เลือก…';
  try{
-  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261023-release101');
+  const {createSummaryPdf}=await import('./summary-pdf.js?v=20261023-quality02');
   if(cancelled())return;
   const result=await createSummaryPdf(report,{isCancelled:cancelled,onProgress:(page,total)=>{status.textContent=`กำลังสร้าง PDF หน้า ${page}/${total}…`;}});
   if(cancelled())return;

@@ -1,4 +1,4 @@
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261023-release101';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,readAll,lockFinanceForm,createRetrySafeInsert,loadExcelTools} from './finance-core.js?v=20261023-quality02';
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const detailDateFormatter=new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'numeric'});
 const currencyFormatter=new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'});
