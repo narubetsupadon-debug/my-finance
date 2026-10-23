@@ -51,4 +51,3 @@ self.addEventListener('notificationclick',event=>{
 });
 
 
-SHELL.push('./finance-trends.js?v=20261023-quality02');
