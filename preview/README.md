@@ -62,3 +62,10 @@ Note: The preview currently implements live read-only core screens. Secondary pa
 - The current `proportion.html#summary` keeps a compact donut (224–250px), a centered total, harmonized colors, small segment gaps and rounded ends. Each category retains its amount, percentage and expandable subcategories below it.
 - The presentation script uses Chart.js's existing chart instance and changes only drawing options and colors after category rendering. It never changes dataset values, filters, calculations or financial records.
 - Supersedes the prior horizontal-bar design. The rest of the summary and production remain unchanged.
+
+## Reference-style donut and rotating expense cards — current Test
+
+- Aqua/pastel donut, coral expenses, category totals/details below.
+- Test-only summary wrapper reads the original renderer's scoped report. It rotates the largest three individual expense records in descending amount order every 5 seconds; income is excluded. Label explicitly states displayed ordinal. Ties use descending date then description. Original report values/filters and PDF remain unchanged.
+- Manual arrows, dots, swipe and pause. Auto cycling stops on hidden tabs/pages, pointer hover, focused card and open detail dialog. Reduced-motion preference starts paused. Zero/one records have no carousel controls. Changing report data or period resets the displayed rank to 1.
+- The import map affects this Test document only, and the wrapper imports production source with a distinct query to avoid recursion. No additional API queries, financial writes or production changes.

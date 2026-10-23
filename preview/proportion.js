@@ -1,7 +1,7 @@
 /* Presentation only: retain the existing category amounts, filters and grouping. */
 document.addEventListener('DOMContentLoaded',()=>{
  const root=document.getElementById('foodSubcategoryBreakdown'),canvas=document.getElementById('categoryPieChart');if(!root||!canvas)return;
- const palette=['#7963e8','#eeaf54','#e67f91','#69b9cb','#9d86d9','#63b698'];
+ const palette=['#4fc5cb','#a8e1e6','#92b9f3','#b29ee0','#eeafcc','#f2ba8b'];
  function decorate(){
   root.querySelectorAll(':scope > .summary-category').forEach((item,index)=>{
    const dot=item.querySelector('.summary-category-dot');if(dot)dot.style.background=palette[index%palette.length];
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const dataset=chart.data.datasets[0];if(!dataset)return;
   // The renderer owns data. These overrides affect only how the same data is drawn.
   dataset.backgroundColor=chart.data.labels.map((_,index)=>palette[index%palette.length]);
-  dataset.borderWidth=0;dataset.borderRadius=5;dataset.spacing=3;dataset.hoverOffset=5;
+  dataset.borderWidth=0;dataset.borderRadius=2;dataset.spacing=2;dataset.hoverOffset=5;
   chart.options.cutout='74%';chart.options.animation={duration:0};
   if(chart.options.plugins?.legend)chart.options.plugins.legend.display=false;
   chart.update('none');
