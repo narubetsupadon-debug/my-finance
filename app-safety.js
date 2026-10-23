@@ -4,8 +4,10 @@ const normText=value=>String(value??'').trim().toLowerCase().replace(/\s+/g,' ')
 export function findDuplicateCandidates(row,transactions,editingId=null){
   if(!row||!Array.isArray(transactions))return [];
   const desc=normText(row.description),amount=Number(row.amount||0);
+  // Reject invalid amounts/dates and compare normalized descriptions to avoid noisy warnings.
+  if(!Number.isFinite(amount)||amount<=0||!row.transaction_date||!row.type)return [];
   return transactions
-    .filter(x=>x.id!==editingId&&x.status!=='cancelled'&&x.type===row.type&&String(x.transaction_date)===String(row.transaction_date)&&Math.abs(Number(x.amount||0)-amount)<0.005)
+    .filter(x=>x.id!==editingId&&x.status!=='cancelled'&&x.type===row.type&&String(x.transaction_date)===String(row.transaction_date)&&Number.isFinite(Number(x.amount))&&Math.abs(Number(x.amount)-amount)<0.005)
     .map(x=>{
       const old=normText(x.description);
       let score=0;
