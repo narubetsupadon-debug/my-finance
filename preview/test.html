@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="th">
-<head><base href="../"><script>
+<head><base href="./"><script>
 /* Read-only test guard: exact production screen and JS, no live financial writes. */
 (function(){
  const originalFetch=window.fetch.bind(window);
@@ -22,9 +22,10 @@
   try{sw.register=async()=>({update:async()=>{}})}catch(_){}
  }
  window.addEventListener('DOMContentLoaded',()=>{
+  document.body.style.paddingTop='calc(35px + env(safe-area-inset-top, 0px))';
   const badge=document.createElement('div');
   badge.setAttribute('role','status');
-  badge.textContent='🧪 TEST · หน้าตาเดียวกับแอปจริง · อ่านอย่างเดียว';
+  badge.textContent='🧪 MY FINANCE TEST · ตรวจหน้าจอ · อ่านอย่างเดียว';
   badge.style.cssText='position:fixed;z-index:2147483646;top:0;left:0;right:0;text-align:center;padding:calc(8px + env(safe-area-inset-top)) 8px 8px;background:#174884;color:white;font:600 12px system-ui,sans-serif;box-shadow:0 2px 12px #0003';
   document.body.appendChild(badge);
   const alertBox=document.createElement('div');alertBox.setAttribute('role','alert');alertBox.hidden=true;alertBox.style.cssText='position:fixed;z-index:2147483647;bottom:80px;left:12px;right:12px;max-width:480px;margin:auto;background:#fff2dc;color:#754600;padding:14px;border:1px solid #ffcf7b;border-radius:12px;font:14px system-ui';
@@ -33,32 +34,35 @@
  });
 })();
 </script>
+<meta name="robots" content="noindex,nofollow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0e14">
-<link rel="manifest" href="./manifest.webmanifest?v=walletfinal">
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
-<link rel="modulepreload" href="./app.js?v=20261017-subcustom2">
-<link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261017-quotes63">
-<link rel="stylesheet" href="./style.css?v=20261017-quotes63">
-<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261017-quotes63" media="(prefers-color-scheme: dark)">
-<script src="./theme.js?v=20261017-quotes63"></script>
+<link rel="modulepreload" href="../app.js?v=20261023-quality02">
+<link rel="preload" as="script" href="../vendor/chart-4.4.7.umd.js?v=20261023-quality02">
+<link rel="stylesheet" href="../style.css?v=20261023-quality02">
+<link id="darkThemeStylesheet" rel="stylesheet" href="../minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
+<script src="../theme.js?v=20261023-quality02"></script>
 <style>
 .insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 #insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261017-quotes63">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=walletfinal">
-<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=walletfinal">
-<link rel="stylesheet" href="./ui-polish.css?v=20261017-quotes63">
+</style><link rel="icon" type="image/svg+xml" href="../app-icon.svg?v=20261023-quality02">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=walletfinal">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=walletfinal">
+<link rel="stylesheet" href="../ui-polish.css?v=20261023-quality02">
+<link rel="stylesheet" href="../dashboard-design.css?v=20261023-quality02">
+<link rel="stylesheet" href="../summary-proportion.css?v=20261023-quality02"><link rel="stylesheet" href="../push-settings.css?v=20261023-quality02"><script defer src="../summary-proportion.js?v=20261023-quality02"></script><link rel="stylesheet" href="../mobile-compact.css?v=20261023-quality02">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
   <div class="auth-splash-card">
-    <img src="./app-icon.svg?v=20261017-quotes63" width="72" height="72" alt="">
+    <img src="../app-icon.svg?v=20261023-quality02" width="72" height="72" alt="">
     <h1>My Finance</h1>
     <p>กำลังเปิดกระเป๋าของมิว…</p>
     <span class="auth-splash-spinner" aria-hidden="true"></span>
@@ -67,7 +71,7 @@
 
 <div id="authScreen" class="auth-screen hidden">
   <div class="auth-card">
-    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261017-quotes63" width="56" height="56" alt="">My Finance</h1>
+    <h1 class="auth-brand"><img class="auth-brand-icon" src="../app-icon.svg?v=20261023-quality02" width="56" height="56" alt="">My Finance</h1>
     <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และยอดค้างชำระบัตรในที่เดียว</p>
     <div class="auth-tabs">
       <button id="tabLogin" class="active">เข้าสู่ระบบ</button>
@@ -88,7 +92,7 @@
   </div>
   <header class="topbar">
     <div class="topin">
-      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261017-quotes63" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
+      <div><div class="brand"><img class="brand-icon" src="../app-icon.svg?v=20261023-quality02" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
       <div class="userbox">
         <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings">⚙️ ตั้งค่า</button>
         <span id="userEmail" class="muted"></span>
@@ -146,7 +150,7 @@
             <div class="budget-meter"><div class="budget-progress"><div id="budgetProgressDash" class="budget-progress-fill"></div></div><span id="budgetPctDash">0%</span></div>
             <div id="homeBudgetStatus" class="daily-caption">แตะเพื่อตั้งงบประมาณ</div>
             <div class="budget-reference"><span id="budgetSpentDash">฿0</span> / <span id="budgetLimitDash">฿0</span></div>
-            <span id="budgetDailyDash" class="sr-only"></span><span id="todayCanSpend" class="sr-only"></span><span id="todayCanSpendHint" class="sr-only"></span>
+            <div id="budgetRingDash" class="budget-ring" aria-hidden="true"><span><b id="budgetRingPct">—</b><small>ใช้ไปแล้ว</small></span></div><span id="budgetDailyDash" class="sr-only"></span><span id="todayCanSpend" class="sr-only"></span><span id="todayCanSpendHint" class="sr-only"></span>
           </button>
           <button type="button" class="daily-panel next-panel" id="nextBillCard">
             <div class="daily-label"><span aria-hidden="true">◷</span> กำหนดชำระถัดไป <span class="panel-arrow">↗</span></div>
@@ -158,7 +162,7 @@
 
         <div class="bill-month-strip section"><button type="button" id="homeBillStatus" class="text-action" data-page-jump="bills">ดูบิลเดือนนี้ ›</button><small id="homeBillStatusNote"></small></div>
         <div class="card quick-capture section">
-          <div class="section-heading"><div><h2>วันนี้จ่ายอะไรบ้าง?</h2><p>เลือกหมวด แล้วใส่ยอดได้เลย</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
+          <div class="section-heading"><div><h2>วันนี้มีรายจ่ายอะไรบ้าง?</h2><p>เลือกหมวดหมู่เพื่อบันทึกรายการได้ทันที</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
           <div id="quickAdd" class="quick-grid"></div>
         </div>
 
@@ -167,10 +171,12 @@
             <div class="section-heading"><h2>รายการล่าสุด</h2><button class="text-action" data-page-jump="transactions">ดูทั้งหมด →</button></div>
             <div id="recentList" class="list section"></div>
           </div>
-          <details class="card insight-card home-detail">
-            <summary><strong>ดูข้อสังเกตเดือนนี้</strong><span class="detail-cue">แตะเพื่ออ่าน ⌄</span></summary>
-            <div id="insightList" class="insight-list section"></div>
-          </details>
+        <details class="home-detail card section" open>
+          <summary><strong>รายการใกล้ถึงกำหนด</strong><span class="detail-cue">ดูทั้งหมด <span aria-hidden="true">⌄</span></span></summary>
+          <div id="upcomingList" class="upcoming-list"></div>
+          <div class="row section"><button class="text-action" data-page-jump="bills">จัดการบิลประจำ →</button><button class="text-action" data-page-jump="debts">บัตร / สินเชื่อ →</button></div>
+        </details>
+
         </div>
 
         <details class="home-detail card section">
@@ -184,11 +190,10 @@
           <h3 class="detail-heading">รายจ่ายตามหมวด</h3><div id="categoryChart"></div>
           <button class="btn soft section" data-page-jump="summary">เปิดสรุปและกราฟทั้งหมด →</button>
         </details>
-        <details class="home-detail card section">
-          <summary><strong>รายการใกล้ถึงกำหนด</strong><span class="detail-cue">ดูทั้งหมด <span aria-hidden="true">⌄</span></span></summary>
-          <div id="upcomingList" class="upcoming-list"></div>
-          <div class="row section"><button class="text-action" data-page-jump="bills">จัดการบิลประจำ →</button><button class="text-action" data-page-jump="debts">บัตร / สินเชื่อ →</button></div>
-        </details>
+          <details class="card insight-card home-detail">
+            <summary><strong>ดูข้อสังเกตเดือนนี้</strong><span class="detail-cue">แตะเพื่ออ่าน ⌄</span></summary>
+            <div id="insightList" class="insight-list section"></div>
+          </details>
       </section>
 
       <section id="transactionsPage" class="page hidden">
@@ -286,9 +291,9 @@
         </div></details>
 
         <div class="card section summary-chart-card summary-share-card">
-          <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดหลักและสัดส่วนของยอดรายจ่ายที่เลือก</p></div><span class="summary-card-badge">100%</span></div>
-          <div class="chart-box donut summary-donut"><canvas id="categoryPieChart" aria-label="กราฟสัดส่วนรายจ่ายตามช่วงเวลาที่เลือก" role="img"></canvas></div>
-          <div id="foodSubcategoryBreakdown" class="card" style="margin-top:12px" hidden></div><p id="summaryPieEmpty" class="empty" hidden>ยังไม่มีรายจ่ายในช่วงนี้</p>
+          <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดหลักและสัดส่วนของยอดรายจ่ายที่เลือก</p></div><span class="summary-card-badge">แยกตามหมวด</span></div>
+          <div class="highest-heading"><h4>รายจ่ายสูงสุด 5 อันดับ</h4><button id="summaryHighestAll" type="button" disabled>ดูรายละเอียดทั้งหมด ›</button></div><div id="summaryHighest" class="summary-highest highest-viewport" role="region" aria-roledescription="carousel" aria-label="รายจ่ายสูงสุด 5 อันดับ" aria-live="off"><div id="summaryHighestTrack" class="highest-track"></div></div><div id="summaryHighestControls" class="highest-controls" hidden aria-label="เลื่อนรายจ่ายอันดับสูงสุด"><button id="summaryHighestPrev" type="button" aria-label="รายจ่ายอันดับก่อนหน้า">‹</button><div id="summaryHighestDots" class="highest-dots"></div><button id="summaryHighestNext" type="button" aria-label="รายจ่ายอันดับถัดไป">›</button><button id="summaryHighestPause" type="button" aria-pressed="false">Ⅱ หยุด</button></div><div class="summary-donut-wrap"><div class="chart-box donut summary-donut"><canvas id="categoryPieChart" aria-label="กราฟสัดส่วนรายจ่ายตามช่วงเวลาที่เลือก" role="img"></canvas></div><div class="summary-donut-center" aria-live="polite" aria-atomic="true"><small id="summaryCenterLabel">รายจ่ายรวม</small><strong id="summaryPieTotal" class="money">—</strong><span id="summarySelectedPercent" hidden></span></div></div>
+          <div class="summary-circle-actions"><button id="summarySelectionReset" type="button" hidden>กลับไปดูยอดรวม ↺</button></div><p class="summary-category-help">แตะสีบนวงกลมเพื่อดูยอดหมวด · แตะชื่อหมวดเพื่อดูหมวดย่อย</p><div id="foodSubcategoryBreakdown" class="summary-category-list" hidden></div><p id="summaryPieEmpty" class="empty" hidden>ยังไม่มีรายจ่ายในช่วงนี้</p>
         </div>
       </section>
 
@@ -299,6 +304,12 @@
             <div class="muted">ทำให้ My Finance เข้ากับวิธีใช้ของมิวมากขึ้น</div>
           </div>
         </div>
+
+        <section class="card settings-card section" aria-labelledby="appVersionTitle">
+          <div class="settings-title"><span aria-hidden="true">ⓘ</span><div><h3 id="appVersionTitle">เกี่ยวกับ My Finance</h3><p>เวอร์ชันของแอปที่กำลังเปิดอยู่</p></div></div>
+          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-10-23">23 ตุลาคม 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.1">1.0.1</strong></div>
+          <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>กราฟวงกลมแตะดูยอดหมวดได้ · รายจ่ายสูงสุด 5 อันดับเลื่อนไหลวนพร้อมรายละเอียด · แก้การส่งแจ้งเตือนบน iPhone</p></details>
+        </section>
 
         <details class="card settings-guide section" id="appUsageGuide">
           <summary><span><b>📖 วิธีใช้งาน My Finance</b><small>บันทึก แก้ไข และแก้ปัญหาเมื่อเน็ตหลุด</small></span><span aria-hidden="true">⌄</span></summary>
@@ -418,27 +429,20 @@
             </div>
           </div>
 
-          <div class="card settings-card notification-settings">
-            <div class="settings-title"><span>🔔</span><div><h3>การแจ้งเตือน</h3><p>แยกชัด ๆ ระหว่างแจ้งเตือนมือถือกับข้อความบนหน้า Home</p></div></div>
-
-            <div class="notification-block">
-              <div class="notification-block-title"><span>📱</span><div><b>แจ้งเตือนบนมือถือ</b><small id="pushStatusText">กำลังตรวจสอบสถานะ…</small></div></div>
-              <label class="setting-row toggle-row push-master-row">
-                <div><b>เปิด Push Notification</b><small>เด้งแจ้งเตือนแม้ไม่ได้เปิด My Finance อยู่</small></div>
-                <span class="switch"><input id="pushDeviceSetting" type="checkbox" aria-label="เปิดแจ้งเตือนบนมือถือ"><span></span></span>
-              </label>
-              <div class="push-summary">
-                <div><span>💳</span><div><b>บิลและบัตรเครดิต</b><small>เตือนเมื่อครบกำหนดวันนี้หรือพรุ่งนี้</small></div></div>
-                <span id="pushStatusBadge" class="pill">ยังไม่เปิด</span>
-              </div>
-              <div class="push-time-note">⏰ ส่งเวลา <b>08:00 น.</b> ตามเวลาไทย</div>
-              <div class="row push-actions">
-                <button id="testPushBtn" type="button" class="btn soft hidden">🔔 ทดสอบแจ้งเตือน</button>
-              </div>
-              <button id="enablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">เปิดแจ้งเตือน</button>
-              <button id="disablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">ปิดแจ้งเตือน</button>
+          <div class="card settings-card notification-settings settings-push-feature">
+            <div class="settings-title"><span>🔔</span><div><h3>แจ้งเตือนบนมือถือ</h3><p>เชื่อมต่อและส่งข้อความทดสอบถึงเครื่องนี้</p></div><span id="pushStatusBadge" class="pill">กำลังตรวจสอบ</span></div>
+            <p id="pushStatusText" class="push-connection" role="status">กำลังตรวจสอบการเชื่อมต่อ…</p>
+            <p id="pushInstallHint" hidden>สำหรับ iPhone ต้องเปิดผ่านไอคอน My Finance ที่เพิ่มไปยังหน้าจอโฮม</p>
+            <label class="setting-row toggle-row"><div><b>เปิดแจ้งเตือนเครื่องนี้</b><small>เมื่อมีบิลหรือบัตรใกล้ครบกำหนด</small></div><span class="switch"><input id="pushDeviceSetting" type="checkbox" aria-label="เปิดแจ้งเตือนบนมือถือ"><span></span></span></label>
+            <div class="push-setup-steps">
+              <div class="push-setup-step"><span>1</span><div><b>เชื่อมต่อเครื่องนี้</b><small>ขอสิทธิ์รับการแจ้งเตือน</small></div><button id="enablePushBtn" type="button" class="btn soft">เชื่อมต่อ</button></div>
+              <div class="push-setup-step"><span>2</span><div><b>ส่งทดสอบถึงโทรศัพท์</b><small>ตรวจแบนเนอร์และผลรับจริง</small></div><button id="testPushBtn" type="button" class="btn primary" disabled>ส่งทดสอบ</button></div>
             </div>
-
+            <div id="pushTestResult" class="push-test-result" role="status">ยังไม่ได้ส่งทดสอบ</div>
+            <div class="push-repair-actions"><button id="reconnectPushBtn" type="button" class="text-action">↻ เชื่อมต่อเครื่องนี้ใหม่</button><button id="checkPushBtn" type="button" class="text-action">ตรวจอีกครั้ง</button><button id="localPushBtn" type="button" class="text-action" disabled>ทดสอบแสดงบนเครื่อง</button></div>
+            <p class="push-repair-note">เชื่อมต่อใหม่จะเปลี่ยนเฉพาะทะเบียนแจ้งเตือนบนอุปกรณ์นี้ ไม่ลบข้อมูลการเงินหรือทะเบียนเครื่องอื่น</p>
+            <button id="disablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">ปิดแจ้งเตือน</button>
+            <p class="push-schedule">⏰ แจ้งเตือนบิลและบัตรเครดิตตามกำหนดเดิม เวลา 08:00 น. (ประเทศไทย)</p>
             <div class="notification-block home-notification-block">
               <div class="notification-block-title"><span>🏠</span><div><b>การเตือนในหน้า Home</b><small>เป็นข้อความที่เห็นตอนเปิดเว็บไซต์ ไม่ใช่ Push</small></div></div>
               <label class="setting-row toggle-row">
@@ -501,10 +505,10 @@
 </form>
 </dialog>
 
-<script src="./vendor/chart-4.4.7.umd.js?v=20261017-quotes63"></script>
+<script src="../vendor/chart-4.4.7.umd.js?v=20261023-quality02"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
-<script type="module" src="./slip-reader.js?v=20261017-quotes63"></script>
-<script type="module" src="./app.js?v=20261017-subcustom2"></script>
-<script type="module" src="./app-nav.js?v=20261017-quotes63"></script></body>
+<script type="module" src="../slip-reader.js?v=20261023-quality02"></script>
+<script type="module" src="../app.js?v=20261023-quality02"></script>
+<script type="module" src="../app-nav.js?v=20261023-quality02"></script></body>
 </html>
 
