@@ -36,8 +36,9 @@ export function createRefreshCoordinator({refresh,isBlocked=()=>false,getDelay=(
   }
 
   function schedule(){
-    clearTimeout(timer);
+    // Keep the first pending refresh. Repeated events should not postpone it forever.
     if(isBlocked()){pending=true;return;}
+    if(timer!==null)return;
     const delay=Math.max(0,Number(getDelay())||0);
     timer=setTimeout(()=>{
       timer=null;
