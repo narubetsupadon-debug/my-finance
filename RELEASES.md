@@ -10,6 +10,13 @@ Version tracking starts at **1.0.0** on 2026-10-21. Earlier releases are not ass
 - Update the service worker cache when publishing. Change JS/CSS query versions when those assets change, keeping shared versions consistent.
 - Record the release here, run the checks relevant to the changes, and verify the published version. Preview work does not increment the production version until promoted.
 
+## 1.0.2 — 2026-10-24
+
+- Corrected CSS cascade precedence so collapsed Settings groups actually hide their cards.
+- Removed conflicting flex bases that stretched account controls vertically and squeezed accent labels or notification badges.
+- Sized Settings controls and cards for 320–430px phones; preserved handlers, IDs, notification registrations and data.
+- Updated Settings stylesheet URL and installed-app cache together.
+
 ## 1.0.1 — 2026-10-23
 
 - Promoted the owner-approved aqua donut, selected-category center values and top-five expense carousel from Test. Period scopes, financial records and calculation rules remain unchanged.
