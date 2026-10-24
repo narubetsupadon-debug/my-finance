@@ -1,0 +1,16 @@
+/* Entity editor: bounded sheet, independently scrolling fields, safe footer. */
+#entityDialog{box-sizing:border-box;width:min(580px,calc(100vw - 24px));max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);padding:0;overflow:hidden}
+#entityDialog #entityForm{display:flex;flex-direction:column;box-sizing:border-box;padding:0;max-width:none;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow:hidden}
+#entityForm>#entityTitle{flex:none;margin:0;padding:22px 24px 18px;font-size:20px;line-height:1.5}
+#entityForm>#entityFields{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:0 24px 20px;gap:16px 14px;scroll-padding-block:16px}
+#entityFields>.field{min-width:0}#entityFields input,#entityFields select{box-sizing:border-box;max-width:100%;min-width:0}
+#entityFields .debt-logo-picker{min-width:0}#entityFields .debt-logo-picker select{min-width:0}
+#entityForm>.modal-actions{position:static;flex:none;margin:0;padding:14px 24px max(18px,env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--card);gap:10px}
+#entityForm>.modal-actions .btn{min-height:48px;padding:10px 20px;white-space:nowrap}
+@media(max-width:820px){
+ #entityDialog{width:100%;max-width:100%;margin:auto 0 0;border-radius:24px 24px 0 0}
+ #entityForm>#entityTitle{padding:22px 22px 16px}
+ #entityForm>#entityFields{padding:0 22px 20px;grid-template-columns:minmax(0,1fr)}
+ #entityFields input,#entityFields select,#entityFields textarea{font-size:16px}
+ #entityForm>.modal-actions{padding:14px 22px calc(18px + env(safe-area-inset-bottom,0px))}
+}

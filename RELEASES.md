@@ -1,3 +1,6 @@
+## 1.0.7 — 24 October 2026
+- Bound the shared entity editor to the viewport; scroll fields independently with a padded, safe-area-aware action footer. Financial handlers and field IDs are unchanged.
+
 ## 1.0.6 — 24 October 2026
 - Remove the monthly loan payment summary and per-loan payment states at the owner’s request. Restore the original wallet UI; financial records are unchanged.
 

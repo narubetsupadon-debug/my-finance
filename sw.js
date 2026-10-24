@@ -1,4 +1,4 @@
-const CACHE='my-finance-loan-restore-v1.0.6';
+const CACHE='my-finance-entity-dialog-v1.0.7';
 const SHELL=['./summary-proportion.css?v=20261023-quality02','./summary-proportion.js?v=20261023-quality02','./summary-highest.js?v=20261023-quality02','./','./index.html','./style.css?v=20261023-quality02','./minimal-dark.css?v=20261023-quality02','./theme.js?v=20261023-quality02','./app.js?v=20261023-quality02','./app-data.js?v=20261023-quality02','./app-summary.js?v=20261023-quality02','./app-dashboard.js?v=20261023-quality02','./app-transactions.js?v=20261023-quality02','./app-planning.js?v=20261023-quality02','./app-safety.js?v=20261023-quality02','./finance-core.js?v=20261023-quality02','./finance-backup.js?v=20261023-quality02','./app-nav.js?v=20261023-quality02','./rent.html','./rent.css?v=20261023-quality02&navfix=03','./rent.js?v=20261023-quality02','./rent-core.js?v=20261023-quality02','./car.html','./car.css?v=20261023-quality02','./car.js?v=20261023-quality02','./salary.html','./salary.js?v=20261023-quality02','./salary-payslip.js?v=20261023-quality02','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261023-quality02','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
 SHELL.push('./ui-polish.css?v=20261023-quality02','./dashboard-design.css?v=20261023-quality02','./push-settings.css?v=20261023-quality02');
 SHELL.push('./app-storage.js?v=20261023-quality02');
@@ -11,6 +11,7 @@ SHELL.push('./mobile-compact.css?v=20261023-quality02');
 SHELL.push('./nav-unified.css?v=20261023-quality02&navux=01','./mobile-polish.css?v=20261023-quality02&navux=01','./rent-refresh.css?v=20261023-quality02&navux=01','./nav-scroll.js?v=20261023-quality02&navux=01');
 SHELL.push('./settings-mobile-fix.css?v=20261023-quality02&settingsfix=03');
 SHELL.push('./app.js?v=20261023-quality02&loans=06','./app-planning.js?v=20261023-quality02&loans=06','./ui-polish.css?v=20261023-quality02&loans=06');
+SHELL.push('./entity-dialog.css?v=20261023-quality02&dialog=07');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
