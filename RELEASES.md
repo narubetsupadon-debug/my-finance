@@ -1,3 +1,6 @@
+## 1.0.6 — 24 October 2026
+- Remove the monthly loan payment summary and per-loan payment states at the owner’s request. Restore the original wallet UI; financial records are unchanged.
+
 ## 1.0.5 — 24 October 2026
 - Version the entry module, planning dependency and loan styling URLs so an older active worker cannot serve the previous loan UI to new HTML. Precache exact new URLs alongside detail-page assets.
 

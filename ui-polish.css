@@ -352,11 +352,3 @@ html[data-resolved-theme=dark] .spent-panel{border-color:transparent}
 /* Keep the chart's intrinsic canvas size inside narrow cards, including while loading. */
 .chart-box{min-width:0}
 .chart-box canvas{max-width:100%}
-
-/* Monthly loan payments are separate from outstanding principal. */
-.loan-month-overview{padding:20px;margin-top:24px;border-radius:20px;background:var(--surface);border:1px solid var(--line);min-width:0}
-.loan-month-overview h3{margin:8px 0;font-size:16px}.loan-month-total{display:block;font-size:clamp(24px,6vw,32px);overflow-wrap:anywhere}
-.loan-month-due{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}.loan-month-due>div{min-width:0}.loan-month-due>div>span{display:block;font-size:12px;color:var(--muted)}.loan-month-due b{display:block;font-size:clamp(23px,5vw,29px);overflow-wrap:anywhere}
-.loan-month-state{font-size:12px;background:var(--surface);color:var(--text);padding:7px 10px;border-radius:16px}.loan-month-state.paid{color:var(--green)}
-.loan-month-split{display:flex;flex-wrap:wrap;gap:12px 24px;margin:14px 0;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.loan-month-split b{display:block;font-size:17px;color:var(--text);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.wallet-loan .loan-month-due~.wallet-amount{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.wallet-loan .loan-month-due~.wallet-amount b{font-size:20px}
