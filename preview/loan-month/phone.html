@@ -1,0 +1,125 @@
+<!doctype html><html lang="th" data-accent="purple" style="--primary: #7c3aed; --primary2: #a78bfa;" class="active mobile-nav-ready"><head><base href="https://narubetsupadon-debug.github.io/my-finance/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0e14">
+<link rel="manifest" href="./manifest.webmanifest?v=walletfinal">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Finance">
+<title>My Finance</title>
+<link rel="preconnect" href="https://esm.sh" crossorigin="">
+<link rel="modulepreload" href="./app.js?v=20261023-quality02">
+<link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261023-quality02">
+<link rel="stylesheet" href="./style.css?v=20261023-quality02">
+<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
+
+<style>
+.insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
+#insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261023-quality02">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=walletfinal">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=walletfinal">
+<link rel="stylesheet" href="./ui-polish.css?v=20261023-quality02">
+<link rel="stylesheet" href="./dashboard-design.css?v=20261023-quality02">
+<link rel="stylesheet" href="./summary-proportion.css?v=20261023-quality02"><link rel="stylesheet" href="./push-settings.css?v=20261023-quality02"><link rel="stylesheet" href="./mobile-compact.css?v=20261023-quality02">
+<link rel="stylesheet" href="./nav-unified.css?v=20261023-quality02&amp;navux=01">
+<link rel="stylesheet" href="./mobile-polish.css?v=20261023-quality02&amp;navux=01">
+<link rel="stylesheet" href="./settings-mobile-fix.css?v=20261023-quality02&amp;settingsfix=03">
+<style>/* Monthly loan payments are separate from outstanding principal. */
+.loan-month-overview{padding:20px;margin-top:24px;border-radius:20px;background:var(--surface);border:1px solid var(--line);min-width:0}
+.loan-month-overview h3{margin:8px 0;font-size:16px}.loan-month-total{display:block;font-size:clamp(24px,6vw,32px);overflow-wrap:anywhere}
+.loan-month-due{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}.loan-month-due>div{min-width:0}.loan-month-due>div>span{display:block;font-size:12px;color:var(--muted)}.loan-month-due b{display:block;font-size:clamp(23px,5vw,29px);overflow-wrap:anywhere}
+.loan-month-state{font-size:12px;background:var(--surface);color:var(--text);padding:7px 10px;border-radius:16px}.loan-month-state.paid{color:var(--green)}
+.loan-month-split{display:flex;flex-wrap:wrap;gap:12px 24px;margin:14px 0;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.loan-month-split b{display:block;font-size:17px;color:var(--text);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.wallet-loan .loan-month-due~.wallet-amount{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.wallet-loan .loan-month-due~.wallet-amount b{font-size:20px}
+</style></head>
+<body>
+
+
+
+
+<p style="padding:12px">PREVIEW · ข้อมูลสมมติ · ตรวจการจัดวางเท่านั้น</p><div id="app" class="app"><div id="dataError" class="notice err hidden" role="alert"><span id="dataErrorText"></span> <button id="retryData" type="button" class="btn small">โหลดใหม่</button></div>
+  <div id="syncStatusBar" class="sync-status" role="status" aria-live="polite" data-state="ok">
+    <span id="syncStatusDot" class="sync-dot" data-state="ok"></span>
+    <span id="syncStatusText">ซิงก์แล้ว · 09:46</span>
+    <button id="syncRetryBtn" type="button" class="text-action hidden">ลองใหม่</button>
+  </div>
+  <header class="topbar">
+    <div class="topin">
+      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261023-quality02" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
+      <div class="userbox">
+        <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings">⚙️ ตั้งค่า</button>
+        <span id="userEmail" class="muted">test@example.invalid</span>
+        <button id="logout" class="btn small ghost" type="button">ออกจากระบบ</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="เมนูหลัก">
+      <div class="nav-group">
+        <div class="nav-group-label">ประจำวัน</div>
+        <button class="navbtn" data-page="dashboard" type="button"><span class="nav-icon" aria-hidden="true">📊</span><span>ภาพรวม</span></button>
+        <button class="navbtn" data-page="transactions" type="button"><span class="nav-icon" aria-hidden="true">🧾</span><span>รายรับ–รายจ่าย</span></button>
+        <button class="navbtn nav-capture" type="button" data-open-capture="" aria-haspopup="dialog"><span class="nav-icon" aria-hidden="true">＋</span><span>บันทึก</span></button>
+        <button class="navbtn" data-page="summary" type="button"><span class="nav-icon" aria-hidden="true">📈</span><span>สรุป</span></button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">วางแผนเงิน</div>
+        <button class="navbtn" data-page="budget" type="button"><span class="nav-icon" aria-hidden="true">🎯</span><span>งบประมาณ</span></button>
+        <button class="navbtn" data-page="bills" type="button"><span class="nav-icon" aria-hidden="true">📅</span><span>บิลประจำ</span></button>
+        <button class="navbtn active" data-page="debts" aria-current="page" type="button"><span class="nav-icon" aria-hidden="true">💳</span><span>บัตรและสินเชื่อ</span></button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">บันทึกเฉพาะเรื่อง</div>
+        <a class="navbtn"><span class="nav-icon" aria-hidden="true">💰</span><span>เงินเดือน</span></a>
+        <a class="navbtn"><span class="nav-icon" aria-hidden="true">🏠</span><span>ค่าห้องเช่า</span></a>
+        <a class="navbtn"><span class="nav-icon" aria-hidden="true">🚗</span><span>รถของฉัน</span></a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">จัดการข้อมูล</div>
+        <button class="navbtn" data-page="accounts" type="button"><span class="nav-icon" aria-hidden="true">🏦</span><span>บัญชี</span></button>
+        <button class="navbtn" data-page="categories" type="button"><span class="nav-icon" aria-hidden="true">🏷️</span><span>หมวดหมู่</span></button>
+        <button class="navbtn" data-page="settings" type="button"><span class="nav-icon" aria-hidden="true">⚙️</span><span>ตั้งค่า</span></button>
+      </div>
+    </aside>
+
+    <main class="content">
+      
+
+      
+
+      
+
+      
+
+      
+
+      <section id="debtsPage" class="page">
+        <div class="page-head"><div><h2>บัตรและสินเชื่อ</h2><div class="muted">ดูยอดที่ใช้ไป วงเงินคงเหลือ และยอดที่ต้องจ่ายรอบนี้</div></div><button class="btn primary" onclick="openEntity('debt')" type="button">+ เพิ่มบัตร/สินเชื่อ</button></div>
+        <div id="debtList" class="wallet-list"><div class="wallet-overview"><div><span>ยอดใช้บัตรรวม</span><b class="money">฿0.00</b></div><div><span>หนี้สินเชื่อคงเหลือ</span><b class="money">฿123,456.78</b></div></div><div class="wallet-section"><h3>บัตรเครดิต</h3><span>0 รายการ</span></div><div class="wallet-grid"><div class="wallet-empty">ยังไม่มีบัตรเครดิตที่เปิดใช้งาน</div></div><section class="loan-month-overview" aria-label="ยอดชำระสินเชื่อเดือนนี้"><div class="wallet-caption">สินเชื่อ · ตุลาคม 2569</div><h3>ยอดต้องจ่ายเดือนนี้</h3><b class="loan-month-total money">฿12,345.67</b><div class="loan-month-split"><span>บันทึกจ่ายแล้ว <b>฿0.00</b></span><span>ยังต้องจ่าย <b>฿12,345.67</b></span></div><p class="wallet-caption">อิงค่างวดที่ตั้งไว้ · จ่ายแล้วนับจากรายการชำระที่จับคู่ได้ในเดือนนี้ ไม่ใช่ยอดยืนยันจากธนาคาร</p></section><div class="wallet-section"><h3>สินเชื่อและผ่อนชำระ</h3><span>1 รายการ</span></div><div class="wallet-grid"><article class="wallet-card wallet-loan"><div class="wallet-head"><div class="wallet-identity"><span class="wallet-symbol" aria-hidden="true">↗</span><h3>ค่าใช้จ่ายชื่อยาวเพื่อทดสอบการแสดงผลบนหน้าจอมือถือและยอดเงินจำนวนมาก</h3></div><span class="wallet-tag">LOAN</span></div><div class="loan-month-due"><div><span>ยอดชำระเดือนนี้</span><b class="money">฿12,345.67</b></div><span class="loan-month-state unrecorded">ยังไม่พบรายการชำระ</span></div><p class="wallet-caption">กำหนดชำระ 2026-10-25</p><div class="loan-month-split"><span>บันทึกจ่ายแล้ว <b>฿0.00</b></span><span>ยังต้องจ่าย <b>฿12,345.67</b></span></div><div class="wallet-amount"><span>ยอดหนี้คงเหลือ</span><b class="money">฿123,456.78</b></div><div class="wallet-available"><span>ค่างวด / รอบ</span><b class="money">฿12,345.67</b></div><div class="wallet-footer"><span>ครบกำหนดทุกวันที่ 25</span><details class="wallet-more"><summary aria-label="จัดการ ค่าใช้จ่ายชื่อยาวเพื่อทดสอบการแสดงผลบนหน้าจอมือถือและยอดเงินจำนวนมาก">⋯</summary><div class="wallet-detail"><div>ยอดชำระต่อรอบ ฿12,345.67</div><div class="actions"><button type="button" class="btn small soft" data-edit="debt" data-id="d1">แก้ไข</button><button type="button" class="btn small danger" data-del="debts" data-id="d1">ลบ</button></div></div></details></div></article></div><p class="wallet-footnote">ยอดคงเหลือปัจจุบัน · ไม่เปลี่ยนตามเดือนที่เลือก</p></div>
+      </section>
+
+      
+
+      
+
+      
+    </main>
+  </div>
+  <button class="fab" onclick="openTx()" type="button">＋ บันทึกรายการ</button>
+<nav class="mobile-app-nav" aria-label="เมนูหลัก"><button type="button" class="app-nav-tab" data-destination="dashboard"><span class="app-nav-icon" aria-hidden="true">📊</span><span>ภาพรวม</span></button><button type="button" class="app-nav-tab" data-destination="transactions"><span class="app-nav-icon" aria-hidden="true">🧾</span><span>รายรับ–รายจ่าย</span></button><button type="button" class="app-nav-tab app-nav-capture" data-destination="capture" aria-haspopup="dialog" aria-expanded="false"><span class="app-nav-icon" aria-hidden="true">＋</span><span>เพิ่ม</span></button><button type="button" class="app-nav-tab" data-destination="summary"><span class="app-nav-icon" aria-hidden="true">📈</span><span>วิเคราะห์</span></button><button type="button" class="app-nav-tab is-active" data-destination="more" aria-haspopup="dialog" aria-expanded="false"><span class="app-nav-icon" aria-hidden="true">☰</span><span>เพิ่มเติม</span></button></nav></div>
+
+
+
+
+
+
+
+<div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
+
+
+
+
+
+</body></html>
