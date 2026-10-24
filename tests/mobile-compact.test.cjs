@@ -11,7 +11,7 @@ for(const name of ['index.html','rent.html','car.html','salary.html']){
  assert.match(html,/viewport-fit=cover/,name+' must respect iPhone safe area');
 }
 assert.match(sw,/SHELL\.push\('\.\/mobile-compact\.css\?v=20261023-quality02'\)/,'Service worker must precache exact CSS URL');
-assert.match(sw,/my-finance-settings-mobile-fix03-v1\.0\.2/,'Cache must change with mobile release');
+assert.match(sw,/my-finance-loan-month-v1\.0\.3/,'Cache must change with mobile release');
 assert.match(css,/\.rent-wrap #rentForm>\.fields/,'Rent layout must be compact');
 assert.match(css,/\.salary-wrap #saveSalary\{min-height:48px\}/,'Salary save must stay tappable');
 assert.match(css,/\.car-wrap #addCarExpense\{min-height:46px\}/,'Car expense action must stay tappable');

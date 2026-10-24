@@ -20,6 +20,6 @@ assert.match(nav,/body:has\(\.finance-detail-page\) \.mobile-app-nav\.is-scroll-
 assert.match(nav,/translateY\(calc\(100%/,'Scroll down hides tabs');
 assert.match(nav,/\.mobile-app-nav:not\(\.is-scroll-hidden\)/,'Scroll up reveals tabs');
 const sw=read('sw.js');
-assert.match(sw,/my-finance-settings-mobile-fix03-v1\.0\.2/);
+assert.match(sw,/my-finance-loan-month-v1\.0\.3/);
 for(const p of ['nav-unified.css','mobile-polish.css','rent-refresh.css','nav-scroll.js'])assert.ok(sw.includes('./'+p+'?v=20261023-quality02&navux=01'),p+' offline cached');
 console.log('PASS production mobile UX release: 4 pages, rent fields, scrolling, offline cache, no test guard');

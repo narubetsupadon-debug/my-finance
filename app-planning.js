@@ -29,6 +29,30 @@ export function bindDebtLogoPicker(root){
  name.addEventListener('input',update);select.addEventListener('change',update);root.querySelector('[name=debt_type]')?.addEventListener('change',update);update();
 }
 
+// Read-only monthly view. Legacy repayments are matched by a unique exact name,
+// never by substring or by bills charged TO a loan/card.
+export function loanMonthStatus(debt,transactions,debts,today){
+ const cents=value=>Number.isFinite(Number(value))?Math.max(0,Math.round(Number(value)*100)):0;
+ const ym=today.slice(0,7),name=String(debt.name||'').trim();
+ const unique=name&&debts.filter(d=>String(d.name||'').trim()===name).length===1;
+ const descriptions=new Set(['ชำระบัตร '+name,'ชำระสินเชื่อ '+name]);
+ const seen=new Set();let paidCents=0;
+ for(const t of transactions){
+  if(t.type!=='expense'||t.status!=='paid'||String(t.transaction_date).slice(0,7)!==ym||String(t.transaction_date).slice(0,10)>today)continue;
+  const linked=t.source==='debt_payment:'+debt.id;
+  const legacy=unique&&(!t.source||t.source==='web'||String(t.source).startsWith('import_'))&&descriptions.has(String(t.description||'').trim());
+  if(!linked&&!legacy)continue;
+  if(t.id&&seen.has(t.id))continue;if(t.id)seen.add(t.id);
+  paidCents+=cents(t.amount);
+ }
+ const configured=cents(debt.installment_amount),known=configured>0;
+ const dueCents=known&&(cents(debt.outstanding_amount)>0||paidCents>0)?configured:0;
+ const remainingCents=Math.max(0,dueCents-paidCents);
+ const last=new Date(Date.UTC(Number(ym.slice(0,4)),Number(ym.slice(5,7)),0)).getUTCDate();
+ const day=Number(debt.due_day),dueDate=Number.isInteger(day)&&day>=1&&day<=31?ym+'-'+String(Math.min(day,last)).padStart(2,'0'):null;
+ return {known,dueCents,paidCents,remainingCents,dueDate,state:!known?'unknown':dueCents===0?'none':remainingCents===0?'paid':paidCents>0?'partial':'unrecorded'};
+}
+
 // Bills, debts, and budget rendering extracted from app.js.
 export function createPlanningRenderer({$,money,esc,bangkokDay,budgetSummary,getBills,getDebts,getBudgets,getTransactions}){
 const openDetails=createTotalDetails({$,money,fmtDate:date=>date});
@@ -56,14 +80,19 @@ function renderBills(){
 function renderDebts(){
  const debts=getDebts(),active=debts.filter(d=>d.is_active!==false),cards=active.filter(d=>d.debt_type==='credit_card'),loans=active.filter(d=>d.debt_type!=='credit_card');
  const total=xs=>xs.reduce((sum,d)=>sum+Math.round(Number(d.outstanding_amount||0)*100),0)/100;
+ const today=bangkokDay(),monthLabel=new Intl.DateTimeFormat('th-TH',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(today.slice(0,7)+'-15T00:00:00Z'));
+ const monthly=d=>loanMonthStatus(d,getTransactions(),debts,today);
+ const loanMonthlyMarkup=d=>{const m=monthly(d),label={unknown:'ยังไม่ระบุค่างวด',none:'ไม่มีงวดที่ต้องจ่าย',paid:'บันทึกจ่ายครบแล้ว',partial:'จ่ายบางส่วน',unrecorded:'ยังไม่พบรายการชำระ'}[m.state];return '<div class="loan-month-due"><div><span>ยอดชำระเดือนนี้</span><b class="money">'+(m.known?money(m.dueCents/100):'ยังไม่ระบุ')+'</b></div><span class="loan-month-state '+m.state+'">'+label+'</span></div><p class="wallet-caption">'+(m.dueDate?'กำหนดชำระ '+esc(new Intl.DateTimeFormat('th-TH',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(m.dueDate+'T00:00:00Z'))):'ยังไม่ระบุวันครบกำหนด')+'</p><div class="loan-month-split"><span>บันทึกจ่ายแล้ว <b>'+money(m.paidCents/100)+'</b></span><span>ยังต้องจ่าย <b>'+(m.known?money(m.remainingCents/100):'ยังไม่ทราบ')+'</b></span></div>';};
+ const states=loans.map(monthly),sumMonth=key=>states.reduce((sum,m)=>sum+m[key],0)/100;
+ const monthOverview=loans.length?'<section class="loan-month-overview" aria-label="ยอดชำระสินเชื่อเดือนนี้"><div class="wallet-caption">สินเชื่อ · '+esc(monthLabel)+'</div><h3>ยอดต้องจ่ายเดือนนี้</h3><b class="loan-month-total money">'+money(sumMonth('dueCents'))+'</b><div class="loan-month-split"><span>บันทึกจ่ายแล้ว <b>'+money(sumMonth('paidCents'))+'</b></span><span>ยังต้องจ่าย <b>'+money(sumMonth('remainingCents'))+'</b></span></div>'+(states.some(m=>!m.known)?'<p class="wallet-caption">ยังไม่รวม '+states.filter(m=>!m.known).length+' สินเชื่อที่ยังไม่ระบุค่างวด</p>':'')+'<p class="wallet-caption">อิงค่างวดที่ตั้งไว้ · จ่ายแล้วนับจากรายการชำระที่จับคู่ได้ในเดือนนี้ ไม่ใช่ยอดยืนยันจากธนาคาร</p></section>':'';
  const cardMarkup=d=>{
   const isCard=d.debt_type==='credit_card',limit=Number(d.original_amount||0),used=Number(d.outstanding_amount||0),available=Math.max(0,limit-used),pct=limit>0?Math.max(0,Math.min(100,used/limit*100)):0;
-  return '<article class="wallet-card '+(isCard?'wallet-credit':'wallet-loan')+'"><div class="wallet-head"><div class="wallet-identity">'+debtLogoMarkup(d)+'<h3>'+esc(d.name)+'</h3></div><span class="wallet-tag">'+(d.is_active===false?'ปิดใช้งาน':isCard?'CREDIT':'LOAN')+'</span></div><div class="wallet-amount"><span>'+(isCard?'ยอดใช้ไป':'ยอดหนี้คงเหลือ')+'</span><b class="money">'+money(used)+'</b></div>'+
-  (isCard?'<div class="wallet-available"><span>วงเงินคงเหลือ</span><b class="money">'+(limit>0?money(available):'ยังไม่ระบุวงเงิน')+'</b></div><div class="wallet-bar"><div class="'+(used>limit&&limit>0?'over':'')+'" style="width:'+pct+'%"></div></div><div class="wallet-caption"><span>'+(limit>0?'ใช้ไป '+Math.round(used/limit*100)+'%':'ยังไม่ระบุวงเงิน')+'</span><span>'+(limit>0?'วงเงิน '+money(limit):'—')+'</span></div>'+(used>limit&&limit>0?'<p class="wallet-alert">เกินวงเงิน '+money(used-limit)+'</p>':''):'<div class="wallet-available"><span>ค่างวด / รอบ</span><b class="money">'+(Number(d.installment_amount)>0?money(d.installment_amount):'ยังไม่ระบุ')+'</b></div>')+
+  return '<article class="wallet-card '+(isCard?'wallet-credit':'wallet-loan')+'"><div class="wallet-head"><div class="wallet-identity">'+debtLogoMarkup(d)+'<h3>'+esc(d.name)+'</h3></div><span class="wallet-tag">'+(d.is_active===false?'ปิดใช้งาน':isCard?'CREDIT':'LOAN')+'</span></div>'+(!isCard&&d.is_active!==false?loanMonthlyMarkup(d):'')+'<div class="wallet-amount"><span>'+(isCard?'ยอดใช้ไป':'ยอดหนี้คงเหลือ')+'</span><b class="money">'+money(used)+'</b></div>'+
+  (isCard?'<div class="wallet-available"><span>วงเงินคงเหลือ</span><b class="money">'+(limit>0?money(available):'ยังไม่ระบุวงเงิน')+'</b></div><div class="wallet-bar"><div class="'+(used>limit&&limit>0?'over':'')+'" style="width:'+pct+'%"></div></div><div class="wallet-caption"><span>'+(limit>0?'ใช้ไป '+Math.round(used/limit*100)+'%':'ยังไม่ระบุวงเงิน')+'</span><span>'+(limit>0?'วงเงิน '+money(limit):'—')+'</span></div>'+(used>limit&&limit>0?'<p class="wallet-alert">เกินวงเงิน '+money(used-limit)+'</p>':''):d.is_active!==false?'':'<div class="wallet-available"><span>ค่างวด / รอบ</span><b class="money">'+(Number(d.installment_amount)>0?money(d.installment_amount):'ยังไม่ระบุ')+'</b></div>')+
   '<div class="wallet-footer"><span>'+(Number(d.due_day)>0?'ครบกำหนดทุกวันที่ '+Number(d.due_day):'ยังไม่ระบุวันครบกำหนด')+'</span><details class="wallet-more"><summary aria-label="จัดการ '+esc(d.name)+'">⋯</summary><div class="wallet-detail"><div>'+(Number(d.installment_amount)>0?'ยอดชำระต่อรอบ '+money(d.installment_amount):'ยังไม่ระบุยอดชำระต่อรอบ')+'</div><div class="actions"><button type="button" class="btn small soft" data-edit="debt" data-id="'+esc(d.id)+'">แก้ไข</button><button type="button" class="btn small danger" data-del="debts" data-id="'+esc(d.id)+'">ลบ</button></div></div></details></div></article>';
  };
  const section=(title,items)=>'<div class="wallet-section"><h3>'+title+'</h3><span>'+items.length+' รายการ</span></div><div class="wallet-grid">'+(items.length?[...items].sort((a,b)=>Number(b.outstanding_amount||0)-Number(a.outstanding_amount||0)).map(cardMarkup).join(''):'<div class="wallet-empty">ยังไม่มี'+title+'ที่เปิดใช้งาน</div>')+'</div>';
- $('debtList').innerHTML='<div class="wallet-overview"><div><span>ยอดใช้บัตรรวม</span><b class="money">'+money(total(cards))+'</b></div><div><span>หนี้สินเชื่อคงเหลือ</span><b class="money">'+money(total(loans))+'</b></div></div>'+section('บัตรเครดิต',cards)+section('สินเชื่อและผ่อนชำระ',loans)+(debts.some(d=>d.is_active===false)?'<details class="wallet-inactive"><summary>ปิดใช้งานแล้ว</summary><div class="wallet-grid">'+debts.filter(d=>d.is_active===false).map(cardMarkup).join('')+'</div></details>':'')+'<p class="wallet-footnote">ยอดคงเหลือปัจจุบัน · ไม่เปลี่ยนตามเดือนที่เลือก</p>';
+ $('debtList').innerHTML='<div class="wallet-overview"><div><span>ยอดใช้บัตรรวม</span><b class="money">'+money(total(cards))+'</b></div><div><span>หนี้สินเชื่อคงเหลือ</span><b class="money">'+money(total(loans))+'</b></div></div>'+section('บัตรเครดิต',cards)+monthOverview+section('สินเชื่อและผ่อนชำระ',loans)+(debts.some(d=>d.is_active===false)?'<details class="wallet-inactive"><summary>ปิดใช้งานแล้ว</summary><div class="wallet-grid">'+debts.filter(d=>d.is_active===false).map(cardMarkup).join('')+'</div></details>':'')+'<p class="wallet-footnote">ยอดคงเหลือปัจจุบัน · ไม่เปลี่ยนตามเดือนที่เลือก</p>';
 }
 function budgetSpent(b){
  const transactions=getTransactions();

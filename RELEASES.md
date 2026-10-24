@@ -1,3 +1,9 @@
+## 1.0.3 — 24 October 2026
+- Monthly loan due, recorded payments, and remaining due shown separately from outstanding balance.
+- Current Bangkok month; exact unique repayment descriptions only for legacy web/import records. Pending, cancelled, future payments and charges made via a loan are excluded.
+- Unknown installment amounts remain unknown. Display only; no financial records or debt balances are changed.
+- New service-worker cache reloads shell assets on installation.
+
 # App versions
 
 Version tracking starts at **1.0.0** on 2026-10-21. Earlier releases are not assigned numbers retroactively.

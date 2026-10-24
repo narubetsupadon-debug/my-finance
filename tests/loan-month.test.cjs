@@ -1,0 +1,17 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync(require('node:path').join(__dirname,'../app-planning.js'),'utf8').replace(/^import .*$/gm,'').replaceAll('export ','');
+const {loanMonthStatus:status}=vm.runInNewContext(source+'\n({loanMonthStatus})');
+const debt={id:'loan1',name:'สินเชื่อ A',installment_amount:1784,outstanding_amount:21408,due_day:31};
+const tx=(extra={})=>({id:'t1',description:'ชำระบัตร สินเชื่อ A',source:'web',type:'expense',status:'paid',transaction_date:'2026-02-05',amount:500,...extra});
+const get=(rows,all=[debt],d=debt)=>status(d,rows,all,'2026-02-20');
+let m=get([tx()]);assert.equal(m.dueCents,178400);assert.equal(m.paidCents,50000);assert.equal(m.remainingCents,128400);assert.equal(m.state,'partial');assert.equal(m.dueDate,'2026-02-28');
+assert.equal(get([tx(),tx()]).paidCents,50000,'same ID counted once');
+for(const extra of [{status:'pending'},{status:'cancelled'},{type:'income'},{transaction_date:'2026-02-25'},{transaction_date:'2026-01-05'},{source:'bill_payment:b1'},{description:'ซื้อของผ่าน สินเชื่อ A'},{description:'ชำระบัตร สินเชื่อ AB'},{amount:-500}])assert.equal(get([tx(extra)]).paidCents,0,JSON.stringify(extra));
+assert.equal(get([tx()], [debt,{...debt,id:'duplicate'}]).paidCents,0,'ambiguous names never matched');
+assert.equal(get([tx({source:'debt_payment:loan1',description:'เปลี่ยนชื่อ'})]).paidCents,50000,'explicit link survives rename');
+assert.equal(get([tx({source:'debt_payment:other'})]).paidCents,0);
+m=get([tx({amount:2000})]);assert.equal(m.state,'paid');assert.equal(m.remainingCents,0);assert.equal(m.paidCents,200000,'actual overpayment retained');
+m=get([],[],{...debt,installment_amount:0});assert.equal(m.known,false);assert.equal(m.state,'unknown');
+assert.equal(get([],[],{...debt,outstanding_amount:0}).state,'none');
+assert.equal(get([tx({amount:0.1}),tx({id:'t2',amount:0.2})]).paidCents,30);
+console.log('PASS loan month: exact satang, partial/full/overpayment, duplicate IDs, ambiguous names, future/pending/cancelled, bill charges, month boundary, unknown and settled loans');
