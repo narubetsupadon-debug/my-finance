@@ -5,7 +5,7 @@ import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=2026102
 import {createSummaryRenderer} from './summary-highest.js?v=20261023-quality02';
 import {createDashboardRenderer} from './app-dashboard.js?v=20261023-quality02';
 import {createTransactionRenderer} from './app-transactions.js?v=20261023-quality02';
-import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-quality02';
+import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-quality02&loans=05';
 import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261023-quality02';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();

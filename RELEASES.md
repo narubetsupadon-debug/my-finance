@@ -1,3 +1,6 @@
+## 1.0.5 — 24 October 2026
+- Version the entry module, planning dependency and loan styling URLs so an older active worker cannot serve the previous loan UI to new HTML. Precache exact new URLs alongside detail-page assets.
+
 ## 1.0.4 — 24 October 2026
 - Show monthly loan summary above credit cards so it is visible without scrolling past every card.
 
