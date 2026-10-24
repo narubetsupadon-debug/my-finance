@@ -65,6 +65,7 @@ async function page(html,js,data,expose,storage={},options={}){
  await walletPage.el('entityForm').onsubmit({preventDefault(){},currentTarget:walletPage.el('entityForm')});assert.equal(walletPage.state.writes.at(-1).row.logo_key,'none');
  walletPage.w.openEntity('debt','logo1');logoChoice=walletPage.el('entityFields').querySelector('[name=logo_key]');logoChoice.value='';
  await walletPage.el('entityForm').onsubmit({preventDefault(){},currentTarget:walletPage.el('entityForm')});assert.equal(walletPage.state.writes.at(-1).row.logo_key,null);
+ assert.ok(walletPage.el('debtList').querySelector('.loan-month-overview').compareDocumentPosition(walletPage.el('debtList').querySelector('.wallet-credit')) & walletPage.w.Node.DOCUMENT_POSITION_FOLLOWING,'Monthly loan summary precedes credit cards');
  assert.match(walletPage.el('debtList').querySelector('.loan-month-overview').textContent,/ยอดต้องจ่ายเดือนนี้/);
  assert.match(walletPage.el('debtList').querySelector('.wallet-loan').textContent,/ยังไม่พบรายการชำระ/);
  assert.equal(walletPage.el('debtList').querySelector('.wallet-credit .loan-month-due'),null);

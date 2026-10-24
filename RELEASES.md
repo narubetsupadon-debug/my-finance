@@ -1,3 +1,6 @@
+## 1.0.4 — 24 October 2026
+- Show monthly loan summary above credit cards so it is visible without scrolling past every card.
+
 ## 1.0.3 — 24 October 2026
 - Monthly loan due, recorded payments, and remaining due shown separately from outstanding balance.
 - Current Bangkok month; exact unique repayment descriptions only for legacy web/import records. Pending, cancelled, future payments and charges made via a loan are excluded.
