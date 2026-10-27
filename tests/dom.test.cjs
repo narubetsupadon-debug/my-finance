@@ -363,13 +363,14 @@ async function page(html,js,data,expose,storage={},options={}){
  }
  assert.equal(menu.state.writes.length,0);
  menu.w.document.querySelector('.navbtn[data-page=dashboard]').click();
- assert.deepEqual([...moreSheet.querySelectorAll('h3')].map(h=>h.textContent),['วางแผนเงิน','บันทึกเฉพาะเรื่อง','จัดการข้อมูล']);
+ assert.deepEqual([...moreSheet.querySelectorAll('h3')].map(h=>h.textContent),['วางแผนเงิน','จัดการข้อมูล']);
  menu.w.document.querySelector('.mobile-app-nav [data-destination=capture]').click();assert.equal(captureSheet.open,true);
  captureSheet.querySelector('[data-destination=income]').click();assert.equal(captureSheet.open,false);assert.equal(menu.el('txDialog').open,true);assert.equal(menu.el('txType').value,'income');
  menu.el('txDialog').close();menu.w.document.querySelector('[data-open-capture]').click();captureSheet.querySelector('[data-destination=expense]').click();assert.equal(menu.el('txType').value,'expense');menu.el('txDialog').close();
  menu.w.history.replaceState(null,'','#capture-income');menu.api.handleNavigationRoute();assert.equal(menu.el('txDialog').open,true);assert.equal(menu.el('txType').value,'income');assert.equal(menu.w.location.hash,'#transactions');menu.el('txDialog').close();
  menu.w.document.querySelector('.mobile-app-nav [data-destination=more]').click();assert.equal(moreSheet.open,true);moreSheet.querySelector('[data-destination=budget]').click();assert.equal(moreSheet.open,false);assert.equal(menu.el('budgetPage').classList.contains('hidden'),false);assert.equal(menu.w.document.querySelector('.mobile-app-nav [data-destination=more]').classList.contains('is-active'),true);
- assert.deepEqual([...captureSheet.querySelectorAll('a,button[data-destination]')].map(b=>b.dataset.destination),['income','expense','salary','rent','car']);
+ assert.deepEqual([...captureSheet.querySelectorAll('a,button[data-destination]')].map(b=>b.dataset.destination),['income','expense']);
+ for(const destination of ['salary','rent','car']){assert.equal(moreSheet.querySelector('[data-destination='+destination+']'),null);assert.equal(captureSheet.querySelector('[data-destination='+destination+']'),null);assert.equal(menu.w.document.querySelector('.sidebar a[href="./'+destination+'.html"]'),null);}
  const autoNav=menu.w.document.querySelector('.mobile-app-nav');
  Object.defineProperty(menu.w,'innerWidth',{value:390,writable:true});
  Object.defineProperty(menu.w.document.documentElement,'scrollHeight',{value:3000,configurable:true});

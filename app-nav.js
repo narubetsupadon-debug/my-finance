@@ -3,7 +3,6 @@ const mount=homeApp||document.body;
 const primary=[['dashboard','📊','ภาพรวม'],['transactions','🧾','รายรับ–รายจ่าย'],['capture','＋','เพิ่ม'],['summary','📈','วิเคราะห์']];
 const groups=[
  ['วางแผนเงิน',[['budget','🎯','งบประมาณ'],['bills','📅','บิลประจำ'],['debts','💳','บัตรและหนี้']]],
- ['บันทึกเฉพาะเรื่อง',[['salary','💰','เงินเดือน','./salary.html'],['rent','🏠','ค่าห้อง','./rent.html'],['car','🚗','ค่าใช้รถ','./car.html']]],
  ['จัดการข้อมูล',[['accounts','🏦','บัญชี'],['categories','🏷️','หมวดหมู่'],['settings','⚙️','ตั้งค่า']]]
 ];
 const secondary=groups.flatMap(([,items])=>items);
@@ -21,8 +20,7 @@ const more=makeButton(['more','☰','เพิ่มเติม'],'app-nav-tab'
 function appendGroup(dialog,label,items,action){const section=document.createElement('section'),heading=document.createElement('h3'),grid=document.createElement('div');section.className='app-menu-group';heading.className='app-menu-group-title';heading.textContent=label;grid.className='app-menu-grid';for(const item of items)grid.append(makeButton(item,'app-menu-item',action?()=>action(item[0]):null));section.append(heading,grid);dialog.append(section);}
 groups.forEach(([label,items])=>appendGroup(sheet,label,items));
 appendGroup(captureSheet,'รายรับ–รายจ่ายทั่วไป',[['income','↗','เพิ่มรายรับ'],['expense','↘','เพิ่มรายจ่าย']],type=>{captureSheet.close();if(homeApp)window.dispatchEvent(new CustomEvent('finance:capture',{detail:type}));else location.href='./index.html#capture-'+type;});
-appendGroup(captureSheet,'ใช้ฟอร์มเฉพาะเรื่อง',groups[1][1]);
-function active(page){buttons.forEach((nodes,key)=>nodes.forEach(b=>{b.classList.toggle('is-active',key===page);if(key===page)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}));more.classList.toggle('is-active',secondary.some(x=>x[0]===page));}
+function active(page){buttons.forEach((nodes,key)=>nodes.forEach(b=>{b.classList.toggle('is-active',key===page);if(key===page)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}));more.classList.toggle('is-active',secondary.some(x=>x[0]===page)||['salary','rent','car'].includes(page));}
 window.addEventListener('finance:page',e=>active(e.detail));
 window.addEventListener('finance:open-capture',openCapture);
 document.querySelector('[data-open-capture]')?.addEventListener('click',openCapture);

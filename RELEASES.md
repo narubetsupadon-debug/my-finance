@@ -1,3 +1,6 @@
+## 1.0.8 — 27 October 2026
+- Hide salary, rent and car entry points from desktop navigation, More and capture chooser. Preserve detail pages, linked transaction edit routes, all data and report calculations. Keep history access in the usage guide.
+
 ## 1.0.7 — 24 October 2026
 - Bound the shared entity editor to the viewport; scroll fields independently with a padded, safe-area-aware action footer. Financial handlers and field IDs are unchanged.
 
