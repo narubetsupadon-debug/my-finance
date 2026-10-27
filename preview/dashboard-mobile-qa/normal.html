@@ -35,7 +35,7 @@
 <div id="app" class="app"><div id="dataError" class="notice err hidden" role="alert"><span id="dataErrorText"></span> <button id="retryData" type="button" class="btn small">โหลดใหม่</button></div>
   <div id="syncStatusBar" class="sync-status" role="status" aria-live="polite" data-state="ok">
     <span id="syncStatusDot" class="sync-dot" data-state="ok"></span>
-    <span id="syncStatusText">ซิงก์แล้ว · 08:41</span>
+    <span id="syncStatusText">ซิงก์แล้ว · 08:45</span>
     <button id="syncRetryBtn" type="button" class="text-action hidden">ลองใหม่</button>
   </div>
   <header class="topbar">
@@ -106,13 +106,13 @@
         <div class="bill-month-strip section"><button type="button" id="homeBillStatus" class="text-action" data-page-jump="bills">บิลเดือนนี้ · จ่ายแล้ว 0 · รอจ่าย 0 · ยังไม่บันทึก 1</button><small id="homeBillStatusNote">ตรวจเฉพาะรายการที่เชื่อมกับบิล · ถ้ากรอกแยกไว้ ตรวจรายการก่อนบันทึกซ้ำ</small></div><p id="homeSpendTrend" class="home-spend-trend">📉 เปรียบเทียบรายจ่าย: ยังมีข้อมูลไม่เพียงพอในช่วงเดียวกันของเดือนก่อน</p>
         <div class="card quick-capture section">
           <div class="section-heading"><div><h2>วันนี้มีรายจ่ายอะไรบ้าง?</h2><p>เลือกหมวดหมู่เพื่อบันทึกรายการได้ทันที</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
-          <div id="quickAdd" class="quick-grid"><button class="quick-btn more" onclick="openTx()"><span>＋</span><b>หมวดอื่น ๆ</b></button></div>
+          <div id="quickAdd" class="quick-grid"><button class="quick-btn" onclick="quickAdd('อาหารและเครื่องดื่ม')"><span>🍜</span><b>อาหารและเครื่องดื่ม</b></button><button class="quick-btn" onclick="quickAdd('รถยนต์')"><span>🚘</span><b>รถยนต์</b></button><button class="quick-btn" onclick="quickAdd('ช้อปปิ้ง')"><span>🛍️</span><b>ช้อปปิ้ง</b></button><button class="quick-btn" onclick="quickAdd('หนี้/ผ่อน')"><span>💳</span><b>หนี้/ผ่อน</b></button><button class="quick-btn" onclick="quickAdd('บิล/สาธารณูปโภค')"><span>🧾</span><b>บิล/สาธารณูปโภค</b></button><button class="quick-btn more" onclick="openTx()"><span>＋</span><b>หมวดอื่น ๆ</b></button></div>
         </div>
 
         <div class="home-feed section">
           <div class="card recent-card">
             <div class="section-heading"><h2>รายการล่าสุด</h2><button class="text-action" data-page-jump="transactions">ดูทั้งหมด →</button></div>
-            <div id="recentList" class="list section"><div class="item transaction-row compact-row "><span class="transaction-icon" aria-hidden="true">🍜</span><div class="transaction-detail"><b>อาหารและเครื่องดื่ม</b><span class="muted">27 ต.ค. 69 · อาหาร</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿54.00</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="t0" aria-label="แก้ไข อาหารและเครื่องดื่ม">ดู</button></div></div><div class="item transaction-row compact-row "><span class="transaction-icon" aria-hidden="true">🍜</span><div class="transaction-detail"><b>อาหารและเครื่องดื่ม</b><span class="muted">27 ต.ค. 69 · อาหาร</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿54.00</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="t1" aria-label="แก้ไข อาหารและเครื่องดื่ม">ดู</button></div></div><div class="item transaction-row compact-row "><span class="transaction-icon" aria-hidden="true">🍜</span><div class="transaction-detail"><b>อาหารและเครื่องดื่ม</b><span class="muted">27 ต.ค. 69 · อาหาร</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿54.00</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="t2" aria-label="แก้ไข อาหารและเครื่องดื่ม">ดู</button></div></div></div>
+            <div id="recentList" class="list section"><div class="item transaction-row compact-row "><span class="transaction-icon" aria-hidden="true">🍜</span><div class="transaction-detail"><b>อาหารและเครื่องดื่ม</b><span class="muted">27 ต.ค. 69 · อาหารและเครื่องดื่ม</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿54.00</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="t0" aria-label="แก้ไข อาหารและเครื่องดื่ม">ดู</button></div></div><div class="item transaction-row compact-row "><span class="transaction-icon" aria-hidden="true">🍜</span><div class="transaction-detail"><b>อาหารและเครื่องดื่ม</b><span class="muted">27 ต.ค. 69 · อาหารและเครื่องดื่ม</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿54.00</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="t1" aria-label="แก้ไข อาหารและเครื่องดื่ม">ดู</button></div></div><div class="item transaction-row compact-row "><span class="transaction-icon" aria-hidden="true">🍜</span><div class="transaction-detail"><b>อาหารและเครื่องดื่ม</b><span class="muted">27 ต.ค. 69 · อาหารและเครื่องดื่ม</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿54.00</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="t2" aria-label="แก้ไข อาหารและเครื่องดื่ม">ดู</button></div></div></div>
           </div>
         <details class="home-detail card section" open="">
           <summary><strong>รายการใกล้ถึงกำหนด</strong><span class="detail-cue">ดูทั้งหมด <span aria-hidden="true">⌄</span></span></summary>
@@ -130,12 +130,12 @@
             <div class="metric"><div class="label">รายรับหักรายจ่าย</div><button type="button" id="balanceTotal" class="value balance money total-link" aria-label="ดูรายการประกอบยอด">-฿162.00</button></div>
             <div class="metric"><div class="label">ยอดบัตร / สินเชื่อ</div><div id="debtTotal" class="value expense money">฿1,500.00</div></div>
           </div>
-          <h3 class="detail-heading">รายจ่ายตามหมวด</h3><div id="categoryChart"><div class="bar-row"><span>อาหาร</span><div class="barbg"><div class="barfill" style="width:100%"></div></div><b>฿162.00</b></div></div>
+          <h3 class="detail-heading">รายจ่ายตามหมวด</h3><div id="categoryChart"><div class="bar-row"><span>อาหารและเครื่องดื่ม</span><div class="barbg"><div class="barfill" style="width:100%"></div></div><b>฿162.00</b></div></div>
           <button class="btn soft section" data-page-jump="summary">เปิดสรุปและกราฟทั้งหมด →</button>
         </details>
           <details class="card insight-card home-detail">
             <summary><strong>ดูข้อสังเกตเดือนนี้</strong><span class="detail-cue">แตะเพื่ออ่าน ⌄</span></summary>
-            <div id="insightList" class="insight-list section"><button type="button" class="insight-item insight-link"><span aria-hidden="true">✨</span><div>เดือนนี้ใช้มากสุดที่ อาหาร ฿162.00<br><small>ดูรายละเอียด ›</small></div></button><button type="button" class="insight-item insight-link"><span aria-hidden="true">🎯</span><div>งบรวมยังเหลือ ฿3,838.00<br><small>ดูรายละเอียด ›</small></div></button></div>
+            <div id="insightList" class="insight-list section"><button type="button" class="insight-item insight-link"><span aria-hidden="true">✨</span><div>เดือนนี้ใช้มากสุดที่ อาหารและเครื่องดื่ม ฿162.00<br><small>ดูรายละเอียด ›</small></div></button><button type="button" class="insight-item insight-link"><span aria-hidden="true">🎯</span><div>งบรวมยังเหลือ ฿3,838.00<br><small>ดูรายละเอียด ›</small></div></button></div>
           </details>
       </section>
 

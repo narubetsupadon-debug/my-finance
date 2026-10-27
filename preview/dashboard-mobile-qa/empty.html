@@ -35,7 +35,7 @@
 <div id="app" class="app"><div id="dataError" class="notice err hidden" role="alert"><span id="dataErrorText"></span> <button id="retryData" type="button" class="btn small">โหลดใหม่</button></div>
   <div id="syncStatusBar" class="sync-status" role="status" aria-live="polite" data-state="ok">
     <span id="syncStatusDot" class="sync-dot" data-state="ok"></span>
-    <span id="syncStatusText">ซิงก์แล้ว · 08:41</span>
+    <span id="syncStatusText">ซิงก์แล้ว · 08:45</span>
     <button id="syncRetryBtn" type="button" class="text-action hidden">ลองใหม่</button>
   </div>
   <header class="topbar">
@@ -106,7 +106,7 @@
         <div class="bill-month-strip section"><button type="button" id="homeBillStatus" class="text-action" data-page-jump="bills">เพิ่มบิลประจำไว้ช่วยจำ ›</button><small id="homeBillStatusNote">ตรวจเฉพาะรายการที่เชื่อมกับบิล · ถ้ากรอกแยกไว้ ตรวจรายการก่อนบันทึกซ้ำ</small></div><p id="homeSpendTrend" class="home-spend-trend" hidden="">📉 เปรียบเทียบรายจ่าย: ยังมีข้อมูลไม่เพียงพอในช่วงเดียวกันของเดือนก่อน</p>
         <div class="card quick-capture section">
           <div class="section-heading"><div><h2>วันนี้มีรายจ่ายอะไรบ้าง?</h2><p>เลือกหมวดหมู่เพื่อบันทึกรายการได้ทันที</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
-          <div id="quickAdd" class="quick-grid"><button class="quick-btn more" onclick="openTx()"><span>＋</span><b>หมวดอื่น ๆ</b></button></div>
+          <div id="quickAdd" class="quick-grid"><button class="quick-btn" onclick="quickAdd('อาหารและเครื่องดื่ม')"><span>🍜</span><b>อาหารและเครื่องดื่ม</b></button><button class="quick-btn" onclick="quickAdd('รถยนต์')"><span>🚘</span><b>รถยนต์</b></button><button class="quick-btn" onclick="quickAdd('ช้อปปิ้ง')"><span>🛍️</span><b>ช้อปปิ้ง</b></button><button class="quick-btn" onclick="quickAdd('หนี้/ผ่อน')"><span>💳</span><b>หนี้/ผ่อน</b></button><button class="quick-btn" onclick="quickAdd('บิล/สาธารณูปโภค')"><span>🧾</span><b>บิล/สาธารณูปโภค</b></button><button class="quick-btn more" onclick="openTx()"><span>＋</span><b>หมวดอื่น ๆ</b></button></div>
         </div>
 
         <div class="home-feed section">
