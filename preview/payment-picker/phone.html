@@ -1,0 +1,475 @@
+<!doctype html><html lang="th" data-accent="purple" style="--primary: #7c3aed; --primary2: #a78bfa;" class="active"><head><base href="https://narubetsupadon-debug.github.io/my-finance/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0e14">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Finance">
+<title>My Finance</title>
+<link rel="preconnect" href="https://esm.sh" crossorigin="">
+
+<link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261023-quality02">
+<link rel="stylesheet" href="./style.css?v=20261023-quality02">
+<link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
+
+<style>
+.insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
+#insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+</style><link rel="icon" type="image/svg+xml" href="./app-icon.svg?v=20261023-quality02">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=walletfinal">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=walletfinal">
+<link rel="stylesheet" href="./ui-polish.css?v=20261023-quality02&amp;loans=06">
+<link rel="stylesheet" href="./dashboard-design.css?v=20261023-quality02">
+<link rel="stylesheet" href="./summary-proportion.css?v=20261023-quality02"><link rel="stylesheet" href="./push-settings.css?v=20261023-quality02"><link rel="stylesheet" href="./mobile-compact.css?v=20261023-quality02">
+<link rel="stylesheet" href="./nav-unified.css?v=20261023-quality02&amp;navux=01">
+<link rel="stylesheet" href="./mobile-polish.css?v=20261023-quality02&amp;navux=01">
+<link rel="stylesheet" href="./settings-mobile-fix.css?v=20261023-quality02&amp;settingsfix=03">
+<link rel="stylesheet" href="./entity-dialog.css?v=20261023-quality02&amp;dialog=07">
+<link rel="stylesheet" href="./dashboard-mobile.css?v=20261023-quality02&amp;overview=09">
+
+<style>.payment-choice{min-width:0}.payment-choice .payment-pick{width:100%;min-width:0}.payment-choice .payment-pick:disabled{opacity:1;cursor:default;background:var(--surface);border-color:var(--line);box-shadow:none}.payment-record-status{display:block;white-space:normal;overflow-wrap:break-word;line-height:1.65;margin-top:6px}.payment-choice .payment-pick:disabled strong{font-size:13px;color:var(--muted);white-space:normal}.payment-extra{display:block;min-height:44px;padding:8px 12px;margin:4px 0 8px auto;font-size:13px}.payment-choice .payment-pick>span:not(.pay-icon){min-width:0}@media(max-width:430px){.payment-choice .payment-pick{padding:16px;gap:10px}.payment-choice .payment-pick b{font-size:16px;overflow-wrap:break-word}.payment-choice .payment-pick small{font-size:12px}.payment-choice .payment-pick strong{font-size:20px}}
+</style></head>
+<body>
+<div id="authSplash" class="auth-splash hidden" role="status" aria-live="polite">
+  <div class="auth-splash-card">
+    <img src="./app-icon.svg?v=20261023-quality02" width="72" height="72" alt="">
+    <h1>My Finance</h1>
+    <p>กำลังเปิดกระเป๋าของมิว…</p>
+    <span class="auth-splash-spinner" aria-hidden="true"></span>
+  </div>
+</div>
+
+<div id="authScreen" class="auth-screen hidden">
+  <div class="auth-card">
+    <h1 class="auth-brand"><img class="auth-brand-icon" src="./app-icon.svg?v=20261023-quality02" width="56" height="56" alt="">My Finance</h1>
+    <p class="muted">จัดการรายรับ รายจ่าย บัญชี บิล และยอดค้างชำระบัตรในที่เดียว</p>
+    <div class="auth-tabs">
+      <button id="tabLogin" class="active">เข้าสู่ระบบ</button>
+      <button id="tabSignup">สมัครใช้งาน</button>
+    </div>
+    <div class="field"><label>อีเมล</label><input id="email" type="email" autocomplete="email"></div>
+    <div class="field" style="margin-top:10px"><label>รหัสผ่าน</label><input id="password" type="password" autocomplete="current-password"></div>
+    <button id="authBtn" class="btn primary full" style="margin-top:14px">เข้าสู่ระบบ</button>
+    <div id="authMsg" class="notice hidden"></div>
+  </div>
+</div>
+
+<div id="app" class="app"><div id="dataError" class="notice err hidden" role="alert"><span id="dataErrorText"></span> <button id="retryData" type="button" class="btn small">โหลดใหม่</button></div>
+  <div id="syncStatusBar" class="sync-status" role="status" aria-live="polite" data-state="ok">
+    <span id="syncStatusDot" class="sync-dot" data-state="ok"></span>
+    <span id="syncStatusText">ซิงก์แล้ว · 08:52</span>
+    <button id="syncRetryBtn" type="button" class="text-action hidden">ลองใหม่</button>
+  </div>
+  <header class="topbar">
+    <div class="topin">
+      <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261023-quality02" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
+      <div class="userbox">
+        <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings">⚙️ ตั้งค่า</button>
+        <span id="userEmail" class="muted">test@example.invalid</span>
+        <button id="logout" class="btn small ghost">ออกจากระบบ</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="เมนูหลัก">
+      <div class="nav-group">
+        <div class="nav-group-label">ประจำวัน</div>
+        <button class="navbtn active" data-page="dashboard" aria-current="page"><span class="nav-icon" aria-hidden="true">📊</span><span>ภาพรวม</span></button>
+        <button class="navbtn" data-page="transactions"><span class="nav-icon" aria-hidden="true">🧾</span><span>รายรับ–รายจ่าย</span></button>
+        <button class="navbtn nav-capture" type="button" data-open-capture="" aria-haspopup="dialog"><span class="nav-icon" aria-hidden="true">＋</span><span>บันทึก</span></button>
+        <button class="navbtn" data-page="summary"><span class="nav-icon" aria-hidden="true">📈</span><span>สรุป</span></button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">วางแผนเงิน</div>
+        <button class="navbtn" data-page="budget"><span class="nav-icon" aria-hidden="true">🎯</span><span>งบประมาณ</span></button>
+        <button class="navbtn" data-page="bills"><span class="nav-icon" aria-hidden="true">📅</span><span>บิลประจำ</span></button>
+        <button class="navbtn" data-page="debts"><span class="nav-icon" aria-hidden="true">💳</span><span>บัตรและสินเชื่อ</span></button>
+      </div>
+      
+      <div class="nav-group">
+        <div class="nav-group-label">จัดการข้อมูล</div>
+        <button class="navbtn" data-page="accounts"><span class="nav-icon" aria-hidden="true">🏦</span><span>บัญชี</span></button>
+        <button class="navbtn" data-page="categories"><span class="nav-icon" aria-hidden="true">🏷️</span><span>หมวดหมู่</span></button>
+        <button class="navbtn" data-page="settings"><span class="nav-icon" aria-hidden="true">⚙️</span><span>ตั้งค่า</span></button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section id="dashboardPage" class="page">
+
+        <div class="home-welcome">
+          <div><div id="todayLabel" class="welcome-date">วันพฤหัสบดีที่ 29 ตุลาคม 2569</div><h1 id="helloTitle">ความกล้าไม่จำเป็นต้องเสียงดัง ✨</h1></div>
+          <button class="btn primary welcome-add" onclick="openTx()">＋ บันทึกรายการ</button>
+        </div>
+
+        <div class="daily-overview">
+          <div class="daily-panel spent-panel">
+            <div class="daily-label"><span aria-hidden="true">↗</span> วันนี้ใช้ไป</div>
+            <button type="button" id="todaySpent" class="daily-amount money total-link" aria-label="ดูรายการประกอบยอด" style="--amount-chars: 9;">฿1,292.00</button>
+            <div class="daily-panel-foot"><span id="todayCount">2 รายการ</span><button class="text-action" id="viewToday" type="button">ดูรายการวันนี้ →</button></div>
+          </div>
+          <button type="button" class="daily-panel budget-panel" id="budgetCard">
+            <div class="daily-label"><span aria-hidden="true">◉</span> งบเดือนนี้ยังเหลือ <span class="panel-arrow">↗</span></div>
+            <div id="budgetRemainDash" class="daily-amount money" style="--amount-chars: 12;">ยังไม่ตั้งงบ</div>
+            <div class="budget-meter"><div class="budget-progress"><div id="budgetProgressDash" class="budget-progress-fill" style="width: 0%;"></div></div><span id="budgetPctDash">0%</span></div>
+            <div id="homeBudgetStatus" class="daily-caption">ยังไม่ได้ตั้งงบ · แตะเพื่อเริ่ม</div>
+            <div class="budget-reference"><span id="budgetSpentDash">฿0.00</span> / <span id="budgetLimitDash">฿0.00</span></div>
+            <div id="budgetRingDash" class="budget-ring" aria-hidden="true" style="--progress: 0%;"><span><b id="budgetRingPct">—</b><small>ใช้ไปแล้ว</small></span></div><span id="budgetDailyDash" class="sr-only">ใช้ได้เฉลี่ยวันละ ฿0.00</span><span id="todayCanSpend" class="sr-only">฿0.00</span><span id="todayCanSpendHint" class="sr-only">ยังไม่ได้ตั้งงบ</span>
+          </button>
+          <button type="button" class="daily-panel next-panel" id="nextBillCard">
+            <div class="daily-label"><span aria-hidden="true">◷</span> กำหนดชำระถัดไป <span class="panel-arrow">↗</span></div>
+            <div id="nextBillName" class="next-bill-name">ยังไม่มีวันครบกำหนด</div>
+            <div id="nextBillAmount" class="next-bill-amount money">—</div>
+            <div id="nextBillDate" class="daily-caption">แตะเพื่อจัดการบิลและวันครบกำหนด</div>
+          </button>
+        </div>
+
+        <div class="bill-month-strip section"><button type="button" id="homeBillStatus" class="text-action" data-page-jump="bills">เพิ่มบิลประจำไว้ช่วยจำ ›</button><small id="homeBillStatusNote">ตรวจเฉพาะรายการที่เชื่อมกับบิล · ถ้ากรอกแยกไว้ ตรวจรายการก่อนบันทึกซ้ำ</small></div><p id="homeSpendTrend" class="home-spend-trend">📉 เปรียบเทียบรายจ่าย: ยังมีข้อมูลไม่เพียงพอในช่วงเดียวกันของเดือนก่อน</p>
+        <div class="card quick-capture section">
+          <div class="section-heading"><div><h2>วันนี้มีรายจ่ายอะไรบ้าง?</h2><p>เลือกหมวดหมู่เพื่อบันทึกรายการได้ทันที</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
+          <div id="quickAdd" class="quick-grid"><button class="quick-btn" onclick="quickAdd('หนี้/ผ่อน')"><span>💳</span><b>หนี้/ผ่อน</b></button><button class="quick-btn more" onclick="openTx()"><span>＋</span><b>หมวดอื่น ๆ</b></button></div>
+        </div>
+
+        <div class="home-feed section">
+          <div class="card recent-card">
+            <div class="section-heading"><h2>รายการล่าสุด</h2><button class="text-action" data-page-jump="transactions">ดูทั้งหมด →</button></div>
+            <div id="recentList" class="list section"><div class="item transaction-row compact-row "><span class="transaction-icon" aria-hidden="true">🧾</span><div class="transaction-detail"><b>ชำระบัตร Grab PayLater</b><span class="muted">29 ต.ค. 69 · ไม่ระบุหมวด</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿292.00</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="pay0" aria-label="แก้ไข ชำระบัตร Grab PayLater">ดู</button></div></div><div class="item transaction-row compact-row "><span class="transaction-icon" aria-hidden="true">🧾</span><div class="transaction-detail"><b>ชำระบัตร Shopee SEasyCash</b><span class="muted">29 ต.ค. 69 · ไม่ระบุหมวด</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿1,000.00</span><div class="actions"><button class="btn small soft" data-edit="tx" data-id="pay1" aria-label="แก้ไข ชำระบัตร Shopee SEasyCash">ดู</button></div></div></div>
+          </div>
+        <details class="home-detail card section" open="">
+          <summary><strong>รายการใกล้ถึงกำหนด</strong><span class="detail-cue">ดูทั้งหมด <span aria-hidden="true">⌄</span></span></summary>
+          <div id="upcomingList" class="upcoming-list"><div class="empty">ไม่มีรายการใกล้ครบกำหนด 🎉</div></div>
+          <div class="row section"><button class="text-action" data-page-jump="bills">จัดการบิลประจำ →</button><button class="text-action" data-page-jump="debts">บัตร / สินเชื่อ →</button></div>
+        </details>
+
+        </div>
+
+        <details class="home-detail card section">
+          <summary><span><strong>ภาพรวมเดือนนี้</strong><small id="monthLabel">ตุลาคม 2569</small></span><span class="detail-cue">ดูรายละเอียด <span aria-hidden="true">⌄</span></span></summary>
+          <p class="muted total-scope">รวมจ่ายแล้ว รอดำเนินการ และวันที่อนาคตในเดือนนี้ · ไม่รวมยกเลิก · แตะยอดดูรายการ</p><div class="grid4 section">
+            <div class="metric"><div class="label">รายรับ</div><button type="button" id="incomeTotal" class="value income money total-link" aria-label="ดูรายการประกอบยอด">฿0.00</button></div>
+            <div class="metric"><div class="label">รายจ่าย</div><button type="button" id="expenseTotal" class="value expense money total-link" aria-label="ดูรายการประกอบยอด">฿1,292.00</button></div>
+            <div class="metric"><div class="label">รายรับหักรายจ่าย</div><button type="button" id="balanceTotal" class="value balance money total-link" aria-label="ดูรายการประกอบยอด">-฿1,292.00</button></div>
+            <div class="metric"><div class="label">ยอดบัตร / สินเชื่อ</div><div id="debtTotal" class="value expense money">฿6,724.00</div></div>
+          </div>
+          <h3 class="detail-heading">รายจ่ายตามหมวด</h3><div id="categoryChart"><div class="bar-row"><span>อื่นๆ</span><div class="barbg"><div class="barfill" style="width:100%"></div></div><b>฿1,292.00</b></div></div>
+          <button class="btn soft section" data-page-jump="summary">เปิดสรุปและกราฟทั้งหมด →</button>
+        </details>
+          <details class="card insight-card home-detail">
+            <summary><strong>ดูข้อสังเกตเดือนนี้</strong><span class="detail-cue">แตะเพื่ออ่าน ⌄</span></summary>
+            <div id="insightList" class="insight-list section"><button type="button" class="insight-item insight-link"><span aria-hidden="true">✨</span><div>เดือนนี้ใช้มากสุดที่ อื่นๆ ฿1,292.00<br><small>ดูรายละเอียด ›</small></div></button></div>
+          </details>
+      </section>
+
+      <section id="transactionsPage" class="page hidden">
+        <div class="page-head tx-page-head"><div><div class="tx-eyebrow">สมุดบันทึกของฉัน</div><h2>รายรับ–รายจ่าย</h2><div id="txCount" class="muted" aria-live="polite">2 รายการ</div></div><button class="btn primary tx-add-button" onclick="openTx()"><span aria-hidden="true">＋</span> เพิ่มรายการ</button></div>
+        <div class="card tx-toolbar">
+          <label class="tx-search-box" for="txSearch"><span aria-hidden="true">⌕</span><input id="txSearch" type="search" placeholder="ค้นหาชื่อ หมวด หรือหมายเหตุ" autocomplete="off" aria-label="ค้นหารายการ"></label>
+          <details id="txFilters" class="tx-filter-panel">
+            <summary><span>ตัวกรอง <span id="txFilterBadge" class="tx-filter-badge" hidden="">0</span></span><span id="txFilterSummary" class="tx-filter-summary">ทุกช่วงเวลา</span><span class="tx-filter-caret" aria-hidden="true">⌄</span></summary>
+            <div class="filters tx-filter-fields">
+              <label for="txFilterType">ประเภท<select id="txFilterType"><option value="all">ทุกประเภท</option><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select></label>
+              <label for="txFilterCategory">หมวดหมู่<select id="txFilterCategory"><option value="">ทุกหมวด</option><option value="debtcat"> หนี้/ผ่อน</option></select></label>
+              <label for="txFilterAccount">บัญชี<select id="txFilterAccount"><option value="">ทุกบัญชี</option><option value="__none__">ไม่ระบุบัญชี</option></select></label>
+              <label for="txFilterStatus">สถานะ<select id="txFilterStatus"><option value="all">ทุกสถานะ</option><option value="paid">รับ/จ่ายแล้ว</option><option value="pending">รอดำเนินการ</option><option value="cancelled">ยกเลิก</option></select></label>
+              <label class="tx-month-field" for="txFilterMonth">ช่วงเวลา<select id="txFilterMonth"><option value="">ทุกเดือน</option><option value="2026-10">ตุลาคม 2569</option></select></label>
+            </div>
+          </details>
+          <button id="txResetFilters" type="button" class="tx-reset-filters" hidden="">ล้างการค้นหาและตัวกรอง</button>
+        </div>
+        <details class="tx-guide"><summary>บันทึกอย่างไรไม่ให้ซ้ำ?</summary><p>รายการทั่วไปบันทึกที่นี่ ส่วนเงินเดือน ค่าห้อง รถ และบิลที่บันทึกผ่านเมนูของตัวเอง จะเชื่อมรายการให้อัตโนมัติ ไม่ต้องลงซ้ำค่ะ</p></details>
+        <div id="txList" class="list tx-ledger"><section class="tx-day-group"><div class="tx-day-header"><h3>29 ต.ค. 69</h3><span>2 รายการ</span></div><div class="tx-day-card"><div class="item transaction-row ledger-row "><span class="transaction-icon" aria-hidden="true">🧾</span><div class="transaction-detail"><b>ชำระบัตร Grab PayLater</b><span class="muted">ไม่ระบุหมวด</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿292.00</span><details class="tx-row-menu"><summary aria-label="ตัวเลือก ชำระบัตร Grab PayLater"><span aria-hidden="true">⋯</span></summary><div class="tx-row-menu-panel"><button class="btn small soft" data-edit="tx" data-id="pay0" aria-label="แก้ไข ชำระบัตร Grab PayLater">แก้ไขรายการ</button><button class="btn small danger" data-del="transactions" data-id="pay0" aria-label="ลบ ชำระบัตร Grab PayLater">ลบรายการ</button></div></details></div><div class="item transaction-row ledger-row "><span class="transaction-icon" aria-hidden="true">🧾</span><div class="transaction-detail"><b>ชำระบัตร Shopee SEasyCash</b><span class="muted">ไม่ระบุหมวด</span><span class="tx-status status-paid">จ่ายแล้ว</span></div><span class="amount expense">−฿1,000.00</span><details class="tx-row-menu"><summary aria-label="ตัวเลือก ชำระบัตร Shopee SEasyCash"><span aria-hidden="true">⋯</span></summary><div class="tx-row-menu-panel"><button class="btn small soft" data-edit="tx" data-id="pay1" aria-label="แก้ไข ชำระบัตร Shopee SEasyCash">แก้ไขรายการ</button><button class="btn small danger" data-del="transactions" data-id="pay1" aria-label="ลบ ชำระบัตร Shopee SEasyCash">ลบรายการ</button></div></details></div></div></section></div>
+      </section>
+
+      <section id="categoriesPage" class="page hidden">
+        <div class="page-head"><div><h2>หมวดหมู่</h2><div class="muted">สร้างหมวดเองได้ไม่จำกัด</div></div><button class="btn primary" onclick="openEntity('category')">+ เพิ่มหมวด</button></div>
+        <div class="card"><div class="row"><h3>รายจ่าย</h3><span class="pill expense">Expense</span></div><div id="expenseCats" class="category-grid section"><div class="category-card"><div class="left"><span class="icon">🏷️</span><span class="name">หนี้/ผ่อน<small class="muted category-usage">ใช้ใน 2 รายการ</small></span></div><div class="actions"><button class="btn small soft" data-edit="category" data-id="debtcat">แก้</button><button class="btn small danger" data-del="categories" data-id="debtcat">ลบ</button></div></div></div></div>
+        <div class="card section"><div class="row"><h3>รายรับ</h3><span class="pill income">Income</span></div><div id="incomeCats" class="category-grid section"><div class="empty">ยังไม่มีหมวด</div></div></div>
+      </section>
+
+      <section id="accountsPage" class="page hidden">
+        <div class="page-head"><div><h2>บัญชี</h2><div class="muted">เงินสด ธนาคาร บัตรเครดิต E‑Wallet · ยอดตั้งต้นไม่ใช่ยอดธนาคารล่าสุด</div></div><button class="btn primary" onclick="openEntity('account')">+ เพิ่มบัญชี</button></div>
+        <div id="accountList" class="card list"><div class="empty">ยังไม่มีบัญชี</div></div>
+      </section>
+
+      <section id="billsPage" class="page hidden">
+        <div class="page-head"><div><h2>บิลประจำ</h2><div class="muted">ค่าเน็ต ค่าหอ Subscription และค่าใช้จ่ายประจำ</div></div><button class="btn primary" onclick="openEntity('bill')">+ เพิ่มบิล</button></div><div class="flow-note"><span class="flow-note-icon">💡</span><div><strong>ชำระที่นี่ครั้งเดียวพอ</strong><br>เมื่อชำระบิลผ่านเมนูนี้ ระบบจะสร้างรายจ่ายให้อัตโนมัติ ไม่ต้องไปลงซ้ำในรายรับ‑รายจ่าย</div></div>
+        <p id="billMonthStatus" class="bill-month-strip section" aria-live="polite">เดือนนี้ · จ่ายแล้ว 0 · รอจ่าย 0 · ยังไม่บันทึกผ่านบิล 0 จากบิลรายเดือนที่เปิดใช้ 0 บิล</p><p class="muted">“ยังไม่บันทึกผ่านบิล” ไม่ได้แปลว่ายังไม่จ่าย หากกรอกแยกไว้ ให้ตรวจรายรับ–รายจ่ายก่อนกดจ่ายแล้ว</p><div id="billList" class="card list"><div class="empty">ยังไม่มีบิล</div></div>
+      </section>
+
+      <section id="debtsPage" class="page hidden">
+        <div class="page-head"><div><h2>บัตรและสินเชื่อ</h2><div class="muted">ดูยอดที่ใช้ไป วงเงินคงเหลือ และยอดที่ต้องจ่ายรอบนี้</div></div><button class="btn primary" onclick="openEntity('debt')">+ เพิ่มบัตร/สินเชื่อ</button></div>
+        <div id="debtList" class="wallet-list"><div class="wallet-overview"><div><span>ยอดใช้บัตรรวม</span><b class="money">฿0.00</b></div><div><span>หนี้สินเชื่อคงเหลือ</span><b class="money">฿6,724.00</b></div></div><div class="wallet-section"><h3>บัตรเครดิต</h3><span>0 รายการ</span></div><div class="wallet-grid"><div class="wallet-empty">ยังไม่มีบัตรเครดิตที่เปิดใช้งาน</div></div><div class="wallet-section"><h3>สินเชื่อและผ่อนชำระ</h3><span>2 รายการ</span></div><div class="wallet-grid"><article class="wallet-card wallet-loan"><div class="wallet-head"><div class="wallet-identity"><span class="wallet-symbol wallet-brand" data-brand="shopee"><img src="./preview/logos/shopee.png" alt="โลโก้ Shopee" width="80" height="44" loading="lazy" decoding="async"></span><h3>Shopee SEasyCash</h3></div><span class="wallet-tag">LOAN</span></div><div class="wallet-amount"><span>ยอดหนี้คงเหลือ</span><b class="money">฿6,432.00</b></div><div class="wallet-available"><span>ค่างวด / รอบ</span><b class="money">฿1,784.00</b></div><div class="wallet-footer"><span>ยังไม่ระบุวันครบกำหนด</span><details class="wallet-more"><summary aria-label="จัดการ Shopee SEasyCash">⋯</summary><div class="wallet-detail"><div>ยอดชำระต่อรอบ ฿1,784.00</div><div class="actions"><button type="button" class="btn small soft" data-edit="debt" data-id="shopee">แก้ไข</button><button type="button" class="btn small danger" data-del="debts" data-id="shopee">ลบ</button></div></div></details></div></article><article class="wallet-card wallet-loan"><div class="wallet-head"><div class="wallet-identity"><span class="wallet-symbol wallet-brand" data-brand="grab"><img src="./preview/logos/grab.png" alt="โลโก้ Grab" width="80" height="44" loading="lazy" decoding="async"></span><h3>Grab PayLater</h3></div><span class="wallet-tag">LOAN</span></div><div class="wallet-amount"><span>ยอดหนี้คงเหลือ</span><b class="money">฿292.00</b></div><div class="wallet-available"><span>ค่างวด / รอบ</span><b class="money">฿292.00</b></div><div class="wallet-footer"><span>ยังไม่ระบุวันครบกำหนด</span><details class="wallet-more"><summary aria-label="จัดการ Grab PayLater">⋯</summary><div class="wallet-detail"><div>ยอดชำระต่อรอบ ฿292.00</div><div class="actions"><button type="button" class="btn small soft" data-edit="debt" data-id="grab">แก้ไข</button><button type="button" class="btn small danger" data-del="debts" data-id="grab">ลบ</button></div></div></details></div></article></div><p class="wallet-footnote">ยอดคงเหลือปัจจุบัน · ไม่เปลี่ยนตามเดือนที่เลือก</p></div>
+      </section>
+
+      <section id="budgetPage" class="page hidden">
+        <div class="page-head">
+          <div><h2>งบประมาณรายเดือน</h2><div class="muted">ตั้งเพดานค่าใช้จ่ายและดูว่าเหลือใช้ได้วันละเท่าไร</div></div>
+          <button class="btn primary" onclick="openEntity('budget')">+ เพิ่มงบ</button>
+        </div>
+        <div class="grid3">
+          <div class="card metric"><div class="label">งบรวมเดือนนี้</div><div id="budgetLimitTotal" class="value balance money">฿0.00</div></div>
+          <div class="card metric"><div class="label">ใช้ไปแล้ว</div><div id="budgetSpentTotal" class="value expense money">฿0.00</div></div>
+          <div class="card metric"><div class="label">คงเหลือ</div><div id="budgetRemainTotal" class="value income money">฿0.00</div><div id="budgetDailyTotal" class="muted">ใช้ได้วันละ ฿0.00 จนจบเดือน</div></div>
+        </div>
+        <div id="budgetList" class="budget-grid section"><div class="card empty">ยังไม่มีงบประมาณ</div></div>
+      </section>
+
+      <section id="summaryPage" class="page hidden">
+        <div class="summary-hero">
+          <div>
+            <div class="summary-eyebrow">FINANCIAL REVIEW</div>
+            <h2>สรุปการเงิน</h2>
+            <div id="summaryPeriodText" class="muted">กำลังดู ตุลาคม 2569</div>
+          </div>
+          <div class="summary-period-picker" aria-label="เลือกช่วงเวลาสรุป">
+            <div class="summary-range-chips" id="summaryRangeChips">
+              <button type="button" class="summary-range-chip active" data-summary-range="month" aria-pressed="true">เดือนนี้</button>
+              <button type="button" class="summary-range-chip" data-summary-range="3m" aria-pressed="false">3 เดือน</button>
+              <button type="button" class="summary-range-chip" data-summary-range="6m" aria-pressed="false">6 เดือน</button>
+              <button type="button" class="summary-range-chip" data-summary-range="year" aria-pressed="false">ปีนี้</button>
+              <button type="button" class="summary-range-chip" data-summary-range="custom" aria-pressed="false">กำหนดเอง</button>
+            </div>
+            <div id="summaryCustomFilters" class="summary-custom-filters hidden">
+              <select id="summaryYear" aria-label="เลือกปี"><option value="2026">2026</option></select>
+              <select id="summaryMonth" aria-label="เลือกเดือน"><option value="all">ทั้งปี</option><option value="01">มกราคม</option><option value="02">กุมภาพันธ์</option><option value="03">มีนาคม</option><option value="04">เมษายน</option><option value="05">พฤษภาคม</option><option value="06">มิถุนายน</option><option value="07">กรกฎาคม</option><option value="08">สิงหาคม</option><option value="09">กันยายน</option><option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-export-toolbar"><label class="summary-status-control" for="summaryStatus">ยอดที่แสดง<select id="summaryStatus"><option value="all">รวมรายการรอดำเนินการ</option><option value="paid">เฉพาะรับ/จ่ายแล้วถึงวันนี้</option></select></label><button id="exportSummaryPdf" type="button" class="btn soft">↓ ดาวน์โหลด PDF</button></div>
+        <p id="summaryPdfStatus" class="muted summary-pdf-status" role="status" aria-live="polite"></p>
+        <p id="summaryScope" class="muted total-scope">รวมรอดำเนินการและวันที่อนาคต · ไม่รวมยกเลิก · รวมยอดชำระบัตร/สินเชื่อ · แตะยอดดูรายการ</p><div class="summary-kpi-grid">
+          <div class="card summary-kpi income-kpi"><div class="summary-kpi-icon">↙</div><div><div class="label">รายรับ</div><button type="button" id="sumIncome" class="value income money total-link" aria-label="ดูรายการประกอบยอด">฿0.00</button><small id="sumIncomeHint">ตุลาคม 2569</small></div></div>
+          <div class="card summary-kpi expense-kpi"><div class="summary-kpi-icon">↗</div><div><div class="label">รายจ่าย</div><button type="button" id="sumExpense" class="value expense money total-link" aria-label="ดูรายการประกอบยอด">฿1,292.00</button><small id="sumExpenseHint">ตุลาคม 2569</small></div></div>
+          <div class="card summary-kpi balance-kpi"><div class="summary-kpi-icon">◎</div><div><div class="label">เงินเหลือสุทธิ</div><button type="button" id="sumBalance" class="value balance money total-link" aria-label="ดูรายการประกอบยอด">-฿1,292.00</button><small id="sumBalanceHint">รายจ่ายมากกว่ารายรับ</small></div></div>
+        </div>
+
+        <details class="card section summary-details"><summary><span><b>ดูยอดแยก</b><small>ค่าห้อง รถ บิล และชำระสินเชื่อ</small></span><span aria-hidden="true">⌄</span></summary><div class="summary-detail-body">
+        <div class="summary-breakdown-grid section">
+          <div class="card summary-mini"><span>💳</span><div><div class="label">บัตร/สินเชื่อ</div><button type="button" id="sumDebtPay" class="value expense money total-link" aria-label="ดูรายการประกอบยอด">฿0.00</button></div></div>
+          <div class="card summary-mini"><span aria-hidden="true">🏠</span><div><div class="label">ค่าห้องเช่า</div><button type="button" id="sumRent" class="value warning money total-link" aria-label="ดูรายการประกอบยอด">฿0.00</button><small class="muted">ส่วนมิว · บิลรวมอ้างอิง <b id="sumRentFull">฿0.00</b><br>ตามวันที่จ่าย · <a href="./rent.html">ดูประวัติตามเดือนบิล →</a></small></div></div>
+          <div class="card summary-mini"><span aria-hidden="true">🚗</span><div><div class="label">ค่าใช้จ่ายรถ</div><button type="button" id="sumCar" class="value warning money total-link" aria-label="ดูรายการประกอบยอด">฿0.00</button><small class="muted">ค่างวด <b id="sumCarInstallment">฿0.00</b><br>ค่าใช้รถอื่น ๆ <b id="sumCarOther">฿0.00</b></small></div></div>
+          <div class="card summary-mini"><span>🔁</span><div><div class="label">รายจ่ายประจำ</div><button type="button" id="sumRecurring" class="value balance money total-link" aria-label="ดูรายการประกอบยอด">฿0.00</button></div></div>
+        </div>
+
+        </div></details>
+
+        <div class="card section summary-chart-card summary-share-card">
+          <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดหลักและสัดส่วนของยอดรายจ่ายที่เลือก</p></div><span class="summary-card-badge">แยกตามหมวด</span></div>
+          <div class="highest-heading"><h4>รายจ่ายสูงสุด 5 อันดับ</h4><button id="summaryHighestAll" type="button" disabled="">ดูรายละเอียดทั้งหมด ›</button></div><div id="summaryHighest" class="summary-highest highest-viewport" role="region" aria-roledescription="carousel" aria-label="รายจ่ายสูงสุด 5 อันดับ" aria-live="off"><div id="summaryHighestTrack" class="highest-track"></div></div><div id="summaryHighestControls" class="highest-controls" hidden="" aria-label="เลื่อนรายจ่ายอันดับสูงสุด"><button id="summaryHighestPrev" type="button" aria-label="รายจ่ายอันดับก่อนหน้า">‹</button><div id="summaryHighestDots" class="highest-dots"></div><button id="summaryHighestNext" type="button" aria-label="รายจ่ายอันดับถัดไป">›</button><button id="summaryHighestPause" type="button" aria-pressed="false">Ⅱ หยุด</button></div><div class="summary-donut-wrap"><div class="chart-box donut summary-donut"><canvas id="categoryPieChart" aria-label="กราฟสัดส่วนรายจ่ายตามช่วงเวลาที่เลือก" role="img"></canvas></div><div class="summary-donut-center" aria-live="polite" aria-atomic="true"><small id="summaryCenterLabel">รายจ่ายรวม</small><strong id="summaryPieTotal" class="money">฿1,292.00</strong><span id="summarySelectedPercent" hidden=""></span></div></div>
+          <div class="summary-circle-actions"><button id="summarySelectionReset" type="button" hidden="">กลับไปดูยอดรวม ↺</button></div><p class="summary-category-help">แตะสีบนวงกลมเพื่อดูยอดหมวด · แตะชื่อหมวดเพื่อดูหมวดย่อย</p><div id="foodSubcategoryBreakdown" class="summary-category-list"><details class="summary-category"><summary><span class="summary-category-dot" style="background:#6366f1"></span><span class="summary-category-name">อื่นๆ</span><span class="summary-category-numbers"><strong class="money">฿1,292.00</strong><small>100.0%</small></span><span class="summary-category-chevron" aria-hidden="true">⌄</span></summary><div class="summary-category-children"><div><span>อื่นๆ</span><strong class="money">฿1,292.00</strong></div></div></details></div><p id="summaryPieEmpty" class="empty" hidden="">ยังไม่มีรายจ่ายในช่วงนี้</p>
+        </div>
+      </section>
+
+      <section id="settingsPage" class="page hidden">
+        <div class="page-head">
+          <div>
+            <h2>ตั้งค่า</h2>
+            <div class="muted">ทำให้ My Finance เข้ากับวิธีใช้ของมิวมากขึ้น</div>
+          </div>
+        </div>
+
+        <section class="card settings-card section" aria-labelledby="appVersionTitle">
+          <div class="settings-title"><span aria-hidden="true">ⓘ</span><div><h3 id="appVersionTitle">เกี่ยวกับ My Finance</h3><p>เวอร์ชันของแอปที่กำลังเปิดอยู่</p></div></div>
+          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-10-29">29 ตุลาคม 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.10">1.0.10</strong></div>
+          <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>ปรับภาพรวมสำหรับมือถือ · ยอดใช้วันนี้เด่นเต็มแถว · การ์ดงบคงเหลือและวงกลมไม่เบียดกัน</p></details>
+        </section>
+
+        <details class="card settings-guide section" id="appUsageGuide">
+          <summary><span><b>📖 วิธีใช้งาน My Finance</b><small>บันทึก แก้ไข และแก้ปัญหาเมื่อเน็ตหลุด</small></span><span aria-hidden="true">⌄</span></summary>
+          <div class="usage-guide-body">
+            <p class="usage-guide-hint">อัปเดต 15 ต.ค. 2569 · แตะอ่านเฉพาะหัวข้อที่ต้องใช้ มีปุ่มลัดเปิดเมนูให้ด้านล่าง</p>
+            <p class="usage-guide-intro">จดรายการทั่วไปที่ “บันทึก” หรือแตะหมวดบนหน้าภาพรวม ส่วนเงินเดือน ค่าห้อง รถ และบิลประจำ ให้บันทึกผ่านเมนูของเรื่องนั้นครั้งเดียว ระบบเชื่อมเข้ารายรับ–รายจ่ายให้</p>
+            <details><summary>1. เริ่มบันทึกรายรับ–รายจ่าย</summary><ol><li>กด “บันทึก” เลือกรายรับหรือรายจ่าย หรือแตะหมวด เช่น อาหาร บนหน้าภาพรวม</li><li>ใส่ยอดและคำอธิบาย ตรวจวันที่ หมวด และบัญชี แล้วกด “บันทึก”</li><li>รอข้อความ “บันทึกรายการสำเร็จแล้ว” หากกรอกผิด แตะ “แก้ไขรายการนี้” เพื่อเปิดรายการเดิมกลับมาแก้ หากปิดฟอร์มที่แก้ค้างไว้ ระบบจะถามก่อนทิ้งข้อมูล</li></ol><p>ใช้ “อ่านสลิปธนาคาร — ยอดและวันที่” ช่วยกรอกจากรูปได้ ตรวจตัวเลขและวันที่ก่อนบันทึกทุกครั้ง</p><p>ระบบจำหมวดและบัญชีจากการบันทึกล่าสุดในเบราว์เซอร์นี้ แยกรายรับกับรายจ่าย ส่วนยอดเงินต้องกรอกใหม่</p><div class="usage-guide-actions"><button type="button" class="btn primary" data-guide-capture="">＋ เริ่มบันทึกรายการ</button></div></details>
+            <details><summary>2. เงินเดือนและสลิป PDF</summary><ol><li>เมนูเงินเดือนซ่อนไว้แล้ว บันทึกรายรับใหม่ที่ รายรับ–รายจ่าย ส่วนการแก้ประวัติเดิมให้เปิดหน้าเงินเดือน ดูยอดสุทธิและประวัติล่าสุด กด “เริ่มเดือนใหม่” เพื่อเปิดฟอร์ม แล้วเลือกเดือนเงินเดือนและวันรับเงินจริง</li><li>แนบสลิป PDF แล้วกดอ่านสลิป หรือกรอกตัวเลขเอง หากไฟล์มีรหัสให้ใส่เฉพาะตอนอ่าน</li><li>ตรวจรายรับ รายการหัก และยอดสุทธิ เลือกบัญชีรับเงิน แล้วบันทึก</li></ol><p>การอ่านสลิปช่วยกรอกเท่านั้น ต้องตรวจยอดก่อนบันทึก หากเดือนนั้นมีแล้ว ให้แก้รายการเดิม รายรับสุทธิจะเชื่อมเข้ารายการอัตโนมัติ</p><div class="usage-guide-actions"><a class="btn soft" href="./salary.html">เปิดหน้าเงินเดือน →</a></div></details>
+            <details><summary>3. ค่าห้องเช่าและส่วนที่แชร์กัน</summary><ol><li>เมนูค่าห้องซ่อนไว้แล้ว บันทึกรายจ่ายใหม่ที่ รายรับ–รายจ่าย ส่วนการแก้ประวัติเดิมให้เปิดหน้าค่าห้อง เลือกเดือนของบิล เช่น กันยายน</li><li>กรอกยอดเต็มและส่วนมิว เลือกสถานะจ่ายแล้วหรือยังไม่จ่าย</li><li>ถ้าจ่ายแล้ว ใส่วันจ่ายเงินจริง เช่น 5 ตุลาคม แล้วบันทึก</li></ol><p>เดือนบิลกับวันจ่ายเป็นคนละค่า หน้าสรุปนับตามวันจ่าย โดยแสดงส่วนมิวและยอดเต็มอ้างอิงแยกกัน หากมีรายจ่ายเดิมอยู่แล้ว ให้เลือกเชื่อมรายการเดิมที่ข้อมูลตรงกัน</p><div class="usage-guide-actions"><a class="btn soft" href="./rent.html">เปิดหน้าค่าห้องเช่า →</a></div></details>
+            <details><summary>4. ค่างวดและค่าใช้รถ</summary><p>เมนูค่าใช้รถซ่อนไว้แล้ว บันทึกรายจ่ายใหม่ที่ รายรับ–รายจ่าย ส่วนการแก้ประวัติเดิมให้เปิดหน้ารถของฉัน ค่างวดให้แก้ที่งวดนั้นและระบุส่วนมิว ส่วนค่าน้ำมัน ซ่อม ประกัน หรือค่าใช้รถอื่น ให้เพิ่มในค่าใช้จ่ายรถ ระบบเชื่อมรายจ่ายให้ ใช้ปุ่ม “แก้งวดที่จ่ายล่าสุด” หรือ “แก้ค่าใช้จ่ายล่าสุด” เพื่อเปิดรายการเดิมได้ทันที แก้รายการที่เชื่อมผ่านหน้ารถเพื่อให้ยอดตรงกัน</p><div class="usage-guide-actions"><a class="btn soft" href="./car.html">เปิดหน้ารถของฉัน →</a></div></details>
+            <details><summary>5. บิลประจำ บัตร และสินเชื่อ</summary><ol><li>ไปที่ เพิ่มเติม → บิลประจำ ตั้งยอด วันครบกำหนด และบัญชีหรือบัตรที่ใช้จ่าย</li><li>เมื่อจ่ายจริง กดบันทึกจ่ายที่บิล ระบบสร้างรายจ่าย และบิลที่ผูกบัตรจะเพิ่มยอดใช้บัตรตามรายการ</li><li>กด “รายการเดือนนี้” เพื่อดูประวัติที่เชื่อมกับบิล ดูหรือแก้ยอดใช้ไป/ยอดค้างชำระที่ เพิ่มเติม → บัตรและสินเชื่อ และเลือกโลโก้ผู้ให้บริการได้ในฟอร์มเพิ่ม/แก้ไขบัตร</li></ol><p>การตั้งบิลยังไม่ใช่การจ่ายจริง ยอดบิลต่อเดือนกับยอดจ่ายที่บันทึกในช่วงที่เลือกจึงอาจต่างกัน ไม่ต้องเพิ่มรายจ่ายทั่วไปซ้ำหลังบันทึกผ่านบิล</p><div class="usage-guide-actions"><button type="button" class="btn soft" data-page-jump="bills">เปิดบิลประจำ →</button><button type="button" class="btn soft" data-page-jump="debts">เปิดบัตรและสินเชื่อ →</button></div></details>
+            <details><summary>6. ดูสรุป งบ และแก้ข้อมูล</summary><p>หน้าสรุปเลือกเดือนนี้ 3 เดือน 6 เดือน ปีนี้ หรือกำหนดเองได้ ดูยอดรับ–จ่าย เงินเหลือ และกราฟสัดส่วนรายจ่ายได้ในหน้าเดียว กด “ดาวน์โหลด PDF” เพื่อบันทึกรายงานพร้อมกราฟตามช่วงเวลาและสถานะที่เลือกได้ ไฟล์สร้างบนเครื่องและมีรายละเอียดรายการ หากซ่อนยอดเงินอยู่ให้ปิดก่อนส่งออก แตะยอดเพื่อดูรายการ หรือเปิด “ดูยอดแยก” เพื่อดูค่าห้อง รถ บิล และสินเชื่อ ที่ “ยอดที่แสดง” เลือกดูเฉพาะรับ/จ่ายแล้วถึงวันนี้ หรือรวมรายการรอดำเนินการและวันที่อนาคตได้ ทุกแบบไม่นับรายการยกเลิก</p><p>ตั้งงบที่ เพิ่มเติม → งบประมาณ แล้วเลือกหมวดที่ต้องการติดตาม กด “ดูรายการในงบ” เพื่อตรวจยอดประกอบได้ แก้รายการทั่วไปได้สองทาง: แตะ “แก้ไขรายการนี้” หลังบันทึก หรือไปที่ รายรับ–รายจ่าย ค้นหาหรือกรองตามบัญชีและสถานะ รายการแสดงครั้งละ 100 แถว กด “แสดงอีก” เพื่ออ่านต่อ การค้นหาและยอดรวมใช้ข้อมูลทั้งหมด แล้วเปิดเมนู ⋯ เพื่อแก้ไข รายการเงินเดือน ห้อง รถ และบิลที่เชื่อม ให้จัดการผ่านเมนูเฉพาะเรื่อง</p><div class="usage-guide-actions"><button type="button" class="btn soft" data-page-jump="summary">ดูสรุป →</button><button type="button" class="btn soft" data-page-jump="budget">ตั้งงบประมาณ →</button><button type="button" class="btn soft" data-page-jump="transactions">ดูและแก้รายการ →</button></div></details>
+            <details><summary>7. บันทึกไม่สำเร็จ เน็ตหลุด หรือค้าง</summary><ul><li><b>บันทึกสำเร็จ แต่โหลดล่าสุดไม่ได้:</b> กด “โหลดใหม่” ไม่ต้องบันทึกซ้ำ เมื่อโหลดสำเร็จจึงแตะ “แก้ไขรายการนี้” ได้</li><li><b>ยังยืนยันการบันทึกไม่ได้:</b> ข้อมูลอาจบันทึกแล้ว เมื่อออนไลน์ให้ตรวจรายการก่อนสร้างใหม่ หากลองบันทึกรายการเดิมอีกครั้ง ให้คงข้อมูลเดิมไว้</li><li><b>บันทึกไม่สำเร็จ:</b> ตรวจข้อความแจ้งเตือน แก้ข้อมูลที่ผิด แล้วลองอีกครั้ง</li></ul><p>หากหลังล็อกอินโหลดข้อมูลไม่ได้ ให้กด “ลองใหม่” ที่แถบสถานะ หากค้างตอนบันทึก ให้รอข้อความผลลัพธ์และตรวจรายการก่อนส่งซ้ำ</p></details>
+            <details><summary>8. ธีม การซิงก์ และสำรองข้อมูล</summary><p>ตั้งค่าแยกเป็นหน้าตาและการบันทึก ข้อมูลและสำรอง และบัญชีผู้ใช้และการแจ้งเตือน เลือกธีมสว่าง มืด หรือตามเครื่อง และซ่อนยอดเงินได้ บนมือถือ เลื่อนลงจะซ่อนเมนู เลื่อนขึ้นจะแสดงกลับ</p><p>ข้อมูลการเงินซิงก์เมื่อเชื่อมต่ออินเทอร์เน็ต หากซิงก์ไม่สำเร็จ กดลองใหม่และตรวจรายการก่อนบันทึกซ้ำ ดูพื้นที่จัดเก็บได้ในตั้งค่า โดยอัปเดตทุก 30 วินาทีขณะเปิดหน้านี้</p><p>ส่งออกไฟล์สำรองจากตั้งค่าและเก็บไว้ให้ปลอดภัย ไฟล์มีข้อมูลการเงิน ปัจจุบันยังไม่มีเมนูนำไฟล์สำรองกลับอัตโนมัติ</p><div class="usage-guide-actions"><button type="button" class="btn soft" data-guide-target="accentPicks">ไปที่ตั้งค่าหน้าตา ↓</button><button type="button" class="btn soft" data-guide-target="exportFinanceBackup">ไปที่ตรวจสอบและสำรองข้อมูล ↓</button></div></details>
+          </div>
+        </details>
+
+        <div class="settings-grid">
+          <h3 class="settings-group-heading">หน้าตาและการบันทึก</h3>
+          <div class="card settings-card">
+            <div class="settings-title"><span>🎨</span><div><h3>หน้าตา</h3><p>ธีมและสีหลักของแอป</p></div></div>
+            <div class="theme-choice-grid section" role="group" aria-label="เลือกธีมเว็บไซต์">
+              <button type="button" class="theme-choice" data-theme-option="system" aria-pressed="false">
+                <span class="theme-preview system-preview"><i></i><i></i></span>
+                <span><b>ตามเครื่อง</b><small>เปลี่ยน Light / Dark ตามอุปกรณ์</small></span>
+              </button>
+              <button type="button" class="theme-choice" data-theme-option="light" aria-pressed="false">
+                <span class="theme-preview light-preview"><i></i></span>
+                <span><b>สว่าง</b><small>ใช้โทนสว่างตลอด</small></span>
+              </button>
+              <button type="button" class="theme-choice" data-theme-option="dark" aria-pressed="false">
+                <span class="theme-preview dark-preview"><i></i></span>
+                <span><b>มืด</b><small>ใช้ Minimal Dark ตลอด</small></span>
+              </button>
+            </div>
+            <div class="setting-row">
+              <div><b>สี Accent</b><small>สีปุ่มและจุดเด่นของแอป</small></div>
+              <div class="accent-picks" id="accentPicks" role="group" aria-label="เลือกสี Accent">
+                <button type="button" data-accent="purple" class="accent-dot accent-purple active" aria-label="ม่วง"></button>
+                <button type="button" data-accent="blue" class="accent-dot accent-blue" aria-label="ฟ้า"></button>
+                <button type="button" data-accent="green" class="accent-dot accent-green" aria-label="เขียว"></button>
+                <button type="button" data-accent="pink" class="accent-dot accent-pink" aria-label="ชมพู"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card settings-card">
+            <div class="settings-title"><span>⚡</span><div><h3>การบันทึก</h3><p>ลดขั้นตอนเวลาจดรายรับรายจ่าย</p></div></div>
+            <label class="setting-row setting-select">
+              <div><b>บัญชีเริ่มต้น</b><small>เลือกให้อัตโนมัติเมื่อเพิ่มรายการใหม่</small></div>
+              <select id="defaultAccountSetting"><option value="">ไม่ระบุบัญชี</option></select>
+            </label>
+            <div class="setting-block">
+              <div class="setting-block-head"><div><b>Quick Add</b><small>เปิด/ปิด และเรียงรายการที่ใช้บ่อย</small></div></div>
+              <div id="quickSettingsList" class="quick-settings-list"><div class="quick-setting-row" data-quick-label="อาหารและเครื่องดื่ม"><label><input type="checkbox" checked="" data-quick-visible="อาหารและเครื่องดื่ม"><span>🍽️ <b>อาหารและเครื่องดื่ม</b></span></label><div class="quick-order-actions"><button type="button" class="btn small ghost" data-quick-up="อาหารและเครื่องดื่ม" disabled="" aria-label="เลื่อน อาหารและเครื่องดื่ม ขึ้น">↑</button><button type="button" class="btn small ghost" data-quick-down="อาหารและเครื่องดื่ม" aria-label="เลื่อน อาหารและเครื่องดื่ม ลง">↓</button></div></div><div class="quick-setting-row" data-quick-label="รถยนต์"><label><input type="checkbox" checked="" data-quick-visible="รถยนต์"><span>🚘 <b>รถยนต์</b></span></label><div class="quick-order-actions"><button type="button" class="btn small ghost" data-quick-up="รถยนต์" aria-label="เลื่อน รถยนต์ ขึ้น">↑</button><button type="button" class="btn small ghost" data-quick-down="รถยนต์" aria-label="เลื่อน รถยนต์ ลง">↓</button></div></div><div class="quick-setting-row" data-quick-label="ช้อปปิ้ง"><label><input type="checkbox" checked="" data-quick-visible="ช้อปปิ้ง"><span>🛍️ <b>ช้อปปิ้ง</b></span></label><div class="quick-order-actions"><button type="button" class="btn small ghost" data-quick-up="ช้อปปิ้ง" aria-label="เลื่อน ช้อปปิ้ง ขึ้น">↑</button><button type="button" class="btn small ghost" data-quick-down="ช้อปปิ้ง" aria-label="เลื่อน ช้อปปิ้ง ลง">↓</button></div></div><div class="quick-setting-row" data-quick-label="หนี้/ผ่อน"><label><input type="checkbox" checked="" data-quick-visible="หนี้/ผ่อน"><span>💳 <b>หนี้/ผ่อน</b></span></label><div class="quick-order-actions"><button type="button" class="btn small ghost" data-quick-up="หนี้/ผ่อน" aria-label="เลื่อน หนี้/ผ่อน ขึ้น">↑</button><button type="button" class="btn small ghost" data-quick-down="หนี้/ผ่อน" aria-label="เลื่อน หนี้/ผ่อน ลง">↓</button></div></div><div class="quick-setting-row" data-quick-label="บิล/สาธารณูปโภค"><label><input type="checkbox" checked="" data-quick-visible="บิล/สาธารณูปโภค"><span>🧾 <b>บิล/สาธารณูปโภค</b></span></label><div class="quick-order-actions"><button type="button" class="btn small ghost" data-quick-up="บิล/สาธารณูปโภค" aria-label="เลื่อน บิล/สาธารณูปโภค ขึ้น">↑</button><button type="button" class="btn small ghost" data-quick-down="บิล/สาธารณูปโภค" disabled="" aria-label="เลื่อน บิล/สาธารณูปโภค ลง">↓</button></div></div></div>
+            </div>
+          </div>
+
+          <div class="card settings-card">
+            <div class="settings-title"><span>👁️</span><div><h3>ความเป็นส่วนตัว</h3><p>ใช้ตอนเปิดเว็บในที่สาธารณะ</p></div></div>
+            <label class="setting-row toggle-row">
+              <div><b>ซ่อนยอดเงิน</b><small>แสดงยอดเป็น •••• ทั่วหน้าเว็บ</small></div>
+              <span class="switch"><input id="privacySetting" type="checkbox"><span></span></span>
+            </label>
+          </div>
+
+
+          <h3 class="settings-group-heading" id="settingsDataGroup">ข้อมูลและสำรอง</h3>
+          <div class="card settings-card capacity-card" aria-labelledby="capacityTitle">
+            <div class="settings-title"><span>💾</span><div><h3 id="capacityTitle">พื้นที่จัดเก็บ</h3><p>พื้นที่บนคลาวด์ของแอพ · โควตาอ้างอิง Free</p></div></div>
+            <div class="capacity-item">
+              <div class="capacity-heading"><b>ฐานข้อมูล</b><span id="capacityDbState"></span></div>
+              <strong id="capacityDbAmount" class="capacity-amount">—</strong>
+              <progress id="capacityDbBar" max="100" value="0" aria-label="พื้นที่ฐานข้อมูลที่ใช้"></progress>
+              <small id="capacityDbRemaining">ยังไม่ได้ตรวจ</small>
+            </div>
+            <div class="capacity-item">
+              <div class="capacity-heading"><b>ไฟล์แนบ</b><span id="capacityFilesState"></span></div>
+              <strong id="capacityFilesAmount" class="capacity-amount">—</strong>
+              <progress id="capacityFilesBar" max="100" value="0" aria-label="พื้นที่ไฟล์ที่ใช้"></progress>
+              <small id="capacityFilesRemaining">ยังไม่ได้ตรวจ</small>
+            </div>
+            <p id="capacityDetail" class="muted capacity-note"></p>
+            <p class="muted capacity-note">ฐานข้อมูลรวมส่วนระบบและดัชนี · ไฟล์นับจากขนาดที่เก็บบนคลาวด์ ไม่รวมไฟล์ที่อ่านเฉพาะบนเครื่อง · ไม่ใช่พื้นที่มือถือหรือปริมาณรับส่งข้อมูลรายเดือน โควตาอ้างอิงฐานข้อมูล 500 MB และไฟล์ 1 GB</p>
+            <p id="capacityStatus" class="muted capacity-note" role="status">เปิดหน้านี้เพื่อตรวจพื้นที่ล่าสุด</p>
+            <div class="capacity-actions"><small id="capacityCheckedAt" class="muted">ยังไม่ได้ตรวจ</small><button id="refreshCapacity" type="button" class="btn small soft">รีเฟรชพื้นที่</button></div>
+          </div>
+
+          <div class="card settings-card health-card">
+            <div class="settings-title"><span>🛡️</span><div><h3>สุขภาพระบบ</h3><p>ตรวจการซิงก์ รายการซ้ำ และข้อมูลที่เชื่อมกัน</p></div></div>
+            <div id="healthSummary" class="health-summary">
+              <div class="health-row"><span>☁️ Database Sync</span><b id="healthSync">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🔎 Transaction ซ้ำ</span><b id="healthDuplicates">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>💰 เงินเดือน</span><b id="healthSalary">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🚗 ค่างวดรถ</span><b id="healthInstallments">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🔧 ค่าใช้จ่ายรถ</span><b id="healthCar">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🏠 ค่าห้องเช่า</span><b id="healthRent">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>📅 ประวัติชำระบิล</span><b id="healthBills">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🔗 หมวด บัญชี และรายการต้นทาง</span><b id="healthLinks">ยังไม่ได้ตรวจ</b></div>
+              <div class="health-row"><span>🔔 Push Notification</span><b id="healthPush">ยังไม่ได้ตรวจ</b></div>
+            </div>
+            <div class="row section health-actions">
+              <small id="healthCheckedAt" class="muted">ยังไม่ได้ตรวจสอบ</small>
+              <button id="runHealthCheck" type="button" class="btn soft">ตรวจสอบอีกครั้ง</button><button id="exportFinanceBackup" class="btn small soft" type="button">ดาวน์โหลดข้อมูลสำรอง JSON</button>
+
+
+            </div>
+          </div>
+
+
+          <h3 class="settings-group-heading" id="settingsAccountGroup">บัญชีผู้ใช้และการแจ้งเตือน</h3>
+          <div class="card settings-card account-session-card">
+            <div class="settings-title"><span>🔐</span><div><h3>บัญชีและการเข้าสู่ระบบ</h3><p>จัดการ session ของ My Finance บนอุปกรณ์นี้</p></div></div>
+            <div class="setting-row session-row">
+              <div><b>ออกจากระบบบนอุปกรณ์นี้</b><small>ครั้งหน้าจะต้องเข้าสู่ระบบใหม่</small></div>
+              <button id="settingsLogout" type="button" class="btn danger">ออกจากระบบ</button>
+            </div>
+          </div>
+
+          <div class="card settings-card notification-settings settings-push-feature">
+            <div class="settings-title"><span>🔔</span><div><h3>แจ้งเตือนบนมือถือ</h3><p>เชื่อมต่อและส่งข้อความทดสอบถึงเครื่องนี้</p></div><span id="pushStatusBadge" class="pill">ยังไม่พร้อม</span></div>
+            <p id="pushStatusText" class="push-connection" role="status">เบราว์เซอร์นี้ไม่รองรับ Push</p>
+            <p id="pushInstallHint" hidden="">สำหรับ iPhone ต้องเปิดผ่านไอคอน My Finance ที่เพิ่มไปยังหน้าจอโฮม</p>
+            <label class="setting-row toggle-row"><div><b>เปิดแจ้งเตือนเครื่องนี้</b><small>เมื่อมีบิลหรือบัตรใกล้ครบกำหนด</small></div><span class="switch"><input id="pushDeviceSetting" type="checkbox" aria-label="เปิดแจ้งเตือนบนมือถือ" disabled=""><span></span></span></label>
+            <div class="push-setup-steps">
+              <div class="push-setup-step"><span>1</span><div><b>เชื่อมต่อเครื่องนี้</b><small>ขอสิทธิ์รับการแจ้งเตือน</small></div><button id="enablePushBtn" type="button" class="btn soft" disabled="">เชื่อมต่อ</button></div>
+              <div class="push-setup-step"><span>2</span><div><b>ส่งทดสอบถึงโทรศัพท์</b><small>ตรวจแบนเนอร์และผลรับจริง</small></div><button id="testPushBtn" type="button" class="btn primary" disabled="">ส่งทดสอบ</button></div>
+            </div>
+            <div id="pushTestResult" class="push-test-result" role="status">ยังไม่ได้ส่งทดสอบ</div>
+            <div class="push-repair-actions"><button id="reconnectPushBtn" type="button" class="text-action" disabled="">↻ เชื่อมต่อเครื่องนี้ใหม่</button><button id="checkPushBtn" type="button" class="text-action">ตรวจอีกครั้ง</button><button id="localPushBtn" type="button" class="text-action" disabled="">ทดสอบแสดงบนเครื่อง</button></div>
+            <p class="push-repair-note">เชื่อมต่อใหม่จะเปลี่ยนเฉพาะทะเบียนแจ้งเตือนบนอุปกรณ์นี้ ไม่ลบข้อมูลการเงินหรือทะเบียนเครื่องอื่น</p>
+            <button id="disablePushBtn" type="button" class="hidden" aria-hidden="true" tabindex="-1">ปิดแจ้งเตือน</button>
+            <p class="push-schedule">⏰ แจ้งเตือนบิลและบัตรเครดิตตามกำหนดเดิม เวลา 08:00 น. (ประเทศไทย)</p>
+            <div class="notification-block home-notification-block">
+              <div class="notification-block-title"><span>🏠</span><div><b>การเตือนในหน้า Home</b><small>เป็นข้อความที่เห็นตอนเปิดเว็บไซต์ ไม่ใช่ Push</small></div></div>
+              <label class="setting-row toggle-row">
+                <div><b>รายการใกล้ครบกำหนด</b><small>แสดงบิลและบัตรที่กำลังจะถึงกำหนด</small></div>
+                <span class="switch"><input id="dueReminderSetting" type="checkbox"><span></span></span>
+              </label>
+              <label class="setting-row toggle-row">
+                <div><b>งบใกล้เต็ม</b><small>เน้นสถานะเมื่อใช้เกิน 80% ของงบ</small></div>
+                <span class="switch"><input id="budgetReminderSetting" type="checkbox"><span></span></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <button class="fab" onclick="openTx()">＋ บันทึกรายการ</button>
+</div>
+
+<dialog id="txDialog" aria-labelledby="txDialogTitle">
+<form id="txForm" class="modal capture-form">
+  <div class="capture-header"><h3 id="txDialogTitle">บันทึกรายการ</h3><button type="button" class="icon-close" onclick="requestCloseTx()" aria-label="ปิดฟอร์ม">✕</button></div>
+  <div class="type-switch" role="group" aria-label="ประเภทรายการ">
+    <button type="button" data-tx-type="expense" aria-pressed="true">↗ รายจ่าย</button>
+    <button type="button" data-tx-type="income" aria-pressed="false">↙ รายรับ</button>
+  </div>
+  <select id="txType" class="hidden" aria-hidden="true" tabindex="-1"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select>
+  <details id="slipSection" class="capture-extra"><summary id="slipSectionTitle" aria-live="polite">🧾 อ่านสลิปธนาคาร — ยอดและวันที่</summary>
+    <div class="field"><label for="slipFile">รูปสลิปธนาคาร (JPG / PNG / WebP ไม่เกิน 10 MB)</label><input id="slipFile" type="file" accept="image/jpeg,image/png,image/webp"></div>
+    <button id="slipRead" type="button" class="btn ghost">อ่านสลิป</button>
+    <p id="slipStatus" class="muted" role="status" aria-live="polite">อ่านในเครื่อง ไม่อัปโหลดหรือเก็บรูป · ครั้งแรกต้องโหลดตัวอ่านผ่านอินเทอร์เน็ต</p>
+    <div class="slip-field-status" aria-live="polite"><span id="slipAmountStatus">ยอดเงิน: ยังไม่ได้อ่าน</span><span id="slipDateStatus">วันที่: ยังไม่ได้อ่าน</span></div>
+    <div id="slipReview" hidden=""><div class="fields"><div class="field"><label for="slipAmount">ตรวจยอดเงิน</label><input id="slipAmount" type="number" min="0.01" max="999999999" step="0.01" inputmode="decimal"></div><div class="field"><label for="slipDate">ตรวจวันที่</label><input id="slipDate" type="date"></div></div><p class="muted">ตรวจให้ตรงสลิป ไม่ได้ตรวจว่าสลิปแท้ และยังไม่บันทึกรายการ</p><details><summary>ดูข้อความที่อ่านได้ (เพื่อเช็กวันที่)</summary><pre id="slipReadText" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:160px;overflow:auto;font-size:14px"></pre></details><button id="slipApply" type="button" class="btn ghost">ใช้ยอดและวันที่นี้</button></div>
+  </details>
+  <div class="capture-amount field"><label for="txAmount">จำนวนเงิน</label><div class="amount-entry"><span aria-hidden="true">฿</span><input id="txAmount" inputmode="decimal" type="number" min="0.01" step="0.01" required="" placeholder="0.00" autocomplete="off" enterkeyhint="next"></div></div>
+  <details id="txRepeatSection" class="capture-repeat"><summary>↻ ใช้รายการโปรด / รายการเดิม</summary><div id="txRepeatList" class="repeat-list">บันทึกรายการแล้วเลือก “เก็บเป็นรายการโปรด” ครั้งต่อไปแตะใช้ได้เลย</div></details>
+  <div class="fields capture-fields">
+    <div class="field full"><label for="txDesc">รายการอะไร?</label><input id="txDesc" required="" placeholder="เช่น ข้าวกลางวัน กาแฟ หรือของเข้าบ้าน" maxlength="250" enterkeyhint="next"></div>
+    <div class="field"><label for="txCategory">หมวดหมู่</label><select id="txCategory" required=""><option value="">เลือกหมวด</option><option value="debtcat"> หนี้/ผ่อน</option></select></div><div class="field" id="txSubcategoryWrap"><label for="txSubcategory">หมวดย่อย</label><div style="display:flex;align-items:center;gap:8px"><select id="txSubcategory" style="min-width:0;flex:1"><option value="">ไม่ระบุหมวดย่อย</option><option value="ชำระบัตรเครดิต">💳 ชำระบัตรเครดิต</option><option value="ชำระสินเชื่อ">🏦 ชำระสินเชื่อ</option><option value="ผ่อนสินค้า">📦 ผ่อนสินค้า</option><option value="อื่นๆ">🏷️ อื่นๆ</option></select><button type="button" id="txSubcategoryAdd" class="btn secondary" style="flex-shrink:0" aria-label="เพิ่มหมวดย่อยใหม่">+ เพิ่มเอง</button></div></div>
+    <div class="field"><label for="txAccount">บัญชีที่ใช้</label><select id="txAccount"><option value="">ไม่ระบุบัญชี</option></select></div>
+    <div id="cardPaymentSuggest" class="field full"><label>เลือกบัตร / สินเชื่อ</label><div id="cardPaymentList" class="payment-suggest-grid"><div class="payment-choice"><button type="button" class="payment-pick" data-pay-debt="grab" disabled=""><span class="pay-icon">💳</span><span><b>Grab PayLater</b><small>หนี้คงเหลือ ฿292.00 · ยอดที่ตั้งไว้ ฿292.00</small><small class="payment-record-status">บันทึกครบยอดที่ตั้งไว้แล้ว · 2026-10 · บันทึกจ่ายแล้ว ฿292.00</small></span><strong>ไม่เสนอจ่ายยอดเดิมซ้ำ</strong></button><button type="button" class="text-action payment-extra" data-pay-debt="grab" data-pay-extra="true">ต้องการบันทึกชำระเพิ่ม</button></div><div class="payment-choice"><button type="button" class="payment-pick" data-pay-debt="shopee"><span class="pay-icon">💳</span><span><b>Shopee SEasyCash</b><small>หนี้คงเหลือ ฿6,432.00 · ยอดที่ตั้งไว้ ฿1,784.00</small><small class="payment-record-status">บันทึกชำระบางส่วนแล้ว · 2026-10 · บันทึกจ่ายแล้ว ฿1,000.00</small></span><strong>฿784.00</strong></button></div></div><div class="muted">ตรวจจากรายการที่จับคู่ชื่อได้ในเดือนของวันที่บันทึก · ไม่ใช่รอบบัญชีธนาคาร · ถ้าบันทึกไว้ชื่ออื่น โปรดตรวจรายการเดิมก่อนเพิ่ม</div></div>
+    <div class="field full date-field"><label for="txDate">วันที่</label><input id="txDate" type="date" required=""></div>
+  </div>
+  <details id="txExtra" class="capture-extra"><summary>เพิ่มหมายเหตุ / เก็บเป็นรายการโปรด</summary><div class="field"><label for="txNote">หมายเหตุ</label><textarea id="txNote" placeholder="รายละเอียดเพิ่มเติม ถ้ามี" maxlength="2000"></textarea></div><label class="repeat-favorite"><input id="txFavorite" type="checkbox"><span>★ เก็บเป็นรายการโปรด <small>จำชื่อ หมวด และบัญชีไว้ในเครื่องนี้</small></span></label></details>
+  <div id="txDuplicateWarning" class="duplicate-warning hidden" role="status">
+    <div><b>⚠️ อาจเป็นรายการซ้ำ</b><p id="txDuplicateText"></p></div>
+    <button id="txDuplicateContinue" type="button" class="btn small soft">บันทึกต่อ</button>
+  </div>
+  <p id="txError" class="notice err hidden" role="alert"></p>
+  <div class="modal-actions capture-actions"><button type="button" class="btn ghost" onclick="requestCloseTx()">ยกเลิก</button><button type="submit" class="btn primary">บันทึก</button></div>
+</form>
+</dialog>
+
+
+
+
+
+<div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
+
+
+
+
+
+<script>document.getElementById('txForm').addEventListener('submit',e=>e.preventDefault());document.getElementById('txDialog').showModal();</script></body></html>
