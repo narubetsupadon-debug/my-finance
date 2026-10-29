@@ -71,6 +71,15 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.ok(walletPage.el('entityFields').querySelector('[data-brand=lazada]'));walletPage.el('entityDialog').close();walletPage.close();
  console.log('PASS wallet: separate balances, inactive exclusion, escaped names, provider override save/reopen, generic and auto choices, name detection and broken image fallback');
 
+
+ const pd=new Date().toISOString().slice(0,10),payDebt={id:'paidloan',user_id:'user',name:'Grab PayLater',debt_type:'credit_card',outstanding_amount:292,installment_amount:292,is_active:true};
+ const paymentPage=await page('index.html','app.js',{categories:[{id:'debtcat',user_id:'user',name:'หนี้/ผ่อน',type:'expense'}],accounts:[],debts:[payDebt],transactions:[{id:'payment',user_id:'user',type:'expense',status:'paid',transaction_date:pd,description:'ชำระบัตร Grab PayLater',source:'web',amount:292,category_id:'debtcat'}]},'');
+ paymentPage.w.openTx();paymentPage.el('txCategory').value='debtcat';paymentPage.el('txCategory').dispatchEvent(new paymentPage.w.Event('change'));
+ const paidPick=paymentPage.el('cardPaymentList').querySelector('.payment-pick');assert.equal(paidPick.disabled,true);assert.match(paidPick.textContent,/บันทึกครบยอดที่ตั้งไว้แล้ว/);
+ paymentPage.el('cardPaymentList').querySelector('[data-pay-extra]').click();assert.equal(paymentPage.el('txAmount').value,'','Additional payment requires explicit amount');assert.equal(paymentPage.state.writes.length,0,'Opening and selecting never writes');
+ paymentPage.el('txDate').value='2027-01-01';paymentPage.el('txDate').dispatchEvent(new paymentPage.w.Event('change'));assert.equal(paymentPage.el('cardPaymentList').querySelector('.payment-pick').disabled,false);
+ paymentPage.el('cardPaymentList').querySelector('.payment-pick').click();assert.equal(paymentPage.el('txAmount').value,'292');paymentPage.close();
+ console.log('PASS paid picker: full payment cannot refill old due, extra payment blank, date month refresh and no writes');
  const day=new Date().toISOString().slice(0,10);
  const categories=[{id:'cat',user_id:'user',name:'อาหาร',type:'expense',icon:'<img src=x onerror=alert(1)>'},{id:'coffee',user_id:'user',name:'กาแฟ',type:'expense',icon:'☕'},{id:'utilities',user_id:'user',name:'บิล/สาธารณูปโภค',type:'expense',icon:'🧾'},{id:'inc',user_id:'user',name:'เงินเดือน',type:'income'}];
  const accounts=[{id:'acc',user_id:'user',name:'bank',is_active:true}];

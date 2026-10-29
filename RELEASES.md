@@ -1,3 +1,8 @@
+## 1.0.10 — 29 October 2026
+- Payment picker derives recorded progress from exact, uniquely matched repayment names or explicit debt-payment sources. Excludes future, pending, cancelled, income, duplicate IDs and card charges.
+- Complete configured amounts disable the old suggestion; explicit extra payment starts blank. Partial payments suggest the remainder. Calendar month follows selected transaction date, not a bank statement cycle.
+- No debt balances or historical records are rewritten. Existing transaction editing hides the picker.
+
 ## 1.0.9 — 27 October 2026
 - Promote approved mobile overview from Test: full-width spending hero on mobile, compact remaining-budget card, consistent spacing and readable due items.
 - CSS only; all financial calculations, IDs, handlers, hidden specialist menus and existing data are preserved.

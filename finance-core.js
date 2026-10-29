@@ -185,3 +185,21 @@ export function showFinanceSaveError(element,error){
  if(element){element.textContent=feedback.message;element.dataset.saveState=feedback.state;element.setAttribute('role','alert');element.classList.remove('hidden');}
  return feedback;
 }
+
+// Calendar-month recording progress, not a bank statement/settlement status.
+export function debtPaymentProgress(debt,debts,transactions,selectedDay,today){
+ const norm=s=>String(s||'').normalize('NFKC').trim().replace(/\s+/g,' ').toLowerCase();
+ const name=norm(debt.name),unique=name&&debts.filter(d=>norm(d.name)===name).length===1;
+ const descriptions=new Set(['ชำระบัตร ','ชำระบัตรเครดิต ','ชำระสินเชื่อ ','ชำระหนี้ ','จ่ายบัตร ','จ่ายสินเชื่อ '].map(p=>norm(p+name)));
+ const month=String(selectedDay||today).slice(0,7),seen=new Set(),rows=[];let paidCents=0;
+ for(const tx of transactions){
+  if(tx.type!=='expense'||tx.status!=='paid'||String(tx.transaction_date).slice(0,7)!==month||String(tx.transaction_date).slice(0,10)>today)continue;
+  const linked=tx.source==='debt_payment:'+debt.id;
+  const legacy=unique&&(!tx.source||tx.source==='web'||String(tx.source).startsWith('import_'))&&descriptions.has(norm(tx.description));
+  if(!linked&&!legacy)continue;
+  const n=Number(tx.amount);if(!Number.isFinite(n)||n<=0||tx.id&&seen.has(tx.id))continue;
+  if(tx.id)seen.add(tx.id);paidCents+=Math.round(n*100);rows.push(tx);
+ }
+ const n=Number(debt.installment_amount),dueCents=Number.isFinite(n)&&n>0?Math.round(n*100):0;
+ return {month,rows,paidCents,dueCents,remainingCents:Math.max(0,dueCents-paidCents),state:paidCents>0?(dueCents>0?(paidCents>=dueCents?'complete':'partial'):'recorded'):'unrecorded'};
+}

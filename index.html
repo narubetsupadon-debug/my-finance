@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
-<link rel="modulepreload" href="./app.js?v=20261023-quality02&loans=06">
+<link rel="modulepreload" href="./app.js?v=20261023-quality02&payment=10">
 <link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261023-quality02">
 <link rel="stylesheet" href="./style.css?v=20261023-quality02">
 <link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
@@ -29,6 +29,7 @@
 <link rel="stylesheet" href="./settings-mobile-fix.css?v=20261023-quality02&settingsfix=03">
 <link rel="stylesheet" href="./entity-dialog.css?v=20261023-quality02&dialog=07">
 <link rel="stylesheet" href="./dashboard-mobile.css?v=20261023-quality02&overview=09">
+<link rel="stylesheet" href="./payment-picker.css?v=20261023-quality02&payment=10">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
@@ -273,7 +274,7 @@
 
         <section class="card settings-card section" aria-labelledby="appVersionTitle">
           <div class="settings-title"><span aria-hidden="true">ⓘ</span><div><h3 id="appVersionTitle">เกี่ยวกับ My Finance</h3><p>เวอร์ชันของแอปที่กำลังเปิดอยู่</p></div></div>
-          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-10-27">27 ตุลาคม 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.9">1.0.9</strong></div>
+          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-10-29">29 ตุลาคม 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.10">1.0.10</strong></div>
           <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>ปรับภาพรวมสำหรับมือถือ · ยอดใช้วันนี้เด่นเต็มแถว · การ์ดงบคงเหลือและวงกลมไม่เบียดกัน</p></details>
         </section>
 
@@ -449,7 +450,7 @@
     <div class="field full"><label for="txDesc">รายการอะไร?</label><input id="txDesc" required placeholder="เช่น ข้าวกลางวัน กาแฟ หรือของเข้าบ้าน" maxlength="250" enterkeyhint="next"></div>
     <div class="field"><label for="txCategory">หมวดหมู่</label><select id="txCategory" required></select></div><div class="field hidden" id="txSubcategoryWrap"><label for="txSubcategory">หมวดย่อย</label><div style="display:flex;align-items:center;gap:8px"><select id="txSubcategory" style="min-width:0;flex:1"><option value="">ไม่ระบุหมวดย่อย</option></select><button type="button" id="txSubcategoryAdd" class="btn secondary" style="flex-shrink:0" aria-label="เพิ่มหมวดย่อยใหม่">+ เพิ่มเอง</button></div></div>
     <div class="field"><label for="txAccount">บัญชีที่ใช้</label><select id="txAccount"></select></div>
-    <div id="cardPaymentSuggest" class="field full hidden"><label>เลือกบัตร / สินเชื่อ</label><div id="cardPaymentList" class="payment-suggest-grid"></div><div class="muted">ตรวจยอดที่จ่ายจริงก่อนบันทึก</div></div>
+    <div id="cardPaymentSuggest" class="field full hidden"><label>เลือกบัตร / สินเชื่อ</label><div id="cardPaymentList" class="payment-suggest-grid"></div><div class="muted">ตรวจจากรายการที่จับคู่ชื่อได้ในเดือนของวันที่บันทึก · ไม่ใช่รอบบัญชีธนาคาร · ถ้าบันทึกไว้ชื่ออื่น โปรดตรวจรายการเดิมก่อนเพิ่ม</div></div>
     <div class="field full date-field"><label for="txDate">วันที่</label><input id="txDate" type="date" required></div>
   </div>
   <details id="txExtra" class="capture-extra"><summary>เพิ่มหมายเหตุ / เก็บเป็นรายการโปรด</summary><div class="field"><label for="txNote">หมายเหตุ</label><textarea id="txNote" placeholder="รายละเอียดเพิ่มเติม ถ้ามี" maxlength="2000"></textarea></div><label class="repeat-favorite"><input id="txFavorite" type="checkbox"><span>★ เก็บเป็นรายการโปรด <small>จำชื่อ หมวด และบัญชีไว้ในเครื่องนี้</small></span></label></details>
@@ -474,7 +475,7 @@
 <script src="./vendor/chart-4.4.7.umd.js?v=20261023-quality02"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
 <script type="module" src="./slip-reader.js?v=20261023-quality02"></script>
-<script type="module" src="./app.js?v=20261023-quality02&loans=06"></script>
+<script type="module" src="./app.js?v=20261023-quality02&payment=10"></script>
 <script type="module" src="./app-nav.js?v=20261023-quality02&menus=08"></script></body>
 </html>
 
