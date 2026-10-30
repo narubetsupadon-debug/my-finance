@@ -16,7 +16,7 @@ export function resolveDebtLogo(debt){
 }
 export function debtLogoMarkup(debt){
  const key=resolveDebtLogo(debt),brand=key&&debtLogoBrands[key];
- return brand?'<span class="wallet-symbol wallet-brand" data-brand="'+key+'"><img src="./preview/logos/'+brand.file+'" alt="โลโก้ '+brand.label+'" width="80" height="44" loading="lazy" decoding="async"></span>':'<span class="wallet-symbol" aria-hidden="true">'+(debt.debt_type==='credit_card'?'▤':'↗')+'</span>';
+ return brand?'<span class="wallet-symbol wallet-brand" data-brand="'+key+'"><img src="../../preview/logos/'+brand.file+'" alt="โลโก้ '+brand.label+'" width="80" height="44" loading="lazy" decoding="async"></span>':'<span class="wallet-symbol" aria-hidden="true">'+(debt.debt_type==='credit_card'?'▤':'↗')+'</span>';
 }
 export function debtLogoOptions(value){
  const entries=[['','อัตโนมัติจากชื่อ'],...Object.entries(debtLogoBrands).map(([key,b])=>[key,b.label]),['none','ไอคอนทั่วไป']];
