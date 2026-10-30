@@ -1,3 +1,8 @@
+## 1.0.12 — 30 October 2026
+- Promote reviewed direct repayment link Test: save debt_payment:<id> source, retain through edits/renames, explicit unlink and clear on new forms/category changes. No balance mutations or historical backfill.
+- Refresh in-app guide for production payment flows, monthly budgets, notifications, widget refresh, backups and historical specialist pages.
+- No database/schema, notification or financial calculation changes. Existing source guards inspected for compatibility.
+
 ## 1.0.11 — 30 October 2026
 - Promote reviewed wallet Test: edited timestamp, configured repayment separate from balance, and matched paid calendar-month history. No financial data rewritten.
 
