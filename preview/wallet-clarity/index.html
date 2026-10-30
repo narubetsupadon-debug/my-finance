@@ -1,0 +1,32 @@
+<!doctype html><html lang="th"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0e14">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Finance">
+<title>My Finance</title>
+<link rel="preconnect" href="https://esm.sh" crossorigin="">
+
+<link rel="preload" as="script" href="../../vendor/chart-4.4.7.umd.js?v=20261023-quality02">
+<link rel="stylesheet" href="../../style.css?v=20261023-quality02">
+<link id="darkThemeStylesheet" rel="stylesheet" href="../../minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
+
+<style>
+.insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
+#insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+</style><link rel="icon" type="image/svg+xml" href="../../app-icon.svg?v=20261023-quality02">
+<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png?v=walletfinal">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png?v=walletfinal">
+<link rel="stylesheet" href="../../ui-polish.css?v=20261023-quality02&amp;loans=06">
+<link rel="stylesheet" href="../../dashboard-design.css?v=20261023-quality02">
+<link rel="stylesheet" href="../../summary-proportion.css?v=20261023-quality02"><link rel="stylesheet" href="../../push-settings.css?v=20261023-quality02"><link rel="stylesheet" href="../../mobile-compact.css?v=20261023-quality02">
+<link rel="stylesheet" href="../../nav-unified.css?v=20261023-quality02&amp;navux=01">
+<link rel="stylesheet" href="../../mobile-polish.css?v=20261023-quality02&amp;navux=01">
+<link rel="stylesheet" href="../../settings-mobile-fix.css?v=20261023-quality02&amp;settingsfix=03">
+<link rel="stylesheet" href="../../entity-dialog.css?v=20261023-quality02&amp;dialog=07">
+<link rel="stylesheet" href="../../dashboard-mobile.css?v=20261023-quality02&amp;overview=09">
+<link rel="stylesheet" href="../../payment-picker.css?v=20261023-quality02&amp;payment=10">
+<link rel="stylesheet" href="./wallet.css"></head>
+<body><main style="max-width:1000px;margin:auto;padding:20px 16px 60px"><div class="preview-banner"><b>TEST · ความชัดเจนของยอดบัตร</b><br>ข้อมูลตัวอย่าง ไม่เชื่อมบัญชีจริงและบันทึกไม่ได้<br>ยอดใช้ / ยอดชำระที่ตั้งไว้ / รายการชำระเดือนนี้ แสดงแยกกัน</div><div class="preview-toolbar"><button class="btn soft" id="theme">สลับธีม</button></div><h1>บัตรและสินเชื่อ</h1><div id="debtList"></div><div id="billList" hidden=""></div></main><dialog id="insightDetailDialog" aria-labelledby="insightDetailTitle"><div class="modal"><div class="insight-detail-head"><h3 id="insightDetailTitle"></h3><button type="button" class="btn ghost" onclick="document.getElementById('insightDetailDialog').close()" aria-label="ปิดรายละเอียด">✕</button></div><p id="insightDetailNote" class="muted"></p><div id="insightDetailBody"></div></div></dialog><script type="module" src="./preview.js"></script></body></html>
