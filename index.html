@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
-<link rel="modulepreload" href="./app.js?v=20261023-quality02&payment=10">
+<link rel="modulepreload" href="./app.js?v=20261023-quality02&wallet=11">
 <link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261023-quality02">
 <link rel="stylesheet" href="./style.css?v=20261023-quality02">
 <link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
@@ -30,6 +30,7 @@
 <link rel="stylesheet" href="./entity-dialog.css?v=20261023-quality02&dialog=07">
 <link rel="stylesheet" href="./dashboard-mobile.css?v=20261023-quality02&overview=09">
 <link rel="stylesheet" href="./payment-picker.css?v=20261023-quality02&payment=10">
+<link rel="stylesheet" href="./wallet-clarity.css?v=20261023-quality02&wallet=11">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
@@ -274,8 +275,8 @@
 
         <section class="card settings-card section" aria-labelledby="appVersionTitle">
           <div class="settings-title"><span aria-hidden="true">ⓘ</span><div><h3 id="appVersionTitle">เกี่ยวกับ My Finance</h3><p>เวอร์ชันของแอปที่กำลังเปิดอยู่</p></div></div>
-          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-10-29">29 ตุลาคม 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.10">1.0.10</strong></div>
-          <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>ปรับภาพรวมสำหรับมือถือ · ยอดใช้วันนี้เด่นเต็มแถว · การ์ดงบคงเหลือและวงกลมไม่เบียดกัน</p></details>
+          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-10-30">30 ตุลาคม 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.11">1.0.11</strong></div>
+          <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>แสดงเวลาแก้ไขข้อมูลบัตร · แยกยอดใช้กับยอดชำระต่อรอบ · กดดูวันที่และยอดชำระที่บันทึกแล้ว</p></details>
         </section>
 
         <details class="card settings-guide section" id="appUsageGuide">
@@ -475,7 +476,7 @@
 <script src="./vendor/chart-4.4.7.umd.js?v=20261023-quality02"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
 <script type="module" src="./slip-reader.js?v=20261023-quality02"></script>
-<script type="module" src="./app.js?v=20261023-quality02&payment=10"></script>
+<script type="module" src="./app.js?v=20261023-quality02&wallet=11"></script>
 <script type="module" src="./app-nav.js?v=20261023-quality02&menus=08"></script></body>
 </html>
 

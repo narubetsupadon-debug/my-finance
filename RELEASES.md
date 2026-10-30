@@ -1,3 +1,6 @@
+## 1.0.11 — 30 October 2026
+- Promote reviewed wallet Test: edited timestamp, configured repayment separate from balance, and matched paid calendar-month history. No financial data rewritten.
+
 ## 1.0.10 — 29 October 2026
 - Payment picker derives recorded progress from exact, uniquely matched repayment names or explicit debt-payment sources. Excludes future, pending, cancelled, income, duplicate IDs and card charges.
 - Complete configured amounts disable the old suggestion; explicit extra payment starts blank. Partial payments suggest the remainder. Calendar month follows selected transaction date, not a bank statement cycle.
