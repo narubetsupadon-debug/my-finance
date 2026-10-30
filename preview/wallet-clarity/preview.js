@@ -1,4 +1,4 @@
-import {createPlanningRenderer} from './planning.js';
+import {createPlanningRenderer} from './planning.js?clarity=3';
 import {bangkokDay,budgetSummary} from '../../finance-core.js?v=20261023-quality02&payment=10';
 const day=bangkokDay(),money=n=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB'}).format(n),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const debts=[{id:'ttb',name:'ttb Credit Card',debt_type:'credit_card',original_amount:28000,outstanding_amount:1219.09,installment_amount:1000,due_day:6,updated_at:day+'T01:30:00Z'},{id:'kbank',name:'KBank Credit Card (K PLUS)',debt_type:'credit_card',original_amount:29000,outstanding_amount:1195,installment_amount:1200,due_day:10},{id:'shopee',name:'Shopee SEasyCash',debt_type:'loan',original_amount:55000,outstanding_amount:5083,installment_amount:1784,due_day:24,updated_at:day+'T01:30:00Z'}];
