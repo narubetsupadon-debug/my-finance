@@ -1,0 +1,63 @@
+// Shared data loading and refresh coordination for the main app.
+async function fetchFinanceData(db,userId,readAll){
+  const query=(table,select='*')=>db.from(table).select(select).eq('user_id',userId);
+  const [categories,accounts,transactions,bills,debts,budgets,carExpenses,rentRecords,subcategories]=await Promise.all([
+    readAll(()=>query('categories').order('sort_order').order('name').order('id')),
+    readAll(()=>query('accounts').eq('is_active',true).order('display_order').order('created_at').order('id')),
+    readAll(()=>query('transactions','*,categories(name,icon),accounts(name)').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).order('id')),
+    readAll(()=>query('bills','*,categories(name),accounts(name)').order('due_day').order('id')),
+    readAll(()=>query('debts').order('created_at').order('id')),
+    readAll(()=>query('budgets').order('created_at').order('id')),
+    readAll(()=>query('car_expenses','transaction_id').not('transaction_id','is',null).order('id')),
+    readAll(()=>query('rent_records').order('bill_month',{ascending:false}).order('id')),
+    readAll(()=>query('finance_subcategories').order('name').order('id'))
+  ]);
+  return {
+    categories,accounts,transactions,bills,debts,budgets,rentRecords,subcategories,
+    carExpenseTxIds:new Set(carExpenses.map(x=>x.transaction_id).filter(Boolean))
+  };
+}
+
+function createRefreshCoordinator({refresh,isBlocked=()=>false,getDelay=()=>180,onError=()=>{}}){
+  let timer=null,cycle=null,queued=false,pending=false;
+
+  async function run(){
+    if(cycle){queued=true;return cycle;}
+    cycle=(async()=>{
+      let result=false;
+      do{
+        queued=false;
+        result=await refresh();
+      }while(queued);
+      return result;
+    })();
+    try{return await cycle}
+    finally{cycle=null}
+  }
+
+  function schedule(){
+    // Keep the first pending refresh. Repeated events should not postpone it forever.
+    if(isBlocked()){pending=true;return;}
+    if(timer!==null)return;
+    const delay=Math.max(0,Number(getDelay())||0);
+    timer=setTimeout(()=>{
+      timer=null;
+      if(isBlocked()){pending=true;return;}
+      pending=false;void run().catch(onError);
+    },delay);
+  }
+
+  function flush(){
+    if(pending)schedule();
+  }
+
+  function dispose(){
+    clearTimeout(timer);
+    timer=null;
+    pending=false;
+    queued=false;
+  }
+
+  return {run,schedule,flush,dispose,get pending(){return pending}};
+}
+
