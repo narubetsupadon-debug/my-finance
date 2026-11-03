@@ -53,10 +53,10 @@ for(const p of ['test.html','index.html']){
  assert.match(html,/reference-budget/,'Budget progress layout: '+p);
  assert.match(html,/data-ref-debt-tab="cards"/,'Credit card switch: '+p);
  assert.match(html,/data-ref-debt-tab="loans"/,'Loan switch: '+p);
- assert.match(html,/reference-layout\\.css\\?v=20261103-refv5/,'Reference CSS loaded: '+p);
- assert.match(html,/reference-layout\\.js\\?v=20261103-refv5/,'Reference navigation loaded: '+p);
+ assert.ok(html.includes('reference-layout.css?v=20261103-refv5'),'Reference CSS loaded: '+p);
+ assert.ok(html.includes('reference-layout.js?v=20261103-refv5'),'Reference navigation loaded: '+p);
 }
-for(const p of ['rent.html','car.html','salary.html']){const html=read('preview/'+p);assert.match(html,/reference-layout\\.js\\?v=20261103-refv5/,'Consistent five-tab preview navigation: '+p);assert.match(html,/reference-layout\\.css\\?v=20261103-refv5/,'Consistent five-tab styling: '+p);}
+for(const p of ['rent.html','car.html','salary.html']){const html=read('preview/'+p);assert.ok(html.includes('reference-layout.js?v=20261103-refv5'),'Consistent five-tab preview navigation: '+p);assert.ok(html.includes('reference-layout.css?v=20261103-refv5'),'Consistent five-tab styling: '+p);}
 assert.ok(read('preview/reference-layout.css').includes('reference-tabbar'),'Reference nav styling is present');
 assert.ok(read('preview/reference-layout.js').includes('finance:navigate'),'Reference tabs use existing app navigation');
 assert.ok(read('preview/reference-layout.js').includes('reference-pay-action'),'Debt cards keep payment entry accessible');
