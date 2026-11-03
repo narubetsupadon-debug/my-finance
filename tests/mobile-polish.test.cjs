@@ -3,7 +3,7 @@ const root=path.join(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'
 const css=read('preview/mobile-polish.css');
 for(const p of ['index.html','test.html','rent.html','car.html','salary.html']){
  const s=read('preview/'+p);
- assert.equal(s.split('mobile-polish.css?v=20261023-polish01').length-1,1,p+' must include polish once');
+ assert.equal(s.split('mobile-polish.css?v=20261023-quality02&navux=01').length-1,1,p+' must include polish once');
  assert.ok(s.indexOf('mobile-polish.css')>s.indexOf('nav-unified.css'),p+' nav styling remains available');
  assert.match(s,/PREVIEW_READ_ONLY/,p+' must stay read-only');
 }
