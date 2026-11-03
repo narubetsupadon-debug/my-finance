@@ -814,7 +814,7 @@ function renderCardPaymentSuggestions(){
  const box=$('cardPaymentSuggest'),list=$('cardPaymentList');if(!box||!list)return;
  const cat=categories.find(c=>c.id===$('txCategory').value),show=$('txType').value==='expense'&&cat?.name==='หนี้/ผ่อน'&&!editing.id;
  box.classList.toggle('hidden',!show);if(!show)return;
- const active=debts.filter(d=>d.is_active&&Number(d.outstanding_amount||0)>0);
+ const active=debts.filter(d=>d.is_active!==false&&Number(d.outstanding_amount||0)>0);
  list.innerHTML=active.length?active.map(d=>{
   const p=debtPaymentProgress(d,debts,transactions,$('txDate').value,bangkokDay()),done=p.state==='complete'||p.state==='recorded';
   const state=p.state==='complete'?'บันทึกครบยอดที่ตั้งไว้แล้ว':p.state==='partial'?'บันทึกชำระบางส่วนแล้ว':p.state==='recorded'?'พบรายการชำระแล้ว · ยังไม่ระบุยอดเป้าหมาย':'ยังไม่พบรายการชำระที่จับคู่ได้';
