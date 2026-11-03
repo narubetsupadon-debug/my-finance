@@ -50,14 +50,15 @@
       const sections=[...list.children].filter(x=>x.classList.contains('wallet-section'));
       sections.slice(0,2).forEach((section,i)=>{
         const visible=(mode==='cards'?i===0:i===1);
-        section.hidden=!visible;
+        if(section.hidden===visible)section.hidden=!visible;
         const grid=section.nextElementSibling;
-        if(grid&&grid.classList.contains('wallet-grid'))grid.hidden=!visible;
+        if(grid&&grid.classList.contains('wallet-grid')&&grid.hidden===visible)grid.hidden=!visible;
         const btn=switches[i];
         if(btn){
           const count=section.querySelector('span')?.textContent?.trim()||'0 รายการ';
-          btn.textContent=(i===0?'บัตรเครดิต':'หนี้/สินเชื่อ')+' · '+count;
-          btn.setAttribute('aria-selected',String(visible));
+          const label=(i===0?'บัตรเครดิต':'หนี้/สินเชื่อ')+' · '+count;
+          if(btn.textContent!==label)btn.textContent=label;
+          if(btn.getAttribute('aria-selected')!==String(visible))btn.setAttribute('aria-selected',String(visible));
         }
       });
       list.querySelectorAll('.wallet-card').forEach(card=>{
@@ -79,9 +80,15 @@
       const btn=e.target.closest('.reference-pay-action');
       if(!btn)return;
       if(typeof window.openTx==='function')window.openTx();
-      // Existing app payment picker receives the same bubbling click, applying linked debt.
+      // Preview opens the existing form; it does not assume the source card was pre-selected.
     },true);
-    const observer=new MutationObserver(refresh);
+    let scheduled=false;
+    const observer=new MutationObserver(mutations=>{
+      // The renderer replaces cards; our own inserted payment button must not trigger a mutation loop.
+      if(!mutations.some(m=>[...m.addedNodes].some(node=>node.nodeType===1&&node.classList?.contains('wallet-section'))))return;
+      if(scheduled)return;scheduled=true;
+      queueMicrotask(()=>{scheduled=false;refresh()});
+    });
     observer.observe(list,{childList:true});
     refresh();
   }
