@@ -28,13 +28,13 @@ assert.ok(!previewHome.includes('rel="manifest"'),'Test must not install product
 for(const p of ['test.html','index.html','rent.html','car.html','salary.html']){
  const html=read('preview/'+p);
  assert.match(html,/<html lang="th" class="soft-minimal-preview">/,'Preview theme scoped: '+p);
- assert.ok(html.includes('href="./soft-minimal.css?v=20261103-softv2"')||html.includes('href="./soft-minimal.css?v=20261103-layoutv3"'),'Soft Minimal CSS must load in Preview: '+p);
+ assert.ok(html.includes('href="./soft-minimal.css?v=20261103-refinev4"'),'Soft Minimal V4 CSS must load in Preview: '+p);
  assert.doesNotMatch(html,/id="darkThemeStylesheet"/,'No dark palette on Soft Minimal Preview: '+p);
 }
 for(const page of ['test.html','index.html']){
  const html=read('preview/'+page);
  assert.match(html,/preview-monthly-overview" open>/,'Preview home should surface existing monthly metrics: '+page);
- assert.ok(html.includes('soft-minimal.css?v=20261103-layoutv3'),'Preview home must use latest visual layout: '+page);
+ assert.ok(html.includes('soft-minimal.css?v=20261103-refinev4'),'Preview home must use latest visual layout: '+page);
 }
 assert.ok(read('preview/soft-minimal.css').includes('grid-template-columns:repeat(5,minmax(0,1fr))'),'Five visible quick expense actions');
 assert.match(read('preview/soft-minimal.css'),/summary-donut-wrap/,'Summary donut layout must be designed');
