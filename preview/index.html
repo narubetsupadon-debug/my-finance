@@ -22,11 +22,11 @@
   try{sw.register=async()=>({update:async()=>{}})}catch(_){}
  }
  window.addEventListener('DOMContentLoaded',()=>{
-  document.body.style.paddingTop='calc(35px + env(safe-area-inset-top, 0px))';
+  document.body.style.paddingTop='0';
   const badge=document.createElement('div');
   badge.setAttribute('role','status');
-  badge.textContent='🧪 SOFT MINIMAL V2 · ดูตัวอย่าง · อ่านอย่างเดียว';
-  badge.style.cssText='position:fixed;z-index:2147483646;top:0;left:0;right:0;text-align:center;padding:calc(8px + env(safe-area-inset-top)) 8px 8px;background:#dcecff;color:#225f9f;font:600 12px system-ui,sans-serif;box-shadow:0 2px 12px #0003';
+  badge.textContent='🧪 Test · อ่านอย่างเดียว';
+  badge.style.cssText='position:fixed;z-index:2147483646;right:12px;bottom:calc(85px + env(safe-area-inset-bottom, 0px));max-width:165px;border-radius:999px;text-align:center;padding:6px 9px;background:#eaf4ff;color:#396eaa;border:1px solid #d7e8fc;font:650 10px system-ui,sans-serif;box-shadow:0 2px 9px #143f741c';
   document.body.appendChild(badge);
   const alertBox=document.createElement('div');alertBox.setAttribute('role','alert');alertBox.hidden=true;alertBox.style.cssText='position:fixed;z-index:2147483647;bottom:80px;left:12px;right:12px;max-width:480px;margin:auto;background:#fff2dc;color:#754600;padding:14px;border:1px solid #ffcf7b;border-radius:12px;font:14px system-ui';
   document.body.appendChild(alertBox);
@@ -101,7 +101,7 @@
     <div class="topin">
       <div><div class="brand"><img class="brand-icon" src="../app-icon.svg?v=20261023-quality02" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
       <div class="userbox">
-        <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings">⚙️ ตั้งค่า</button>
+        <button id="openSettingsTop" class="btn small soft" type="button" data-page-jump="settings" aria-label="ตั้งค่าและการแจ้งเตือน">♧</button>
         <span id="userEmail" class="muted"></span>
         <button id="logout" class="btn small ghost">ออกจากระบบ</button>
       </div>
