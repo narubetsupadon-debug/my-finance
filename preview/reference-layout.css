@@ -1,0 +1,338 @@
+/* Soft Minimal Reference V5 — preview-only composition after the existing V4 skin.
+   Every displayed financial value belongs to the existing application. */
+html.soft-minimal-preview{--primary:#478bd5!important;--text:#21324c!important}
+html.soft-minimal-preview body{background:#f7faff!important}
+html.soft-minimal-preview #dashboardPage.reference-home{
+ display:flex!important;flex-direction:column!important;gap:13px!important;
+ max-width:590px!important;margin:0 auto!important;
+}
+html.soft-minimal-preview #dashboardPage.reference-home>*{order:initial!important;margin:0!important;min-width:0!important}
+html.soft-minimal-preview #dashboardPage .home-welcome{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ margin:0!important;padding:2px 3px 4px!important;
+}
+html.soft-minimal-preview #dashboardPage .home-welcome>div{
+ display:flex;align-items:center;gap:10px;min-width:0;
+}
+html.soft-minimal-preview #dashboardPage .reference-greeting-icon{
+ width:37px;height:37px;display:grid;place-items:center;border-radius:50%;
+ background:#e4f2ff;color:#478bd5;flex:none;font-size:17px;
+}
+html.soft-minimal-preview #dashboardPage .home-welcome h1{
+ font-size:15px!important;margin:0!important;line-height:1.3!important;color:#1d3554!important;
+}
+html.soft-minimal-preview #dashboardPage .home-welcome .welcome-date{
+ font-size:11px!important;font-weight:450!important;color:#70819b!important;
+ margin:3px 0 0!important;
+}
+html.soft-minimal-preview #dashboardPage .home-welcome .welcome-add{
+ padding:8px!important;font-size:12px!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-balance-hero{
+ min-height:102px!important;display:flex;align-items:center;gap:13px;
+ padding:20px 18px!important;color:white!important;
+ background:linear-gradient(116deg,#93c1ed 0%,#5e9bdd 100%)!important;
+ border:1px solid #82b4e9!important;border-radius:18px!important;
+ box-shadow:0 7px 16px rgba(64,133,213,.20)!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-balance-icon{
+ display:grid;place-items:center;width:38px;height:38px;flex:none;
+ color:#fff;font-size:29px;
+}
+html.soft-minimal-preview #dashboardPage .reference-balance-info{flex:1;min-width:0}
+html.soft-minimal-preview #dashboardPage .reference-balance-label{
+ font-size:11px;color:#f2f8ff;font-weight:650;letter-spacing:.05px;
+}
+html.soft-minimal-preview #dashboardPage .reference-balance-number{
+ display:block!important;width:100%;min-width:0;padding:0;border:0!important;
+ color:#fff!important;text-align:left!important;background:none!important;
+ font-size:clamp(23px,6vw,33px)!important;line-height:1.28!important;
+ letter-spacing:-.75px;font-weight:850!important;overflow-wrap:anywhere;white-space:normal!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-hero-arrow{
+ flex:none;border:0;color:#fff;background:transparent;padding:8px;
+ font-size:29px;line-height:1;
+}
+html.soft-minimal-preview #dashboardPage .reference-income-expense{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-mini-card{
+ display:flex;gap:8px;align-items:center;min-width:0;
+ background:#fff!important;border:1px solid #e9eef7!important;
+ border-radius:15px!important;box-shadow:0 3px 11px rgba(56,91,139,.06)!important;
+ padding:12px 10px!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-mini-icon{
+ display:grid;place-items:center;width:27px;height:27px;flex:none;
+ border-radius:50%;font-size:17px;font-weight:700;
+}
+html.soft-minimal-preview #dashboardPage .reference-mini-icon.income{color:#20a780!important;background:#e9f8f1}
+html.soft-minimal-preview #dashboardPage .reference-mini-icon.expense{color:#e96a70!important;background:#ffeff1}
+html.soft-minimal-preview #dashboardPage .reference-mini-card .label{
+ color:#718099!important;font-size:11px!important;font-weight:550!important;white-space:normal;
+}
+html.soft-minimal-preview #dashboardPage .reference-mini-card .value{
+ font-size:clamp(15px,3.6vw,20px)!important;font-weight:800!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;
+ display:block!important;text-align:left!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-budget{
+ display:flex!important;flex-direction:column!important;gap:6px!important;
+ min-height:0!important;padding:15px 14px!important;align-items:stretch!important;
+ background:#fff!important;border:1px solid #e7eef8!important;border-radius:16px!important;
+ box-shadow:0 3px 12px rgba(44,94,156,.06)!important;color:#27374f!important;
+ text-align:left!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-budget-head{
+ width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+ font-size:12px;font-weight:800;
+}
+html.soft-minimal-preview #dashboardPage .reference-budget-head strong{font-size:12px;color:#253750}
+html.soft-minimal-preview #dashboardPage .reference-budget-head span{font-size:12px;font-weight:800;color:#375f95}
+html.soft-minimal-preview #dashboardPage .reference-budget-figures{
+ color:#64748b;font-size:11px;
+}
+html.soft-minimal-preview #dashboardPage .reference-budget-figures b{color:#243c5b}
+html.soft-minimal-preview #dashboardPage .reference-budget>.budget-meter{
+ display:block!important;position:static!important;width:100%!important;height:9px!important;
+ clip-path:none!important;overflow:visible!important;order:initial!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-budget .budget-progress{
+ display:block!important;height:9px!important;width:100%!important;border-radius:999px!important;
+ background:#eaf0f9!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-budget .budget-progress-fill{
+ background:linear-gradient(90deg,#a0c7f0,#5a9bdc)!important;height:100%;
+}
+html.soft-minimal-preview #dashboardPage .reference-budget #homeBudgetStatus{
+ margin:0;font-size:10px!important;color:#8592a6!important;
+}
+html.soft-minimal-preview #dashboardPage .quick-capture{
+ margin:2px 0 0!important;padding:0!important;
+ background:transparent!important;box-shadow:none!important;border:0!important;
+}
+html.soft-minimal-preview #dashboardPage .quick-capture .section-heading{
+ display:flex!important;margin-bottom:9px!important;align-items:center;
+}
+html.soft-minimal-preview #dashboardPage .quick-capture .section-heading h2{
+ font-size:15px!important;font-weight:850!important;color:#1b2f49;
+}
+html.soft-minimal-preview #dashboardPage .quick-grid{
+ display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important;
+}
+html.soft-minimal-preview #dashboardPage .quick-btn{
+ display:flex!important;flex-direction:column!important;justify-content:center;align-items:center!important;
+ padding:7px 2px!important;min-height:70px!important;border:1px solid #e5edf8!important;
+ background:#fff!important;border-radius:13px!important;color:#344c6e!important;
+ box-shadow:0 3px 8px rgba(48,93,155,.055)!important;
+ font-size:10px!important;line-height:1.25!important;overflow-wrap:anywhere;
+}
+html.soft-minimal-preview #dashboardPage .quick-btn:nth-child(n+6){display:none!important}
+html.soft-minimal-preview #dashboardPage .reference-recent{
+ padding:14px 13px!important;background:#fff!important;border-radius:16px!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-recent .section-heading{
+ display:flex!important;justify-content:space-between!important;align-items:center!important;
+ margin-bottom:5px!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-recent h2{
+ font-size:15px!important;font-weight:850!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-recent #recentList{
+ max-height:310px;overflow-y:auto;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-section{
+ display:block!important;border:0!important;background:none!important;padding:0!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-section>summary{
+ display:flex;justify-content:space-between;padding:12px 3px;cursor:pointer;
+ font-size:12px;font-weight:700;color:#6a819e;list-style:none;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-section>summary::-webkit-details-marker{display:none}
+html.soft-minimal-preview #dashboardPage .reference-extra-grid{
+ display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-card{
+ padding:14px!important;min-width:0!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-card .daily-amount{
+ font-size:clamp(18px,4vw,26px)!important;color:#2d4c75!important;white-space:normal!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-section .next-panel{
+ grid-column:initial!important;min-width:0;min-height:unset!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-section>.home-detail{margin-top:12px}
+html.soft-minimal-preview #dashboardPage .reference-extra-section .preview-monthly-overview{
+ display:block!important;border:1px solid #e6edf7!important;
+ background:#fff!important;padding:12px!important;box-shadow:none!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-section .preview-monthly-overview>summary{
+ display:flex!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-section .preview-monthly-overview>.grid4{
+ display:grid!important;grid-template-columns:1fr!important;
+}
+html.soft-minimal-preview #dashboardPage .reference-extra-section .preview-monthly-overview>.grid4>.metric{
+ display:block!important;
+}
+/* Keep analytics as the user sees in the source reference: selector -> two cards -> donut. */
+html.soft-minimal-preview #summaryPage{max-width:590px!important;margin:0 auto}
+html.soft-minimal-preview #summaryPage .summary-hero{
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ gap:8px!important;text-align:center!important;padding:2px 0 8px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-hero h2{
+ font-size:18px!important;line-height:1.25!important;
+}
+html.soft-minimal-preview #summaryPage .summary-eyebrow{display:none!important}
+html.soft-minimal-preview #summaryPage .summary-hero #summaryPeriodText{
+ font-size:11px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-range-chips{
+ display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:4px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-range-chip{
+ flex:none!important;font-size:11px!important;padding:8px 11px!important;border-radius:999px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-kpi-grid{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-kpi{
+ padding:12px!important;min-height:0!important;border-radius:15px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-kpi .value{
+ font-size:clamp(16px,3.6vw,21px)!important;
+}
+html.soft-minimal-preview #summaryPage .summary-share-card{
+ padding:15px!important;border-radius:17px!important;gap:5px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-share-card .summary-donut-wrap{
+ width:min(100%,285px)!important;max-width:285px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-share-card .summary-card-head h3{
+ font-size:15px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-share-card .summary-category-help{
+ font-size:11px!important;
+}
+/* Card switcher mirrors the reference but only filters the existing real rendered cards. */
+html.soft-minimal-preview #debtsPage{max-width:590px!important;margin:0 auto}
+html.soft-minimal-preview #debtsPage .page-head h2{
+ font-size:18px!important;text-align:center!important;
+}
+html.soft-minimal-preview .reference-debt-tabs{
+ display:grid;grid-template-columns:1fr 1fr;gap:3px;
+ background:#f1f4f8;border-radius:99px;padding:4px;margin:5px 0 13px;
+}
+html.soft-minimal-preview .reference-debt-tabs button{
+ border:0;background:transparent;color:#65738b;min-height:36px;
+ border-radius:99px;font-size:12px;font-weight:750;
+}
+html.soft-minimal-preview .reference-debt-tabs button[aria-selected="true"]{
+ background:linear-gradient(130deg,#86b9ee,#4d91d8);color:white;
+ box-shadow:0 3px 8px rgba(69,132,210,.17);
+}
+html.soft-minimal-preview #debtsPage .wallet-overview{display:none!important}
+html.soft-minimal-preview #debtsPage .wallet-section{display:none!important}
+html.soft-minimal-preview #debtsPage .wallet-grid{
+ display:grid!important;grid-template-columns:1fr!important;gap:8px!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-card{
+ padding:13px!important;border-radius:15px!important;margin:0!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-head{margin:0 0 10px!important}
+html.soft-minimal-preview #debtsPage .wallet-card .wallet-amount{margin:0 0 8px!important}
+html.soft-minimal-preview #debtsPage .wallet-card .wallet-amount b{
+ font-size:clamp(19px,4vw,24px)!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-symbol{
+ width:52px!important;height:37px!important;overflow:hidden;
+}
+html.soft-minimal-preview #debtsPage .wallet-symbol img{
+ width:100%!important;height:100%!important;object-fit:contain!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-available{
+ font-size:11px!important;gap:10px;
+}
+html.soft-minimal-preview #debtsPage .wallet-record-info{
+ padding:8px!important;margin:8px 0!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-record-info>small{
+ font-size:10px!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-footer{font-size:11px!important}
+html.soft-minimal-preview #debtsPage .reference-pay-action{
+ border:0;background:#eaf3ff;color:#347bca;border-radius:999px;
+ padding:6px 13px;font-weight:800;font-size:11px;cursor:pointer;
+}
+html.soft-minimal-preview #debtsPage .reference-payment-summary{
+ margin:14px 0 0;padding:13px!important;border-radius:15px!important;
+ background:#fff!important;border:1px solid #e8eef7!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-grid[hidden],
+html.soft-minimal-preview #debtsPage .wallet-section[hidden]{display:none!important}
+/* Compact transaction editor with all existing fields and read-only saving guard. */
+html.soft-minimal-preview #txDialog .capture-form{
+ max-width:430px!important;gap:8px!important;padding:16px!important;
+}
+html.soft-minimal-preview #txDialog .capture-header{justify-content:center!important;position:relative}
+html.soft-minimal-preview #txDialog .capture-header h3{font-size:18px!important}
+html.soft-minimal-preview #txDialog .capture-header .icon-close{position:absolute;right:0;top:0}
+html.soft-minimal-preview #txDialog .capture-amount{padding:9px!important}
+html.soft-minimal-preview #txDialog .capture-fields{
+ grid-template-columns:1fr!important;gap:8px!important;
+}
+html.soft-minimal-preview #txDialog .capture-fields>.field{
+ grid-column:1/-1!important;
+}
+html.soft-minimal-preview #txDialog .capture-fields>.field label{
+ font-size:11px!important;margin-bottom:4px!important;
+}
+html.soft-minimal-preview #txDialog :is(input,select,textarea){
+ min-height:41px!important;border-radius:10px!important;
+}
+html.soft-minimal-preview #txDialog .capture-actions{position:sticky;bottom:-2px;z-index:5}
+html.soft-minimal-preview #txDialog .capture-actions>.primary{
+ min-height:45px!important;background:linear-gradient(120deg,#88b9ed,#4f90d9)!important;
+}
+/* Five buttons with the same destinations and icon hierarchy as the reference screenshot. */
+@media(max-width:820px){
+ html.soft-minimal-preview.reference-nav-ready .mobile-app-nav{display:none!important}
+ html.soft-minimal-preview .reference-tabbar{
+  display:grid!important;position:fixed;z-index:65;
+  left:0;right:0;bottom:0;grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:1px;align-items:center;
+  padding:7px 8px calc(9px + env(safe-area-inset-bottom,0px));
+  background:rgba(255,255,255,.98);border-top:1px solid #e7edf7;
+  box-shadow:0 -4px 19px rgba(42,82,139,.07);
+ }
+ html.soft-minimal-preview .reference-tabbar button{
+  min-width:0;background:transparent;border:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  color:#75849c;font-size:10px;font-weight:650;border-radius:10px;
+  min-height:46px;
+ }
+ html.soft-minimal-preview .reference-tabbar button .ref-tab-icon{
+  display:grid;place-items:center;font-size:19px;width:30px;height:27px;line-height:1;
+ }
+ html.soft-minimal-preview .reference-tabbar button[aria-current="page"]{color:#347fd2}
+ html.soft-minimal-preview .reference-tabbar button[data-target="capture"] .ref-tab-icon{
+  background:#6a9edb;color:white;border-radius:50%;
+  width:25px;height:25px;font-size:23px;
+ }
+ html.soft-minimal-preview .reference-tabbar button:focus-visible{
+  outline:2px solid #438bd6;outline-offset:-2px;
+ }
+ html.soft-minimal-preview .content{padding-bottom:calc(91px + env(safe-area-inset-bottom))!important}
+}
+@media(min-width:821px){html.soft-minimal-preview .reference-tabbar{display:none!important}}
+@media(max-width:390px){
+ html.soft-minimal-preview .reference-balance-hero{padding:16px 12px!important;gap:9px}
+ html.soft-minimal-preview #dashboardPage .reference-balance-number{font-size:24px!important}
+ html.soft-minimal-preview #dashboardPage .reference-mini-card{padding:10px 6px!important;gap:5px!important}
+ html.soft-minimal-preview #dashboardPage .reference-mini-card .value{font-size:15px!important}
+ html.soft-minimal-preview #dashboardPage .quick-btn{font-size:9px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ html.soft-minimal-preview .reference-tabbar *{transition:none!important}
+}

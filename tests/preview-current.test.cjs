@@ -42,5 +42,25 @@ assert.match(read('preview/soft-minimal.css'),/summary-donut-wrap/,'Summary donu
 assert.doesNotMatch(read('index.html'),/soft-minimal\.css|soft-minimal-preview/,'Production must retain its existing theme');
 assert.match(read('preview/soft-minimal.css'),/\.soft-minimal-preview/,'Preview CSS is scoped');
 
+// Reference V5: real data bindings, original Preview write guard, and mobile navigation.
+for(const p of ['test.html','index.html']){
+ const html=read('preview/'+p);
+ for(const id of ['balanceTotal','incomeTotal','expenseTotal','budgetCard','budgetPctDash','budgetSpentDash','budgetLimitDash','budgetProgressDash','quickAdd','recentList','categoryPieChart','debtList','txForm']){
+  assert.equal((html.match(new RegExp('id="'+id+'"','g'))||[]).length,1,'Reference page must preserve one real '+id+': '+p);
+ }
+ assert.match(html,/class="reference-balance-hero"/,'Large reference blue balance hero: '+p);
+ assert.match(html,/reference-income-expense/,'Real month income and expense cards: '+p);
+ assert.match(html,/reference-budget/,'Budget progress layout: '+p);
+ assert.match(html,/data-ref-debt-tab="cards"/,'Credit card switch: '+p);
+ assert.match(html,/data-ref-debt-tab="loans"/,'Loan switch: '+p);
+ assert.ok(html.includes('reference-layout.css?v=20261103-refv5'),'Reference CSS loaded: '+p);
+ assert.ok(html.includes('reference-layout.js?v=20261103-refv5'),'Reference navigation loaded: '+p);
+}
+for(const p of ['rent.html','car.html','salary.html']){const html=read('preview/'+p);assert.ok(html.includes('reference-layout.js?v=20261103-refv5'),'Consistent five-tab preview navigation: '+p);assert.ok(html.includes('reference-layout.css?v=20261103-refv5'),'Consistent five-tab styling: '+p);}
+assert.ok(read('preview/reference-layout.css').includes('reference-tabbar'),'Reference nav styling is present');
+assert.ok(read('preview/reference-layout.js').includes('finance:navigate'),'Reference tabs use existing app navigation');
+assert.ok(read('preview/reference-layout.js').includes('reference-pay-action'),'Debt cards keep payment entry accessible');
+assert.doesNotMatch(read('index.html'),/reference-balance-hero|reference-layout\\.css/,'Production layout remains untouched');
+
 assert.match(read('preview/compare.html'),/เปรียบเทียบกับเว็บไซต์จริง/,'Preserve previous comparison hub');
 console.log('PASS preview mirrors: latest UI, read-only guard and internal test navigation');
