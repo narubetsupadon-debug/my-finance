@@ -11,5 +11,18 @@ for(const [source,mirror] of [['index.html','preview/index.html'],['index.html',
  for(const token of ['id="saveRent"','id="saveCar"','id="saveSalary"'].filter(x=>prod.includes(x)))assert.ok(test.includes(token),'Keep existing controls: '+token);
  if(source==='index.html')assert.ok(test.includes('id="dashboardPage"')&&test.includes('id="settingsPage"'),'Test must contain real UI screens');
 }
+// Main preview must run the same payment-release entrypoint and responsive asset versions.
+const prodHome=read('index.html'),previewHome=read('preview/test.html');
+const mainEntrypoint=prodHome.match(/<script type="module" src="\.\/app\.js\?([^"]+)"><\/script>/)?.[1];
+assert.ok(mainEntrypoint,'Production app module must exist');
+assert.ok(previewHome.includes('src="../app.js?'+mainEntrypoint+'"'),'Preview must load the exact production main module URL');
+for(const name of ['nav-unified.css','mobile-polish.css','payment-picker.css','wallet-clarity.css']){
+ const escName=name.replace(/\./g,'\\.');
+ const m=prodHome.match(new RegExp('href="\\./'+escName+'\\?([^"]+)"'));
+ assert.ok(m,'Production asset missing: '+name);
+ assert.ok(previewHome.includes('href="../'+name+'?'+m[1]+'"'),'Preview version drift: '+name);
+}
+assert.ok(!previewHome.includes('rel="manifest"'),'Test must not install production PWA');
+
 assert.match(read('preview/compare.html'),/เปรียบเทียบกับเว็บไซต์จริง/,'Preserve previous comparison hub');
 console.log('PASS preview mirrors: latest UI, read-only guard and internal test navigation');
