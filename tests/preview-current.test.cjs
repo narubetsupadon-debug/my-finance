@@ -53,10 +53,18 @@ for(const p of ['test.html','index.html']){
  assert.match(html,/reference-budget/,'Budget progress layout: '+p);
  assert.match(html,/data-ref-debt-tab="cards"/,'Credit card switch: '+p);
  assert.match(html,/data-ref-debt-tab="loans"/,'Loan switch: '+p);
- assert.ok(html.includes('reference-layout.css?v=20261103-refv5'),'Reference CSS loaded: '+p);
- assert.ok(html.includes('reference-layout.js?v=20261103-refv5'),'Reference navigation loaded: '+p);
+ assert.ok(html.includes('reference-layout.css?v=20261103-refv6'),'Reference CSS loaded: '+p);
+ assert.ok(html.includes('reference-layout.js?v=20261103-refv6'),'Reference navigation loaded: '+p);
 }
-for(const p of ['rent.html','car.html','salary.html']){const html=read('preview/'+p);assert.ok(html.includes('reference-layout.js?v=20261103-refv5'),'Consistent five-tab preview navigation: '+p);assert.ok(html.includes('reference-layout.css?v=20261103-refv5'),'Consistent five-tab styling: '+p);}
+for(const p of ['rent.html','car.html','salary.html']){const html=read('preview/'+p);assert.ok(html.includes('reference-layout.js?v=20261103-refv6'),'Consistent five-tab preview navigation: '+p);assert.ok(html.includes('reference-layout.css?v=20261103-refv6'),'Consistent five-tab styling: '+p);}
+for(const p of ['test.html','index.html']){
+ const html=read('preview/'+p);
+ assert.ok(html.includes('id="referenceMonthLabel"'),'Monthly selector title is visible: '+p);
+ assert.ok(html.includes('data-reference-month="-1"')&&html.includes('data-reference-month="1"'),'Previous and next month controls: '+p);
+ assert.ok(html.includes('class="reference-chart-row"'),'Donut and category legend align side-by-side: '+p);
+}
+assert.ok(read('preview/reference-layout.js').includes("if(btn.textContent!==label)"),'Debts renderer avoids a feedback loop');
+assert.ok(read('preview/reference-layout.js').includes("month.dispatchEvent(new Event('change'"),'Summary selection uses the existing report renderer');
 assert.ok(read('preview/reference-layout.css').includes('reference-tabbar'),'Reference nav styling is present');
 assert.ok(read('preview/reference-layout.js').includes('finance:navigate'),'Reference tabs use existing app navigation');
 assert.ok(read('preview/reference-layout.js').includes('reference-pay-action'),'Debt cards keep payment entry accessible');
