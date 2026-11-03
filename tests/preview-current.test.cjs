@@ -24,5 +24,15 @@ for(const name of ['nav-unified.css','mobile-polish.css','payment-picker.css','w
 }
 assert.ok(!previewHome.includes('rel="manifest"'),'Test must not install production PWA');
 
+// Soft Minimal must remain an isolated preview theme; never change production pages.
+for(const p of ['test.html','index.html','rent.html','car.html','salary.html']){
+ const html=read('preview/'+p);
+ assert.match(html,/<html lang="th" class="soft-minimal-preview">/,'Preview theme scoped: '+p);
+ assert.match(html,/href="\.\/soft-minimal\.css\?v=20261103-softv2"/,'Soft Minimal CSS must load in Preview: '+p);
+ assert.doesNotMatch(html,/id="darkThemeStylesheet"/,'No dark palette on Soft Minimal Preview: '+p);
+}
+assert.doesNotMatch(read('index.html'),/soft-minimal\.css|soft-minimal-preview/,'Production must retain its existing theme');
+assert.match(read('preview/soft-minimal.css'),/\.soft-minimal-preview/,'Preview CSS is scoped');
+
 assert.match(read('preview/compare.html'),/เปรียบเทียบกับเว็บไซต์จริง/,'Preserve previous comparison hub');
 console.log('PASS preview mirrors: latest UI, read-only guard and internal test navigation');
