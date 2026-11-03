@@ -64,6 +64,7 @@
 <link rel="stylesheet" href="../payment-picker.css?v=20261023-quality02&payment=10">
 <link rel="stylesheet" href="../wallet-clarity.css?v=20261023-quality02&wallet=11">
 <link rel="stylesheet" href="./soft-minimal.css?v=20261103-refinev4">
+<link rel="stylesheet" href="./reference-layout.css?v=20261103-refv5">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite">
@@ -132,69 +133,68 @@
     </aside>
 
     <main class="content">
-      <section id="dashboardPage" class="page">
-
+      <section id="dashboardPage" class="page reference-home">
         <div class="home-welcome">
-          <div><div id="todayLabel" class="welcome-date">วันนี้</div><h1 id="helloTitle">แวะมาดูแลเงินกันนะมิว 💙</h1></div>
-          <button class="btn primary welcome-add" onclick="openTx()">＋ บันทึกรายการ</button>
+          <div><div class="reference-greeting-icon" aria-hidden="true">💙</div><div><h1 id="helloTitle">สวัสดีค่ะ 👋</h1><div id="todayLabel" class="welcome-date">ดูภาพรวมการเงินของคุณวันนี้</div></div></div>
+          <button class="btn primary welcome-add" onclick="openTx()">＋ บันทึก</button>
         </div>
 
-        <div class="daily-overview">
-          <div class="daily-panel spent-panel">
-            <div class="daily-label"><span aria-hidden="true">↗</span> วันนี้ใช้ไป</div>
-            <button type="button" id="todaySpent" class="daily-amount money total-link" aria-label="ดูรายการประกอบยอด">฿0</button>
-            <div class="daily-panel-foot"><span id="todayCount">0 รายการ</span><button class="text-action" id="viewToday" type="button">ดูรายการวันนี้ →</button></div>
-          </div>
-          <button type="button" class="daily-panel budget-panel" id="budgetCard">
-            <div class="daily-label"><span aria-hidden="true">◉</span> งบเดือนนี้ยังเหลือ <span class="panel-arrow">↗</span></div>
-            <div id="budgetRemainDash" class="daily-amount money">฿0</div>
-            <div class="budget-meter"><div class="budget-progress"><div id="budgetProgressDash" class="budget-progress-fill"></div></div><span id="budgetPctDash">0%</span></div>
-            <div id="homeBudgetStatus" class="daily-caption">แตะเพื่อตั้งงบประมาณ</div>
-            <div class="budget-reference"><span id="budgetSpentDash">฿0</span> / <span id="budgetLimitDash">฿0</span></div>
-            <div id="budgetRingDash" class="budget-ring" aria-hidden="true"><span><b id="budgetRingPct">—</b><small>ใช้ไปแล้ว</small></span></div><span id="budgetDailyDash" class="sr-only"></span><span id="todayCanSpend" class="sr-only"></span><span id="todayCanSpendHint" class="sr-only"></span>
-          </button>
-          <button type="button" class="daily-panel next-panel" id="nextBillCard">
-            <div class="daily-label"><span aria-hidden="true">◷</span> กำหนดชำระถัดไป <span class="panel-arrow">↗</span></div>
-            <div id="nextBillName" class="next-bill-name">ยังไม่มีรายการ</div>
-            <div id="nextBillAmount" class="next-bill-amount money">—</div>
-            <div id="nextBillDate" class="daily-caption">เพิ่มบิลไว้ช่วยจำได้เลย</div>
-          </button>
+        <div class="reference-balance-hero">
+          <div class="reference-balance-icon" aria-hidden="true">▤</div>
+          <div class="reference-balance-info"><div class="reference-balance-label">รายรับหักรายจ่ายเดือนนี้</div>
+          <button type="button" id="balanceTotal" class="value balance money total-link reference-balance-number" aria-label="ดูรายการประกอบยอด">฿0</button></div>
+          <button type="button" class="reference-hero-arrow" data-page-jump="summary" aria-label="ดูรายละเอียดสรุปรายรับรายจ่าย">›</button>
         </div>
 
-        <div class="bill-month-strip section"><button type="button" id="homeBillStatus" class="text-action" data-page-jump="bills">ดูบิลเดือนนี้ ›</button><small id="homeBillStatusNote"></small></div>
+        <div class="reference-income-expense">
+          <div class="reference-mini-card"><span class="reference-mini-icon income">↑</span><div><div class="label">รายรับเดือนนี้</div><button type="button" id="incomeTotal" class="value income money total-link" aria-label="ดูรายรับเดือนนี้">฿0</button></div></div>
+          <div class="reference-mini-card"><span class="reference-mini-icon expense">↓</span><div><div class="label">รายจ่ายเดือนนี้</div><button type="button" id="expenseTotal" class="value expense money total-link" aria-label="ดูรายจ่ายเดือนนี้">฿0</button></div></div>
+        </div>
+
+        <button type="button" class="daily-panel budget-panel reference-budget" id="budgetCard">
+          <div class="reference-budget-head"><strong>งบประมาณเดือนนี้</strong><span id="budgetPctDash">0%</span></div>
+          <div class="reference-budget-figures">ใช้ไป <b id="budgetSpentDash">฿0</b> / <span id="budgetLimitDash">฿0</span></div>
+          <div class="budget-meter"><div class="budget-progress"><div id="budgetProgressDash" class="budget-progress-fill"></div></div></div>
+          <div id="homeBudgetStatus" class="daily-caption">แตะเพื่อตั้งงบประมาณ</div>
+          <span id="budgetRemainDash" class="sr-only">฿0</span>
+          <span id="budgetRingDash" class="sr-only" aria-hidden="true"><span><b id="budgetRingPct">—</b><small>ใช้ไปแล้ว</small></span></span>
+          <span id="budgetDailyDash" class="sr-only"></span><span id="todayCanSpend" class="sr-only"></span><span id="todayCanSpendHint" class="sr-only"></span>
+        </button>
+
         <div class="card quick-capture section">
-          <div class="section-heading"><div><h2>วันนี้มีรายจ่ายอะไรบ้าง?</h2><p>เลือกหมวดหมู่เพื่อบันทึกรายการได้ทันที</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
+          <div class="section-heading"><div><h2>วันนี้มีรายจ่ายอะไรบ้าง?</h2></div></div>
           <div id="quickAdd" class="quick-grid"></div>
         </div>
 
-        <div class="home-feed section">
-          <div class="card recent-card">
-            <div class="section-heading"><h2>รายการล่าสุด</h2><button class="text-action" data-page-jump="transactions">ดูทั้งหมด →</button></div>
-            <div id="recentList" class="list section"></div>
-          </div>
-        <details class="home-detail card section" open>
-          <summary><strong>รายการใกล้ถึงกำหนด</strong><span class="detail-cue">ดูทั้งหมด <span aria-hidden="true">⌄</span></span></summary>
-          <div id="upcomingList" class="upcoming-list"></div>
-          <div class="row section"><button class="text-action" data-page-jump="bills">จัดการบิลประจำ →</button><button class="text-action" data-page-jump="debts">บัตร / สินเชื่อ →</button></div>
-        </details>
-
+        <div class="card recent-card reference-recent">
+          <div class="section-heading"><h2>รายการล่าสุด</h2><button class="text-action" data-page-jump="transactions">ดูทั้งหมด ›</button></div>
+          <div id="recentList" class="list section"></div>
         </div>
 
-        <details class="home-detail card section preview-monthly-overview" open>
-          <summary><span><strong>ภาพรวมเดือนนี้</strong><small id="monthLabel"></small></span><span class="detail-cue">ดูรายละเอียด <span aria-hidden="true">⌄</span></span></summary>
-          <p class="muted total-scope">รวมจ่ายแล้ว รอดำเนินการ และวันที่อนาคตในเดือนนี้ · ไม่รวมยกเลิก · แตะยอดดูรายการ</p><div class="grid4 section">
-            <div class="metric"><div class="label">รายรับ</div><button type="button" id="incomeTotal" class="value income money total-link" aria-label="ดูรายการประกอบยอด">฿0</button></div>
-            <div class="metric"><div class="label">รายจ่าย</div><button type="button" id="expenseTotal" class="value expense money total-link" aria-label="ดูรายการประกอบยอด">฿0</button></div>
-            <div class="metric"><div class="label">รายรับหักรายจ่าย</div><button type="button" id="balanceTotal" class="value balance money total-link" aria-label="ดูรายการประกอบยอด">฿0</button></div>
-            <div class="metric"><div class="label">ยอดบัตร / สินเชื่อ</div><div id="debtTotal" class="value expense money">฿0</div></div>
+        <details class="reference-extra-section">
+          <summary>รายละเอียดเพิ่มเติมของเดือนนี้ <span aria-hidden="true">⌄</span></summary>
+          <div class="reference-extra-grid">
+            <div class="card reference-extra-card"><div class="daily-label">วันนี้ใช้ไป</div><button type="button" id="todaySpent" class="daily-amount money total-link" aria-label="ดูรายการประกอบยอด">฿0</button><div class="daily-panel-foot"><span id="todayCount">0 รายการ</span><button class="text-action" id="viewToday" type="button">ดูรายการวันนี้ →</button></div></div>
+            <button type="button" class="daily-panel next-panel" id="nextBillCard">
+              <div class="daily-label">◷ กำหนดชำระถัดไป</div><div id="nextBillName" class="next-bill-name">ยังไม่มีรายการ</div>
+              <div id="nextBillAmount" class="next-bill-amount money">—</div><div id="nextBillDate" class="daily-caption">เพิ่มบิลไว้ช่วยจำได้เลย</div>
+            </button>
           </div>
-          <h3 class="detail-heading">รายจ่ายตามหมวด</h3><div id="categoryChart"></div>
-          <button class="btn soft section" data-page-jump="summary">เปิดสรุปและกราฟทั้งหมด →</button>
-        </details>
-          <details class="card insight-card home-detail">
-            <summary><strong>ดูข้อสังเกตเดือนนี้</strong><span class="detail-cue">แตะเพื่ออ่าน ⌄</span></summary>
-            <div id="insightList" class="insight-list section"></div>
+          <div class="bill-month-strip section"><button type="button" id="homeBillStatus" class="text-action" data-page-jump="bills">ดูบิลเดือนนี้ ›</button><small id="homeBillStatusNote"></small></div>
+          <details class="home-detail card section" open>
+            <summary><strong>รายการใกล้ถึงกำหนด</strong><span class="detail-cue">⌄</span></summary>
+            <div id="upcomingList" class="upcoming-list"></div>
+            <div class="row section"><button class="text-action" data-page-jump="bills">จัดการบิลประจำ →</button><button class="text-action" data-page-jump="debts">บัตร / สินเชื่อ →</button></div>
           </details>
+          <details class="home-detail card section preview-monthly-overview" open>
+            <summary><span><strong>ภาพรวมเดือนนี้</strong><small id="monthLabel"></small></span><span class="detail-cue">⌄</span></summary>
+            <p class="muted total-scope">รายรับหักรายจ่ายไม่ใช่เงินสดคงเหลือในบัญชี · รวมรายการที่บันทึกในเดือนนี้</p>
+            <div class="grid4 section"><div class="metric"><div class="label">ยอดบัตร / สินเชื่อ</div><div id="debtTotal" class="value expense money">฿0</div></div></div>
+            <h3 class="detail-heading">รายจ่ายตามหมวด</h3><div id="categoryChart"></div>
+            <button class="btn soft section" data-page-jump="summary">เปิดสรุปและกราฟทั้งหมด →</button>
+          </details>
+          <details class="card insight-card home-detail"><summary><strong>ดูข้อสังเกตเดือนนี้</strong><span class="detail-cue">⌄</span></summary><div id="insightList" class="insight-list section"></div></details>
+        </details>
       </section>
 
       <section id="transactionsPage" class="page hidden">
