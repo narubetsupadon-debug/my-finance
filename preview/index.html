@@ -235,7 +235,9 @@
 
       <section id="debtsPage" class="page hidden">
         <div class="page-head"><div><h2>บัตรและสินเชื่อ</h2><div class="muted">ดูยอดที่ใช้ไป วงเงินคงเหลือ และยอดที่ต้องจ่ายรอบนี้</div></div><button class="btn primary" onclick="openEntity('debt')">+ เพิ่มบัตร/สินเชื่อ</button></div>
+        <div class="reference-debt-tabs" role="group" aria-label="เลือกบัตรหรือสินเชื่อ"><button type="button" data-ref-debt-tab="cards" aria-selected="true">บัตรเครดิต</button><button type="button" data-ref-debt-tab="loans" aria-selected="false">หนี้/สินเชื่อ</button></div>
         <div id="debtList" class="wallet-list"></div>
+        <div class="reference-payment-summary"><strong>สถานะการชำระรายเดือน</strong><p class="muted">ดูยอดบันทึกชำระและประวัติได้ในการ์ดแต่ละใบ · ไม่ใช่ยอดยืนยันจากธนาคาร</p></div>
       </section>
 
       <section id="budgetPage" class="page hidden">
@@ -255,7 +257,7 @@
         <div class="summary-hero">
           <div>
             <div class="summary-eyebrow">FINANCIAL REVIEW</div>
-            <h2>สรุปการเงิน</h2>
+            <h2>สรุปรายรับและรายจ่าย</h2>
             <div id="summaryPeriodText" class="muted">รายรับ รายจ่าย และเงินเหลือตามช่วงเวลาที่เลือก</div>
           </div>
           <div class="summary-period-picker" aria-label="เลือกช่วงเวลาสรุป">
@@ -292,7 +294,7 @@
         </div></details>
 
         <div class="card section summary-chart-card summary-share-card">
-          <div class="summary-card-head"><div><h3>สัดส่วนรายจ่าย</h3><p>หมวดหลักและสัดส่วนของยอดรายจ่ายที่เลือก</p></div><span class="summary-card-badge">แยกตามหมวด</span></div>
+          <div class="summary-card-head"><div><h3>รายจ่ายตามหมวดหมู่</h3><p>หมวดหลักและสัดส่วนของยอดรายจ่ายที่เลือก</p></div><span class="summary-card-badge">แยกตามหมวด</span></div>
           <div class="highest-heading"><h4>รายจ่ายสูงสุด 5 อันดับ</h4><button id="summaryHighestAll" type="button" disabled>ดูรายละเอียดทั้งหมด ›</button></div><div id="summaryHighest" class="summary-highest highest-viewport" role="region" aria-roledescription="carousel" aria-label="รายจ่ายสูงสุด 5 อันดับ" aria-live="off"><div id="summaryHighestTrack" class="highest-track"></div></div><div id="summaryHighestControls" class="highest-controls" hidden aria-label="เลื่อนรายจ่ายอันดับสูงสุด"><button id="summaryHighestPrev" type="button" aria-label="รายจ่ายอันดับก่อนหน้า">‹</button><div id="summaryHighestDots" class="highest-dots"></div><button id="summaryHighestNext" type="button" aria-label="รายจ่ายอันดับถัดไป">›</button><button id="summaryHighestPause" type="button" aria-pressed="false">Ⅱ หยุด</button></div><div class="summary-donut-wrap"><div class="chart-box donut summary-donut"><canvas id="categoryPieChart" aria-label="กราฟสัดส่วนรายจ่ายตามช่วงเวลาที่เลือก" role="img"></canvas></div><div class="summary-donut-center" aria-live="polite" aria-atomic="true"><small id="summaryCenterLabel">รายจ่ายรวม</small><strong id="summaryPieTotal" class="money">—</strong><span id="summarySelectedPercent" hidden></span></div></div>
           <div class="summary-circle-actions"><button id="summarySelectionReset" type="button" hidden>กลับไปดูยอดรวม ↺</button></div><p class="summary-category-help">แตะสีบนวงกลมเพื่อดูยอดหมวด · แตะชื่อหมวดเพื่อดูหมวดย่อย</p><div id="foodSubcategoryBreakdown" class="summary-category-list" hidden></div><p id="summaryPieEmpty" class="empty" hidden>ยังไม่มีรายจ่ายในช่วงนี้</p>
         </div>
@@ -468,7 +470,7 @@
 
 <dialog id="txDialog" aria-labelledby="txDialogTitle">
 <form id="txForm" class="modal capture-form">
-  <div class="capture-header"><h3 id="txDialogTitle">บันทึกรายการ</h3><button type="button" class="icon-close" onclick="requestCloseTx()" aria-label="ปิดฟอร์ม">✕</button></div>
+  <div class="capture-header"><h3 id="txDialogTitle">เพิ่มรายการ</h3><button type="button" class="icon-close" onclick="requestCloseTx()" aria-label="ปิดฟอร์ม">✕</button></div>
   <div class="type-switch" role="group" aria-label="ประเภทรายการ">
     <button type="button" data-tx-type="expense" aria-pressed="true">↗ รายจ่าย</button>
     <button type="button" data-tx-type="income" aria-pressed="false">↙ รายรับ</button>
@@ -484,7 +486,7 @@
   <div class="capture-amount field"><label for="txAmount">จำนวนเงิน</label><div class="amount-entry"><span aria-hidden="true">฿</span><input id="txAmount" inputmode="decimal" type="number" min="0.01" step="0.01" required placeholder="0.00" autocomplete="off" enterkeyhint="next"></div></div>
   <details id="txRepeatSection" class="capture-repeat"><summary>↻ ใช้รายการโปรด / รายการเดิม</summary><div id="txRepeatList" class="repeat-list"></div></details>
   <div class="fields capture-fields">
-    <div class="field full"><label for="txDesc">รายการอะไร?</label><input id="txDesc" required placeholder="เช่น ข้าวกลางวัน กาแฟ หรือของเข้าบ้าน" maxlength="250" enterkeyhint="next"></div>
+    <div class="field full"><label for="txDesc">รายการ / บันทึก</label><input id="txDesc" required placeholder="เช่น ข้าวกลางวัน กาแฟ หรือของเข้าบ้าน" maxlength="250" enterkeyhint="next"></div>
     <div class="field"><label for="txCategory">หมวดหมู่</label><select id="txCategory" required></select></div><div class="field hidden" id="txSubcategoryWrap"><label for="txSubcategory">หมวดย่อย</label><div style="display:flex;align-items:center;gap:8px"><select id="txSubcategory" style="min-width:0;flex:1"><option value="">ไม่ระบุหมวดย่อย</option></select><button type="button" id="txSubcategoryAdd" class="btn secondary" style="flex-shrink:0" aria-label="เพิ่มหมวดย่อยใหม่">+ เพิ่มเอง</button></div></div>
     <div class="field"><label for="txAccount">บัญชีที่ใช้</label><select id="txAccount"></select></div>
     <div id="txDebtLinkField" class="field full hidden"><label for="txDebtLink">รายการชำระของบัตร / สินเชื่อ</label><select id="txDebtLink"><option value="">ไม่ผูกกับบัตร / สินเชื่อ</option></select><small id="txDebtLinkHint" class="muted">เลือกเพื่อจำบัตรโดยตรง แม้แก้ชื่อรายการภายหลัง · ไม่เปลี่ยนยอดหนี้อัตโนมัติ</small></div>
@@ -514,6 +516,6 @@
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
 <script type="module" src="../slip-reader.js?v=20261023-quality02"></script>
 <script type="module" src="../app.js?v=20261023-quality02&payments=13"></script>
-<script type="module" src="../app-nav.js?v=20261023-quality02&menus=08"></script><script type="module" src="./nav-scroll.js?v=20261023-scroll01"></script></body>
+<script type="module" src="../app-nav.js?v=20261023-quality02&menus=08"></script><script type="module" src="./nav-scroll.js?v=20261023-scroll01"></script><script src="./reference-layout.js?v=20261103-refv5" defer></script></body>
 </html>
 
