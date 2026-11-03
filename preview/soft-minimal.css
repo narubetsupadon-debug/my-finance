@@ -164,3 +164,243 @@ html.soft-minimal-preview .soft-preview-banner small{color:#5279a8}
   html.soft-minimal-preview *,html.soft-minimal-preview *::before,
   html.soft-minimal-preview *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+
+/* V3: match the approved four-screen concept through REAL, functioning pages. */
+html.soft-minimal-preview .content{max-width:1120px}
+html.soft-minimal-preview #dashboardPage{
+ display:flex!important;flex-direction:column;gap:12px;max-width:840px;margin:auto;
+}
+html.soft-minimal-preview #dashboardPage > *{min-width:0;margin-top:0!important;margin-bottom:0!important}
+html.soft-minimal-preview #dashboardPage .home-welcome{order:0;margin:0!important;align-items:center;gap:12px}
+html.soft-minimal-preview #dashboardPage .home-welcome h1{font-size:clamp(19px,4.5vw,27px)!important;line-height:1.28}
+html.soft-minimal-preview #dashboardPage .home-welcome .welcome-date{color:#6488b4;font-weight:700;font-size:12px;margin:0 0 5px}
+html.soft-minimal-preview #dashboardPage .daily-overview{
+ order:1;display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;
+}
+html.soft-minimal-preview #dashboardPage .daily-panel{
+ min-height:unset!important;max-height:none!important;
+ padding:16px!important;border-radius:17px!important;box-shadow:0 4px 18px #1f46700b!important;
+}
+html.soft-minimal-preview #dashboardPage .spent-panel{
+ grid-column:1/-1;min-height:140px!important;
+ padding:19px 21px!important;display:flex;flex-direction:column;
+}
+html.soft-minimal-preview #dashboardPage .spent-panel .daily-label{font-size:13px!important}
+html.soft-minimal-preview #dashboardPage .spent-panel .daily-amount{
+ font-size:clamp(30px,6vw,42px)!important;white-space:normal!important;overflow-wrap:anywhere;
+ margin:6px 0 10px!important;line-height:1.12!important;
+}
+html.soft-minimal-preview #dashboardPage .spent-panel .daily-panel-foot{
+ flex-direction:row!important;align-items:center!important;justify-content:space-between;gap:10px!important;margin:0!important;
+}
+html.soft-minimal-preview #dashboardPage .budget-panel{
+ grid-column:1!important;display:flex!important;flex-direction:column!important;
+ gap:5px!important;align-items:flex-start!important;text-align:left!important;min-height:unset!important;
+ justify-content:space-between!important;padding:16px!important;
+}
+html.soft-minimal-preview #dashboardPage .budget-panel>.daily-label{font-size:12px!important;display:block!important}
+html.soft-minimal-preview #dashboardPage .budget-panel>.daily-amount{
+ font-size:clamp(19px,4vw,25px)!important;margin:0!important;white-space:normal!important;overflow-wrap:anywhere;
+}
+html.soft-minimal-preview #dashboardPage .budget-panel>.budget-ring{
+ display:none!important;
+}
+html.soft-minimal-preview #dashboardPage .budget-panel>.budget-meter{
+ display:flex!important;position:static!important;width:100%!important;height:auto!important;overflow:visible!important;
+ clip-path:none!important;align-items:center;gap:9px;order:2;
+}
+html.soft-minimal-preview #dashboardPage .budget-meter .budget-progress{
+ display:block!important;height:7px!important;flex:1;border-radius:999px;
+}
+html.soft-minimal-preview #dashboardPage .budget-panel>.daily-caption{font-size:11px!important;line-height:1.4}
+html.soft-minimal-preview #dashboardPage .budget-panel>.budget-reference{font-size:11px!important}
+html.soft-minimal-preview #dashboardPage .next-panel{
+ grid-column:2!important;display:flex!important;flex-direction:column;justify-content:center;
+ gap:9px;min-height:unset!important;text-align:left;
+}
+html.soft-minimal-preview #dashboardPage .next-panel>.daily-label{font-size:12px}
+html.soft-minimal-preview #dashboardPage .next-bill-amount{font-size:clamp(17px,3.7vw,23px)!important;font-weight:800}
+html.soft-minimal-preview #dashboardPage .bill-month-strip{order:3;margin:0!important;padding:0 4px}
+html.soft-minimal-preview #dashboardPage .quick-capture{
+ order:4;background:transparent!important;border:0!important;box-shadow:none!important;padding:3px 0!important;
+}
+html.soft-minimal-preview #dashboardPage .quick-capture .section-heading{
+ display:flex!important;align-items:center!important;justify-content:space-between;margin-bottom:12px;
+}
+html.soft-minimal-preview #dashboardPage .quick-capture .section-heading h2{font-size:17px!important;margin:0}
+html.soft-minimal-preview #dashboardPage .quick-capture .section-heading p{font-size:12px!important;margin:4px 0 0;color:#8090a6}
+html.soft-minimal-preview #dashboardPage .quick-grid{
+ display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important;
+}
+html.soft-minimal-preview #dashboardPage .quick-btn{
+ display:flex!important;min-width:0!important;min-height:78px!important;
+ flex-direction:column;align-items:center;justify-content:center;
+ padding:9px 4px!important;border:1px solid #e5edf8!important;border-radius:15px!important;
+ background:#fff!important;box-shadow:0 3px 11px #1a4a7609!important;
+ font-size:clamp(10px,2.6vw,12px)!important;text-align:center;
+}
+html.soft-minimal-preview #dashboardPage .quick-btn:nth-child(n+6){display:none!important}
+html.soft-minimal-preview #dashboardPage .home-feed{
+ order:5;display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+}
+html.soft-minimal-preview #dashboardPage .recent-card{padding:17px!important}
+html.soft-minimal-preview #dashboardPage .home-feed>.home-detail{
+ border-radius:17px!important;padding:15px 17px!important;
+}
+html.soft-minimal-preview #dashboardPage .home-feed .home-detail .detail-cue{display:inline!important}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview{
+ order:2;display:block!important;background:transparent!important;border:0!important;box-shadow:none!important;
+ padding:0!important;
+}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>summary{
+ display:none!important;
+}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>.total-scope{display:none}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>.grid4{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;
+ margin:0!important;
+}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>.grid4>.metric{
+ min-width:0;padding:15px!important;border:1px solid #e3edf8!important;border-radius:16px!important;
+ background:#fff!important;box-shadow:0 4px 15px #2850870a!important;
+}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>.grid4 .label{
+ font-size:12px!important;color:#7a8ba2!important;margin-bottom:7px;
+}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>.grid4 .value{
+ display:block!important;font-size:clamp(18px,4vw,23px)!important;
+ font-weight:800!important;white-space:normal!important;overflow-wrap:anywhere;text-align:left!important;
+}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>.grid4>.metric:nth-child(n+3){display:none}
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>.detail-heading,
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>#categoryChart,
+html.soft-minimal-preview #dashboardPage>.home-detail.preview-monthly-overview>.btn{display:none!important}
+html.soft-minimal-preview #dashboardPage>.insight-card{order:7}
+
+/* Summary: KPI tiles followed immediately by the large interactive donut. */
+html.soft-minimal-preview #summaryPage{max-width:840px;margin:auto}
+html.soft-minimal-preview #summaryPage .summary-hero{
+ border:0!important;background:transparent!important;box-shadow:none!important;
+ padding:4px 0 12px!important;margin-bottom:6px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-hero h2{
+ font-size:clamp(22px,4vw,29px)!important;font-weight:850;letter-spacing:-.6px;
+}
+html.soft-minimal-preview #summaryPage .summary-eyebrow{font-size:10px;color:#79a0cc!important;letter-spacing:1.7px}
+html.soft-minimal-preview #summaryPage .summary-kpi-grid{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-kpi-grid>.summary-kpi{
+ min-width:0!important;padding:14px!important;display:flex!important;align-items:center!important;
+ gap:8px!important;
+}
+html.soft-minimal-preview #summaryPage .summary-kpi-grid>.summary-kpi:nth-child(3){
+ grid-column:1/-1!important;
+}
+html.soft-minimal-preview #summaryPage .summary-kpi :is(.value,.money){
+ font-size:clamp(17px,4vw,24px)!important;white-space:normal!important;overflow-wrap:anywhere;
+}
+html.soft-minimal-preview #summaryPage .income-kpi{background:#f1faf6!important}
+html.soft-minimal-preview #summaryPage .expense-kpi{background:#fff4f6!important}
+html.soft-minimal-preview #summaryPage .summary-share-card{
+ display:flex!important;flex-direction:column!important;gap:10px!important;
+ padding:18px!important;overflow:hidden;
+}
+html.soft-minimal-preview #summaryPage .summary-share-card .summary-card-head{order:0}
+html.soft-minimal-preview #summaryPage .summary-share-card .summary-donut-wrap{
+ order:1!important;margin:4px auto!important;width:min(100%,330px)!important;
+}
+html.soft-minimal-preview #summaryPage .summary-share-card .summary-circle-actions{order:2!important}
+html.soft-minimal-preview #summaryPage .summary-share-card .summary-category-help{order:3!important}
+html.soft-minimal-preview #summaryPage .summary-share-card #foodSubcategoryBreakdown{order:4!important}
+html.soft-minimal-preview #summaryPage .summary-share-card #summaryPieEmpty{order:5!important}
+html.soft-minimal-preview #summaryPage .summary-share-card .highest-heading{order:6!important;margin-top:4px}
+html.soft-minimal-preview #summaryPage .summary-share-card .highest-viewport{order:7!important}
+html.soft-minimal-preview #summaryPage .summary-share-card .highest-controls{order:8!important}
+html.soft-minimal-preview #summaryPage .summary-card-head h3{font-size:18px!important}
+html.soft-minimal-preview #summaryPage .summary-range-chips{gap:6px!important}
+html.soft-minimal-preview #summaryPage .summary-range-chip{border-radius:999px!important}
+
+/* Cards: segmented visual grouping, tidy payment history and horizontal usage bars. */
+html.soft-minimal-preview #debtsPage{max-width:840px;margin:auto}
+html.soft-minimal-preview #debtsPage .page-head{margin-bottom:15px}
+html.soft-minimal-preview #debtsPage .wallet-list{display:flex!important;flex-direction:column!important;gap:13px!important}
+html.soft-minimal-preview #debtsPage .wallet-overview{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:9px!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-overview>div{
+ min-width:0;background:#f2f7fe!important;border:1px solid #e1eaf8!important;
+ border-radius:16px!important;padding:14px!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-overview b{
+ font-size:clamp(17px,3.9vw,24px)!important;overflow-wrap:anywhere;
+}
+html.soft-minimal-preview #debtsPage .wallet-section{
+ display:flex;justify-content:space-between;align-items:center;
+ padding:4px 3px!important;margin:4px 0!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-grid{
+ display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,285px),1fr))!important;
+ gap:12px!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-card{
+ padding:18px!important;border-radius:19px!important;
+ background:linear-gradient(160deg,#fff,#f9fbff)!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-head{margin-bottom:13px!important}
+html.soft-minimal-preview #debtsPage .wallet-card .wallet-amount b{
+ font-size:clamp(23px,5vw,29px)!important;letter-spacing:-.6px;
+}
+html.soft-minimal-preview #debtsPage .wallet-record-info{
+ padding:12px!important;background:#f5f9ff!important;border:1px solid #e8eef8!important;
+}
+html.soft-minimal-preview #debtsPage .wallet-bar{height:7px!important;margin:10px 0!important}
+
+/* Transaction entry: like the example, high-priority amount -> form -> optional tools. */
+html.soft-minimal-preview #txDialog[open]{
+ padding:0!important;border:0!important;background:transparent!important;
+}
+html.soft-minimal-preview #txDialog .capture-form{
+ display:flex!important;flex-direction:column!important;gap:12px!important;
+ max-width:500px!important;padding:20px!important;
+}
+html.soft-minimal-preview #txDialog .capture-header{order:0!important}
+html.soft-minimal-preview #txDialog .type-switch{order:1!important}
+html.soft-minimal-preview #txDialog .capture-amount{order:2!important;margin:0!important}
+html.soft-minimal-preview #txDialog .capture-amount .amount-entry{
+ border-radius:15px!important;background:#f7faff!important;padding:7px 13px!important;
+ border:1px solid #dce8f6!important;
+}
+html.soft-minimal-preview #txDialog .capture-amount input{
+ font-size:clamp(25px,5.5vw,32px)!important;font-weight:800!important;background:transparent!important;
+ border:0!important;
+}
+html.soft-minimal-preview #txDialog .capture-fields{
+ order:3!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:10px!important;
+}
+html.soft-minimal-preview #txDialog .capture-fields>.field{min-width:0!important}
+html.soft-minimal-preview #txDialog .capture-fields>.field.full{grid-column:1/-1!important}
+html.soft-minimal-preview #txDialog .capture-fields .field>label{font-size:12px!important;font-weight:700!important}
+html.soft-minimal-preview #txDialog :is(#slipSection,#txRepeatSection,#txExtra){order:4!important}
+html.soft-minimal-preview #txDialog #slipSection{order:5!important}
+html.soft-minimal-preview #txDialog #txRepeatSection{order:6!important}
+html.soft-minimal-preview #txDialog #txExtra{order:7!important}
+html.soft-minimal-preview #txDialog #txDuplicateWarning{order:8!important}
+html.soft-minimal-preview #txDialog #txError{order:9!important}
+html.soft-minimal-preview #txDialog .capture-actions{order:10!important;position:sticky;bottom:0;background:#fff!important;padding:9px 0!important}
+html.soft-minimal-preview #txDialog .capture-actions .primary{
+ flex:1!important;min-height:46px!important;border-radius:14px!important;
+}
+@media(max-width:600px){
+ html.soft-minimal-preview .layout{padding:12px 12px 112px!important}
+ html.soft-minimal-preview #dashboardPage .daily-overview{gap:9px!important}
+ html.soft-minimal-preview #dashboardPage .spent-panel{min-height:130px!important}
+ html.soft-minimal-preview #dashboardPage .home-welcome{padding:2px 3px!important}
+ html.soft-minimal-preview #dashboardPage .quick-grid{gap:6px!important}
+ html.soft-minimal-preview #dashboardPage .quick-btn{font-size:10px!important;padding:8px 3px!important}
+ html.soft-minimal-preview #summaryPage .summary-donut-wrap{max-width:280px!important}
+ html.soft-minimal-preview #txDialog .capture-form{min-height:0!important;max-height:94dvh!important;overflow-y:auto!important}
+}
