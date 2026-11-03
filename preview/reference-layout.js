@@ -41,6 +41,40 @@
       location.pathname.includes('rent')||location.pathname.includes('salary')||location.pathname.includes('car')?'settings':'dashboard';
     setActive(selected);
     if(!hasApp)return;
+    // Use the app's existing monthly filter rather than inventing a separate dataset.
+    const period=document.getElementById('summaryPeriodText');
+    const monthLabel=document.getElementById('referenceMonthLabel');
+    const thMonths=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    const todayThai=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Bangkok'});
+    let selectedMonth=todayThai.slice(0,7);
+    function labelFromPeriod(){
+      if(!monthLabel||!period)return;
+      const text=period.textContent.trim().replace(/^กำลังดู\\s*/,'');
+      monthLabel.textContent=text||'เดือนปัจจุบัน';
+    }
+    if(period){
+      const obs=new MutationObserver(labelFromPeriod);
+      obs.observe(period,{childList:true,characterData:true,subtree:true});
+      labelFromPeriod();
+    }
+    document.querySelectorAll('[data-reference-month]').forEach(button=>button.addEventListener('click',()=>{
+      const offset=Number(button.dataset.referenceMonth||0);
+      const custom=document.querySelector('[data-summary-range="custom"]');
+      const year=document.getElementById('summaryYear'),month=document.getElementById('summaryMonth');
+      if(!custom||!year||!month||!offset)return;
+      const isCustom=custom.classList.contains('active');
+      if(isCustom&&month.value!=='all'&&/^\\d{4}$/.test(year.value))selectedMonth=year.value+'-'+month.value;
+      const [yyyy,mm]=selectedMonth.split('-').map(Number);
+      const next=new Date(yyyy,mm-1+offset,1),y=String(next.getFullYear()),m=String(next.getMonth()+1).padStart(2,'0');
+      const availableYear=[...year.options].some(option=>option.value===y);
+      if(!availableYear){
+        monthLabel.textContent='ไม่พบข้อมูลสำหรับปี '+String(next.getFullYear()+543);
+        return;
+      }
+      custom.click();
+      year.value=y;month.value=m;selectedMonth=y+'-'+m;
+      month.dispatchEvent(new Event('change',{bubbles:true}));
+    }));
     const list=document.getElementById('debtList');
     const bar=document.querySelector('.reference-debt-tabs');
     if(!list||!bar)return;
