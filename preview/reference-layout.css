@@ -428,3 +428,34 @@ html.soft-minimal-preview #debtsPage .reference-payment-summary p{font-size:11px
  html.soft-minimal-preview #summaryPage .reference-chart-row>.summary-category-list .summary-category>summary{font-size:9px!important}
  html.soft-minimal-preview #summaryPage .reference-chart-row .summary-category-name{font-size:9px!important}
 }
+
+
+/* V6 approved screenshot details: compact top bar and pictogram quick actions */
+@media(max-width:820px){
+ html.soft-minimal-preview .topbar{
+  min-height:55px!important;padding:4px 0!important;box-shadow:none!important;
+ }
+ html.soft-minimal-preview .topbar .topin{min-height:52px!important;align-items:center!important}
+ html.soft-minimal-preview .topbar .brand{
+  font-size:19px!important;font-weight:850!important;letter-spacing:-.6px!important;
+ }
+ html.soft-minimal-preview .topbar .brand-icon{display:none!important}
+ html.soft-minimal-preview .topbar .brand+.muted{display:none!important}
+ html.soft-minimal-preview .topbar #userEmail{display:none!important}
+ html.soft-minimal-preview .topbar #openSettingsTop{
+  border:0!important;box-shadow:none!important;background:transparent!important;
+  font-size:18px!important;padding:8px!important;color:#4e6788!important;
+ }
+ html.soft-minimal-preview #dashboardPage .quick-btn>span:first-child{
+  display:grid!important;place-items:center!important;width:28px;height:28px;
+  color:#4a8cd6!important;margin-bottom:5px;font-size:20px!important;
+  line-height:1!important;
+ }
+ html.soft-minimal-preview #dashboardPage .quick-btn>b{
+  display:block!important;font-size:10px!important;font-weight:650!important;line-height:1.25!important;
+ }
+ html.soft-minimal-preview #dashboardPage .reference-recent{box-shadow:none!important}
+ html.soft-minimal-preview #dashboardPage .reference-recent #recentList{
+  max-height:none!important;
+ }
+}
