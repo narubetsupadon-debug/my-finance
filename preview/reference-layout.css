@@ -297,7 +297,7 @@ html.soft-minimal-preview #txDialog .capture-actions>.primary{
 }
 /* Five buttons with the same destinations and icon hierarchy as the reference screenshot. */
 @media(max-width:820px){
- html.soft-minimal-preview .mobile-app-nav{display:none!important}
+ html.soft-minimal-preview.reference-nav-ready .mobile-app-nav{display:none!important}
  html.soft-minimal-preview .reference-tabbar{
   display:grid!important;position:fixed;z-index:65;
   left:0;right:0;bottom:0;grid-template-columns:repeat(5,minmax(0,1fr));
