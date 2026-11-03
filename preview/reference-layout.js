@@ -41,6 +41,40 @@
       location.pathname.includes('rent')||location.pathname.includes('salary')||location.pathname.includes('car')?'settings':'dashboard';
     setActive(selected);
     if(!hasApp)return;
+    // Use the app's existing monthly filter rather than inventing a separate dataset.
+    const period=document.getElementById('summaryPeriodText');
+    const monthLabel=document.getElementById('referenceMonthLabel');
+    const thMonths=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    const todayThai=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Bangkok'});
+    let selectedMonth=todayThai.slice(0,7);
+    function labelFromPeriod(){
+      if(!monthLabel||!period)return;
+      const text=period.textContent.trim().replace(/^กำลังดู\\s*/,'');
+      monthLabel.textContent=text||'เดือนปัจจุบัน';
+    }
+    if(period){
+      const obs=new MutationObserver(labelFromPeriod);
+      obs.observe(period,{childList:true,characterData:true,subtree:true});
+      labelFromPeriod();
+    }
+    document.querySelectorAll('[data-reference-month]').forEach(button=>button.addEventListener('click',()=>{
+      const offset=Number(button.dataset.referenceMonth||0);
+      const custom=document.querySelector('[data-summary-range="custom"]');
+      const year=document.getElementById('summaryYear'),month=document.getElementById('summaryMonth');
+      if(!custom||!year||!month||!offset)return;
+      const isCustom=custom.classList.contains('active');
+      if(isCustom&&month.value!=='all'&&/^\\d{4}$/.test(year.value))selectedMonth=year.value+'-'+month.value;
+      const [yyyy,mm]=selectedMonth.split('-').map(Number);
+      const next=new Date(yyyy,mm-1+offset,1),y=String(next.getFullYear()),m=String(next.getMonth()+1).padStart(2,'0');
+      const availableYear=[...year.options].some(option=>option.value===y);
+      if(!availableYear){
+        monthLabel.textContent='ไม่พบข้อมูลสำหรับปี '+String(next.getFullYear()+543);
+        return;
+      }
+      custom.click();
+      year.value=y;month.value=m;selectedMonth=y+'-'+m;
+      month.dispatchEvent(new Event('change',{bubbles:true}));
+    }));
     const list=document.getElementById('debtList');
     const bar=document.querySelector('.reference-debt-tabs');
     if(!list||!bar)return;
@@ -50,14 +84,15 @@
       const sections=[...list.children].filter(x=>x.classList.contains('wallet-section'));
       sections.slice(0,2).forEach((section,i)=>{
         const visible=(mode==='cards'?i===0:i===1);
-        section.hidden=!visible;
+        if(section.hidden===visible)section.hidden=!visible;
         const grid=section.nextElementSibling;
-        if(grid&&grid.classList.contains('wallet-grid'))grid.hidden=!visible;
+        if(grid&&grid.classList.contains('wallet-grid')&&grid.hidden===visible)grid.hidden=!visible;
         const btn=switches[i];
         if(btn){
           const count=section.querySelector('span')?.textContent?.trim()||'0 รายการ';
-          btn.textContent=(i===0?'บัตรเครดิต':'หนี้/สินเชื่อ')+' · '+count;
-          btn.setAttribute('aria-selected',String(visible));
+          const label=(i===0?'บัตรเครดิต':'หนี้/สินเชื่อ')+' · '+count;
+          if(btn.textContent!==label)btn.textContent=label;
+          if(btn.getAttribute('aria-selected')!==String(visible))btn.setAttribute('aria-selected',String(visible));
         }
       });
       list.querySelectorAll('.wallet-card').forEach(card=>{
@@ -79,9 +114,15 @@
       const btn=e.target.closest('.reference-pay-action');
       if(!btn)return;
       if(typeof window.openTx==='function')window.openTx();
-      // Existing app payment picker receives the same bubbling click, applying linked debt.
+      // Preview opens the existing form; it does not assume the source card was pre-selected.
     },true);
-    const observer=new MutationObserver(refresh);
+    let scheduled=false;
+    const observer=new MutationObserver(mutations=>{
+      // The renderer replaces cards; our own inserted payment button must not trigger a mutation loop.
+      if(!mutations.some(m=>[...m.addedNodes].some(node=>node.nodeType===1&&node.classList?.contains('wallet-section'))))return;
+      if(scheduled)return;scheduled=true;
+      queueMicrotask(()=>{scheduled=false;refresh()});
+    });
     observer.observe(list,{childList:true});
     refresh();
   }
