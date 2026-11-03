@@ -28,9 +28,17 @@ assert.ok(!previewHome.includes('rel="manifest"'),'Test must not install product
 for(const p of ['test.html','index.html','rent.html','car.html','salary.html']){
  const html=read('preview/'+p);
  assert.match(html,/<html lang="th" class="soft-minimal-preview">/,'Preview theme scoped: '+p);
- assert.match(html,/href="\.\/soft-minimal\.css\?v=20261103-softv2"/,'Soft Minimal CSS must load in Preview: '+p);
+ assert.match(html,/href="\\.\\/soft-minimal\\.css\\?v=20261103-(?:softv2|layoutv3)"/,'Soft Minimal CSS must load in Preview: '+p);
  assert.doesNotMatch(html,/id="darkThemeStylesheet"/,'No dark palette on Soft Minimal Preview: '+p);
 }
+for(const page of ['test.html','index.html']){
+ const html=read('preview/'+page);
+ assert.match(html,/preview-monthly-overview" open>/,'Preview home should surface existing monthly metrics: '+page);
+ assert.match(html,/soft-minimal\\.css\\?v=20261103-layoutv3/,'Preview home must use latest visual layout: '+page);
+}
+assert.match(read('preview/soft-minimal.css'),/grid-template-columns:repeat\\(5,minmax\\(0,1fr\\)\\)/,'Five visible quick expense actions');
+assert.match(read('preview/soft-minimal.css'),/summary-donut-wrap/,'Summary donut layout must be designed');
+
 assert.doesNotMatch(read('index.html'),/soft-minimal\.css|soft-minimal-preview/,'Production must retain its existing theme');
 assert.match(read('preview/soft-minimal.css'),/\.soft-minimal-preview/,'Preview CSS is scoped');
 
