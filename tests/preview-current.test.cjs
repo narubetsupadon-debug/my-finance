@@ -56,7 +56,7 @@ for(const p of ['test.html','index.html']){
  assert.match(html,/reference-layout\\.css\\?v=20261103-refv5/,'Reference CSS loaded: '+p);
  assert.match(html,/reference-layout\\.js\\?v=20261103-refv5/,'Reference navigation loaded: '+p);
 }
-for(const p of ['rent.html','car.html','salary.html'])assert.match(read('preview/'+p),/reference-layout\\.js\\?v=20261103-refv5/,'Consistent five-tab preview navigation: '+p);
+for(const p of ['rent.html','car.html','salary.html']){const html=read('preview/'+p);assert.match(html,/reference-layout\\.js\\?v=20261103-refv5/,'Consistent five-tab preview navigation: '+p);assert.match(html,/reference-layout\\.css\\?v=20261103-refv5/,'Consistent five-tab styling: '+p);}
 assert.ok(read('preview/reference-layout.css').includes('reference-tabbar'),'Reference nav styling is present');
 assert.ok(read('preview/reference-layout.js').includes('finance:navigate'),'Reference tabs use existing app navigation');
 assert.ok(read('preview/reference-layout.js').includes('reference-pay-action'),'Debt cards keep payment entry accessible');
