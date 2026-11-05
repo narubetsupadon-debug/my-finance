@@ -1,3 +1,9 @@
+## 1.0.16 — 2026-11-05
+
+- Apply the reviewed Refined UI to the existing production pages: typography, surfaces, borders, buttons, semantic colors, and line icons in the bottom menu.
+- Retain the DOM structure, menu destinations, section order, white mobile header, safe-area spacing, financial renderers, and data bindings.
+- Keep light/dark themes and amount masking. Refresh the CSS/navigation asset URLs and PWA cache.
+
 ## 1.0.15 — 2026-11-05
 
 - Promote the reviewed Summary Rev.2 layout: income/expense cards, net total, month arrows, real category/breakdown tabs, and the top-five expense carousel controls.

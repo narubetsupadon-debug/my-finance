@@ -1,3 +1,10 @@
+const navigationPaths={dashboard:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',transactions:'M6 3h12v18l-3-2-3 2-3-2-3 2z M9 8h6 M9 12h6',capture:'M12 5v14 M5 12h14',summary:'M4 20V4 M4 20h17 M8 15l4-5 4 2 5-7',more:'M4 6h16 M4 12h16 M4 18h16'};
+function paintNavigationIcon(element,page,fallback,classes){
+ const path=navigationPaths[page];if(!classes.split(' ').includes('app-nav-tab')||!path){element.textContent=fallback;return;}
+ const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),line=document.createElementNS(ns,'path');
+ for(const [name,value]of Object.entries({viewBox:'0 0 24 24',width:'21',height:'21',fill:'none',stroke:'currentColor','stroke-width':'1.6','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'}))svg.setAttribute(name,value);
+ line.setAttribute('d',path);svg.append(line);element.append(svg);
+}
 const homeApp=document.getElementById('app');
 const mount=homeApp||document.body;
 const primary=[['dashboard','📊','ภาพรวม'],['transactions','🧾','รายรับ–รายจ่าย'],['capture','＋','เพิ่ม'],['summary','📈','วิเคราะห์']];
@@ -13,7 +20,7 @@ const sheet=createSheet('appMenuTitle','เพิ่มเติม'),captureShe
 function navigate(page,href){if(sheet.open)sheet.close();if(captureSheet.open)captureSheet.close();if(href){location.href=href;return;}if(homeApp)window.dispatchEvent(new CustomEvent('finance:navigate',{detail:page}));else location.href='./index.html#'+page;}
 const warmedPages=new Set();
 function warmPage(href){if(!href||warmedPages.has(href))return;warmedPages.add(href);const link=document.createElement('link');link.rel='prefetch';link.href=href;link.as='document';document.head.append(link);}
-function makeButton(item,cls,action=null){const [page,icon,label,href]=item,b=document.createElement('button');b.type='button';b.className=cls;b.dataset.destination=page;const ico=document.createElement('span');ico.className='app-nav-icon';ico.setAttribute('aria-hidden','true');ico.textContent=icon;const txt=document.createElement('span');txt.textContent=label;b.append(ico,txt);b.onclick=action||(()=>navigate(page,href));if(href){b.addEventListener('pointerenter',()=>warmPage(href),{once:true});b.addEventListener('focus',()=>warmPage(href),{once:true});b.addEventListener('touchstart',()=>warmPage(href),{once:true,passive:true});}if(!action)buttons.set(page,[...(buttons.get(page)||[]),b]);return b;}
+function makeButton(item,cls,action=null){const [page,icon,label,href]=item,b=document.createElement('button');b.type='button';b.className=cls;b.dataset.destination=page;const ico=document.createElement('span');ico.className='app-nav-icon';ico.setAttribute('aria-hidden','true');paintNavigationIcon(ico,page,icon,cls);const txt=document.createElement('span');txt.textContent=label;b.append(ico,txt);b.onclick=action||(()=>navigate(page,href));if(href){b.addEventListener('pointerenter',()=>warmPage(href),{once:true});b.addEventListener('focus',()=>warmPage(href),{once:true});b.addEventListener('touchstart',()=>warmPage(href),{once:true,passive:true});}if(!action)buttons.set(page,[...(buttons.get(page)||[]),b]);return b;}
 function openCapture(){if(sheet.open)sheet.close();if(!captureSheet.open)captureSheet.showModal();}
 primary.forEach(x=>{const b=makeButton(x,'app-nav-tab'+(x[0]==='capture'?' app-nav-capture':''),x[0]==='capture'?openCapture:null);if(x[0]==='capture'){b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-expanded','false');captureSheet.addEventListener('close',()=>b.setAttribute('aria-expanded','false'));b.onclick=()=>{openCapture();b.setAttribute('aria-expanded','true');};}nav.append(b);});
 const more=makeButton(['more','☰','เพิ่มเติม'],'app-nav-tab',()=>{sheet.showModal();more.setAttribute('aria-expanded','true');});more.setAttribute('aria-haspopup','dialog');more.setAttribute('aria-expanded','false');nav.append(more);sheet.addEventListener('close',()=>more.setAttribute('aria-expanded','false'));
