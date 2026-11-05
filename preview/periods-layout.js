@@ -19,13 +19,23 @@ function initializeSummaryLayout(){
  const rangePanel=document.createElement('div');rangePanel.className='summary-period-control';
  const rangeLabel=document.createElement('label');rangeLabel.htmlFor='summaryRangeSelect';rangeLabel.textContent='ช่วงเวลา';
  const rangeSelect=document.createElement('select');rangeSelect.id='summaryRangeSelect';
- for(const [value,text]of [['month','เดือนนี้'],['3m','3 เดือนล่าสุด'],['6m','6 เดือนล่าสุด'],['year','ปีนี้'],['custom','เลือกเดือน / ปีเอง']]){const option=document.createElement('option');option.value=value;option.textContent=text;rangeSelect.append(option);}
+ for(const [value,text]of [['month','เดือนนี้'],['3m','3 เดือนล่าสุด'],['6m','6 เดือนล่าสุด'],['year','ปีนี้'],['custom','เลือกเดือน / ปีเอง'],['dates','ระบุช่วงวันที่']]){const option=document.createElement('option');option.value=value;option.textContent=text;rangeSelect.append(option);}
  const rangeHint=document.createElement('small');rangeHint.className='summary-range-hint';rangeHint.textContent='ช่วง 3 และ 6 เดือน นับรวมเดือนปัจจุบัน';
  const periodText=$('summaryPeriodText');periodText.setAttribute('role','status');periodText.setAttribute('aria-live','polite');
  rangePanel.append(rangeLabel,rangeSelect,periodText,rangeHint);header.after(rangePanel);
+ const dateControls=document.createElement('div');dateControls.className='summary-date-controls';dateControls.hidden=true;
+ const startLabel=document.createElement('label');startLabel.textContent='ตั้งแต่วันที่';startLabel.htmlFor='summaryFromDate';
+ const from=document.createElement('input');from.type='date';from.id='summaryFromDate';from.min='1900-01-01';from.max='2199-12-31';from.value=now.slice(0,7)+'-01';startLabel.append(from);
+ const endLabel=document.createElement('label');endLabel.textContent='ถึงวันที่';endLabel.htmlFor='summaryToDate';
+ const to=document.createElement('input');to.type='date';to.id='summaryToDate';to.min=from.min;to.max=from.max;to.value=now;endLabel.append(to);
+ const apply=document.createElement('button');apply.type='button';apply.textContent='ใช้ช่วงวันที่นี้';apply.className='btn soft';
+ const error=document.createElement('small');error.className='summary-date-error';error.setAttribute('role','alert');
+ dateControls.append(startLabel,endLabel,apply,error);rangePanel.append(dateControls);
  const chips=$('summaryRangeChips');
- const syncRange=()=>{const selected=chips.querySelector('[aria-pressed="true"],.active')?.dataset.summaryRange||'month';rangeSelect.value=selected;picker.hidden=!['month','custom'].includes(selected);rangeHint.hidden=!['3m','6m','year'].includes(selected);rangeHint.textContent=selected==='year'?'ปีปฏิทินปัจจุบัน · ใช้สถานะรายการตามตัวกรอง':'ช่วง '+(selected==='3m'?'3':'6')+' เดือน นับรวมเดือนปัจจุบัน';};
- rangeSelect.onchange=()=>{const chip=chips.querySelector('[data-summary-range="'+rangeSelect.value+'"]');if(rangeSelect.value==='month'){month.value=now.slice(5,7);year.value=now.slice(0,4);}chip?.click();syncRange();};
+ const datesChip=document.createElement('button');datesChip.type='button';datesChip.dataset.summaryRange='dates';datesChip.hidden=true;datesChip.textContent='ระบุช่วงวันที่';chips.append(datesChip);
+ const validDates=()=>{const ok=from.value&&to.value&&from.checkValidity()&&to.checkValidity()&&from.value<=to.value;error.textContent=ok?'':'เลือกวันเริ่มต้นและสิ้นสุดให้ครบ โดยวันสิ้นสุดต้องไม่ก่อนวันเริ่มต้น';return ok;};apply.onclick=()=>{if(validDates())datesChip.click();};
+ const syncRange=()=>{const selected=chips.querySelector('[aria-pressed="true"],.active')?.dataset.summaryRange||'month';rangeSelect.value=selected;dateControls.hidden=selected!=='dates';picker.hidden=!['month','custom'].includes(selected);rangeHint.hidden=!['3m','6m','year'].includes(selected);rangeHint.textContent=selected==='year'?'ปีปฏิทินปัจจุบัน · ใช้สถานะรายการตามตัวกรอง':'ช่วง '+(selected==='3m'?'3':'6')+' เดือน นับรวมเดือนปัจจุบัน';};
+ rangeSelect.onchange=()=>{if(rangeSelect.value==='dates'){dateControls.hidden=false;if(validDates())datesChip.click();return;}const chip=chips.querySelector('[data-summary-range="'+rangeSelect.value+'"]');if(rangeSelect.value==='month'){month.value=now.slice(5,7);year.value=now.slice(0,4);}chip?.click();syncRange();};
  new MutationObserver(syncRange).observe(chips,{subtree:true,attributes:true,attributeFilter:['aria-pressed','class']});syncRange();
  const custom=page.querySelector('[data-summary-range="custom"]');
  for(const select of [month,year])select.addEventListener('change',()=>custom.click(),true);
@@ -56,7 +66,7 @@ function initializeSummaryLayout(){
   chart.getDatasetMeta(0).data.forEach((arc,i)=>{const pct=total?Number(values[i])/total*100:0;if(pct<8)return;const {x,y,startAngle,endAngle,innerRadius,outerRadius}=arc.getProps(['x','y','startAngle','endAngle','innerRadius','outerRadius'],true),angle=(startAngle+endAngle)/2,r=(innerRadius+outerRadius)/2;ctx.save();ctx.fillStyle=i===1?'#467d83':'#ffffff';ctx.font='500 10px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(pct.toFixed(0)+'%',x+Math.cos(angle)*r,y+Math.sin(angle)*r);ctx.restore();});
  }});const chart=Chart.getChart($('categoryPieChart'));if(chart)chart.update('none');}
  // Renderer keeps all query/filter behavior; only activate the compact month controls.
- custom.click();decorateList();
+ chips.querySelector('[data-summary-range="month"]').click();decorateList();
 
 (()=>{
 const page=document.getElementById('summaryPage'),$=id=>document.getElementById(id);

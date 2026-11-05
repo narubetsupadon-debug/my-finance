@@ -17,7 +17,7 @@ try{
   if(copy.id==='darkThemeStylesheet')copy.media=dark?'all':'not all';document.head.append(copy);
  }
  for(const style of parsed.querySelectorAll('style'))document.head.append(style.cloneNode(true));
- const periodCss=document.createElement('link');periodCss.rel='stylesheet';periodCss.href=new URL('periods.css?v=20261105-period01',import.meta.url);document.head.append(periodCss);
+ const periodCss=document.createElement('link');periodCss.rel='stylesheet';periodCss.href=new URL('periods.css?v=20261105-period02',import.meta.url);document.head.append(periodCss);
  const refined=document.createElement('link');refined.rel='stylesheet';refined.href=new URL('refined-ui.css?v=20261105-refined01',import.meta.url);document.head.append(refined);
  document.body.innerHTML=parsed.body.innerHTML;
  document.querySelectorAll('script').forEach(script=>script.remove());
@@ -78,7 +78,7 @@ try{
  const original=await (await fetch(new URL(screen==='index'?'app.js':screen+'.js',root))).text();
  const clientImport=/^import\s*\{\s*createClient\s*\}\s*from .*$/m;
  if(!clientImport.test(original))throw Error('หน้าตัวอย่างต้องอัปเดตให้ตรงกับแอป');
- const source=original.replace(clientImport,'const createClient=()=>window.modernDemoDb;').replace(/from '(\.\/[^']+)'/g,(_,path)=>"from '"+new URL(path,root).href+"'").replace(/import\('(\.\/[^']+)'\)/g,(_,path)=>"import('"+new URL(path,root).href+"')");
+ const source=original.replace(/from '\.\/summary-highest\.js[^']*'/,"from '"+new URL('periods-highest.js?v=20261105-period02',import.meta.url).href+"'").replace(clientImport,'const createClient=()=>window.modernDemoDb;').replace(/from '(\.\/[^']+)'/g,(_,path)=>"from '"+new URL(path,root).href+"'").replace(/import\('(\.\/[^']+)'\)/g,(_,path)=>"import('"+new URL(path,root).href+"')");
  const script=document.createElement('script'),blob=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));script.type='module';script.src=blob;document.body.append(script);
  await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=reject;});URL.revokeObjectURL(blob);
  const navText=await(await fetch(new URL('app-nav.js?v=20261023-quality02&menus=08',root))).text();
@@ -104,7 +104,7 @@ try{
  const selectionSource=selectionText.replace("document.addEventListener('DOMContentLoaded',()=>{",'(()=>{').replace(/}\);\s*$/,'})();');
  const selectionBlob=URL.createObjectURL(new Blob([selectionSource],{type:'text/javascript'})),selectionScript=document.createElement('script');selectionScript.src=selectionBlob;document.body.append(selectionScript);
  await new Promise((resolve,reject)=>{selectionScript.onload=resolve;selectionScript.onerror=reject;});URL.revokeObjectURL(selectionBlob);
- await loadScript('preview/periods-layout.js?v=20261105-period01');
+ await loadScript('preview/periods-layout.js?v=20261105-period02');
  const requestedPage=(params.get('page')||location.hash.slice(1));if(['summary','transactions','settings','debts','accounts','categories','bills','budget'].includes(requestedPage))window.dispatchEvent(new CustomEvent('finance:navigate',{detail:requestedPage}));
  }
  window.dispatchEvent(new Event('myfinance:preview-ready'));
