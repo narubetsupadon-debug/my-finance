@@ -1,0 +1,6 @@
+html.summary-layout-ready #summaryPage .summary-period-control{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px 12px;margin:0 0 20px;min-width:0}
+html.summary-layout-ready #summaryPage .summary-period-control label{font-size:14px;color:var(--text);font-weight:600}
+html.summary-layout-ready #summaryPage #summaryRangeSelect{width:100%;min-width:0;min-height:44px;margin:0;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit;font-size:16px}
+html.summary-layout-ready #summaryPage .summary-period-control #summaryPeriodText{grid-column:1/-1;font-size:13px;line-height:1.6;color:var(--muted);margin:0;overflow-wrap:anywhere}
+html.summary-layout-ready #summaryPage .summary-range-hint{grid-column:1/-1;font-size:12px;color:var(--muted);line-height:1.6}
+html.summary-layout-ready #summaryPage .make-summary-month[hidden],html.summary-layout-ready #summaryPage .summary-range-hint[hidden]{display:none!important}

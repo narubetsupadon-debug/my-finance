@@ -1,0 +1,40 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const {JSDOM}=require('jsdom');
+(async()=>{
+ const root=path.join(__dirname,'..');
+ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+ const dom=new JSDOM(html,{runScripts:'outside-only',url:'https://example.test/my-finance/',pretendToBeVisual:true});
+ await new Promise(resolve=>dom.window.document.readyState==='loading'?dom.window.document.addEventListener('DOMContentLoaded',resolve,{once:true}):resolve());
+ const previous={document:global.document,window:global.window};global.document=dom.window.document;global.window=dom.window;
+ try{
+ const {$:unused}=dom.window;const $=id=>dom.window.document.getElementById(id);
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const month=today.slice(0,7),year=Number(today.slice(0,4));
+ const rows=[{transaction_date:month+'-01',type:'income',amount:23000,status:'paid'}, {transaction_date:month+'-01',type:'expense',amount:1234.56,status:'paid',categories:{name:'อาหาร'}}, {transaction_date:month+'-01',type:'expense',amount:900,status:'cancelled'}];
+ const {createSummaryRenderer}=await import('../app-summary.js');
+ const render=createSummaryRenderer({$,money:n=>'฿'+Number(n).toFixed(2),esc:String,bangkokDay:()=>today,getTransactions:()=>rows});
+ for(const id of ['summaryMonth','summaryYear','summaryStatus'])$(id).onchange=render;
+ document.addEventListener('click',event=>{const range=event.target.closest('[data-summary-range]');if(range)render.setRange(range.dataset.summaryRange);});
+ render();dom.window.eval(fs.readFileSync(path.join(root,'preview/periods-layout.js'),'utf8'));
+ const periods=$('summaryRangeSelect');assert(periods);assert.equal(periods.closest('.summary-hero'),null,'Range selector must be visible outside hidden hero');
+ const previousMonth=new Date(year,Number(month.slice(5,7))-2,1);const previousKey=previousMonth.getFullYear()+'-'+String(previousMonth.getMonth()+1).padStart(2,'0');
+ rows.push({transaction_date:previousKey+'-01',type:'expense',amount:100,status:'paid'},{transaction_date:previousKey+'-01',type:'expense',amount:999,status:'cancelled'});
+ periods.value='3m';periods.dispatchEvent(new dom.window.Event('change'));assert.equal(render.getReport().keys.length,3);assert.equal($('sumExpense').textContent,'฿1334.56');assert.equal(document.querySelector('.make-summary-month').hidden,true);assert.equal(render.getReport().keys.at(-1),month);assert.equal(render.getReport().keys.at(-2),previousKey);
+ periods.value='6m';periods.dispatchEvent(new dom.window.Event('change'));assert.equal(render.getReport().keys.length,6);assert.equal($('sumExpense').textContent,'฿1334.56');
+ periods.value='year';periods.dispatchEvent(new dom.window.Event('change'));assert.equal(render.getReport().keys.length,12);
+ periods.value='custom';periods.dispatchEvent(new dom.window.Event('change'));assert.equal(document.querySelector('.make-summary-month').hidden,false);
+ periods.value='month';periods.dispatchEvent(new dom.window.Event('change'));assert.equal($('sumExpense').textContent,'฿1234.56');assert.equal($('summaryMonth').value,month.slice(5,7));
+ assert.equal($('sumIncome').textContent,'฿23000.00');assert.equal($('sumExpense').textContent,'฿1234.56');assert.equal($('sumBalance').textContent,'฿21765.44');
+ assert.equal($('summaryCategoryPanel').hidden,false);assert.equal($('summaryBreakdownPanel').hidden,true);
+ $('summaryDetailTab').click();assert.equal($('summaryCategoryPanel').hidden,true);assert.equal($('summaryBreakdownPanel').hidden,false);assert.equal($('summaryDetailTab').getAttribute('aria-selected'),'true');
+ $('summaryCategoryTab').click();assert.equal($('summaryBreakdownPanel').hidden,true);
+ $('summaryMonth').value='12';$('summaryMonth').dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+ document.querySelector('[aria-label="เดือนถัดไป"]').click();
+ assert.equal($('summaryMonth').value,'01');assert.equal($('summaryYear').value,String(year+1));assert.equal($('sumExpense').textContent,'฿0.00');
+ render();assert.equal($('summaryYear').value,String(year+1),'Data refresh keeps selected empty year');
+ document.querySelector('[aria-label="เดือนก่อนหน้า"]').click();assert.equal($('summaryMonth').value,'12');assert.equal($('summaryYear').value,String(year));
+ assert(document.querySelector('#summaryHighestControls').closest('.make-summary-highest'));assert(document.querySelector('.summary-net #sumBalance'));
+ assert.equal(document.querySelectorAll('#exportSummaryPdf').length,1);assert.equal(document.querySelectorAll('#summaryMonth').length,1);
+ console.log('PASS summary periods baseline: real totals, cancelled exclusion, true tabs, net total, month/year rollover, empty-year refresh, retained PDF and controls');
+ }finally{global.document=previous.document;global.window=previous.window;dom.window.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});
