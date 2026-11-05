@@ -63,17 +63,20 @@
 <link rel="stylesheet" href="../dashboard-mobile.css?v=20261023-quality02&overview=09">
 <link rel="stylesheet" href="../payment-picker.css?v=20261023-quality02&payment=10">
 <link rel="stylesheet" href="../wallet-clarity.css?v=20261023-quality02&wallet=11">
+<link rel="stylesheet" href="../loading-screen.css?v=20261023-quality02&loading=01">
 <link rel="stylesheet" href="./soft-minimal.css?v=20261103-refinev4">
 <link rel="stylesheet" href="./reference-layout.css?v=20261103-refv6">
 </head>
 <body>
-<div id="authSplash" class="auth-splash" role="status" aria-live="polite">
+<div id="authSplash" class="auth-splash" role="status" aria-live="polite" aria-label="กำลังเปิด My Finance">
   <div class="auth-splash-card">
-    <img src="../app-icon.svg?v=20261023-quality02" width="72" height="72" alt="">
+    <div class="auth-splash-emblem" aria-hidden="true"><img src="../app-icon.svg?v=20261023-quality02" width="92" height="92" alt=""></div>
+    <p class="auth-splash-eyebrow">YOUR EVERYDAY FINANCE</p>
     <h1>My Finance</h1>
-    <p>กำลังเปิดกระเป๋าของมิว…</p>
-    <span class="auth-splash-spinner" aria-hidden="true"></span>
+    <p class="auth-splash-tagline">จัดทุกเรื่องเงิน ให้เป็นเรื่องง่าย</p>
+    <div class="auth-splash-progress"><span class="auth-splash-dots" aria-hidden="true"><i></i><i></i><i></i></span><p>กำลังเปิดกระเป๋าของมิว…</p></div>
   </div>
+  <p class="auth-splash-footer" aria-hidden="true">รายรับ · รายจ่าย · เป้าหมายของมิว</p>
 </div>
 
 <div id="authScreen" class="auth-screen hidden">

@@ -1,0 +1,41 @@
+/* Startup presentation only: the existing session flow controls visibility. */
+#authSplash{
+ --splash-ink:#24213d;--splash-muted:#77738c;--splash-line:rgba(98,83,164,.12);--splash-tint:rgba(120,100,225,.10);
+ isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 39%,var(--splash-tint),transparent 56%),var(--bg,#f8fafc);
+ padding:max(24px,env(safe-area-inset-top)) 24px max(80px,calc(env(safe-area-inset-bottom) + 56px));
+}
+#authSplash::before,#authSplash::after{content:'';position:absolute;z-index:-1;border:1px solid var(--splash-line);border-radius:50%;pointer-events:none;}
+#authSplash::before{width:min(620px,150vw);aspect-ratio:1;left:50%;top:43%;transform:translate(-50%,-50%);}
+#authSplash::after{width:min(840px,205vw);aspect-ratio:1;left:50%;top:43%;transform:translate(-50%,-50%);opacity:.55;}
+#authSplash .auth-splash-card{width:min(100%,360px);gap:0;animation:finance-splash-enter .45s ease-out both;}
+#authSplash .auth-splash-emblem{position:relative;display:grid;place-items:center;width:132px;height:132px;margin-bottom:30px;}
+#authSplash .auth-splash-emblem::before{content:'';position:absolute;inset:0;border:1px solid var(--splash-line);border-top:2px solid var(--primary,#7c3aed);border-right-color:var(--primary2,#a78bfa);border-radius:50%;animation:auth-spin 3.2s linear infinite;}
+#authSplash .auth-splash-emblem img{width:92px;height:92px;display:block;border-radius:22px;filter:drop-shadow(0 12px 22px rgba(79,70,229,.16));animation:finance-splash-float 3.2s ease-in-out infinite;}
+#authSplash .auth-splash-eyebrow{color:var(--splash-muted);font-size:10px;font-weight:650;letter-spacing:.24em;margin:0 0 10px;}
+#authSplash h1{margin:0;color:var(--splash-ink);font-size:clamp(30px,8vw,38px);font-weight:750;line-height:1.2;letter-spacing:-1.3px;}
+#authSplash .auth-splash-tagline{margin:12px 0 0;color:var(--splash-muted);font-size:14px;line-height:1.7;}
+#authSplash .auth-splash-progress{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:34px;padding:10px 16px;border:1px solid var(--splash-line);border-radius:999px;background:var(--card,#fff);}
+#authSplash .auth-splash-progress p{color:var(--splash-muted);font-size:12px;line-height:1.6;}
+#authSplash .auth-splash-dots{display:flex;gap:3px;flex-shrink:0;}
+#authSplash .auth-splash-dots i{width:4px;height:4px;border-radius:50%;background:var(--primary,#7c3aed);animation:finance-splash-dot 1.4s ease-in-out infinite;}
+#authSplash .auth-splash-dots i:nth-child(2){animation-delay:.16s;}
+#authSplash .auth-splash-dots i:nth-child(3){animation-delay:.32s;}
+#authSplash .auth-splash-footer{position:absolute;left:24px;right:24px;bottom:max(26px,calc(env(safe-area-inset-bottom) + 18px));margin:0;text-align:center;color:var(--splash-muted);font-size:11px;letter-spacing:.02em;}
+:root[data-resolved-theme="dark"] #authSplash{--splash-ink:#f3f1fc;--splash-muted:#aaa4bd;--splash-line:rgba(171,151,231,.12);--splash-tint:rgba(113,76,199,.16);}
+@keyframes finance-splash-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes finance-splash-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes finance-splash-dot{0%,70%,100%{opacity:.3;transform:translateY(0)}35%{opacity:1;transform:translateY(-3px)}}
+@media(max-height:480px){
+ #authSplash{padding-top:16px;padding-bottom:48px;}
+ #authSplash .auth-splash-emblem{width:86px;height:86px;margin-bottom:12px;}
+ #authSplash .auth-splash-emblem img{width:60px;height:60px;border-radius:15px;}
+ #authSplash .auth-splash-eyebrow{display:none;}
+ #authSplash h1{font-size:28px;}
+ #authSplash .auth-splash-tagline{margin-top:5px;font-size:12px;}
+ #authSplash .auth-splash-progress{margin-top:16px;padding:6px 14px;}
+ #authSplash .auth-splash-footer{bottom:max(12px,env(safe-area-inset-bottom));font-size:10px;}
+}
+@media(prefers-reduced-motion:reduce){
+ #authSplash .auth-splash-card,#authSplash .auth-splash-emblem::before,#authSplash .auth-splash-emblem img,#authSplash .auth-splash-dots i{animation:none;}
+ #authSplash .auth-splash-dots i{opacity:.7;}
+}
