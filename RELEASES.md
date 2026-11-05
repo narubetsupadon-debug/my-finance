@@ -1,3 +1,9 @@
+## 1.0.15 — 2026-11-05
+
+- Promote the reviewed Summary Rev.2 layout: income/expense cards, net total, month arrows, real category/breakdown tabs, and the top-five expense carousel controls.
+- Keep the authenticated data source, report scope, totals, rent allocation, PDF export, and existing navigation. Preserve amount masking and dark theme.
+- Keep an explicitly selected year even when it has no transactions; refresh PWA caches and version the changed summary import chain.
+
 ## 1.0.14 — 5 November 2026
 - Loading build 02: keep the startup splash visible for at least 800 ms from its parsed markup while loading finance data concurrently; do not add a fresh delay after a slow startup or on later sign-in. Preserve signed-out/error recovery and session-change guards.
 - Refresh startup loading screen with the existing wallet mark, subtle orbit/dots, light/dark palettes, compact landscape layout and reduced-motion support. Preserve session timing and existing visibility/failure behavior.
@@ -77,3 +83,4 @@ Version tracking starts at **1.0.0** on 2026-10-21. Earlier releases are not ass
 
 - Added app version, release date, and expandable release notes to Settings.
 - Began explicit app version numbering from this release.
+
