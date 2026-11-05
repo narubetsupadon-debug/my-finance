@@ -172,3 +172,12 @@ html[data-resolved-theme="dark"].summary-layout-ready #summaryPage .summary-shar
 /* New typography must retain the app's amount masking. */
 html.summary-layout-ready body.privacy-mode #summaryPage .money{font-size:0!important;color:transparent!important}
 html.summary-layout-ready body.privacy-mode #summaryPage .money::after{color:var(--text)!important;font-size:16px!important}
+
+/* Keep the mobile month picker inside the screen, including iPhone safe areas. */
+@media(max-width:820px){
+ html.summary-layout-ready:has(#summaryPage:not(.hidden)) .layout{padding-left:max(16px,env(safe-area-inset-left))!important;padding-right:max(16px,env(safe-area-inset-right))!important}
+ html.summary-layout-ready #summaryPage .make-summary-header{grid-template-columns:minmax(0,1fr);row-gap:10px;padding-inline:4px}
+ html.summary-layout-ready #summaryPage .make-summary-header h2{grid-column:1;grid-row:1;min-width:0}
+ html.summary-layout-ready #summaryPage .make-summary-month{grid-column:1;grid-row:2;justify-self:start;max-width:100%;min-width:0;margin:0}
+ html.summary-layout-ready #summaryPage .make-summary-month select{min-width:0;flex-shrink:1}
+}
