@@ -11,6 +11,14 @@ export function summaryTimelineKeys(config,today,rows=[]){
  }
  return Array.from({length:count},(_,i)=>config.monthKey+'-'+String(i+1).padStart(2,'0'));
 }
+export function explicitDateRange(from,to){
+ const valid=value=>/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number(value.slice(0,4))>=1900&&Number(value.slice(0,4))<=2199&&Number.isFinite(Date.parse(value+'T00:00:00Z'))&&new Date(value+'T00:00:00Z').toISOString().slice(0,10)===value;
+ if(!valid(from)||!valid(to)||from>to)return null;
+ const start=Number(from.slice(0,4))*12+Number(from.slice(5,7))-1,end=Number(to.slice(0,4))*12+Number(to.slice(5,7))-1;
+ const keys=Array.from({length:end-start+1},(_,i)=>Math.floor((start+i)/12)+'-'+String((start+i)%12+1).padStart(2,'0'));
+ const label=value=>new Date(value+'T12:00:00Z').toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok',day:'numeric',month:'short',year:'numeric'});
+ return{mode:'months',keys,from,to,label:label(from)+' – '+label(to),badge:'รายเดือน'};
+}
 // Excel rent imports already contain the user's half, not the full bill.
 export function rentShareTotals(rows,records=[]){
  const linked=new Map(records.map(r=>[r.transaction_id,r]));
@@ -43,7 +51,7 @@ function excelGroup(x){
  }
  return cat
 }
-let selectedRange='month'
+let selectedRange='month',selectedDates=null
 
 function monthKeyOffset(key,offset){
  const y=Number(key.slice(0,4)),m=Number(key.slice(5,7))-1
@@ -51,6 +59,7 @@ function monthKeyOffset(key,offset){
  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')
 }
 function rangeConfig(today=bangkokDay()){
+ if(selectedRange==='dates'&&selectedDates)return selectedDates;
  const currentMonth=today.slice(0,7),year=today.slice(0,4)
  if(selectedRange==='3m'||selectedRange==='6m'){
   const count=selectedRange==='3m'?3:6
@@ -88,7 +97,7 @@ function renderSummary(){
  if($('summaryScope'))$('summaryScope').textContent=scope+' · ไม่รวมยกเลิก · รวมยอดชำระบัตร/สินเชื่อ · แตะยอดดูรายการ';
  const rows=config.mode==='days'
   ?valid.filter(x=>String(x.transaction_date).slice(0,7)===config.monthKey)
-  :valid.filter(x=>config.keys.includes(String(x.transaction_date).slice(0,7)))
+  :valid.filter(x=>config.keys.includes(String(x.transaction_date).slice(0,7))&&(!config.from||(String(x.transaction_date)>=config.from&&String(x.transaction_date)<=config.to)))
  lastReport={label:config.label,scope:scope+' · ไม่รวมยกเลิก',paidOnly,mode:config.mode,
   keys:[...summaryTimelineKeys(config,today,rows)],
   rows:rows.map(x=>({transaction_date:x.transaction_date,type:x.type,amount:x.amount,description:x.description,status:x.status,reportCategory:excelGroup(x),subcategory:x.subcategory||null}))};
@@ -154,7 +163,7 @@ function renderSummary(){
 
 
 }
-renderSummary.setRange=range=>{selectedRange=range;renderSummary()}
+renderSummary.setRange=range=>{if(range==='dates'){const config=explicitDateRange($('summaryFromDate')?.value||'', $('summaryToDate')?.value||'');if(!config)return false;selectedDates=config;}selectedRange=range;renderSummary();return true;}
 // Snapshot the same rows and status scope used by the visible summary totals.
 renderSummary.getReport=()=>lastReport?{...lastReport,keys:[...lastReport.keys],rows:lastReport.rows.map(x=>({...x}))}:null;
 

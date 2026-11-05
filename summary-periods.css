@@ -1,0 +1,13 @@
+html.summary-layout-ready #summaryPage .summary-period-control{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px 12px;margin:0 0 20px;min-width:0}
+html.summary-layout-ready #summaryPage .summary-period-control label{font-size:14px;color:var(--text);font-weight:600}
+html.summary-layout-ready #summaryPage #summaryRangeSelect{width:100%;min-width:0;min-height:44px;margin:0;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit;font-size:16px}
+html.summary-layout-ready #summaryPage .summary-period-control #summaryPeriodText{grid-column:1/-1;font-size:13px;line-height:1.6;color:var(--muted);margin:0;overflow-wrap:anywhere}
+html.summary-layout-ready #summaryPage .summary-range-hint{grid-column:1/-1;font-size:12px;color:var(--muted);line-height:1.6}
+html.summary-layout-ready #summaryPage .make-summary-month[hidden],html.summary-layout-ready #summaryPage .summary-range-hint[hidden]{display:none!important}
+html.summary-layout-ready #summaryPage .summary-date-controls{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0}
+html.summary-layout-ready #summaryPage .summary-date-controls[hidden]{display:none!important}
+html.summary-layout-ready #summaryPage .summary-date-controls label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:13px}
+html.summary-layout-ready #summaryPage .summary-date-controls input{box-sizing:border-box;width:100%;max-width:100%;min-width:0;min-height:44px;padding:8px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:16px;color:var(--text);background:var(--card)}
+html.summary-layout-ready #summaryPage .summary-date-controls button{grid-column:1/-1;min-height:44px}
+html.summary-layout-ready #summaryPage .summary-date-error{grid-column:1/-1;color:var(--expense,#b42318);line-height:1.6}
+@media(max-width:350px){html.summary-layout-ready #summaryPage .summary-date-controls{grid-template-columns:minmax(0,1fr)}}

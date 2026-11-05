@@ -1,3 +1,9 @@
+## 1.0.17 — 2026-11-05
+
+- Promote reviewed summary period selector outside the hidden hero: current month, trailing 3/6 months (including current month), current calendar year, custom month/year and inclusive explicit dates.
+- Validate date bounds before applying; draft/reversed dates preserve the last applied report. Totals, donut, breakdown, ranking, details and PDF share the same report rows.
+- Preserve existing monthly presets, status/future/cancelled rules and data. Update guide and exact PWA module URLs.
+
 ## 1.0.16 — 2026-11-05
 
 - Apply the reviewed Refined UI to the existing production pages: typography, surfaces, borders, buttons, semantic colors, and line icons in the bottom menu.
