@@ -1,7 +1,7 @@
 /* Summary interaction wrapper: reuse production report scope and calculations unchanged. */
-import {createSummaryRenderer as createOriginal} from './app-summary.js?v=20261105-summary02';
+import {createSummaryRenderer as createOriginal} from './app-summary.js?v=20261023-quality02&summary=02';
 import {createTotalDetails} from './total-details.js?v=20261023-release101';
-export * from './app-summary.js?v=20261105-summary02';
+export * from './app-summary.js?v=20261023-quality02&summary=02';
 export function rankedExpenses(rows){
  return rows.filter(row=>row.type==='expense'&&Number.isFinite(Number(row.amount))&&Number(row.amount)>0)
  .slice().sort((a,b)=>Math.round(Number(b.amount)*100)-Math.round(Number(a.amount)*100)||String(b.transaction_date).localeCompare(String(a.transaction_date))||String(a.description).localeCompare(String(b.description),'th')).slice(0,5);
