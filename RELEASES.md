@@ -1,3 +1,10 @@
+## 1.0.14 — 5 November 2026
+- Clear automatically suggested debt-payment amounts when the transaction month or selected debt changes. Preserve manually entered amounts, including explicit input of the same number.
+- Reset suggestion ownership on new/edit forms. Keep exact debt links and existing debt balances unchanged.
+- Refresh payment entrypoint/planning URLs and the service-worker cache together; align displayed release metadata.
+- Add regressions for month/debt changes and service-worker install, activation, offline reads, cache isolation, failed precaching and successful retries. Browser lifecycle tests remain necessary for installed PWA/multiple-tab behavior.
+- No database/schema or financial history changes.
+
 ## 1.0.12 — 30 October 2026
 - Promote reviewed direct repayment link Test: save debt_payment:<id> source, retain through edits/renames, explicit unlink and clear on new forms/category changes. No balance mutations or historical backfill.
 - Refresh in-app guide for production payment flows, monthly budgets, notifications, widget refresh, backups and historical specialist pages.
