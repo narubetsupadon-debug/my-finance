@@ -43,7 +43,7 @@
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
-<link rel="modulepreload" href="../app.js?v=20261023-quality02&payments=13">
+<link rel="modulepreload" href="../app.js?v=20261023-quality02&payments=14">
 <link rel="preload" as="script" href="../vendor/chart-4.4.7.umd.js?v=20261023-quality02">
 <link rel="stylesheet" href="../style.css?v=20261023-quality02">
 <script src="../theme.js?v=20261023-quality02"></script>
@@ -63,17 +63,20 @@
 <link rel="stylesheet" href="../dashboard-mobile.css?v=20261023-quality02&overview=09">
 <link rel="stylesheet" href="../payment-picker.css?v=20261023-quality02&payment=10">
 <link rel="stylesheet" href="../wallet-clarity.css?v=20261023-quality02&wallet=11">
+<link rel="stylesheet" href="../loading-screen.css?v=20261023-quality02&loading=01">
 <link rel="stylesheet" href="./soft-minimal.css?v=20261103-refinev4">
 <link rel="stylesheet" href="./reference-layout.css?v=20261103-refv6">
 </head>
 <body>
-<div id="authSplash" class="auth-splash" role="status" aria-live="polite">
+<div id="authSplash" class="auth-splash" role="status" aria-live="polite" aria-label="กำลังเปิด My Finance">
   <div class="auth-splash-card">
-    <img src="../app-icon.svg?v=20261023-quality02" width="72" height="72" alt="">
+    <div class="auth-splash-emblem" aria-hidden="true"><img src="../app-icon.svg?v=20261023-quality02" width="92" height="92" alt=""></div>
+    <p class="auth-splash-eyebrow">YOUR EVERYDAY FINANCE</p>
     <h1>My Finance</h1>
-    <p>กำลังเปิดกระเป๋าของมิว…</p>
-    <span class="auth-splash-spinner" aria-hidden="true"></span>
+    <p class="auth-splash-tagline">จัดทุกเรื่องเงิน ให้เป็นเรื่องง่าย</p>
+    <div class="auth-splash-progress"><span class="auth-splash-dots" aria-hidden="true"><i></i><i></i><i></i></span><p>กำลังเปิดกระเป๋าของมิว…</p></div>
   </div>
+  <p class="auth-splash-footer" aria-hidden="true">รายรับ · รายจ่าย · เป้าหมายของมิว</p>
 </div>
 
 <div id="authScreen" class="auth-screen hidden">
@@ -315,8 +318,8 @@
 
         <section class="card settings-card section" aria-labelledby="appVersionTitle">
           <div class="settings-title"><span aria-hidden="true">ⓘ</span><div><h3 id="appVersionTitle">เกี่ยวกับ My Finance</h3><p>เวอร์ชันของแอปที่กำลังเปิดอยู่</p></div></div>
-          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-10-30">30 ตุลาคม 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.12">1.0.12</strong></div>
-          <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>ผูกรายการชำระกับบัตรโดยตรง แม้แก้ชื่อก็ยังจับคู่ได้ · อัปเดตคู่มือการใช้งานในตั้งค่า</p></details>
+          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-11-05">5 พฤศจิกายน 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.14">1.0.14</strong></div>
+          <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>ล้างยอดชำระที่ระบบเสนอเมื่อเปลี่ยนเดือนหรือบัตร · เก็บยอดที่กรอกเอง · อัปเดตไฟล์ PWA เป็นรุ่นใหม่</p></details>
         </section>
 
         <details class="card settings-guide section" id="appUsageGuide">
@@ -520,7 +523,7 @@
 <script src="../vendor/chart-4.4.7.umd.js?v=20261023-quality02"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
 <script type="module" src="../slip-reader.js?v=20261023-quality02"></script>
-<script type="module" src="../app.js?v=20261023-quality02&payments=13"></script>
+<script type="module" src="../app.js?v=20261023-quality02&payments=14"></script>
 <script type="module" src="../app-nav.js?v=20261023-quality02&menus=08"></script><script type="module" src="./nav-scroll.js?v=20261023-scroll01"></script><script src="./reference-layout.js?v=20261103-refv6" defer></script></body>
 </html>
 

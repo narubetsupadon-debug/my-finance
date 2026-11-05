@@ -75,11 +75,43 @@ async function page(html,js,data,expose,storage={},options={}){
  const pd=new Date().toISOString().slice(0,10),payDebt={id:'paidloan',user_id:'user',name:'Grab PayLater',debt_type:'credit_card',outstanding_amount:292,installment_amount:292,is_active:true};
  const paymentPage=await page('index.html','app.js',{categories:[{id:'debtcat',user_id:'user',name:'หนี้/ผ่อน',type:'expense'}],accounts:[],debts:[payDebt],transactions:[{id:'payment',user_id:'user',type:'expense',status:'paid',transaction_date:pd,description:'ชำระบัตร Grab PayLater',source:'web',amount:292,category_id:'debtcat'}]},'');
  paymentPage.el('debtList').querySelector('[data-debt-history]').click();assert.equal(paymentPage.el('insightDetailDialog').open,true);assert.match(paymentPage.el('insightDetailBody').textContent,/292/);paymentPage.el('insightDetailDialog').close();paymentPage.w.openTx();paymentPage.el('txCategory').value='debtcat';paymentPage.el('txCategory').dispatchEvent(new paymentPage.w.Event('change'));
+ assert.match(paymentPage.el('debtList').textContent,/✓ บันทึกชำระครบยอดที่ตั้งไว้เดือนนี้/);
  const paidPick=paymentPage.el('cardPaymentList').querySelector('.payment-pick');assert.equal(paidPick.disabled,true);assert.match(paidPick.textContent,/บันทึกครบยอดที่ตั้งไว้แล้ว/);
  paymentPage.el('cardPaymentList').querySelector('[data-pay-extra]').click();assert.equal(paymentPage.el('txAmount').value,'','Additional payment requires explicit amount');assert.equal(paymentPage.state.writes.length,0,'Opening and selecting never writes');
  paymentPage.el('txDate').value='2027-01-01';paymentPage.el('txDate').dispatchEvent(new paymentPage.w.Event('change'));assert.equal(paymentPage.el('cardPaymentList').querySelector('.payment-pick').disabled,false);
  paymentPage.el('cardPaymentList').querySelector('.payment-pick').click();assert.equal(paymentPage.el('txAmount').value,'292');paymentPage.close();
  console.log('PASS paid picker: full payment cannot refill old due, extra payment blank, date month refresh and no writes');
+ // Suggested amounts belong to a selected debt and calendar month; manual amounts belong to the user.
+ const monthToday=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const [monthYear,monthNumber]=monthToday.split('-').map(Number),previousMonthDay=new Date(Date.UTC(monthYear,monthNumber-2,15)).toISOString().slice(0,10);
+ const monthDebt={id:'month-card',user_id:'user',name:'Month Card',outstanding_amount:1000,installment_amount:500};
+ const monthCategory={id:'month-cat',user_id:'user',type:'expense',name:'หนี้/ผ่อน'};
+ const monthData={categories:[monthCategory],accounts:[],debts:[monthDebt,{...monthDebt,id:'other-card',name:'Other Card',is_active:null,installment_amount:0},{...monthDebt,id:'inactive-card',is_active:false},{...monthDebt,id:'zero-card',outstanding_amount:0}],transactions:[
+  {id:'old-month-payment',user_id:'user',type:'expense',status:'paid',source:'debt_payment:month-card',transaction_date:previousMonthDay,amount:100,description:'old month',category_id:monthCategory.id},
+  {id:'this-month-payment',user_id:'user',type:'expense',status:'paid',source:'debt_payment:month-card',transaction_date:monthToday,amount:200,description:'current month',category_id:monthCategory.id}
+ ]};
+ const monthPage=await page('index.html','app.js',monthData,'');monthPage.state.persistWrites=true;
+ assert.match(monthPage.el('debtList').textContent,/บันทึกชำระแล้ว.*เหลือตามยอดที่ตั้งไว้/);
+ const monthChange=id=>monthPage.el(id).dispatchEvent(new monthPage.w.Event('change'));
+ const selectMonth=day=>{monthPage.el('txDate').value=day;monthChange('txDate');};
+ const pickMonth=()=>monthPage.el('cardPaymentList').querySelector('[data-pay-debt="month-card"]').click();
+ monthPage.w.openTx();monthPage.el('txCategory').value=monthCategory.id;monthChange('txCategory');
+ assert.equal(monthPage.el('cardPaymentList').querySelectorAll('.payment-pick').length,2,'Default/null active included; inactive and zero balance excluded');
+ selectMonth(previousMonthDay);pickMonth();assert.equal(monthPage.el('txAmount').value,'400');
+ selectMonth(previousMonthDay.slice(0,7)+'-01');assert.equal(monthPage.el('txAmount').value,'400','Same month preserves the suggestion');
+ selectMonth(monthToday);assert.equal(monthPage.el('txAmount').value,'','Month change clears the old automatic amount');assert.equal(monthPage.el('txDebtLink').value,'month-card');
+ pickMonth();assert.equal(monthPage.el('txAmount').value,'300','Re-picking uses new month remaining amount');
+ monthPage.el('txAmount').value='123.45';monthPage.el('txAmount').dispatchEvent(new monthPage.w.Event('input'));
+ selectMonth(previousMonthDay);assert.equal(monthPage.el('txAmount').value,'123.45','Manual amount survives month changes');
+ pickMonth();monthPage.el('txAmount').dispatchEvent(new monthPage.w.Event('input'));selectMonth(monthToday);assert.equal(monthPage.el('txAmount').value,'400','Explicit input of the same amount is still manual');
+ pickMonth();monthPage.el('txDebtLink').value='other-card';monthChange('txDebtLink');assert.equal(monthPage.el('txAmount').value,'','Changing debt clears automatic amount from prior debt');
+ monthPage.el('txAmount').value='75';monthPage.el('txAmount').dispatchEvent(new monthPage.w.Event('input'));monthPage.el('txDesc').value='Actual payment for other card';
+ await monthPage.el('txForm').onsubmit({preventDefault(){},currentTarget:monthPage.el('txForm')});
+ assert.equal(monthPage.state.writes.at(-1).row.source,'debt_payment:other-card');assert.equal(monthPage.state.writes.at(-1).row.amount,75);
+ assert.match(monthPage.el('debtList').textContent,/✓ มีบันทึกชำระเดือนนี้.*ยังไม่กำหนดยอดต่อรอบ/);
+ assert.ok(monthPage.state.writes.every(write=>write.table==='transactions'),'Picker must never write debt balances');
+ monthPage.w.openTx();assert.equal(monthPage.el('txAmount').value,'');assert.equal(monthPage.el('txDebtLink').value,'');monthPage.close();
+ console.log('PASS payment month: default-active picker, automatic amount reset, manual preservation, re-pick, debt switch, exact saved link and form reset');
  const linkDay=new Date().toISOString().slice(0,10),linkCategory={id:'linkcat',user_id:'user',name:'หนี้/ผ่อน',type:'expense'},otherCategory={id:'othercat',user_id:'user',name:'อาหาร',type:'expense'};
  const linkDebt={id:'link-debt',user_id:'user',name:'Test Card',debt_type:'credit_card',is_active:true,original_amount:10000,outstanding_amount:1000,installment_amount:500};
  const linkData={categories:[linkCategory,otherCategory],accounts:[],debts:[linkDebt],transactions:[]};
