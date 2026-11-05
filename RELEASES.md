@@ -1,3 +1,8 @@
+## 1.0.19 — 2026-11-05
+
+- Remove the explicit newline from the transaction tab and prevent wrapping for all bottom labels.
+- Give the full transaction label a wider slot and reduce the bottom bar to 70px; preserve all five actions and More menu.
+
 ## 1.0.18 — 2026-11-05
 
 - Promote the reviewed mobile navigation from Test: fixed 78px bar, aligned icons and full transaction label.
