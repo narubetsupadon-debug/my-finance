@@ -71,3 +71,4 @@ html.modern-ui.pocket-ui[data-resolved-theme=dark]{--bg:#142522;--card:#203631;-
 .pocket-ui #dashboardPage .pocket-grid .pocket-tile{grid-column:auto!important;grid-row:auto!important}
 .pocket-ui #summaryPage .summary-range-chips{scrollbar-width:none}
 .pocket-ui #summaryPage .summary-range-chips::-webkit-scrollbar{display:none}
+.pocket-ui #dashboardPage .pocket-grid .daily-amount,.pocket-ui #dashboardPage .pocket-grid .value{font-size:clamp(16px,4.8vw,23px)!important;overflow-wrap:anywhere}
