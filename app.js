@@ -238,7 +238,21 @@ $('syncRetryBtn')?.addEventListener('click',()=>void loadAll());
 window.addEventListener('online',()=>{if(!user)return;setSyncStatus('syncing','กลับมาออนไลน์แล้ว · กำลังอัปเดต…');void loadAll()});
 window.addEventListener('offline',()=>setSyncStatus('error','ออฟไลน์ · ข้อมูลอาจยังไม่ล่าสุด'));
 
-async function boot(u){if(user?.id!==u.id)sessionRevision++;user=u;$('authSplash')?.classList.add('hidden');$('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';await loadAll();if(user?.id!==u.id)return;subscribe();handleNavigationRoute();void readPushReceipt()}
+async function dismissStartupSplash(){
+ const splash=$('authSplash');if(!splash||splash.classList.contains('hidden'))return;
+ const startedAt=Number.isFinite(window.financeSplashStartedAt)?window.financeSplashStartedAt:performance.now();
+ const remaining=800-(performance.now()-startedAt);
+ if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
+ splash.classList.add('hidden');
+}
+async function boot(u){
+ if(user?.id!==u.id)sessionRevision++;user=u;const revision=sessionRevision;
+ $('authScreen').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email||'';
+ // Start data loading immediately; only presentation waits for the minimum splash time.
+ await Promise.all([loadAll(),dismissStartupSplash()]);
+ if(user?.id!==u.id||sessionRevision!==revision)return;
+ subscribe();handleNavigationRoute();void readPushReceipt();
+}
 async function performLoad(){
  if(!user)return false;
  const loadingUser=user.id,revision=sessionRevision;
@@ -1178,10 +1192,10 @@ try{
  const {data:{session},error}=await supabase.auth.getSession();
  if(error)throw error;
  if(session?.user)await boot(session.user);
- else{$('authSplash')?.classList.add('hidden');$('authScreen').classList.remove('hidden');}
+ else{await dismissStartupSplash();$('authScreen').classList.remove('hidden');}
 }catch(error){
  console.warn('Session restore failed',error);
- $('authSplash')?.classList.add('hidden');$('authScreen').classList.remove('hidden');
+ await dismissStartupSplash();$('authScreen').classList.remove('hidden');
  toast('ตรวจสอบการเข้าสู่ระบบไม่สำเร็จ กรุณาเข้าสู่ระบบอีกครั้ง','err');
 }
 

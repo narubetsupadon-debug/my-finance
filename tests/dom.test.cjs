@@ -31,7 +31,7 @@ function dbMock(data,options={}){
 }
 async function page(html,js,data,expose,storage={},options={}){
  const dom=new JSDOM(fs.readFileSync(root+html,'utf8'),{url:'https://finance.test/',runScripts:'outside-only'});
- const w=dom.window,{db,state}=dbMock(data,options);w.createClient=()=>db;w.alerts=[];w.alert=x=>w.alerts.push(x);w.confirm=()=>true;w.scrollTo=()=>{};w.setInterval=()=>0;
+ const w=dom.window,{db,state}=dbMock(data,options);w.financeSplashStartedAt=w.performance.now()-800;w.createClient=()=>db;w.alerts=[];w.alert=x=>w.alerts.push(x);w.confirm=()=>true;w.scrollTo=()=>{};w.setInterval=()=>0;
  for(const [key,value] of Object.entries(storage))w.localStorage.setItem(key,value);
  w.HTMLElement.prototype.scrollIntoView=function(){};w.requestAnimationFrame=cb=>{cb();return 1};w.cancelAnimationFrame=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};

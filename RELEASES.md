@@ -1,4 +1,5 @@
 ## 1.0.14 — 5 November 2026
+- Loading build 02: keep the startup splash visible for at least 800 ms from its parsed markup while loading finance data concurrently; do not add a fresh delay after a slow startup or on later sign-in. Preserve signed-out/error recovery and session-change guards.
 - Refresh startup loading screen with the existing wallet mark, subtle orbit/dots, light/dark palettes, compact landscape layout and reduced-motion support. Preserve session timing and existing visibility/failure behavior.
 - Clear automatically suggested debt-payment amounts when the transaction month or selected debt changes. Preserve manually entered amounts, including explicit input of the same number.
 - Reset suggestion ownership on new/edit forms. Keep exact debt links and existing debt balances unchanged.

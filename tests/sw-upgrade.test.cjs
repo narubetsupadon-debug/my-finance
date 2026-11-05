@@ -42,7 +42,7 @@ function harness(){
  assert.equal(h.state.claim,1);assert.equal(h.stores.has(previous),false);assert.ok(h.stores.has(current));
  assert.ok(h.stores.has('finance-push-receipt-v1'));assert.ok(h.stores.has('unrelated-app'));
  h.state.offline=true;
- for(const file of ['./app.js?v=20261023-quality02&payments=14','./app-planning.js?v=20261023-quality02&payments=14','./index.html']){
+ for(const file of ['./app.js?v=20261023-quality02&payments=14&splash=02','./app-planning.js?v=20261023-quality02&payments=14','./index.html']){
   assert.equal(await (await h.request(file)).text(),'network:'+key(file),'upgraded shell must work offline: '+file);
  }
  assert.equal(h.requests.filter(r=>key(r).includes('payments=12')).length,0,'new shell must not request the old payment module');
