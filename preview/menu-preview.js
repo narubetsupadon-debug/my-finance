@@ -17,7 +17,7 @@ try{
   if(copy.id==='darkThemeStylesheet')copy.media=dark?'all':'not all';document.head.append(copy);
  }
  for(const style of parsed.querySelectorAll('style'))document.head.append(style.cloneNode(true));
- const refined=document.createElement('link');refined.rel='stylesheet';refined.href=new URL('menu-ui.css?v=20261105-menu01',import.meta.url);document.head.append(refined);
+ const refined=document.createElement('link');refined.rel='stylesheet';refined.href=new URL('menu-ui.css?v=20261105-menu02',import.meta.url);document.head.append(refined);
  document.body.innerHTML=parsed.body.innerHTML;
  document.querySelectorAll('script').forEach(script=>script.remove());
  document.querySelectorAll('img[src]').forEach(img=>img.src=new URL(img.getAttribute('src'),root));
@@ -79,7 +79,7 @@ try{
  const source=original.replace(clientImport,'const createClient=()=>window.modernDemoDb;').replace(/from '(\.\/[^']+)'/g,(_,path)=>"from '"+new URL(path,root).href+"'").replace(/import\('(\.\/[^']+)'\)/g,(_,path)=>"import('"+new URL(path,root).href+"')");
  const script=document.createElement('script'),blob=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));script.type='module';script.src=blob;document.body.append(script);
  await new Promise((resolve,reject)=>{script.onload=resolve;script.onerror=reject;});URL.revokeObjectURL(blob);
- const navText=await(await fetch(new URL('menu-nav.js?v=20261105-menu01',import.meta.url))).text();
+ const navText=await(await fetch(new URL('menu-nav.js?v=20261105-menu02',import.meta.url))).text();
  const navSource=navText.replace("else location.href='./index.html#'+page;","else {const target=new URL(location.href);target.searchParams.delete('screen');target.hash=page;location.href=target.href;}")
  .replace("else location.href='./index.html#capture-'+type;","else {const target=new URL(location.href);target.searchParams.delete('screen');target.hash='capture-'+type;location.href=target.href;}");
  const nav=document.createElement('script'),navBlob=URL.createObjectURL(new Blob([navSource],{type:'text/javascript'}));nav.type='module';nav.src=navBlob;document.body.append(nav);
