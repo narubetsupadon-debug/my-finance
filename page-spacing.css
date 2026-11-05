@@ -1,0 +1,45 @@
+/* Shared mobile page frame. Financial controls and calculations are unchanged. */
+@media(max-width:820px){
+ html.finance-spacing{background:#edf2f5}
+ html.finance-spacing body{background:#edf2f5}
+ html.finance-spacing .topbar{padding-top:env(safe-area-inset-top,0px);background:var(--card,#fff);border-bottom:1px solid #dce5eb}
+ html.finance-spacing .topbar .topin{padding:12px 24px!important;gap:8px}
+ html.finance-spacing .layout{
+  padding:24px max(12px,env(safe-area-inset-right,0px)) calc(120px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))!important;
+  min-width:0;
+ }
+ html.finance-spacing #app .content>.page:not(#summaryPage){
+  padding:20px 12px 24px;border:1px solid #dce5eb;border-radius:24px;
+  background:var(--card,#fff);box-shadow:0 4px 18px #263d4d08;min-width:0;
+ }
+ html.finance-spacing #app .content>.page>.page-head{margin-top:0;margin-bottom:18px;flex-wrap:wrap;row-gap:12px}
+ html.finance-spacing #app .content>.page>.page-head>div{min-width:0;flex:1 1 160px}
+ html.finance-spacing body>main.finance-detail-page{
+  box-sizing:border-box;width:calc(100% - 24px);max-width:1050px;
+  margin:24px 12px calc(120px + env(safe-area-inset-bottom,0px))!important;
+  padding:20px 12px 24px!important;border:1px solid #dce5eb;border-radius:24px;
+  background:var(--card,#fff);box-shadow:0 4px 18px #263d4d08;min-width:0;
+ }
+ html.finance-spacing .finance-detail-page .detail-page-heading{padding:0;margin:0 0 18px}
+ html.finance-spacing .finance-detail-page .detail-page-heading h1{margin-top:0;line-height:1.4}
+ html.finance-spacing .finance-detail-page .detail-page-heading p{font-size:13px;line-height:1.65}
+ html.finance-spacing .finance-detail-page .salary-head{flex-wrap:wrap;gap:12px}
+ html.finance-spacing .auth-screen{padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px))}
+ html.finance-spacing.finance-widget-doc body{
+  box-sizing:border-box;width:calc(100% - 24px);max-width:620px;
+  margin:calc(24px + env(safe-area-inset-top,0px)) 12px calc(24px + env(safe-area-inset-bottom,0px));
+  padding:20px 12px 24px;border:1px solid #dce5eb;border-radius:24px;
+  background:#fff;color:#25374a;overflow-wrap:anywhere;
+ }
+ html.finance-spacing.finance-widget-doc h1{font-size:24px;line-height:1.45;margin-top:0}
+ html.finance-spacing.finance-widget-dark{background:#0b1220}
+ html.finance-spacing.finance-widget-dark body{background:#141e2c;color:#e1ebf3;border-color:#2b3d4d}
+ html.finance-spacing[data-resolved-theme="dark"]{background:#0b1220}
+ html.finance-spacing[data-resolved-theme="dark"] body{background:#0b1220}
+ html.finance-spacing[data-resolved-theme="dark"] :is(.topbar,#app .content>.page:not(#summaryPage),body>main.finance-detail-page){background:var(--card,#141e2c);border-color:#2b3d4d;box-shadow:none}
+}
+
+@media(max-width:820px){
+ /* Rent already reserves the bottom menu outside its scrolling form. */
+ html.finance-spacing body:has(.rent-wrap)>main.rent-wrap{margin:24px 12px 12px!important;scroll-padding-block:20px 24px}
+}
