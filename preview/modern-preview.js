@@ -1,7 +1,7 @@
 // Real application + in-memory sample records. This preview never loads a live client.
 const root=new URL('../',import.meta.url),nativeFetch=window.fetch.bind(window);
 const requestedTheme=new URLSearchParams(location.search).get('theme');
-let dark=requestedTheme?requestedTheme!=='light':!document.documentElement.classList.contains('pocket-ui');
+let dark=requestedTheme?requestedTheme!=='light':!document.documentElement.matches('.pocket-ui,.summary-only-preview');
 document.documentElement.dataset.resolvedTheme=dark?'dark':'light';
 window.fetch=(resource,init)=>{
  const value=typeof resource==='string'||resource instanceof URL?String(resource):resource.url;
@@ -18,6 +18,7 @@ try{
  for(const style of parsed.querySelectorAll('style'))document.head.append(style.cloneNode(true));
  const modern=document.createElement('link');modern.rel='stylesheet';modern.href=new URL('modern-ui.css?v=20261105-modern01',import.meta.url);document.head.append(modern);
  if(document.documentElement.classList.contains('pocket-ui')){const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('pocket-ui.css?v=20261105-pocket01',import.meta.url);document.head.append(style);}
+ if(document.documentElement.classList.contains('summary-only-preview')){const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('make-summary.css?v=20261106-summary01',import.meta.url);document.head.append(style);}
  document.body.innerHTML=parsed.body.innerHTML;
  document.querySelectorAll('script').forEach(script=>script.remove());
  document.querySelectorAll('img[src]').forEach(img=>img.src=new URL(img.getAttribute('src'),root));
@@ -78,7 +79,7 @@ try{
  await new Promise((resolve,reject)=>{nav.onload=resolve;nav.onerror=reject;});
  // The same navigation/actions; only replace decorative emoji with a compact line icon set.
  const icons={dashboard:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',transactions:'M6 3h12v18l-3-2-3 2-3-2-3 2z M9 8h6 M9 12h6',capture:'M12 5v14 M5 12h14',summary:'M4 20V4 M4 20h17 M8 15l4-5 4 2 5-7',more:'M4 6h16 M4 12h16 M4 18h16'};
- document.querySelectorAll('.app-nav-tab').forEach(button=>{const path=icons[button.dataset.destination];if(path)button.querySelector('.app-nav-icon').innerHTML='<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+path+'"/></svg>';});
+ if(!document.documentElement.classList.contains('summary-only-preview'))document.querySelectorAll('.app-nav-tab').forEach(button=>{const path=icons[button.dataset.destination];if(path)button.querySelector('.app-nav-icon').innerHTML='<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+path+'"/></svg>';});
  document.addEventListener('click',event=>{const a=event.target.closest('a[href]');if(a&&!a.getAttribute('href').startsWith('#')){event.preventDefault();window.alert('หน้านี้เป็น UI Preview · ลองเมนูและบันทึกข้อมูลตัวอย่างในหน้านี้ได้ โดยไม่เชื่อมบัญชีจริง');}},true);
  // Reuse production ring selection behavior even though this page boots after DOMContentLoaded.
  const selectionText=await (await fetch(new URL('summary-proportion.js?v=20261023-quality02',root))).text();

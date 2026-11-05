@@ -1,0 +1,86 @@
+/* Only the summary screen changes. All other production screens retain their original UI. */
+.summary-only-preview:has(#summaryPage:not(.hidden)) body{background:#fff}
+.summary-only-preview:has(#summaryPage:not(.hidden)) .topbar,.summary-only-preview:has(#summaryPage:not(.hidden)) #syncStatusBar{display:none}
+.summary-only-preview:has(#summaryPage:not(.hidden)) .layout{padding-top:12px}
+.summary-only-preview #summaryPage{--card:#fff;--bg:#fff;--text:#455262;--muted:#929dab;--line:#f0f2f4;--primary:#45c3ce;--primary2:#35aab6;max-width:540px;margin:0 auto;color:var(--text);padding:0 4px}
+.summary-only-preview #summaryPage .make-summary-header{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px;margin:0 0 14px}
+.summary-only-preview #summaryPage .make-summary-back{justify-self:start;border:0;background:none;color:#45c3ce;font-size:32px;font-weight:300;line-height:1;width:32px;height:36px;text-align:left;padding:0}
+.summary-only-preview #summaryPage .make-summary-header h2{grid-column:1/-1;font-size:23px;line-height:1.5;margin:2px 0 0;color:#465262;font-weight:700;letter-spacing:-.4px}
+.summary-only-preview #summaryPage .make-summary-month{display:flex;align-items:center;gap:3px;border:1px solid #b4bdc7;border-radius:7px;padding:3px 6px;color:#8b96a5;background:#fff}
+.summary-only-preview #summaryPage .make-summary-month select{appearance:none;background:transparent;color:#7d8999;border:0;box-shadow:none;padding:4px 2px;font:inherit;font-size:11px;min-height:25px;width:auto;max-width:67px;border-radius:3px;font-weight:600}
+.summary-only-preview #summaryPage .make-summary-month span{display:flex;padding-left:2px}
+.summary-only-preview #summaryPage .make-summary-totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:0}
+.summary-only-preview #summaryPage .make-summary-totals .summary-kpi{display:block;border:0;border-radius:11px;box-shadow:none;padding:12px 12px 10px;background:#e7f7f9;min-height:72px;margin:0;min-width:0}
+.summary-only-preview #summaryPage .make-summary-totals .expense-kpi{background:#fff1ef}
+.summary-only-preview #summaryPage .make-summary-totals .summary-kpi-icon{display:none}
+.summary-only-preview #summaryPage .make-summary-totals .label{font-size:11px;font-weight:500;color:#7b8c9a;margin:0 0 2px;line-height:1.5}
+.summary-only-preview #summaryPage .make-summary-totals .value{display:block;white-space:normal;overflow-wrap:anywhere;font-size:clamp(16px,4.8vw,21px);line-height:1.5;letter-spacing:-.3px;font-weight:650;padding:0;background:none;border:0;color:#36aebb;text-align:left}
+.summary-only-preview #summaryPage .make-summary-totals .expense-kpi .value{color:#ff786c}
+.summary-only-preview #summaryPage .make-summary-totals small{display:none}
+.summary-only-preview #summaryPage .make-summary-caption{margin:7px 1px 12px;text-align:right;color:#a1aab5;font-size:9px;line-height:1.6}
+.summary-only-preview #summaryPage .make-summary-highest{border:1px solid #eef0f3;border-radius:12px;overflow:hidden;margin-bottom:14px;background:#fff}
+.summary-only-preview #summaryPage .highest-heading{margin:0;padding:6px 12px 0;align-items:center;min-height:20px}
+.summary-only-preview #summaryPage .highest-heading h4{font-size:10px;font-weight:500;color:#8893a2}
+.summary-only-preview #summaryPage #summaryHighestAll{font-size:9px;color:#8d99a8;padding:0;min-height:20px}
+.summary-only-preview #summaryPage .make-summary-highest .summary-highest{border:0;border-radius:0;background:#fff;margin:0;min-height:50px;box-shadow:none;padding:0}
+.summary-only-preview #summaryPage .make-summary-highest .highest-slide{min-height:50px;padding:5px 12px 10px;grid-template-columns:26px minmax(0,1fr) auto;gap:9px}
+.summary-only-preview #summaryPage .make-summary-highest .highest-icon{width:26px;height:26px;background:#f2f6f7;color:#8c9aa8;border-radius:50%;font-size:11px}
+.summary-only-preview #summaryPage .make-summary-highest .highest-info{min-height:0;gap:0}
+.summary-only-preview #summaryPage .make-summary-highest .highest-info small,.summary-only-preview #summaryPage .make-summary-highest .highest-info>span{display:none}
+.summary-only-preview #summaryPage .make-summary-highest .highest-info strong{font-size:11px;font-weight:550;color:#697889}
+.summary-only-preview #summaryPage .make-summary-highest .highest-amount{font-size:12px;color:#ff786c}
+.summary-only-preview #summaryPage .make-summary-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #f0f2f4;margin:0 -4px 6px;padding-inline:15px;gap:26px}
+.summary-only-preview #summaryPage .make-summary-tabs button{background:none;border:0;color:#a1aab6;font:inherit;font-size:13px;font-weight:550;min-height:40px;padding:8px 0}
+.summary-only-preview #summaryPage .make-summary-tabs button.is-active{color:#47c4cf;border-bottom:3px solid #47c4cf}
+.summary-only-preview #summaryPage .summary-share-card{border:0;box-shadow:none;border-radius:0;padding:0;margin:0;background:#fff}
+.summary-only-preview #summaryPage .summary-share-card .summary-card-head{display:none}
+.summary-only-preview #summaryPage .summary-share-card .summary-donut-wrap{width:230px;max-width:86%;margin:22px auto 18px}
+.summary-only-preview #summaryPage .summary-share-card .summary-donut{height:230px!important;filter:none}
+.summary-only-preview #summaryPage .summary-share-card .summary-donut-center{padding:0 60px;gap:4px;pointer-events:none}
+.summary-only-preview #summaryPage .summary-share-card #summaryCenterLabel{font-size:10px;font-weight:400;color:#939ca8;line-height:1.4}
+.summary-only-preview #summaryPage .summary-share-card #summaryPieTotal{color:#ff786c!important;font-size:15px;font-weight:650;letter-spacing:-.4px;white-space:normal;overflow-wrap:anywhere}
+.summary-only-preview #summaryPage #summarySelectedPercent{font-size:9px;color:#8e9aa8}
+.summary-only-preview #summaryPage .summary-category-help{font-size:9px;color:#a4adb7;margin:0 0 4px;line-height:1.6}
+.summary-only-preview #summaryPage .summary-circle-actions{min-height:0;margin:0 0 8px}
+.summary-only-preview #summaryPage #summarySelectionReset{font-size:9px;padding:5px 10px;background:#eefafb;color:#4bbbc5}
+.summary-only-preview #summaryPage .summary-category-list{margin-top:0}
+.summary-only-preview #summaryPage .summary-category{border:0;border-bottom:1px solid #f2f3f5;border-radius:0;background:#fff;margin:0;padding:0;box-shadow:none}
+.summary-only-preview #summaryPage .summary-category>summary{display:grid;grid-template-columns:31px minmax(0,1fr) auto 10px;gap:10px;align-items:center;min-height:62px;padding:10px 0;list-style:none}
+.summary-only-preview #summaryPage .summary-category>summary::-webkit-details-marker{display:none}
+.summary-only-preview #summaryPage .summary-category-dot{display:grid;place-items:center;width:29px;height:29px;border-radius:50%;margin:0;color:#fff}
+.summary-only-preview #summaryPage .summary-category-name{color:#566474;font-size:12px;font-weight:600;line-height:1.6;overflow-wrap:anywhere}
+.summary-only-preview #summaryPage .summary-category-numbers{display:flex;flex-direction:column;gap:1px;text-align:right;min-width:0}
+.summary-only-preview #summaryPage .summary-category-numbers strong{color:#ff786c;font-size:12px;font-weight:650;line-height:1.5;white-space:nowrap}
+.summary-only-preview #summaryPage .summary-category-numbers small{color:#a0a9b5;font-size:9px}
+.summary-only-preview #summaryPage .summary-category-chevron{font-size:15px;color:#a9b0bb}
+.summary-only-preview #summaryPage .selected-category{border:0;border-bottom:1px solid #e9f5f7;background:#f7fcfc;box-shadow:none;padding:0 7px;margin-inline:-7px}
+.summary-only-preview #summaryPage .summary-category-children{padding:3px 0 12px 41px;background:transparent}
+.summary-only-preview #summaryPage .summary-category-children>div{font-size:11px;line-height:1.7;color:#8b97a5;gap:8px}
+.summary-only-preview #summaryPage .make-summary-extra{margin-top:20px;border:1px solid #eef0f3;border-radius:12px;padding:12px;background:#fff;font-size:11px}
+.summary-only-preview #summaryPage .make-summary-extra>summary{color:#8b97a5;cursor:pointer;min-height:30px;padding:5px 0}
+.summary-only-preview #summaryPage .make-summary-extra .summary-export-toolbar{display:flex;flex-wrap:wrap;gap:12px;margin-top:15px}
+.summary-only-preview #summaryPage .make-summary-extra .balance-kpi{padding:14px;border:1px solid #f0f2f4;border-radius:12px;box-shadow:none;margin-top:12px}
+.summary-only-preview #summaryPage button:focus-visible,.summary-only-preview #summaryPage select:focus-visible{outline:2px solid #47c4cf;outline-offset:3px}
+@media(max-width:820px){
+ .summary-only-preview:has(#summaryPage:not(.hidden)) .layout{padding:10px 18px 115px}
+ .summary-only-preview #summaryPage{padding:0}
+ .summary-only-preview #summaryPage .make-summary-header{margin-bottom:13px}
+ .summary-only-preview #summaryPage .summary-share-card .summary-donut-wrap{width:230px;margin:20px auto 14px}
+ .summary-only-preview #summaryPage .make-summary-totals .summary-kpi{padding:11px 10px 9px;min-height:65px}
+}
+@media(max-width:360px){
+ .summary-only-preview:has(#summaryPage:not(.hidden)) .layout{padding-inline:16px}
+ .summary-only-preview #summaryPage .make-summary-header h2{font-size:21px}
+ .summary-only-preview #summaryPage .summary-share-card .summary-donut-wrap{width:215px}
+ .summary-only-preview #summaryPage .summary-share-card .summary-donut{height:215px!important}
+ .summary-only-preview #summaryPage .summary-share-card .summary-donut-center{padding-inline:55px}
+ .summary-only-preview #summaryPage .summary-share-card #summaryPieTotal{font-size:14px}
+ .summary-only-preview #summaryPage .summary-category>summary{gap:8px;grid-template-columns:29px minmax(0,1fr) auto 9px}
+}
+.summary-only-preview #summaryPage .make-summary-totals>.income-kpi{grid-column:1!important;grid-row:1!important;width:100%}
+.summary-only-preview #summaryPage .make-summary-totals>.expense-kpi{grid-column:2!important;grid-row:1!important;width:100%}
+.summary-only-preview .modern-preview-note{min-height:22px;padding:4px 8px;font-size:9px;background:#f8fafb;color:#8c98a4}
+.summary-only-preview .modern-preview-note button{display:none}
+.summary-only-preview #summaryPage .make-summary-totals .summary-kpi{min-height:62px;padding:10px!important}
+.summary-only-preview #summaryPage .make-summary-totals .value{margin:0!important}
+.summary-only-preview #summaryPage .make-summary-totals .label{margin:0!important}
