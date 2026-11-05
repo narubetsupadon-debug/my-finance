@@ -72,3 +72,19 @@ html.finance-spacing{--finance-safe-top:env(safe-area-inset-top,0px)}
  html.finance-spacing.finance-widget-dark body{background:#0b1220}
  html.finance-spacing.finance-widget-dark main.finance-widget-content{background:#141e2c;color:#e1ebf3;border-color:#2b3d4d}
 }
+
+/* Keep each mobile content frame 20px inside the screen. */
+@media(max-width:820px){
+ html.finance-spacing .layout,
+ html.finance-spacing.summary-layout-ready:has(#summaryPage:not(.hidden)) .layout{
+  padding-left:max(20px,env(safe-area-inset-left,0px))!important;
+  padding-right:max(20px,env(safe-area-inset-right,0px))!important;
+ }
+ html.finance-spacing body>main.finance-detail-page,
+ html.finance-spacing body:has(.rent-wrap)>main.rent-wrap,
+ html.finance-spacing.finance-widget-doc main.finance-widget-content{
+  width:calc(100% - max(20px,env(safe-area-inset-left,0px)) - max(20px,env(safe-area-inset-right,0px)));
+  margin-left:max(20px,env(safe-area-inset-left,0px))!important;
+  margin-right:max(20px,env(safe-area-inset-right,0px))!important;
+ }
+}
