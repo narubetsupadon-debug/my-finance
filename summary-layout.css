@@ -181,3 +181,22 @@ html.summary-layout-ready body.privacy-mode #summaryPage .money::after{color:var
  html.summary-layout-ready #summaryPage .make-summary-month{grid-column:1;grid-row:2;justify-self:start;max-width:100%;min-width:0;margin:0}
  html.summary-layout-ready #summaryPage .make-summary-month select{min-width:0;flex-shrink:1}
 }
+
+/* Readable summary typography on mobile. */
+html.summary-layout-ready #summaryPage .make-summary-month select{font-size:14px;font-weight:600;color:#42596b}
+html.summary-layout-ready #summaryPage :is(.make-summary-caption,.summary-category-help,.highest-info>span,.summary-breakdown-note){font-size:12px;font-weight:500;line-height:1.7;color:#5c7080}
+html.summary-layout-ready #summaryPage .make-summary-totals .label{font-size:14px!important;font-weight:600;color:#526777}
+html.summary-layout-ready #summaryPage .make-summary-tabs button{font-size:15px;font-weight:600;color:#5d7180}
+html.summary-layout-ready #summaryPage .make-summary-tabs button.is-active{color:#087d89}
+html.summary-layout-ready #summaryPage .make-summary-highest .highest-info strong{font-size:14px;font-weight:600;color:#354d5d}
+html.summary-layout-ready #summaryPage .make-summary-highest .highest-info>span{font-size:12px;color:#5c7080}
+html.summary-layout-ready #summaryPage .summary-category-name{font-size:15px;font-weight:600;color:#354d5d}
+html.summary-layout-ready #summaryPage .summary-category-numbers strong{font-size:15px}
+html.summary-layout-ready #summaryPage .summary-category-numbers small{font-size:12px;font-weight:500;color:#5c7080}
+html.summary-layout-ready #summaryPage .summary-category-children>div{font-size:13px;color:#526777}
+html.summary-layout-ready #summaryPage #summaryCenterLabel{font-size:13px;font-weight:500;color:#5c7080}
+html.summary-layout-ready #summaryPage #summarySelectedPercent{font-size:12px;color:#5c7080}
+html[data-resolved-theme="dark"].summary-layout-ready #summaryPage :is(.make-summary-caption,.summary-category-help,.highest-info>span,.summary-breakdown-note,.summary-category-numbers small,.summary-category-children>div,#summaryCenterLabel,#summarySelectedPercent){color:#b6c8d6}
+html[data-resolved-theme="dark"].summary-layout-ready #summaryPage :is(.make-summary-totals .label,.make-summary-tabs button){color:#b6c8d6}
+html[data-resolved-theme="dark"].summary-layout-ready #summaryPage :is(.summary-category-name,.make-summary-highest .highest-info strong){color:#e1ebf3}
+html[data-resolved-theme="dark"].summary-layout-ready #summaryPage .make-summary-tabs button.is-active{color:#74d5dd}
