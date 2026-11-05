@@ -18,7 +18,7 @@ SHELL.push('./finance-core.js?v=20261023-quality02&payment=10','./payment-picker
 SHELL.push('./wallet-clarity.css?v=20261023-quality02&wallet=11');
 SHELL.push('./app.js?v=20261023-quality02&payments=14&splash=02','./app-planning.js?v=20261023-quality02&payments=14');
 SHELL.push('./loading-screen.css?v=20261023-quality02&loading=01');
-SHELL.push('./summary-layout.css?v=20261105-summary02','./summary-layout.js?v=20261105-summary02','./summary-highest.js?v=20261105-summary02','./app-summary.js?v=20261105-summary02','./app.js?v=20261023-quality02&payments=14&splash=02&summary=02');
+SHELL.push('./summary-layout.css?v=20261023-quality02&summary=02','./summary-layout.js?v=20261023-quality02&summary=02','./summary-highest.js?v=20261023-quality02&summary=02','./app-summary.js?v=20261023-quality02&summary=02','./app.js?v=20261023-quality02&payments=14&splash=02&summary=02');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
