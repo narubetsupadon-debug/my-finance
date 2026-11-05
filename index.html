@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="th" class="finance-spacing">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><meta name="theme-color" content="#4f46e5"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b0e14">
+
 <link rel="manifest" href="./manifest.webmanifest?v=walletfinal">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
@@ -14,7 +14,7 @@
 <link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261023-quality02">
 <link rel="stylesheet" href="./style.css?v=20261023-quality02">
 <link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
-<script src="./theme.js?v=20261023-quality02"></script>
+<script src="./theme.js?v=20261023-quality02&status=01"></script>
 <style>
 .insight-link{width:100%;border:1px solid #e5e9f4;text-align:left;font:inherit;font-size:13px;color:inherit;cursor:pointer}.insight-link small{display:inline-block;color:#4f46e5;margin-top:5px;font-size:11px}.insight-link:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 #insightDetailDialog{max-height:88dvh;overflow:auto}#insightDetailDialog .modal{max-height:none;overflow:visible}.insight-detail-group h4{background:#f1f3ff;padding:12px;border-radius:12px;font-size:14px}.insight-detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #edf0f5}.insight-detail-row>div{min-width:0;overflow-wrap:anywhere}.insight-detail-row small{display:block;color:#7b8497;font-size:11px;margin-top:4px}.insight-detail-row strong{white-space:nowrap}.insight-detail-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -34,7 +34,7 @@
 <link rel="stylesheet" href="./loading-screen.css?v=20261023-quality02&loading=01">
 <link rel="stylesheet" href="./summary-layout.css?v=20261023-quality02&summary=05">
 <script defer src="./summary-layout.js?v=20261023-quality02&summary=02"></script>
-<link rel="stylesheet" href="./page-spacing.css?v=20261023-quality02&spacing=01">
+<link rel="stylesheet" href="./page-spacing.css?v=20261023-quality02&spacing=02">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite" aria-label="กำลังเปิด My Finance">
@@ -64,12 +64,8 @@
   </div>
 </div>
 
-<div id="app" class="app hidden"><div id="dataError" class="notice err hidden" role="alert"><span id="dataErrorText"></span> <button id="retryData" type="button" class="btn small">โหลดใหม่</button></div>
-  <div id="syncStatusBar" class="sync-status" role="status" aria-live="polite">
-    <span id="syncStatusDot" class="sync-dot"></span>
-    <span id="syncStatusText">กำลังเชื่อมต่อ…</span>
-    <button id="syncRetryBtn" type="button" class="text-action hidden">ลองใหม่</button>
-  </div>
+<div id="app" class="app hidden">
+
   <header class="topbar">
     <div class="topin">
       <div><div class="brand"><img class="brand-icon" src="./app-icon.svg?v=20261023-quality02" width="36" height="36" alt="">My Finance</div><div class="muted">สมุดการเงินส่วนตัว</div></div>
@@ -80,6 +76,12 @@
       </div>
     </div>
   </header>
+<div id="dataError" class="notice err hidden" role="alert"><span id="dataErrorText"></span> <button id="retryData" type="button" class="btn small">โหลดใหม่</button></div>
+  <div id="syncStatusBar" class="sync-status" role="status" aria-live="polite">
+    <span id="syncStatusDot" class="sync-dot"></span>
+    <span id="syncStatusText">กำลังเชื่อมต่อ…</span>
+    <button id="syncRetryBtn" type="button" class="text-action hidden">ลองใหม่</button>
+  </div>
 
   <div class="layout">
     <aside class="sidebar" aria-label="เมนูหลัก">

@@ -29,7 +29,9 @@
     document.documentElement.style.colorScheme=resolved;
     let meta=document.querySelector('meta[name="theme-color"]');
     if(!meta){meta=document.createElement('meta');meta.name='theme-color';document.head.append(meta);}
-    meta.content=resolved==='dark'?'#0d1017':'#f6f7fb';
+    const headerColor=resolved==='dark'?'#141e2c':'#4f46e5';
+    document.documentElement.style.setProperty('--app-header-bg',headerColor);
+    meta.content=headerColor;
     document.querySelectorAll('[data-theme-option]').forEach(btn=>{
       const active=btn.dataset.themeOption===mode;
       btn.classList.toggle('active',active);

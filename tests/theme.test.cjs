@@ -7,7 +7,8 @@ for(const [mode,systemDark] of [['light',true],['dark',false],['system',true],['
  const resolved=mode==='system'?(systemDark?'dark':'light'):mode;
  assert.equal(w.document.documentElement.dataset.resolvedTheme,resolved,'theme must apply before DOMContentLoaded');
  assert.equal(w.document.documentElement.style.colorScheme,resolved);
- assert.equal(w.document.querySelector('meta[name="theme-color"]').content,resolved==='dark'?'#0d1017':'#f6f7fb');
+ assert.equal(w.document.querySelector('meta[name="theme-color"]').content,resolved==='dark'?'#141e2c':'#4f46e5');
+ assert.equal(w.document.documentElement.style.getPropertyValue('--app-header-bg'),w.document.querySelector('meta[name="theme-color"]').content,'toolbar and browser status area must use the same color');
  w.document.dispatchEvent(new w.Event('DOMContentLoaded'));w.financeTheme.set('light');assert.equal(w.document.getElementById('darkThemeStylesheet').media,'not all');
  mq.matches=true;changed();assert.equal(w.document.documentElement.dataset.resolvedTheme,'light','explicit theme must ignore system changes');
  w.financeTheme.set('system');assert.equal(w.document.documentElement.dataset.resolvedTheme,'dark');mq.matches=false;changed();assert.equal(w.document.documentElement.dataset.resolvedTheme,'light');
