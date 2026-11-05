@@ -1,0 +1,129 @@
+/* Isolated visual refresh. Production markup, renderers and calculations stay intact. */
+html.modern-ui{--modern-accent:#7560dd;--bg:#f4f5f9;--card:#fff;--text:#242535;--muted:#737687;--line:#e7e8ef;--primary:#7560dd;--primary2:#9a80ef;--green:#188469;--red:#d74e68;--soft:#f1eefb;--shadow:0 4px 18px #171a3605;color-scheme:light}
+html.modern-ui[data-resolved-theme=dark]{--modern-accent:color-mix(in srgb,var(--primary) 65%,#fff);--bg:#101116;--card:#1a1c24;--text:#f4f3fa;--muted:#a1a4b6;--line:#2c2e3c;--primary:#a48bfa;--primary2:#c1a9ff;--green:#71d8b5;--red:#ff94a8;--soft:#272338;--shadow:0 5px 20px #00000012;color-scheme:dark}
+.modern-ui body{background:var(--bg);color:var(--text);letter-spacing:-.1px;-webkit-font-smoothing:antialiased}
+.modern-start{display:grid;place-items:center;min-height:100vh;font:15px system-ui}
+.modern-preview-note{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;min-height:34px;padding:7px 12px;background:var(--soft);color:var(--modern-accent);font-size:11px;text-align:center;z-index:60}
+.modern-preview-note button{font:inherit;font-weight:700;min-height:28px;padding:3px 10px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:99px;cursor:pointer}
+.modern-ui .topbar{background:color-mix(in srgb,var(--bg) 90%,transparent);border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}
+.modern-ui .topin{max-width:1320px;padding:20px 28px}
+.modern-ui .brand{color:var(--text);font-size:19px;letter-spacing:-.6px;gap:10px}
+.modern-ui .brand-icon{width:32px;height:32px;border-radius:10px}
+.modern-ui .topin>.brand,.modern-ui .topin .brand{display:flex;align-items:center}
+.modern-ui .topin>.userbox{gap:12px}.modern-ui .topin>div>.muted{margin-top:4px;font-size:10px;letter-spacing:.03em}
+.modern-ui #syncStatusBar{padding:5px 20px;min-height:26px;background:var(--bg);border-bottom:0;font-size:10px;color:var(--muted)}
+.modern-ui #userEmail{font-size:11px}.modern-ui .btn{border-radius:13px;min-height:42px;padding:10px 16px;font-weight:650;box-shadow:none}
+.modern-ui .btn.primary{background:#8066e7;color:#fff;border:1px solid #957cf1;box-shadow:0 4px 12px #7153d526}
+.modern-ui .btn.soft,.modern-ui .btn.ghost{background:var(--soft);color:var(--modern-accent);border:1px solid transparent}
+.modern-ui .btn:hover{filter:brightness(1.05)}.modern-ui button:focus-visible,.modern-ui a:focus-visible{outline:2px solid var(--modern-accent);outline-offset:3px}
+.modern-ui .layout{max-width:1320px;margin:auto;grid-template-columns:190px minmax(0,1fr);gap:36px;padding:28px 28px 100px}
+.modern-ui .sidebar{background:transparent;border:0;box-shadow:none;padding:0;top:122px;border-radius:0}
+.modern-ui .nav-group{padding:0 0 20px;margin:0 0 12px;border-bottom:1px solid var(--line)}
+.modern-ui .nav-group-label{padding:8px 14px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.modern-ui .navbtn{display:flex;align-items:center;gap:11px;padding:12px 14px;margin:3px 0;border-radius:13px;font-size:13px;color:var(--muted);font-weight:550}
+.modern-ui .navbtn.active{background:var(--soft);color:var(--modern-accent);font-weight:700}.modern-ui .nav-icon{font-size:17px}
+.modern-ui .content{min-width:0}.modern-ui .card{border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:none}
+.modern-ui .page-head{margin-bottom:24px;gap:12px}.modern-ui .page-head h2{font-size:25px;font-weight:650;letter-spacing:-.7px}
+.modern-ui .page-head .muted{margin-top:6px}.modern-ui .section-heading h2{font-weight:650;color:var(--text)}
+.modern-ui .text-action{color:var(--modern-accent);font-weight:600}.modern-ui .metric .label,.modern-ui .label{color:var(--muted)}
+.modern-ui .field input,.modern-ui .field select,.modern-ui .field textarea{background:var(--bg);border-color:var(--line);border-radius:12px;color:var(--text);min-height:44px}
+.modern-ui .modal,.modern-ui dialog,.modern-ui .app-menu-sheet{background:var(--card);color:var(--text);border-color:var(--line)}
+.modern-ui dialog::backdrop{background:#080a126b;backdrop-filter:blur(6px)}
+.modern-ui #dashboardPage{max-width:none;--home-radius:22px}
+.modern-ui #dashboardPage .home-welcome{margin:0 0 26px;align-items:end}
+.modern-ui #dashboardPage .welcome-date{font-size:12px;color:var(--muted);margin-bottom:8px}
+.modern-ui #dashboardPage #helloTitle{font-size:clamp(21px,2.5vw,30px);line-height:1.45;font-weight:650;letter-spacing:-.7px;max-width:30ch}
+.modern-ui #dashboardPage .daily-overview{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)!important;gap:18px}
+.modern-ui #dashboardPage .daily-panel{border-radius:22px;padding:24px;min-height:188px;box-shadow:none}
+.modern-ui #dashboardPage .spent-panel{background:linear-gradient(115deg,#7056d5,#9477ee);position:relative;overflow:hidden;isolation:isolate;border:1px solid #a78af259;justify-content:space-between}
+.modern-ui #dashboardPage .spent-panel::after{display:block;content:'';position:absolute;z-index:-1;width:210px;height:210px;border:1px solid #ffffff29;border-radius:50%;right:-55px;top:-65px;pointer-events:none;box-shadow:0 0 0 38px #ffffff07,0 0 0 76px #ffffff05}
+.modern-ui #dashboardPage .spent-panel .daily-label{font-size:12px;font-weight:550;color:#f6f1ff}
+.modern-ui #dashboardPage .spent-panel .daily-amount{font-size:min(44px,calc(148cqi / var(--amount-chars,12)));font-weight:650;letter-spacing:-1.7px;margin:10px 0 12px;color:#fff}
+.modern-ui #dashboardPage .spent-panel .daily-panel-foot{display:flex;flex-direction:row;align-items:center;justify-content:space-between;margin-top:0;font-size:11px;color:#f1eaff;gap:8px}
+.modern-ui #dashboardPage .spent-panel .text-action{font-size:11px;color:#fff;background:#ffffff15;border:1px solid #ffffff22;border-radius:99px;padding:7px 10px;min-height:32px}
+.modern-ui #dashboardPage .budget-panel{display:grid;grid-template-columns:minmax(0,1fr) 80px;align-content:center;column-gap:16px;row-gap:4px;background:var(--card);border:1px solid var(--line)}
+.modern-ui #dashboardPage .budget-panel>.daily-label{grid-column:1;font-size:12px;display:block;color:var(--muted);font-weight:500;line-height:1.8}
+.modern-ui #dashboardPage .budget-panel>.daily-label>span{display:none}
+.modern-ui #dashboardPage .budget-panel>.daily-amount{grid-column:1;font-size:clamp(24px,2.8vw,34px);font-weight:650;letter-spacing:-1px;margin:3px 0;color:var(--green)}
+.modern-ui #dashboardPage .budget-panel>.budget-ring{grid-column:2;grid-row:1/5;position:relative;inset:auto;align-self:center;width:80px;height:80px;margin:0;background:conic-gradient(var(--green) var(--progress,0%),var(--line) 0)}
+.modern-ui #dashboardPage .budget-ring::before{inset:6px;background:var(--card)}
+.modern-ui #dashboardPage .budget-ring span{font-size:17px;color:var(--text)}.modern-ui #dashboardPage .budget-ring small{font-size:9px;color:var(--muted)}
+.modern-ui #dashboardPage .budget-panel>.daily-caption{grid-column:1;font-size:11px;color:var(--muted);line-height:1.7}
+.modern-ui #dashboardPage .budget-reference{grid-column:1;font-size:10px;color:var(--muted)}
+.modern-ui #dashboardPage .bill-month-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 15px;border:1px solid var(--line);border-radius:13px;margin:14px 0 25px;background:color-mix(in srgb,var(--card) 60%,transparent)}
+.modern-ui #dashboardPage .bill-month-strip button{font-size:11px;color:var(--text)}.modern-ui #dashboardPage .bill-month-strip small{font-size:10px;color:var(--muted)}
+.modern-ui #dashboardPage .quick-capture{padding:0;margin:0 0 26px;background:transparent;border:0;box-shadow:none}
+.modern-ui #dashboardPage .quick-capture .section-heading{display:flex;margin-bottom:14px}.modern-ui #dashboardPage .quick-capture .section-heading h2{font-size:14px}
+.modern-ui #dashboardPage .quick-capture .section-heading p,.modern-ui #dashboardPage .section-mark{display:none}
+.modern-ui #dashboardPage .quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.modern-ui #dashboardPage .quick-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:91px;padding:12px 6px;background:var(--card);border:1px solid var(--line);border-radius:16px;color:var(--text);transition:border-color .15s,transform .15s}
+.modern-ui #dashboardPage .quick-btn>span{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--soft);font-size:20px;margin:0}
+.modern-ui #dashboardPage .quick-btn b{font-size:11px;font-weight:550}.modern-ui #dashboardPage .quick-btn:hover{transform:translateY(-2px);border-color:var(--primary)}
+.modern-ui #dashboardPage .home-feed{gap:18px;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);margin-top:0}
+.modern-ui #dashboardPage .home-feed>.card,.modern-ui #dashboardPage>.home-detail{padding:21px;border:1px solid var(--line);border-radius:20px}
+.modern-ui #dashboardPage .section-heading h2,.modern-ui #dashboardPage .home-detail summary strong{font-size:15px;letter-spacing:-.3px}
+.modern-ui #dashboardPage .section-heading .text-action{font-size:11px}.modern-ui #dashboardPage .section-heading{margin-bottom:15px}
+.modern-ui #dashboardPage .upcoming-item{padding:15px 0;border-color:var(--line)}.modern-ui #dashboardPage .upcoming-name{font-size:12px;font-weight:600}
+.modern-ui #dashboardPage .upcoming-amount{font-size:13px}.modern-ui #dashboardPage .upcoming-item .muted{font-size:10px;margin-top:4px}
+.modern-ui #dashboardPage .tx-row{border-color:var(--line);padding:14px 0}.modern-ui .tx-list-item,.modern-ui .item{border-color:var(--line)}
+.modern-ui .tx-toolbar,.modern-ui .tx-filter-panel,.modern-ui .tx-search-box{background:var(--card);border-color:var(--line);color:var(--text)}
+.modern-ui .tx-search-box input{background:transparent;color:var(--text)}
+.modern-ui .wallet-card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:none;overflow:hidden}
+.modern-ui .wallet-head{margin-bottom:24px}.modern-ui .wallet-tag{background:var(--soft);color:var(--modern-accent);font-size:9px;letter-spacing:.1em;border-radius:7px}
+.modern-ui .wallet-amount b{font-weight:650;letter-spacing:-1.2px}.modern-ui .wallet-available{font-size:12px}.modern-ui .wallet-caption{font-size:10px}
+.modern-ui .summary-kpi,.modern-ui .budget-grid>.card{border-color:var(--line);background:var(--card);border-radius:20px}
+.modern-ui .app-menu-item{background:var(--bg);color:var(--text);border-color:var(--line);border-radius:16px}
+@media(max-width:900px){
+ .modern-ui .layout{gap:20px;grid-template-columns:170px minmax(0,1fr);padding:22px 20px 110px}
+ .modern-ui #dashboardPage .home-feed{grid-template-columns:1fr}
+}
+@media(max-width:820px){
+ .modern-ui .topin{padding:16px 20px}.modern-ui .topin .brand{font-size:18px}
+ .modern-ui .layout{display:block;padding:22px 20px 125px}.modern-ui .sidebar{display:none}
+ .modern-ui #userEmail,.modern-ui #logout,.modern-ui .topin>div>.muted{display:none}
+ .modern-ui #openSettingsTop{font-size:0;width:38px;min-height:38px;padding:0;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:50%}
+ .modern-ui #openSettingsTop::after{content:'⚙';font-size:21px;font-weight:400}
+ .modern-ui .mobile-app-nav{left:14px!important;right:14px!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;min-height:70px!important;border-radius:23px!important;padding:6px!important;background:color-mix(in srgb,var(--card) 93%,transparent)!important;border-color:var(--line)!important;box-shadow:0 12px 35px #00000025!important}
+ .modern-ui .mobile-app-nav>.app-nav-tab{font-weight:500!important;font-size:9px!important;border-radius:16px!important;min-height:56px!important}
+ .modern-ui .mobile-app-nav>.app-nav-tab.is-active{background:var(--soft)!important;color:var(--modern-accent)!important}
+ .modern-ui .mobile-app-nav>.app-nav-tab.app-nav-capture>.app-nav-icon{width:43px!important;height:43px!important;background:#8569e9!important;border:1px solid #b49afb;border-radius:15px!important;color:#fff!important;box-shadow:0 4px 12px #7054d53b!important}
+ .modern-ui #dashboardPage .home-welcome{margin:0 0 22px}.modern-ui #dashboardPage #helloTitle{font-size:23px;line-height:1.5;max-width:24ch}
+ .modern-ui #dashboardPage .welcome-add{display:none}
+ .modern-ui #dashboardPage .daily-overview{grid-template-columns:1fr!important;gap:12px}
+ .modern-ui #dashboardPage .spent-panel{grid-column:1;min-height:175px;padding:22px}
+ .modern-ui #dashboardPage .spent-panel .daily-amount{font-size:min(40px,calc(135cqi / var(--amount-chars,12)));margin:8px 0 13px}
+ .modern-ui #dashboardPage .budget-panel{grid-column:1;min-height:125px;padding:18px 20px;grid-template-columns:minmax(0,1fr) 72px}
+ .modern-ui #dashboardPage .budget-panel>.daily-amount{font-size:28px}
+ .modern-ui #dashboardPage .budget-panel>.budget-ring{width:72px;height:72px}
+ .modern-ui #dashboardPage .quick-btn{min-height:87px}.modern-ui #dashboardPage .quick-grid{gap:8px}
+ .modern-ui #dashboardPage .home-feed>.card,.modern-ui #dashboardPage>.home-detail{padding:18px}
+ .modern-ui .page-head h2{font-size:24px}.modern-ui .page-head{margin-bottom:20px}
+ .modern-ui .wallet-card{padding:22px}.modern-ui .wallet-head{margin-bottom:20px}
+}
+@media(max-width:360px){
+ .modern-ui .layout{padding-inline:16px}.modern-ui .topin{padding-inline:16px}
+ .modern-ui #dashboardPage #helloTitle{font-size:20px}.modern-ui #dashboardPage .spent-panel{padding:20px}
+ .modern-ui #dashboardPage .quick-btn b{font-size:10px}.modern-ui #dashboardPage .budget-panel{padding:16px}
+ .modern-ui .modern-preview-note{font-size:10px;gap:6px}.modern-ui .mobile-app-nav{left:10px!important;right:10px!important}
+}
+@media(prefers-reduced-motion:reduce){.modern-ui *{scroll-behavior:auto!important}.modern-ui #dashboardPage .quick-btn{transition:none}.modern-ui #dashboardPage .quick-btn:hover{transform:none}}
+
+.modern-ui #dashboardPage #budgetRemainDash{color:var(--green)!important}
+.modern-ui #dashboardPage #budgetCard:has(.is-over) #budgetRemainDash{color:var(--red)!important}
+.modern-ui .fab{display:none!important}
+.modern-ui #recentList .compact-row{padding:14px 0;border-color:var(--line);gap:10px}
+.modern-ui #recentList .transaction-icon{background:var(--soft);border-radius:12px;width:34px;height:34px;font-size:17px}
+.modern-ui #recentList .transaction-detail>b{font-size:12px;font-weight:600}
+.modern-ui #recentList .transaction-detail .muted{font-size:10px}
+.modern-ui #recentList .tx-status{font-size:9px;background:transparent;padding:0;color:var(--muted)}
+.modern-ui #recentList .amount{font-size:13px;font-weight:650}
+.modern-ui #homeSpendTrend{font-size:11px;line-height:1.7;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--muted);margin:0 0 22px}
+.modern-ui .wallet-identity{display:flex;flex-direction:row;align-items:center;gap:10px;min-width:0}
+.modern-ui .wallet-identity h3{font-size:16px;margin:0;overflow-wrap:anywhere}
+@media(max-width:820px){
+ .modern-ui #debtsPage .page-head{display:flex;flex-direction:column!important;align-items:stretch;gap:12px}
+ .modern-ui #debtsPage .page-head>div{width:100%;min-width:0}
+ .modern-ui #debtsPage .page-head h2{font-size:25px;line-height:1.5}
+ .modern-ui #debtsPage .page-head>.btn{align-self:flex-start}
+ .modern-ui #debtsPage .page-head p{font-size:12px;line-height:1.7;margin:5px 0 0}
+}
