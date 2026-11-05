@@ -70,7 +70,8 @@ function rangeConfig(today=bangkokDay()){
 }
 function setupSummaryFilters(today){
  const transactions=getTransactions()
- const years=[...new Set([today.slice(0,4),...transactions.map(x=>String(x.transaction_date).slice(0,4)).filter(Boolean)])].sort((a,b)=>b.localeCompare(a))
+ const chosenYear=$('summaryYear').value;
+ const years=[...new Set([today.slice(0,4),...(/^\d{4}$/.test(chosenYear)?[chosenYear]:[]),...transactions.map(x=>String(x.transaction_date).slice(0,4)).filter(Boolean)])].sort((a,b)=>b.localeCompare(a))
  const ys=$('summaryYear'),current=ys.value||today.slice(0,4),nextYears=years.join('|');
  if(nextYears!==yearChoices){ys.innerHTML=years.map(y=>'<option value="'+y+'">'+y+'</option>').join('');yearChoices=nextYears;}
  ys.value=years.includes(current)?current:years[0];
@@ -160,4 +161,5 @@ renderSummary.getReport=()=>lastReport?{...lastReport,keys:[...lastReport.keys],
 
  return renderSummary;
 }
+
 
