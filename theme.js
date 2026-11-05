@@ -29,7 +29,7 @@
     document.documentElement.style.colorScheme=resolved;
     let meta=document.querySelector('meta[name="theme-color"]');
     if(!meta){meta=document.createElement('meta');meta.name='theme-color';document.head.append(meta);}
-    const headerColor=resolved==='dark'?'#141e2c':'#4f46e5';
+    const headerColor='#ffffff';
     document.documentElement.style.setProperty('--app-header-bg',headerColor);
     meta.content=headerColor;
     document.querySelectorAll('[data-theme-option]').forEach(btn=>{
