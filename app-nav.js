@@ -1,6 +1,6 @@
-const navigationPaths={dashboard:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',transactions:'M6 3h12v18l-3-2-3 2-3-2-3 2z M9 8h6 M9 12h6',capture:'M12 5v14 M5 12h14',summary:'M4 20V4 M4 20h17 M8 15l4-5 4 2 5-7',more:'M4 6h16 M4 12h16 M4 18h16'};
+const navigationPaths={dashboard:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',transactions:'M6 3h12v18l-3-2-3 2-3-2-3 2z M9 8h6 M9 12h6',capture:'M12 5v14 M5 12h14',summary:'M4 20V4 M4 20h17 M8 15l4-5 4 2 5-7',more:'M4 6h16 M4 12h16 M4 18h16',budget:'M12 3a9 9 0 1 0 9 9 M12 7a5 5 0 1 0 5 5 M12 12l8-8 M16 4h4v4',bills:'M5 5h14v16H5z M8 3v4 M16 3v4 M5 10h14 M8 14h3 M8 17h6',debts:'M3 5h18v14H3z M3 10h18 M7 15h4',accounts:'M3 9l9-6 9 6z M5 10v9 M10 10v9 M15 10v9 M20 10v9 M3 21h18',categories:'M3 4h8l10 10-7 7L3 10z M7 8h.01',settings:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1z'};
 function paintNavigationIcon(element,page,fallback,classes){
- const path=navigationPaths[page];if(!classes.split(' ').includes('app-nav-tab')||!path){element.textContent=fallback;return;}
+ const path=navigationPaths[page];if(!path){element.textContent=fallback;return;}
  const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),line=document.createElementNS(ns,'path');
  for(const [name,value]of Object.entries({viewBox:'0 0 24 24',width:'21',height:'21',fill:'none',stroke:'currentColor','stroke-width':'1.6','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'}))svg.setAttribute(name,value);
  line.setAttribute('d',path);svg.append(line);element.append(svg);
@@ -17,6 +17,7 @@ const buttons=new Map();
 const nav=document.createElement('nav');nav.className='mobile-app-nav';nav.setAttribute('aria-label','เมนูหลัก');
 function createSheet(id,title){const dialog=document.createElement('dialog');dialog.className='app-menu-sheet';dialog.setAttribute('aria-labelledby',id);dialog.innerHTML='<div class="app-menu-head"><div><div class="app-menu-eyebrow">MY FINANCE</div><h2 id="'+id+'">'+title+'</h2></div><button type="button" class="app-menu-close" aria-label="ปิดเมนู">✕</button></div>';dialog.querySelector('.app-menu-close').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientY<r.top||e.clientY>r.bottom||e.clientX<r.left||e.clientX>r.right)dialog.close();}});return dialog;}
 const sheet=createSheet('appMenuTitle','เพิ่มเติม'),captureSheet=createSheet('appCaptureTitle','บันทึกอะไรดี?');
+sheet.classList.add('more-menu-modern');
 function navigate(page,href){if(sheet.open)sheet.close();if(captureSheet.open)captureSheet.close();if(href){location.href=href;return;}if(homeApp)window.dispatchEvent(new CustomEvent('finance:navigate',{detail:page}));else location.href='./index.html#'+page;}
 const warmedPages=new Set();
 function warmPage(href){if(!href||warmedPages.has(href))return;warmedPages.add(href);const link=document.createElement('link');link.rel='prefetch';link.href=href;link.as='document';document.head.append(link);}
@@ -26,6 +27,7 @@ primary.forEach(x=>{const b=makeButton(x,'app-nav-tab'+(x[0]==='capture'?' app-n
 const more=makeButton(['more','☰','เพิ่มเติม'],'app-nav-tab',()=>{sheet.showModal();more.setAttribute('aria-expanded','true');});more.setAttribute('aria-haspopup','dialog');more.setAttribute('aria-expanded','false');nav.append(more);sheet.addEventListener('close',()=>more.setAttribute('aria-expanded','false'));
 function appendGroup(dialog,label,items,action){const section=document.createElement('section'),heading=document.createElement('h3'),grid=document.createElement('div');section.className='app-menu-group';heading.className='app-menu-group-title';heading.textContent=label;grid.className='app-menu-grid';for(const item of items)grid.append(makeButton(item,'app-menu-item',action?()=>action(item[0]):null));section.append(heading,grid);dialog.append(section);}
 groups.forEach(([label,items])=>appendGroup(sheet,label,items));
+for(const button of sheet.querySelectorAll('.app-menu-item')){const arrow=document.createElement('span');arrow.className='menu-chevron';arrow.setAttribute('aria-hidden','true');arrow.textContent='›';button.append(arrow);}
 appendGroup(captureSheet,'รายรับ–รายจ่ายทั่วไป',[['income','↗','เพิ่มรายรับ'],['expense','↘','เพิ่มรายจ่าย']],type=>{captureSheet.close();if(homeApp)window.dispatchEvent(new CustomEvent('finance:capture',{detail:type}));else location.href='./index.html#capture-'+type;});
 function active(page){buttons.forEach((nodes,key)=>nodes.forEach(b=>{b.classList.toggle('is-active',key===page);if(key===page)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}));more.classList.toggle('is-active',secondary.some(x=>x[0]===page)||['salary','rent','car'].includes(page));}
 window.addEventListener('finance:page',e=>active(e.detail));

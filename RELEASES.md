@@ -1,3 +1,9 @@
+## 1.0.18 — 2026-11-05
+
+- Promote the reviewed mobile navigation from Test: fixed 78px bar, aligned icons and full transaction label.
+- Replace More tiles with grouped list rows, SVG icons and chevrons; retain six destinations, native dialog close/focus and scroll behavior.
+- Apply to all four app entry pages, preserve financial data and update version/PWA assets.
+
 ## 1.0.17 — 2026-11-05
 
 - Promote reviewed summary period selector outside the hidden hero: current month, trailing 3/6 months (including current month), current calendar year, custom month/year and inclusive explicit dates.
