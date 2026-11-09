@@ -1,8 +1,9 @@
 export const financialBackupTables=['categories','accounts','transactions','bills','debts','budgets','salary_records','car_installments','car_expenses','rent_records'];
 export function serializeFinanceBackup(backup){
- if(backup?.format!=='my-finance-backup'||backup.version!==1||!backup.owner_id||!Number.isFinite(Date.parse(backup.exported_at))||!backup.data)throw new Error('รูปแบบสำรองข้อมูลไม่ครบ');
- if(Object.keys(backup.data).length!==financialBackupTables.length)throw new Error('ตารางสำรองข้อมูลไม่ครบ');
- for(const table of financialBackupTables){const rows=backup.data[table];if(!Array.isArray(rows)||rows.some(row=>!row?.id||row.user_id!==backup.owner_id)||new Set(rows.map(r=>r.id)).size!==rows.length)throw new Error('ข้อมูลสำรองไม่ครบหรือเจ้าของข้อมูลไม่ตรง: '+table);}
+ if(backup?.format!=='my-finance-backup'||![1,2].includes(backup.version)||!backup.owner_id||!Number.isFinite(Date.parse(backup.exported_at))||!backup.data)throw new Error('รูปแบบสำรองข้อมูลไม่ครบ');
+ const tables=backup.version===2?[...financialBackupTables,'finance_subcategories']:financialBackupTables;
+ if(Object.keys(backup.data).length!==tables.length)throw new Error('ตารางสำรองข้อมูลไม่ครบ');
+ for(const table of tables){const rows=backup.data[table];if(!Array.isArray(rows)||rows.some(row=>!row?.id||row.user_id!==backup.owner_id)||new Set(rows.map(r=>r.id)).size!==rows.length)throw new Error('ข้อมูลสำรองไม่ครบหรือเจ้าของข้อมูลไม่ตรง: '+table);}
  return JSON.stringify(backup,null,2);
 }
 
@@ -12,9 +13,10 @@ export function serializeFinanceBackup(backup){
 export function verifyFinanceBackup(backup,expectedOwner=backup?.owner_id){
  serializeFinanceBackup(backup);
  if(backup.owner_id!==expectedOwner)throw new Error('เจ้าของไฟล์สำรองไม่ตรงกับบัญชี');
- const ids=Object.fromEntries(financialBackupTables.map(t=>[t,new Set(backup.data[t].map(r=>r.id))]));
+ const tables=backup.version===2?[...financialBackupTables,'finance_subcategories']:financialBackupTables;
+ const ids=Object.fromEntries(tables.map(t=>[t,new Set(backup.data[t].map(r=>r.id))]));
  const counts={};
- for(const table of financialBackupTables){counts[table]=backup.data[table].length;
+ for(const table of tables){counts[table]=backup.data[table].length;
   for(const row of backup.data[table]){
    for(const [field,target] of [['category_id','categories'],['account_id','accounts'],['debt_id','debts'],['transaction_id','transactions']]){
     if(row[field]!=null&&!ids[target].has(row[field]))throw new Error('ลิงก์ในไฟล์สำรองไม่ครบ: '+table+' / '+field);

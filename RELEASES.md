@@ -1,3 +1,10 @@
+## 1.0.20 — 2026-11-09
+
+- Keep acknowledged transaction inserts/edits in the current owner cache when follow-up reads fail; reject older read snapshots after confirmed writes. Preserve retry-safe IDs and debt balances.
+- Show deferred refresh status while an editor is open. Reject backup downloads after a session changes.
+- Add authenticated, security-invoker backup v2 with custom child categories; retain the v1 RPC and read compatibility. No financial row updates or automatic restore.
+- Promote reviewed stability Test, regression coverage, guide and exact PWA asset URLs.
+
 ## 1.0.19 — 2026-11-05
 
 - Remove the explicit newline from the transaction tab and prevent wrapping for all bottom labels.

@@ -14,3 +14,9 @@ const rehearsal=verifyFinanceBackup(backup,'fixture-owner');assert.equal(rehears
 const missingRef=structuredClone(backup);missingRef.data.transactions[0].category_id='missing';assert.throws(()=>verifyFinanceBackup(missingRef),/ลิงก์/);
 const multiLink=structuredClone(backup);multiLink.data.car_expenses=[{id:'car',user_id:'fixture-owner',transaction_id:'tx'}];assert.throws(()=>verifyFinanceBackup(multiLink),/หลายเรื่อง/);
 console.log('PASS backup recovery rehearsal: exact JSON clone, owner isolation, row counts, missing references and cross-source double links rejected; no production write');
+
+const v2=structuredClone(backup);v2.version=2;v2.data.categories=[{id:'food',user_id:'fixture-owner',name:'อาหาร'}];v2.data.finance_subcategories=[{id:'custom',user_id:'fixture-owner',category_id:'food',name:'อาหารทำเอง'}];
+assert.deepEqual(verifyFinanceBackup(v2,'fixture-owner').restored,v2);
+const incompleteV2=structuredClone(v2);delete incompleteV2.data.finance_subcategories;assert.throws(()=>verifyFinanceBackup(incompleteV2),/ไม่ครบ/);
+const orphanChild=structuredClone(v2);orphanChild.data.finance_subcategories[0].category_id='gone';assert.throws(()=>verifyFinanceBackup(orphanChild),/ลิงก์/);
+console.log('PASS backup v2: custom child categories retained, missing table and orphan parent rejected; v1 readable');

@@ -1,5 +1,5 @@
 import {createCapacityMonitor} from './app-storage.js?v=20261023-quality02';
-import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261023-quality02';
+import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261023-quality02&backup=20';
 import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError,debtPaymentProgress} from './finance-core.js?v=20261023-quality02&payment=10';
 import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261023-quality02';
 import {createSummaryRenderer} from './summary-highest.js?v=20261023-quality02&period=17';
@@ -32,7 +32,7 @@ const formatAccountNumber=value=>{
 };
 function accountLabel(a){return String(a?.name||'')+(a?.account_number?' · •••• '+String(a.account_number).replace(/\D/g,'').slice(-4):'')}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
-let mode='login',user=null,categories=[],subcategories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),rentRecords=[],duplicateOverride=false,lastSyncAt=null,sessionRevision=0
+let mode='login',user=null,categories=[],subcategories=[],accounts=[],transactions=[],bills=[],debts=[],budgets=[],channel=null,editing={type:null,id:null},carExpenseTxIds=new Set(),rentRecords=[],duplicateOverride=false,lastSyncAt=null,sessionRevision=0,confirmedWriteRevision=0
 let summaryPdfUrl=null;
 function clearSummaryPdf(){if(summaryPdfUrl)URL.revokeObjectURL(summaryPdfUrl);summaryPdfUrl=null;$('summaryPdfStatus')?.replaceChildren();}
 
@@ -255,12 +255,13 @@ async function boot(u){
 }
 async function performLoad(){
  if(!user)return false;
- const loadingUser=user.id,revision=sessionRevision;
+ const loadingUser=user.id,revision=sessionRevision,writeRevision=confirmedWriteRevision;
  setSyncStatus('syncing');
  try{
   const data=await fetchFinanceData(supabase,loadingUser,readAll);
   if(user?.id!==loadingUser||sessionRevision!==revision)return false;
-  if(editorOpen()){scheduleLoad();return false;}
+  if(writeRevision!==confirmedWriteRevision){scheduleLoad();return false;}
+  if(editorOpen()){setSyncStatus('deferred','รออัปเดตหลังปิดหน้าบันทึก');scheduleLoad();return false;}
   categories=data.categories;subcategories=data.subcategories;accounts=data.accounts;transactions=data.transactions;
   bills=data.bills;debts=data.debts;budgets=data.budgets;carExpenseTxIds=data.carExpenseTxIds;rentRecords=data.rentRecords;
   $('dataError').classList.add('hidden');setSyncStatus('ok');renderAll();return true;
@@ -1085,7 +1086,13 @@ $('txForm').onsubmit=async e=>{
  try{
   const r=editing.id?await supabase.from('transactions').update(row).eq('id',editing.id).eq('user_id',user.id).select('id').single():await retrySafeInsert(supabase,'transactions',row);
   if(r.error)throw r.error;
-  savedId=savedId||r.data?.id;committed=true;if(!editing.id)rememberTxSelection(row);const favoriteSaved=saveFavorite(row);$('txDialog').close();
+  savedId=savedId||r.data?.id;committed=true;
+  // The database acknowledged this row. Keep it even when the next read fails.
+  if(user?.id!==row.user_id)return;
+  const previous=transactions.find(t=>t.id===savedId);
+  const confirmed={...previous,...row,id:savedId,created_at:previous?.created_at||new Date().toISOString(),categories:categories.find(c=>c.id===row.category_id)||null,accounts:accounts.find(a=>a.id===row.account_id)||null};
+  confirmedWriteRevision++;transactions=[confirmed,...transactions.filter(t=>t.id!==savedId)];
+  if(!editing.id)rememberTxSelection(row);const favoriteSaved=saveFavorite(row);$('txDialog').close();renderAll();
   const label='บันทึกรายการสำเร็จแล้ว ✅'+(row.status==='cancelled'?' · รายการยกเลิก ไม่นับรวมยอด':'')+(!favoriteSaved?' · เก็บรายการโปรดในเครื่องนี้ไม่ได้':'');
   await refreshSavedNotice(label,{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});
  }catch(error){if(committed)savedNotice('บันทึกรายการสำเร็จแล้ว',false,{label:'แก้ไขรายการนี้',run:()=>editSavedTransaction(savedId,row)});else{showFinanceSaveError($('txError'),error);$('txError').scrollIntoView({block:'nearest'})}}finally{unlock();button.disabled=false;button.textContent='บันทึก'}
@@ -1230,8 +1237,8 @@ $('txDialog')?.addEventListener('focusin',e=>{
 
 
 $('exportFinanceBackup').onclick=async()=>{
- const button=$('exportFinanceBackup');if(!user||button.disabled)return;button.disabled=true;button.textContent='กำลังสำรอง…';
- try{const {data,error}=await supabase.rpc('export_finance_backup');if(error)throw error;if(!user)throw new Error('กรุณาเข้าสู่ระบบก่อนสำรองข้อมูล');verifyFinanceBackup(data,user.id);const content=serializeFinanceBackup(data),url=URL.createObjectURL(new Blob([content],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='My_Finance_Backup_'+bangkokDay()+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showAppToast('สร้างไฟล์สำรองข้อมูลการเงินแล้ว กรุณาเก็บไฟล์ไว้ในที่ปลอดภัย');}
+ const button=$('exportFinanceBackup');if(!user||button.disabled)return;const owner=user.id,revision=sessionRevision;button.disabled=true;button.textContent='กำลังสำรอง…';
+ try{const {data,error}=await supabase.rpc('export_finance_backup_v2');if(error)throw error;if(user?.id!==owner||sessionRevision!==revision)throw new Error('บัญชีเปลี่ยนระหว่างสำรองข้อมูล กรุณาลองใหม่');verifyFinanceBackup(data,owner);const content=serializeFinanceBackup(data),url=URL.createObjectURL(new Blob([content],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='My_Finance_Backup_'+bangkokDay()+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showAppToast('สร้างไฟล์สำรองข้อมูลการเงินแล้ว กรุณาเก็บไฟล์ไว้ในที่ปลอดภัย');}
  catch(error){showAppToast('สำรองข้อมูลไม่ได้: '+error.message);}
  finally{button.disabled=false;button.textContent='ดาวน์โหลดข้อมูลสำรอง JSON';}
 };

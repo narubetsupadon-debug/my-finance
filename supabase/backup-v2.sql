@@ -1,4 +1,4 @@
--- Candidate only: preserves the existing production backup function and all data.
+-- Release 1.0.20: preserves the existing production backup function and all data.
 create or replace function public.export_finance_backup_v2()
 returns jsonb language plpgsql stable security invoker set search_path = ''
 as $function$
