@@ -1,3 +1,7 @@
+## 1.0.23 — 2026-11-11
+
+- Separate category amount, percentage and chevron; align amounts and compact subcategory rows. Preserve values and chart interaction.
+
 ## 1.0.22 — 2026-11-11
 
 - Refresh all primary pages and retained salary/rent/car history screens with consistent spacing, forms and responsive layouts. Preserve financial calculations and routes.

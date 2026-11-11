@@ -110,3 +110,13 @@ html.refined-ui #categoriesPage .category-card .name{white-space:normal;overflow
 html.refined-ui #accountsPage .item b{white-space:normal;overflow:visible;text-overflow:clip}
 html.refined-ui #dashboardPage .home-welcome{background:transparent;border:0;box-shadow:none}
 html.refined-ui[data-resolved-theme=dark] body{--green:#6dd5b0;--red:#ff9eaa}
+
+/* Keep amount, percentage and disclosure control visually separate. */
+html.summary-layout-ready #summaryPage .summary-category>summary{column-gap:12px;padding:14px 0;min-height:76px;grid-template-columns:34px minmax(0,1fr) auto 14px}
+html.summary-layout-ready #summaryPage .summary-category-numbers{gap:6px;align-items:flex-end;padding-right:4px}
+html.summary-layout-ready #summaryPage .summary-category-numbers strong{line-height:1.35;letter-spacing:.01em;white-space:nowrap;font-variant-numeric:tabular-nums}
+html.summary-layout-ready #summaryPage .summary-category-numbers small{line-height:1.4}
+html.summary-layout-ready #summaryPage .summary-category-chevron{justify-self:end}
+html.summary-layout-ready #summaryPage .summary-category-children{margin:0 0 12px;padding:4px 0 8px 46px;background:transparent}
+html.summary-layout-ready #summaryPage .summary-category-children>div{padding:7px 0;gap:16px;line-height:1.6;min-height:0}
+@media(max-width:359px){html.summary-layout-ready #summaryPage .summary-category>summary{column-gap:8px;grid-template-columns:28px minmax(0,1fr) auto 10px}html.summary-layout-ready #summaryPage .summary-category-numbers strong{font-size:14px}}
