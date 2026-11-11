@@ -2,6 +2,7 @@ import {analyzeExpenses} from './expense-analysis.js?v=20261023-quality02';
 import {sumTransactionAmounts} from './finance-core.js?v=20261023-quality02';
 import {recurringBillMonthStatus} from './finance-core.js?v=20261023-quality02';
 import {createTotalDetails,bindTotal} from './total-details.js?v=20261023-quality02';
+import {renderBudgetBreakdown} from './budget-overview.js?v=20261023-quality02&budget=21';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
@@ -37,6 +38,10 @@ function renderDashboard(){
  const exp=sumTransactionAmounts(monthly,'expense')
  const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=sumTransactionAmounts(todayRows)
  const bsum=budgetTotals(),dailyLeft=bsum.daily,pct=bsum.limit?Math.min(100,bsum.spent/bsum.limit*100):0
+ renderBudgetBreakdown({root:$('homeBudgetPockets'),budgets:getBudgets(),transactions,day:today,money,onOpen:(budget,totals)=>{
+  const rows=monthly.filter(t=>t.type==='expense'&&(budget.category_names||[]).includes(t.categories?.name));
+  openInsightDetails('งบ '+budget.name,[{label:'รายการในงบนี้',rows}],monthKey+' · วงเงิน '+money(totals.limit)+' · ใช้แล้ว '+money(totals.spent)+' · รวมรอดำเนินการและวันที่ล่วงหน้าในเดือนนี้ ไม่รวมยกเลิก');
+ }});
  const billStates=bills.filter(b=>b.is_active&&(b.frequency==='monthly'||!b.frequency)).map(b=>recurringBillMonthStatus(b,transactions,today));
  if($('homeBillStatus'))$('homeBillStatus').textContent=billStates.length?'บิลเดือนนี้ · จ่ายแล้ว '+billStates.filter(s=>s.state==='paid').length+' · รอจ่าย '+billStates.filter(s=>s.state==='pending').length+' · ยังไม่บันทึก '+billStates.filter(s=>s.state==='unrecorded').length:'เพิ่มบิลประจำไว้ช่วยจำ ›';
  if($('homeBillStatusNote'))$('homeBillStatusNote').textContent='ตรวจเฉพาะรายการที่เชื่อมกับบิล · ถ้ากรอกแยกไว้ ตรวจรายการก่อนบันทึกซ้ำ';

@@ -3,7 +3,7 @@ import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=
 import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError,debtPaymentProgress} from './finance-core.js?v=20261023-quality02&payment=10';
 import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261023-quality02';
 import {createSummaryRenderer} from './summary-highest.js?v=20261023-quality02&period=17';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261023-quality02';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261023-quality02&budget=21';
 import {createTransactionRenderer} from './app-transactions.js?v=20261023-quality02';
 import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-quality02&payments=14';
 import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261023-quality02';

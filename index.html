@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
-<link rel="modulepreload" href="./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=20">
+<link rel="modulepreload" href="./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=21">
 <link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261023-quality02">
 <link rel="stylesheet" href="./style.css?v=20261023-quality02">
 <link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
@@ -28,6 +28,7 @@
 <link rel="stylesheet" href="./mobile-polish.css?v=20261023-quality02&navux=01">
 <link rel="stylesheet" href="./settings-mobile-fix.css?v=20261023-quality02&settingsfix=03">
 <link rel="stylesheet" href="./entity-dialog.css?v=20261023-quality02&dialog=07">
+<link rel="stylesheet" href="./budget-overview.css?v=20261023-quality02&budget=21">
 <link rel="stylesheet" href="./dashboard-mobile.css?v=20261023-quality02&overview=09">
 <link rel="stylesheet" href="./payment-picker.css?v=20261023-quality02&payment=10">
 <link rel="stylesheet" href="./wallet-clarity.css?v=20261023-quality02&wallet=11">
@@ -125,7 +126,7 @@
             <div class="daily-panel-foot"><span id="todayCount">0 รายการ</span><button class="text-action" id="viewToday" type="button">ดูรายการวันนี้ →</button></div>
           </div>
           <button type="button" class="daily-panel budget-panel" id="budgetCard">
-            <div class="daily-label"><span aria-hidden="true">◉</span> งบเดือนนี้ยังเหลือ <span class="panel-arrow">↗</span></div>
+            <div class="daily-label"><span aria-hidden="true">◉</span> งบรวมคงเหลือ <span class="panel-arrow">↗</span></div>
             <div id="budgetRemainDash" class="daily-amount money">฿0</div>
             <div class="budget-meter"><div class="budget-progress"><div id="budgetProgressDash" class="budget-progress-fill"></div></div><span id="budgetPctDash">0%</span></div>
             <div id="homeBudgetStatus" class="daily-caption">แตะเพื่อตั้งงบประมาณ</div>
@@ -140,6 +141,11 @@
           </button>
         </div>
 
+        <section class="home-budget-breakdown" aria-labelledby="homeBudgetHeading">
+          <div class="home-budget-heading"><h2 id="homeBudgetHeading">งบแยกก้อนเดือนนี้</h2><button type="button" class="text-action" data-page-jump="budget">จัดการงบ →</button></div>
+          <div id="homeBudgetPockets" class="home-budget-pockets" hidden></div>
+          <p class="home-budget-scope">ยอดใช้รวมรายการรอดำเนินการและวันที่ล่วงหน้าในเดือนนี้ · แตะก้อนงบเพื่อดูรายการ</p>
+        </section>
         <div class="bill-month-strip section"><button type="button" id="homeBillStatus" class="text-action" data-page-jump="bills">ดูบิลเดือนนี้ ›</button><small id="homeBillStatusNote"></small></div>
         <div class="card quick-capture section">
           <div class="section-heading"><div><h2>วันนี้มีรายจ่ายอะไรบ้าง?</h2><p>เลือกหมวดหมู่เพื่อบันทึกรายการได้ทันที</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
@@ -492,7 +498,7 @@
 <script src="./vendor/chart-4.4.7.umd.js?v=20261023-quality02"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
 <script type="module" src="./slip-reader.js?v=20261023-quality02"></script>
-<script type="module" src="./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=20"></script>
+<script type="module" src="./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=21"></script>
 <script type="module" src="./app-nav.js?v=20261023-quality02&menus=19"></script></body>
 </html>
 

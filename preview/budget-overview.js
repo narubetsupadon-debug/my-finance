@@ -1,0 +1,5 @@
+import {renderBudgetBreakdown} from '../budget-overview.js?v=20261023-quality02&budget=21';
+const budgets=[{name:'ค่ากิน',monthly_limit:2800,is_active:true,category_names:['อาหารและเครื่องดื่ม']},{name:'ใช้จ่ายทั่วไป',monthly_limit:1200,is_active:true,category_names:['ช้อปปิ้ง','บันเทิง','อื่นๆ']}];
+const transactions=[{type:'expense',status:'paid',transaction_date:'2026-11-11',amount:1350.25,categories:{name:'อาหารและเครื่องดื่ม'}},{type:'expense',status:'paid',transaction_date:'2026-11-11',amount:850,categories:{name:'ช้อปปิ้ง'}}];
+renderBudgetBreakdown({root:document.getElementById('homeBudgetPockets'),budgets,transactions,day:'2026-11-11',money:n=>'฿'+n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}),onOpen:(b,t)=>{document.getElementById('testResult').textContent=b.name+' · ใช้แล้ว '+t.spent.toFixed(2)+' บาท · เหลือ '+t.remain.toFixed(2)+' บาท';}});
+document.getElementById('theme').onclick=()=>{const dark=document.documentElement.dataset.resolvedTheme!=='dark';document.documentElement.dataset.resolvedTheme=dark?'dark':'light';document.body.classList.toggle('dark',dark);};

@@ -6,7 +6,7 @@ const appStorage=fs.readFileSync(root+'app-storage.js','utf8').replaceAll('expor
 const appData=fs.readFileSync(root+'app-data.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const appSummary=fs.readFileSync(root+'app-summary.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const expenseAnalysis=fs.readFileSync(root+'expense-analysis.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
-const appDashboard=fs.readFileSync(root+'app-dashboard.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
+const appDashboard=['budget-overview.js','app-dashboard.js'].map(file=>fs.readFileSync(root+file,'utf8').replaceAll('export ','').replace(/^import .*$/gm,'')).join('\n');
 const appTransactions=fs.readFileSync(root+'app-transactions.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const appPlanning=fs.readFileSync(root+'app-planning.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
 const appSafety=fs.readFileSync(root+'app-safety.js','utf8').replaceAll('export ','').replace(/^import .*$/gm,'');
