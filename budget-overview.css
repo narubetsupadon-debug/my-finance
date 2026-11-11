@@ -1,0 +1,19 @@
+#dashboardPage .home-budget-breakdown{margin-top:16px}
+#dashboardPage .home-budget-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+#dashboardPage .home-budget-heading h2{margin:0;font-size:16px}
+#dashboardPage .home-budget-heading button{font-size:12px;min-height:44px}
+#dashboardPage .home-budget-pockets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#dashboardPage .home-budget-pockets[hidden]{display:none}
+#dashboardPage .home-budget-pocket{display:flex;flex-direction:column;align-items:stretch;gap:5px;min-width:0;width:100%;padding:18px;border:1px solid var(--line);border-radius:20px;background:var(--card);color:var(--text);text-align:left;font:inherit;cursor:pointer}
+#dashboardPage .home-budget-pocket:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+#dashboardPage .home-budget-name{font-size:15px;line-height:1.6;overflow-wrap:anywhere}
+#dashboardPage .home-budget-pocket small,#dashboardPage .home-budget-label{color:var(--muted);font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+#dashboardPage .home-budget-label{margin-top:10px}
+#dashboardPage .home-budget-amount{font-size:clamp(17px,4.6vw,25px);line-height:1.4;white-space:nowrap;letter-spacing:-.4px;color:var(--green)}
+#dashboardPage .home-budget-meter{display:block;height:6px;background:var(--line);border-radius:8px;overflow:hidden;margin:8px 0 4px}
+#dashboardPage .home-budget-meter>span{display:block;height:100%;background:var(--primary);border-radius:inherit}
+#dashboardPage .home-budget-pocket.is-over .home-budget-amount{color:var(--red,#c43d3d)}
+#dashboardPage .home-budget-pocket.is-over .home-budget-meter>span{background:var(--red,#c43d3d)}
+#dashboardPage .home-budget-scope{font-size:11px;color:var(--muted);line-height:1.7;margin:10px 0 0}
+@media(max-width:359px){#dashboardPage .home-budget-pocket{padding:14px 12px}#dashboardPage .home-budget-pockets{gap:10px}}
+@media(max-width:299px){#dashboardPage .home-budget-pockets{grid-template-columns:minmax(0,1fr)}}

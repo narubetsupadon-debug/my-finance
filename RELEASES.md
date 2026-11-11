@@ -1,3 +1,9 @@
+# 1.0.21 — 2026-11-11
+
+- หน้าภาพรวมแสดงงบที่เปิดใช้งานแยกก้อน ใช้กฎนับรายการเดียวกับหน้างบประมาณ
+- แต่ละก้อนแสดงวงเงิน ยอดใช้ ยอดเหลือ/เกินงบ และเปิดรายการประกอบได้
+- การ์ดงบรวมระบุชัดเจน พร้อมอัปเดต PWA cache
+
 ## 1.0.20 — 2026-11-09
 
 - Keep acknowledged transaction inserts/edits in the current owner cache when follow-up reads fail; reject older read snapshots after confirmed writes. Preserve retry-safe IDs and debt balances.

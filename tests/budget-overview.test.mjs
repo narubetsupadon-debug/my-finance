@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {JSDOM} from 'jsdom';
+import {renderBudgetBreakdown} from '../budget-overview.js';
+const dom=new JSDOM('<div id="root"></div>');globalThis.document=dom.window.document;
+const root=document.getElementById('root'),money=n=>'฿'+n.toFixed(2);
+const budgets=[{name:'ค่ากิน',monthly_limit:2800,is_active:true,category_names:['อาหาร']},{name:'ทั่วไป',monthly_limit:1200,is_active:true,category_names:['อื่นๆ']},{name:'ปิดแล้ว',monthly_limit:9000,is_active:false,category_names:['อาหาร']}];
+const tx=(amount,name,date='2026-11-11',status='paid',type='expense')=>({amount,categories:{name},transaction_date:date,status,type});
+let opened;
+const transactions=[tx(1000.25,'อาหาร'),tx(100,'อาหาร','2026-11-30','pending'),tx(300,'อาหาร','2026-10-11'),tx(900,'อาหาร','2026-11-11','cancelled'),tx(1200,'อื่นๆ'),tx(50,'อื่นๆ'),tx(800,'อาหาร','2026-11-11','paid','income')];
+renderBudgetBreakdown({root,budgets,transactions,day:'2026-11-11',money,onOpen:(b,t)=>opened={b,t}});
+assert.equal(root.children.length,2);
+assert.match(root.children[0].textContent,/฿2800.00/);assert.match(root.children[0].textContent,/฿1699.75/);assert.match(root.children[0].textContent,/ใช้แล้ว ฿1100.25/);
+assert.match(root.children[1].textContent,/เกินงบ฿50.00/);assert.equal(root.children[1].querySelector('.home-budget-meter>span').style.width,'100%');
+root.children[0].click();assert.equal(opened.b.name,'ค่ากิน');assert.equal(opened.t.spent,1100.25);
+renderBudgetBreakdown({root,budgets,transactions,day:'2026-12-01',money,onOpen(){}});assert.match(root.children[0].textContent,/คงเหลือ฿2800.00/);
+renderBudgetBreakdown({root,budgets:[],transactions,day:'2026-11-11',money,onOpen(){}});assert.equal(root.hidden,true);assert.equal(root.children.length,0);
+console.log('PASS split overview: independent totals, monthly rollover, pending/future, excluded cancelled/income, over budget and details');
