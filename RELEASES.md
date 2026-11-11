@@ -1,3 +1,9 @@
+## 1.0.22 — 2026-11-11
+
+- Refresh all primary pages and retained salary/rent/car history screens with consistent spacing, forms and responsive layouts. Preserve financial calculations and routes.
+- Explain each secondary menu destination; collapse duplicate quick-capture controls on Home. Retain budget pockets, interactive donut and period filters.
+- Add a read-only full-app preview and refresh exact navigation/PWA asset versions.
+
 # 1.0.21 — 2026-11-11
 
 - หน้าภาพรวมแสดงงบที่เปิดใช้งานแยกก้อน ใช้กฎนับรายการเดียวกับหน้างบประมาณ

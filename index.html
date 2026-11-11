@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="My Finance">
 <title>My Finance</title>
 <link rel="preconnect" href="https://esm.sh" crossorigin>
-<link rel="modulepreload" href="./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=21">
+<link rel="modulepreload" href="./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=22">
 <link rel="preload" as="script" href="./vendor/chart-4.4.7.umd.js?v=20261023-quality02">
 <link rel="stylesheet" href="./style.css?v=20261023-quality02">
 <link id="darkThemeStylesheet" rel="stylesheet" href="./minimal-dark.css?v=20261023-quality02" media="(prefers-color-scheme: dark)">
@@ -38,7 +38,8 @@
 <link rel="stylesheet" href="./page-spacing.css?v=20261023-quality02&spacing=05">
 <link rel="stylesheet" href="./refined-ui.css?v=20261023-quality02&refined=01">
 <link rel="stylesheet" href="./summary-periods.css?v=20261023-quality02&period=17">
-<link rel="stylesheet" href="./navigation-modern.css?v=20261023-quality02&menus=19">
+<link rel="stylesheet" href="./navigation-modern.css?v=20261023-quality02&menus=22">
+<link rel="stylesheet" href="./interface-refresh.css?v=20261023-quality02&ui=22">
 </head>
 <body>
 <div id="authSplash" class="auth-splash" role="status" aria-live="polite" aria-label="กำลังเปิด My Finance">
@@ -147,10 +148,10 @@
           <p class="home-budget-scope">ยอดใช้รวมรายการรอดำเนินการและวันที่ล่วงหน้าในเดือนนี้ · แตะก้อนงบเพื่อดูรายการ</p>
         </section>
         <div class="bill-month-strip section"><button type="button" id="homeBillStatus" class="text-action" data-page-jump="bills">ดูบิลเดือนนี้ ›</button><small id="homeBillStatusNote"></small></div>
-        <div class="card quick-capture section">
+        <details class="card quick-capture section"><summary>บันทึกด่วนตามหมวด</summary>
           <div class="section-heading"><div><h2>วันนี้มีรายจ่ายอะไรบ้าง?</h2><p>เลือกหมวดหมู่เพื่อบันทึกรายการได้ทันที</p></div><span class="section-mark" aria-hidden="true">＋</span></div>
           <div id="quickAdd" class="quick-grid"></div>
-        </div>
+        </details>
 
         <div class="home-feed section">
           <div class="card recent-card">
@@ -203,29 +204,29 @@
       </section>
 
       <section id="categoriesPage" class="page hidden">
-        <div class="page-head"><div><h2>หมวดหมู่</h2><div class="muted">สร้างหมวดเองได้ไม่จำกัด</div></div><button class="btn primary" onclick="openEntity('category')">+ เพิ่มหมวด</button></div>
+        <div class="page-head"><div><span class="page-purpose">จัดระเบียบรายการ</span><h2>หมวดหมู่</h2><div class="muted">จัดกลุ่มรายรับและรายจ่าย เพื่อให้วิเคราะห์ได้ชัดขึ้น</div></div><button class="btn primary" onclick="openEntity('category')">+ เพิ่มหมวด</button></div>
         <div class="card"><div class="row"><h3>รายจ่าย</h3><span class="pill expense">Expense</span></div><div id="expenseCats" class="category-grid section"></div></div>
         <div class="card section"><div class="row"><h3>รายรับ</h3><span class="pill income">Income</span></div><div id="incomeCats" class="category-grid section"></div></div>
       </section>
 
       <section id="accountsPage" class="page hidden">
-        <div class="page-head"><div><h2>บัญชี</h2><div class="muted">เงินสด ธนาคาร บัตรเครดิต E‑Wallet · ยอดตั้งต้นไม่ใช่ยอดธนาคารล่าสุด</div></div><button class="btn primary" onclick="openEntity('account')">+ เพิ่มบัญชี</button></div>
+        <div class="page-head"><div><span class="page-purpose">ช่องทางรับและจ่าย</span><h2>บัญชี</h2><div class="muted">เงินสด ธนาคาร บัตรเครดิต E‑Wallet · ยอดตั้งต้นไม่ใช่ยอดธนาคารล่าสุด</div></div><button class="btn primary" onclick="openEntity('account')">+ เพิ่มบัญชี</button></div>
         <div id="accountList" class="card list"></div>
       </section>
 
       <section id="billsPage" class="page hidden">
-        <div class="page-head"><div><h2>บิลประจำ</h2><div class="muted">ค่าเน็ต ค่าหอ Subscription และค่าใช้จ่ายประจำ</div></div><button class="btn primary" onclick="openEntity('bill')">+ เพิ่มบิล</button></div><div class="flow-note"><span class="flow-note-icon">💡</span><div><strong>ชำระที่นี่ครั้งเดียวพอ</strong><br>เมื่อชำระบิลผ่านเมนูนี้ ระบบจะสร้างรายจ่ายให้อัตโนมัติ ไม่ต้องไปลงซ้ำในรายรับ‑รายจ่าย</div></div>
+        <div class="page-head"><div><span class="page-purpose">ติดตามค่าใช้จ่ายประจำ</span><h2>บิลประจำ</h2><div class="muted">ค่าเน็ต ค่าหอ Subscription และค่าใช้จ่ายประจำ</div></div><button class="btn primary" onclick="openEntity('bill')">+ เพิ่มบิล</button></div><div class="flow-note"><span class="flow-note-icon">💡</span><div><strong>ชำระที่นี่ครั้งเดียวพอ</strong><br>เมื่อชำระบิลผ่านเมนูนี้ ระบบจะสร้างรายจ่ายให้อัตโนมัติ ไม่ต้องไปลงซ้ำในรายรับ‑รายจ่าย</div></div>
         <p id="billMonthStatus" class="bill-month-strip section" aria-live="polite"></p><p class="muted">“ยังไม่บันทึกผ่านบิล” ไม่ได้แปลว่ายังไม่จ่าย หากกรอกแยกไว้ ให้ตรวจรายรับ–รายจ่ายก่อนกดจ่ายแล้ว</p><div id="billList" class="card list"></div>
       </section>
 
       <section id="debtsPage" class="page hidden">
-        <div class="page-head"><div><h2>บัตรและสินเชื่อ</h2><div class="muted">ดูยอดที่ใช้ไป วงเงินคงเหลือ และยอดที่ต้องจ่ายรอบนี้</div></div><button class="btn primary" onclick="openEntity('debt')">+ เพิ่มบัตร/สินเชื่อ</button></div>
+        <div class="page-head"><div><span class="page-purpose">จัดการภาระชำระ</span><h2>บัตรและสินเชื่อ</h2><div class="muted">ดูยอดที่ใช้ไป วงเงินคงเหลือ และยอดที่ต้องจ่ายรอบนี้</div></div><button class="btn primary" onclick="openEntity('debt')">+ เพิ่มบัตร/สินเชื่อ</button></div>
         <div id="debtList" class="wallet-list"></div>
       </section>
 
       <section id="budgetPage" class="page hidden">
         <div class="page-head">
-          <div><h2>งบประมาณรายเดือน</h2><div class="muted">ตั้งเพดานค่าใช้จ่ายและดูว่าเหลือใช้ได้วันละเท่าไร</div></div>
+          <div><span class="page-purpose">วางแผนก่อนใช้</span><h2>งบประมาณรายเดือน</h2><div class="muted">ตั้งเพดานค่าใช้จ่ายและดูว่าเหลือใช้ได้วันละเท่าไร</div></div>
           <button class="btn primary" onclick="openEntity('budget')">+ เพิ่มงบ</button>
         </div>
         <div class="grid3">
@@ -286,21 +287,21 @@
       <section id="settingsPage" class="page hidden">
         <div class="page-head">
           <div>
-            <h2>ตั้งค่า</h2>
+            <span class="page-purpose">ปรับแอปให้เหมาะกับคุณ</span><h2>ตั้งค่า</h2>
             <div class="muted">ทำให้ My Finance เข้ากับวิธีใช้ของมิวมากขึ้น</div>
           </div>
         </div>
 
         <section class="card settings-card section" aria-labelledby="appVersionTitle">
           <div class="settings-title"><span aria-hidden="true">ⓘ</span><div><h3 id="appVersionTitle">เกี่ยวกับ My Finance</h3><p>เวอร์ชันของแอปที่กำลังเปิดอยู่</p></div></div>
-          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-11-09">9 พฤศจิกายน 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.20">1.0.20</strong></div>
-          <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>หน้าวิเคราะห์มีช่องเลือกเดือนนี้ 3 เดือน 6 เดือน ปีนี้ และระบุวันเริ่มต้น–สิ้นสุดเอง</p></details>
+          <div class="setting-row"><div><b>เวอร์ชันแอป</b><small>อัปเดต <time id="appReleaseDate" datetime="2026-11-11">11 พฤศจิกายน 2569</time></small></div><strong id="appVersion" class="pill" aria-label="เวอร์ชัน 1.0.22">1.0.22</strong></div>
+          <details class="section"><summary>มีอะไรใหม่ในรุ่นนี้</summary><p>ปรับทุกหน้าหลักและหน้าประวัติให้เป็นธีมเดียวกัน จัดเมนูให้อ่านง่าย ลดกรอบซ้อนและข้อมูลซ้ำ พร้อมคงงบแยกก้อน</p></details>
         </section>
 
         <details class="card settings-guide section" id="appUsageGuide">
           <summary><span><b>📖 วิธีใช้งาน My Finance</b><small>เริ่มบันทึก ตรวจยอด และแก้ปัญหา เลือกอ่านทีละหัวข้อ</small></span><span aria-hidden="true">⌄</span></summary>
           <div class="usage-guide-body">
-            <p class="usage-guide-hint">อัปเดต 30 ต.ค. 2569 · สำหรับเว็บจริงรุ่น 1.0.12 · แตะหัวข้อเพื่อเปิดหรือย่อ</p>
+            <p class="usage-guide-hint">อัปเดต 11 พ.ย. 2569 · สำหรับเว็บจริงรุ่น 1.0.22 · แตะหัวข้อเพื่อเปิดหรือย่อ</p>
             <p class="usage-guide-intro">รายการทั่วไปเริ่มที่ “บันทึก” ส่วนบิลประจำที่กดจ่ายผ่านเมนูบิลแล้วจะสร้างรายจ่ายให้ ไม่ต้องบันทึกซ้ำ ข้อมูลในแอปมาจากการบันทึกของเรา ไม่ได้ดึงยอดธนาคารอัตโนมัติ</p>
             <details><summary>1. บันทึกรายรับ–รายจ่าย และอ่านสลิป</summary><ol><li>กด “บันทึก” เลือกรายรับหรือรายจ่าย หรือแตะหมวดบนหน้าภาพรวม</li><li>ใส่ยอด ชื่อรายการ วันที่ หมวด และบัญชีที่ใช้ หากต้องการรายละเอียดเพิ่มให้เลือกหมวดย่อย</li><li>กด “บันทึก” แล้วรอข้อความสำเร็จ หากกรอกผิด แตะ “แก้ไขรายการนี้” เพื่อแก้รายการเดิม</li></ol><p>“อ่านสลิปธนาคาร — ยอดและวันที่” ช่วยกรอกสองช่องนี้จากรูป ต้องตรวจให้ตรงสลิปก่อนใช้ ระบบอาจอ่านบางภาพไม่ครบ และไม่ได้ตรวจว่าสลิปแท้ หากอ่านวันที่ไม่ได้ให้กรอกเอง ไม่ใช้วันที่ปัจจุบันแทนโดยไม่ตรวจ</p><p>ระบบจำหมวดและบัญชีล่าสุดแยกรายรับกับรายจ่ายในเบราว์เซอร์นี้ ยอดเงินต้องตรวจหรือกรอกใหม่ รายการโปรดช่วยเรียกข้อมูลเดิมมาใช้ แต่ยังต้องกรอกยอดและตรวจวันที่ก่อนบันทึก</p><div class="usage-guide-actions"><button type="button" class="btn primary" data-guide-capture>＋ เริ่มบันทึกรายการ</button></div></details>
             <details><summary>2. อ่านยอดบัตรและสินเชื่อให้ถูกช่อง</summary><ul><li><b>ยอดใช้ไป / ยอดหนี้คงเหลือ:</b> ยอดล่าสุดที่บันทึกไว้ในข้อมูลบัตร</li><li><b>วงเงินคงเหลือ:</b> วงเงินที่ตั้งไว้หักยอดใช้ ไม่ใช่ยอดเงินสดในบัญชี</li><li><b>ยอดชำระต่อรอบที่ตั้งไว้:</b> จำนวนที่กรอกไว้ อาจไม่เท่ากับยอดใช้ทั้งหมด ต้องตรวจใบแจ้งยอดรอบใหม่ก่อนใช้</li><li><b>ข้อมูลบัตรแก้ไขล่าสุด:</b> เวลาที่ข้อมูลบัตรในแอปถูกแก้ ไม่ใช่เวลาที่ธนาคารอัปเดตยอด</li></ul><p>แตะ “บันทึกชำระเดือนนี้” เพื่อดูวันที่และจำนวนเงินที่ระบบจับคู่ได้ คิดตามเดือนปฏิทิน ไม่ใช่รอบบัญชีของธนาคาร “ยังไม่พบรายการ” ไม่ได้ยืนยันว่ายังไม่จ่าย เพราะรายการเก่าอาจใช้ชื่อต่างกัน</p><p>เพิ่มหรือแก้ยอดที่ เพิ่มเติม → บัตรและสินเชื่อ การปรับยอดสถานะบัตรไม่สร้างรายจ่ายหรือรายการชำระใหม่ให้</p><div class="usage-guide-actions"><button type="button" class="btn soft" data-page-jump="debts">เปิดบัตรและสินเชื่อ →</button></div></details>
@@ -498,8 +499,8 @@
 <script src="./vendor/chart-4.4.7.umd.js?v=20261023-quality02"></script>
 <div id="appToast" class="app-toast hidden" role="status" aria-live="polite"></div>
 <script type="module" src="./slip-reader.js?v=20261023-quality02"></script>
-<script type="module" src="./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=21"></script>
-<script type="module" src="./app-nav.js?v=20261023-quality02&menus=19"></script></body>
+<script type="module" src="./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=22"></script>
+<script type="module" src="./app-nav.js?v=20261023-quality02&menus=22"></script></body>
 </html>
 
 
