@@ -26,10 +26,14 @@ Scope: review v1.0.23 after mobile amount/release-note patch. **This is a test p
 
 ## Changed in this branch
 - Release notes text in Settings now matches release 1.0.23.
+- Recurring bills distinguish full, partial and pending payments based on confirmed satang totals; duplicate transaction IDs cannot inflate the paid amount.
+- Planning and dashboard expose partial-bill counts; repeated one-tap full-payment is blocked on an already-linked partial bill.
+- Dashboard category sums are calculated in satang before presentation.
+- Updated JS/CSS asset URLs and PWA shell cache avoid stale logic on app updates.
 - Small-screen category amounts may wrap rather than force horizontal overflow.
 - Static regression assertions protect both behaviors.
 
 ## Gate / ownership
-- Run `npm test` in CI and inspect failures; inspect rendered mobile layout in a real browser.
+- Run `npm test` in CI (Node 22 / 24) and inspect failures; inspect rendered mobile layout in a real browser.
 - Do not merge/release if financial P0 scenarios are unresolved.
-- No changes to Supabase data, accounting formulas, service worker version or widget schedule are made in this branch.
+- No live Supabase transactions, schema changes or widget schedules are made in this branch. The service-worker cache key and asset URLs were updated; bill classification and category total calculation were changed in code only.
