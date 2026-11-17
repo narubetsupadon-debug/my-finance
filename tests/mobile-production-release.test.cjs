@@ -26,3 +26,10 @@ console.log('PASS production mobile UX release: 4 pages, rent fields, scrolling,
 
 assert.ok(read('index.html').includes('./dashboard-mobile.css?v=20261023-quality02&overview=09'),'Approved overview CSS must load');assert.ok(read('sw.js').includes('./dashboard-mobile.css?v=20261023-quality02&overview=09'),'Exact overview URL cached');assert.equal(read('dashboard-mobile.css').replace('Approved mobile-first overview.','Preview only: mobile-first overview.'),read('preview/dashboard-mobile.css'),'Released design matches reviewed preview');
 
+
+const released=read('index.html');
+assert.match(released,/ปรับช่องไฟระหว่างยอดเงิน เปอร์เซ็นต์ และลูกศรในหน้าสรุป/,'Settings describes current release');
+const refresh=read('interface-refresh.css');
+assert.match(refresh,/Narrow-screen financial amount resilience/,'Narrow-screen category amount regression guard');
+assert.match(refresh,/summary-category-numbers strong\\{white-space:normal;overflow-wrap:anywhere;text-align:right\\}/,'Large figures can wrap on narrow screens');
+assert.equal((refresh.match(/\\{/g)||[]).length,(refresh.match(/\\}/g)||[]).length,'Interface refresh braces balanced');
