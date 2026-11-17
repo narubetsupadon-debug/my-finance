@@ -43,7 +43,7 @@ function renderDashboard(){
   openInsightDetails('งบ '+budget.name,[{label:'รายการในงบนี้',rows}],monthKey+' · วงเงิน '+money(totals.limit)+' · ใช้แล้ว '+money(totals.spent)+' · รวมรอดำเนินการและวันที่ล่วงหน้าในเดือนนี้ ไม่รวมยกเลิก');
  }});
  const billStates=bills.filter(b=>b.is_active&&(b.frequency==='monthly'||!b.frequency)).map(b=>recurringBillMonthStatus(b,transactions,today));
- if($('homeBillStatus'))$('homeBillStatus').textContent=billStates.length?'บิลเดือนนี้ · จ่ายแล้ว '+billStates.filter(s=>s.state==='paid').length+' · รอจ่าย '+billStates.filter(s=>s.state==='pending').length+' · ยังไม่บันทึก '+billStates.filter(s=>s.state==='unrecorded').length:'เพิ่มบิลประจำไว้ช่วยจำ ›';
+ if($('homeBillStatus'))$('homeBillStatus').textContent=billStates.length?'บิลเดือนนี้ · จ่ายแล้ว '+billStates.filter(s=>s.state==='paid').length+' · บางส่วน '+billStates.filter(s=>s.state==='partial').length+' · รอจ่าย '+billStates.filter(s=>s.state==='pending').length+' · ยังไม่บันทึก '+billStates.filter(s=>s.state==='unrecorded').length:'เพิ่มบิลประจำไว้ช่วยจำ ›';
  if($('homeBillStatusNote'))$('homeBillStatusNote').textContent='ตรวจเฉพาะรายการที่เชื่อมกับบิล · ถ้ากรอกแยกไว้ ตรวจรายการก่อนบันทึกซ้ำ';
  $('nextBillCard')?.classList.toggle('hidden',uiSettings.dueReminder===false);
  $('upcomingList')?.closest('details')?.classList.toggle('hidden',uiSettings.dueReminder===false);
@@ -82,7 +82,7 @@ function renderDashboard(){
  const quick=orderedQuickItems().filter(x=>x.available!==false&&!uiSettings.quickHidden.includes(x.label))
  $('quickAdd').innerHTML=quick.map(({icon,label})=>'<button class="quick-btn" onclick="quickAdd(\''+label+'\')"><span>'+icon+'</span><b>'+label+'</b></button>').join('')+'<button class="quick-btn more" onclick="openTx()"><span>＋</span><b>หมวดอื่น ๆ</b></button>'
 
- const sums={};monthly.filter(x=>x.type==='expense').forEach(x=>{const n=x.categories?.name||'อื่นๆ';sums[n]=(sums[n]||0)+Number(x.amount)})
+ const sums={};monthly.filter(x=>x.type==='expense').forEach(x=>{const n=x.categories?.name||'อื่นๆ';sums[n]=(sums[n]||0)+Math.round(Number(x.amount||0)*100)})
  const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]),top=sorted[0]
 
  const insights=[];
@@ -90,7 +90,7 @@ function renderDashboard(){
  const currentComparable=monthly.filter(x=>x.type==='expense'&&Number(x.transaction_date.slice(8,10))<=cutoff);
  const priorComparable=previous.filter(x=>x.type==='expense'&&Number(x.transaction_date.slice(8,10))<=cutoff);
  const currentSum=sumTransactionAmounts(currentComparable),priorSum=sumTransactionAmounts(priorComparable);
- if(top)insights.push({text:'เดือนนี้ใช้มากสุดที่ '+top[0]+' '+money(top[1]),icon:'✨',open:()=>openInsightDetails('รายจ่ายหมวด '+top[0],[{label:'เดือนนี้ · '+top[0],rows:monthly.filter(x=>x.type==='expense'&&(x.categories?.name||'อื่นๆ')===top[0])}],'ไม่รวมรายการยกเลิก')});
+ if(top)insights.push({text:'เดือนนี้ใช้มากสุดที่ '+top[0]+' '+money(top[1]/100),icon:'✨',open:()=>openInsightDetails('รายจ่ายหมวด '+top[0],[{label:'เดือนนี้ · '+top[0],rows:monthly.filter(x=>x.type==='expense'&&(x.categories?.name||'อื่นๆ')===top[0])}],'ไม่รวมรายการยกเลิก')});
  if(priorSum>0){const diff=(currentSum-priorSum)/priorSum*100;insights.push({text:diff===0?'รายจ่ายเท่ากับเดือนก่อนในช่วงเดียวกัน':('รายจ่าย'+(diff>0?'เพิ่มขึ้น ':'ลดลง ')+Math.abs(diff).toFixed(0)+'% ในช่วงเดียวกัน'),icon:'📊',open:()=>openInsightDetails('เทียบรายจ่ายช่วงวันที่ 1–'+cutoff,[{label:now.toLocaleDateString('th-TH',{month:'long',year:'numeric'}),rows:currentComparable},{label:prevDate.toLocaleDateString('th-TH',{month:'long',year:'numeric'}),rows:priorComparable}],'เทียบช่วงวันที่เท่ากันของสองเดือน จากรายการที่บันทึกไว้ ไม่รวมรายการยกเลิก')});}
  if(bsum.limit)insights.push({text:bsum.spent>bsum.limit?'ใช้เกินงบรวม '+money(bsum.spent-bsum.limit):'งบรวมยังเหลือ '+money(bsum.remain),icon:'🎯',open:()=>showPage('budget')});
  if(inc>0)insights.push({text:'รายรับหักรายจ่ายเดือนนี้ '+money(inc-exp),icon:'💙',open:()=>openInsightDetails('รายรับและรายจ่ายเดือนนี้',[{label:'รายรับ',rows:monthly.filter(x=>x.type==='income')},{label:'รายจ่าย',rows:monthly.filter(x=>x.type==='expense')}],'ผลต่าง '+money(inc-exp)+' จากรายการที่บันทึกในเดือนนี้ ไม่ใช่ยอดเงินคงเหลือทุกบัญชี')});
@@ -111,7 +111,7 @@ function renderDashboard(){
  $('upcomingList').innerHTML=upcoming.length?upcoming.map(x=>{const days=Math.ceil((x.due-new Date(y,m,now.getDate()))/86400000);return '<div class="upcoming-item'+(x.amount===null?' has-no-amount':'')+'"><div class="upcoming-main"><b class="upcoming-name">'+esc(x.name)+'</b><div class="muted">'+x.kind+' · '+(days===0?'วันนี้':days<0?'เลยกำหนด '+Math.abs(days)+' วัน':'อีก '+days+' วัน')+'</div></div><div class="upcoming-total"><b class="upcoming-amount'+(x.amount===null?' is-unset':' money')+'">'+(x.amount===null?'ยังไม่ระบุยอดรอบนี้':money(x.amount))+'</b><div class="muted">'+x.due.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+'</div></div></div>'}).join(''):'<div class="empty">ไม่มีรายการใกล้ครบกำหนด 🎉</div>'
 
  renderTxList($('recentList'),transactions.slice(0,5),true)
- const max=Math.max(1,...Object.values(sums));$('categoryChart').innerHTML=Object.keys(sums).length?sorted.slice(0,8).map(([n,v])=>'<div class="bar-row"><span>'+esc(n)+'</span><div class="barbg"><div class="barfill" style="width:'+Math.round(v/max*100)+'%"></div></div><b>'+money(v)+'</b></div>').join(''):'<div class="empty">ยังไม่มีรายจ่ายเดือนนี้</div>'
+ const max=Math.max(1,...Object.values(sums));$('categoryChart').innerHTML=Object.keys(sums).length?sorted.slice(0,8).map(([n,v])=>'<div class="bar-row"><span>'+esc(n)+'</span><div class="barbg"><div class="barfill" style="width:'+Math.round(v/max*100)+'%"></div></div><b>'+money(v/100)+'</b></div>').join(''):'<div class="empty">ยังไม่มีรายจ่ายเดือนนี้</div>'
 }
 
 
