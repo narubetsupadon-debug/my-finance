@@ -33,3 +33,9 @@ const refresh=read('interface-refresh.css');
 assert.match(refresh,/Narrow-screen financial amount resilience/,'Narrow-screen category amount regression guard');
 assert.match(refresh,/summary-category-numbers strong\{white-space:normal;overflow-wrap:anywhere;text-align:right\}/,'Large figures can wrap on narrow screens');
 assert.equal((refresh.match(/\{/g)||[]).length,(refresh.match(/\}/g)||[]).length,'Interface refresh braces balanced');
+
+const assetQa=read('sw.js');
+for(const resource of ['app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=22&billfix=24','app-planning.js?v=20261023-quality02&payments=14&billfix=24','app-dashboard.js?v=20261023-quality02&budget=21&billfix=24','finance-core.js?v=20261023-quality02&payment=10&billfix=24','interface-refresh.css?v=20261023-quality02&ui=23&billfix=24'])assert.ok(assetQa.includes('./'+resource),'Updated finance resource must be precached: '+resource);
+assert.match(read('app.js'),/finance-core\.js\?v=20261023-quality02&payment=10&billfix=24/,'Main app imports updated core');
+assert.match(read('app-planning.js'),/finance-core\.js\?v=20261023-quality02&payment=10&billfix=24/,'Planning reuses updated core');
+assert.match(read('index.html'),/stability=22&billfix=24/,'Entry point requests new module URL');
