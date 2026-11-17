@@ -33,19 +33,20 @@ export function bindDebtLogoPicker(root){
 export function createPlanningRenderer({$,money,esc,bangkokDay,budgetSummary,getBills,getDebts,getBudgets,getTransactions}){
 const openDetails=createTotalDetails({$,money,fmtDate:date=>date});
 $('debtList').addEventListener('error',event=>{const tile=event.target?.closest?.('.wallet-brand');if(tile&&event.target.tagName==='IMG'){tile.classList.remove('wallet-brand');tile.textContent='▤';}},{capture:true});
-function billPriority(b){if(b.is_active===false)return 4;const s=recurringBillMonthStatus(b,getTransactions(),bangkokDay());return s.state==='paid'?3:s.state==='pending'?2:s.due?0:1;}
+function billPriority(b){if(b.is_active===false)return 4;const s=recurringBillMonthStatus(b,getTransactions(),bangkokDay());return s.state==='paid'?4:s.state==='pending'?3:s.state==='partial'?0:s.due?1:2;}
 function renderBills(){
  const bills=getBills(),transactions=getTransactions(),debts=getDebts(),ym=bangkokDay().slice(0,7);
  const active=bills.filter(b=>b.is_active&&(b.frequency==='monthly'||!b.frequency)),states=active.map(b=>recurringBillMonthStatus(b,transactions,bangkokDay()));
- if($('billMonthStatus'))$('billMonthStatus').textContent='เดือนนี้ · จ่ายแล้ว '+states.filter(s=>s.state==='paid').length+' · รอจ่าย '+states.filter(s=>s.state==='pending').length+' · ยังไม่บันทึกผ่านบิล '+states.filter(s=>s.state==='unrecorded').length+' จากบิลรายเดือนที่เปิดใช้ '+active.length+' บิล';
+ if($('billMonthStatus'))$('billMonthStatus').textContent='เดือนนี้ · จ่ายแล้ว '+states.filter(s=>s.state==='paid').length+' · จ่ายบางส่วน '+states.filter(s=>s.state==='partial').length+' · รอจ่าย '+states.filter(s=>s.state==='pending').length+' · ยังไม่บันทึกผ่านบิล '+states.filter(s=>s.state==='unrecorded').length+' จากบิลรายเดือนที่เปิดใช้ '+active.length+' บิล';
  $('billList').innerHTML=bills.length?[...bills].sort((a,b)=>billPriority(a)-billPriority(b)||Number(a.due_day||32)-Number(b.due_day||32)||String(a.name).localeCompare(String(b.name),'th')).map(b=>{
  
-  const monthStatus=recurringBillMonthStatus(b,transactions,bangkokDay()),paid=monthStatus.state==='paid',pending=monthStatus.state==='pending';
-  const statusLabel=!b.is_active?'ปิดใช้งาน':paid?'จ่ายแล้วเดือนนี้':pending?'รอจ่าย / วันที่อนาคต':'ยังไม่บันทึกผ่านบิล'+(monthStatus.due?' · ถึงกำหนดแล้ว':'');
+  const monthStatus=recurringBillMonthStatus(b,transactions,bangkokDay()),paid=monthStatus.state==='paid',partial=monthStatus.state==='partial',pending=monthStatus.state==='pending';
+  const statusLabel=!b.is_active?'ปิดใช้งาน':paid?'จ่ายแล้วเดือนนี้':partial?'ชำระบางส่วน '+money(monthStatus.paidCents/100)+' · เหลือ '+money(monthStatus.remainingCents/100):pending?'รอจ่าย / วันที่อนาคต':'ยังไม่บันทึกผ่านบิล'+(monthStatus.due?' · ถึงกำหนดแล้ว':'');
   const amount=Number(b.amount||0),debt=debts.find(d=>d.id===b.debt_id);
   const paymentLabel=debt?'💳 '+debt.name:(b.accounts?.name?'🏦 '+b.accounts.name:'ยังไม่ระบุช่องทาง');
   const payAction=b.is_active===false?'<button class="btn small soft" type="button" disabled>ปิดใช้งาน</button>':paid
    ?'<button class="btn small soft bill-paid-btn" type="button" disabled>✓ จ่ายแล้วเดือนนี้</button>'
+   :partial?'<button class="btn small soft" type="button" disabled>ชำระบางส่วน · ตรวจรายการ</button>'
    :pending?'<button class="btn small soft" type="button" disabled>มีรายการรอจ่ายแล้ว</button>'
    :amount>0
     ?'<button class="btn small primary" type="button" data-pay-bill="'+b.id+'">✓ จ่ายแล้ว</button>'
