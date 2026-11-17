@@ -31,5 +31,5 @@ const released=read('index.html');
 assert.match(released,/ปรับช่องไฟระหว่างยอดเงิน เปอร์เซ็นต์ และลูกศรในหน้าสรุป/,'Settings describes current release');
 const refresh=read('interface-refresh.css');
 assert.match(refresh,/Narrow-screen financial amount resilience/,'Narrow-screen category amount regression guard');
-assert.match(refresh,/summary-category-numbers strong\\{white-space:normal;overflow-wrap:anywhere;text-align:right\\}/,'Large figures can wrap on narrow screens');
-assert.equal((refresh.match(/\\{/g)||[]).length,(refresh.match(/\\}/g)||[]).length,'Interface refresh braces balanced');
+assert.match(refresh,/summary-category-numbers strong\{white-space:normal;overflow-wrap:anywhere;text-align:right\}/,'Large figures can wrap on narrow screens');
+assert.equal((refresh.match(/\{/g)||[]).length,(refresh.match(/\}/g)||[]).length,'Interface refresh braces balanced');
