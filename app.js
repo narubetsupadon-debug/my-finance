@@ -1,11 +1,11 @@
 import {createCapacityMonitor} from './app-storage.js?v=20261023-quality02';
 import {serializeFinanceBackup,verifyFinanceBackup} from './finance-backup.js?v=20261023-quality02&backup=20';
-import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError,debtPaymentProgress} from './finance-core.js?v=20261023-quality02&payment=10';
+import {financeSaveFeedback,showFinanceSaveError,createFinanceFetch,bangkokDay,bangkokDate,readAll,budgetSummary,monthlyDue,billDue,recurringBillMonthStatus,lockFinanceForm,createRetrySafeInsert,recordFinanceError,debtPaymentProgress} from './finance-core.js?v=20261023-quality02&payment=10&billfix=24';
 import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=20261023-quality02';
 import {createSummaryRenderer} from './summary-highest.js?v=20261023-quality02&period=17';
-import {createDashboardRenderer} from './app-dashboard.js?v=20261023-quality02&budget=21';
+import {createDashboardRenderer} from './app-dashboard.js?v=20261023-quality02&budget=21&billfix=24';
 import {createTransactionRenderer} from './app-transactions.js?v=20261023-quality02';
-import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-quality02&payments=14';
+import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-quality02&payments=14&billfix=24';
 import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261023-quality02';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
