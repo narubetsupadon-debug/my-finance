@@ -1174,7 +1174,7 @@ async function payRecurringBill(bill,button){
  if(!confirm('ยืนยันว่าจ่าย '+bill.name+' '+money(amount)+(via?' '+via:'')+' แล้ววันนี้?'))return;
  const source='bill_payment:'+bill.id,ym=bangkokDay().slice(0,7);
  const localPaid=transactions.some(x=>x.status!=='cancelled'&&x.source===source&&String(x.transaction_date).slice(0,7)===ym);
- if(localPaid){const status=recurringBillMonthStatus(bill,transactions,bangkokDay());showAppToast(status.state==='paid'?'บิลนี้จ่ายแล้วในเดือนนี้ ✅':'บิลนี้มีรายการรอจ่ายหรือวันที่อนาคตแล้ว กรุณาตรวจรายการก่อน');renderBills();return;}
+ if(localPaid){const status=recurringBillMonthStatus(bill,transactions,bangkokDay());showAppToast(status.state==='paid'?'บิลนี้จ่ายแล้วในเดือนนี้ ✅':status.state==='partial'?'บิลนี้ชำระบางส่วน '+money(status.paidCents/100)+' ยังเหลือ '+money(status.remainingCents/100)+' กรุณาตรวจรายการก่อน':'บิลนี้มีรายการรอจ่ายหรือวันที่อนาคตแล้ว กรุณาตรวจรายการก่อน');renderBills();return;}
  const originalText=button?.textContent||'✓ จ่ายแล้ว';if(button){button.disabled=true;button.textContent='กำลังบันทึก…';}
  try{
   const {error}=await supabase.rpc('pay_recurring_bill',{p_bill_id:bill.id,p_paid_date:bangkokDay()});
