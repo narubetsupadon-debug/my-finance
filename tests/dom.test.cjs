@@ -316,6 +316,8 @@ async function page(html,js,data,expose,storage={},options={}){
  const payButton=billsPage.el('billList').querySelector('[data-pay-bill="bill1"]');assert.ok(payButton);billsPage.w.confirm=()=>true;payButton.click();
  await new Promise(r=>setTimeout(r,0));
  assert.equal(billsPage.state.rpcs.at(-1).name,'pay_recurring_bill');assert.equal(billsPage.state.rpcs.at(-1).args.p_bill_id,'bill1');
+ assert.match(billsPage.el('billList').textContent,/บันทึกแล้ว · รอซิงก์/,'confirmed RPC must block second bill payment until readback');
+ assert.equal(billsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null,'no duplicate full-payment action after server confirmation');
  billsPage.w.openEntity('bill','bill1');assert.equal(billsPage.el('entityFields').querySelector('[name=payment_source]').value,'account:acc');billsPage.el('entityDialog').close();
  const cardBill={...bill,id:'bill2',name:'Spotify',account_id:null,debt_id:'kplus',accounts:null};
  const cardPage=await page('index.html','app.js',{categories,accounts,transactions:[],bills:[cardBill],debts:[debt]},'loadAll');
