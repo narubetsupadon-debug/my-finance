@@ -1,6 +1,6 @@
 import {analyzeExpenses} from './expense-analysis.js?v=20261023-quality02';
-import {sumTransactionAmounts} from './finance-core.js?v=20261023-quality02';
-import {recurringBillMonthStatus} from './finance-core.js?v=20261023-quality02';
+import {sumTransactionAmounts} from './finance-core.js?v=20261023-quality02&payment=10&billfix=24';
+import {recurringBillMonthStatus} from './finance-core.js?v=20261023-quality02&payment=10&billfix=24';
 import {createTotalDetails,bindTotal} from './total-details.js?v=20261023-quality02';
 import {renderBudgetBreakdown} from './budget-overview.js?v=20261023-quality02&budget=21';
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
