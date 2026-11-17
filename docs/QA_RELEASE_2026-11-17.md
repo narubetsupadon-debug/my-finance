@@ -4,6 +4,8 @@ Scope: review v1.0.23 after mobile amount/release-note patch. **This is a test p
 
 ## P0 — Financial integrity (must pass before release)
 - [ ] Create a transaction and force follow-up read failure; confirmed save must remain visible and persistent after reload.
+- [ ] Confirm a bill RPC but fail subsequent readback; payment button must stay disabled and show “บันทึกแล้ว · รอซิงก์”. Only clear guard after a matching server row is observed.
+- [ ] Lose the bill RPC response; show uncertain state and forbid a blind second payment within the session.
 - [ ] Open two tabs; test stale read returned after confirmed insert/edit. Never overwrite confirmed local state.
 - [ ] Partial debt payment, full payment, excess payment, edited linked repayment, renamed debt, changed month, and repeat submission. Compare persisted ledger to displayed progress; avoid duplicate IDs.
 - [ ] Paid recurring bill stays paid after navigation, reload and new session; unpaid/partial states reconcile to the right calendar month.
@@ -27,6 +29,7 @@ Scope: review v1.0.23 after mobile amount/release-note patch. **This is a test p
 ## Changed in this branch
 - Release notes text in Settings now matches release 1.0.23.
 - Recurring bills distinguish full, partial and pending payments based on confirmed satang totals; duplicate transaction IDs cannot inflate the paid amount.
+- A confirmed bill RPC result is held in a per-user/month guard until its server readback appears, avoiding a second one-tap payment after a read failure. Uncertain transport responses also block blind retries within the session.
 - Planning and dashboard expose partial-bill counts; repeated one-tap full-payment is blocked on an already-linked partial bill.
 - Dashboard category sums are calculated in satang before presentation.
 - Updated JS/CSS asset URLs and PWA shell cache avoid stale logic on app updates.
