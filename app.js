@@ -9,6 +9,10 @@ import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker
 import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261023-quality02';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
+// Per-account, per-month write acknowledgements prevent an accidental second bill
+// payment while the confirmed row is still waiting for a server readback.
+const billWriteStates=new Map();
+const billWriteKey=(owner,billId,month)=>String(owner)+'|'+String(billId)+'|'+String(month);
 const url='https://'+'mmvdhopogchcxwlstflk'+'.supabase.co'
 const key='sb_'+'publishable_'+'PYkDjHN3ULlFW9BavMvAVQ_'+'d77eZZ5W'
 // MINIMAL_DARK_CHART_DEFAULTS
@@ -217,6 +221,7 @@ $('logout').onclick=()=>requestLogout($('logout'));
 $('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settingsLogout')));
 function clearSessionUI(){
  transactionRenderer.dispose();
+ billWriteStates.clear();
  clearSummaryPdf();
  sessionRevision++;user=null;refreshCoordinator.dispose();capacityMonitor.clear();
  clearTimeout(window.__toastTimer);$('appToast')?.classList.add('hidden');$('appToast')?.replaceChildren();
@@ -262,6 +267,13 @@ async function performLoad(){
   if(user?.id!==loadingUser||sessionRevision!==revision)return false;
   if(writeRevision!==confirmedWriteRevision){scheduleLoad();return false;}
   if(editorOpen()){setSyncStatus('deferred','รออัปเดตหลังปิดหน้าบันทึก');scheduleLoad();return false;}
+  // Only an observed, confirmed server row clears a local write guard.
+  if(billWriteStates.size){
+   for(const tx of data.transactions){
+    if(tx.type!=='expense'||tx.status!=='paid'||!String(tx.source||'').startsWith('bill_payment:'))continue;
+    billWriteStates.delete(billWriteKey(loadingUser,String(tx.source).slice('bill_payment:'.length),String(tx.transaction_date).slice(0,7)));
+   }
+  }
   categories=data.categories;subcategories=data.subcategories;accounts=data.accounts;transactions=data.transactions;
   bills=data.bills;debts=data.debts;budgets=data.budgets;carExpenseTxIds=data.carExpenseTxIds;rentRecords=data.rentRecords;
   $('dataError').classList.add('hidden');setSyncStatus('ok');renderAll();return true;
@@ -778,7 +790,8 @@ const planningRenderer=createPlanningRenderer({
  getBills:()=>bills,
  getDebts:()=>debts,
  getBudgets:()=>budgets,
- getTransactions:()=>transactions
+ getTransactions:()=>transactions,
+ getBillWriteState:(billId,month)=>billWriteStates.get(billWriteKey(user?.id,billId,month))||null
 });
 function renderBills(){return planningRenderer.renderBills()}
 function renderDebts(){return planningRenderer.renderDebts()}
@@ -1169,18 +1182,26 @@ async function payRecurringBill(bill,button){
  if(!bill||!user)return;
  const amount=Number(bill.amount||0);
  if(amount<=0){showAppToast('ใส่ยอดบิลก่อน แล้วค่อยกดจ่ายแล้ว');return;}
+ const owner=user.id,paidDay=bangkokDay(),ym=paidDay.slice(0,7);
+ const key=billWriteKey(owner,bill.id,ym),writeState=billWriteStates.get(key);
+ if(writeState){showAppToast(writeState==='saved'?'ระบบบันทึกแล้ว แต่กำลังรอข้อมูลล่าสุด กรุณาอย่ากดจ่ายซ้ำ':'ยังยืนยันการบันทึกไม่ได้ กรุณาตรวจรายการและซิงก์ก่อนบันทึกซ้ำ');renderBills();return;}
  const debt=bill.debt_id?debts.find(d=>d.id===bill.debt_id):null;
  const via=debt?'ผ่านบัตร '+debt.name:(bill.accounts?.name?'จาก '+bill.accounts.name:'');
- if(!confirm('ยืนยันว่าจ่าย '+bill.name+' '+money(amount)+(via?' '+via:'')+' แล้ววันนี้?'))return;
- const source='bill_payment:'+bill.id,ym=bangkokDay().slice(0,7);
+ const source='bill_payment:'+bill.id;
  const localPaid=transactions.some(x=>x.status!=='cancelled'&&x.source===source&&String(x.transaction_date).slice(0,7)===ym);
  if(localPaid){const status=recurringBillMonthStatus(bill,transactions,bangkokDay());showAppToast(status.state==='paid'?'บิลนี้จ่ายแล้วในเดือนนี้ ✅':status.state==='partial'?'บิลนี้ชำระบางส่วน '+money(status.paidCents/100)+' ยังเหลือ '+money(status.remainingCents/100)+' กรุณาตรวจรายการก่อน':'บิลนี้มีรายการรอจ่ายหรือวันที่อนาคตแล้ว กรุณาตรวจรายการก่อน');renderBills();return;}
+ if(!confirm('ยืนยันว่าจ่าย '+bill.name+' '+money(amount)+(via?' '+via:'')+' แล้ววันนี้?'))return;
  const originalText=button?.textContent||'✓ จ่ายแล้ว';if(button){button.disabled=true;button.textContent='กำลังบันทึก…';}
  try{
-  const {error}=await supabase.rpc('pay_recurring_bill',{p_bill_id:bill.id,p_paid_date:bangkokDay()});
+  const {error}=await supabase.rpc('pay_recurring_bill',{p_bill_id:bill.id,p_paid_date:paidDay});
   if(error)throw error;
+  if(user?.id!==owner)return;
+  billWriteStates.set(key,'saved');confirmedWriteRevision++;
+  renderBills();
   savedNotice(debt?'บันทึกรายจ่ายและเพิ่มยอดบัตร '+debt.name+' สำเร็จแล้ว ✅':'บันทึก '+bill.name+' เป็นรายจ่ายสำเร็จแล้ว ✅',await loadAll(),{label:'ดูบิล',run:()=>showPage('bills')});
- }catch(error){const feedback=financeSaveFeedback(error);showAppToast(feedback.message,{label:'ตรวจรายการ',run:()=>{showPage('transactions');void loadAll()}},feedback.state)}
+ }catch(error){const feedback=financeSaveFeedback(error);
+  if(user?.id===owner&&feedback.state==='uncertain'){billWriteStates.set(key,'uncertain');confirmedWriteRevision++;renderBills();}
+  if(user?.id===owner)showAppToast(feedback.message,{label:'ตรวจรายการ',run:()=>{showPage('transactions');void loadAll()}},feedback.state)}
  finally{if(button?.isConnected){button.disabled=false;button.textContent=originalText;}}
 }
 
