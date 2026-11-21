@@ -44,16 +44,18 @@ function renderBills(){
   const statusLabel=!b.is_active?'ปิดใช้งาน':writeState==='saved'?'บันทึกแล้ว · รอซิงก์ข้อมูลล่าสุด':writeState==='uncertain'?'ยังยืนยันการบันทึกไม่ได้ · ตรวจรายการก่อน':paid?'จ่ายแล้วเดือนนี้':partial?'ชำระบางส่วน '+money(monthStatus.paidCents/100)+' · เหลือ '+money(monthStatus.remainingCents/100):pending?'รอจ่าย / วันที่อนาคต':'ยังไม่บันทึกผ่านบิล'+(monthStatus.due?' · ถึงกำหนดแล้ว':'');
   const amount=Number(b.amount||0),debt=debts.find(d=>d.id===b.debt_id);
   const paymentLabel=debt?'💳 '+debt.name:(b.accounts?.name?'🏦 '+b.accounts.name:'ยังไม่ระบุช่องทาง');
+  const canSplit=b.is_active&&amount>0&&!paid&&!writeState&&monthStatus.rows.length===monthStatus.paidRows.length;
+  const splitButton=canSplit?'<button class="btn small '+(partial?'primary':'soft')+'" type="button" data-bill-installment="'+esc(b.id)+'">'+(partial?'จ่ายเพิ่ม':'จ่ายบางส่วน')+'</button>':'';
   const payAction=b.is_active===false?'<button class="btn small soft" type="button" disabled>ปิดใช้งาน</button>':writeState
    ?'<button class="btn small soft" type="button" disabled>'+(writeState==='saved'?'✓ บันทึกแล้ว · รอซิงก์':'ตรวจสอบก่อนจ่ายซ้ำ')+'</button>'
    :paid
    ?'<button class="btn small soft bill-paid-btn" type="button" disabled>✓ จ่ายแล้วเดือนนี้</button>'
-   :partial?'<button class="btn small soft" type="button" disabled>ชำระบางส่วน · ตรวจรายการ</button>'
+   :partial&&canSplit?'':partial?'<button class="btn small soft" type="button" disabled>ชำระบางส่วน · ตรวจรายการ</button>'
    :pending?'<button class="btn small soft" type="button" disabled>มีรายการรอจ่ายแล้ว</button>'
    :amount>0
     ?'<button class="btn small primary" type="button" data-pay-bill="'+b.id+'">✓ จ่ายแล้ว</button>'
     :'<button class="btn small soft" type="button" data-edit="bill" data-id="'+b.id+'">ใส่ยอดก่อน</button>';
-  return '<div class="item bill-item"><div><b>📅 '+esc(b.name)+'</b><span class="muted">ทุกวันที่ '+(b.due_day||'-')+' · '+esc(b.categories?.name||'ไม่ระบุหมวด')+' · '+esc(paymentLabel)+' · '+esc(statusLabel)+'</span></div><span class="amount expense">'+money(b.amount)+'</span><div class="actions">'+payAction+'<button type="button" class="btn small soft" data-bill-history="'+esc(b.id)+'">รายการเดือนนี้</button><button class="btn small soft" data-edit="bill" data-id="'+b.id+'">แก้ไข</button><button class="btn small danger" data-del="bills" data-id="'+b.id+'">ลบ</button></div></div>';
+  return '<div class="item bill-item"><div><b>📅 '+esc(b.name)+'</b><span class="muted">ทุกวันที่ '+(b.due_day||'-')+' · '+esc(b.categories?.name||'ไม่ระบุหมวด')+' · '+esc(paymentLabel)+' · '+esc(statusLabel)+'</span></div><span class="amount expense">'+money(b.amount)+'</span><div class="actions">'+payAction+splitButton+'<button type="button" class="btn small soft" data-bill-history="'+esc(b.id)+'">รายการเดือนนี้</button><button class="btn small soft" data-edit="bill" data-id="'+b.id+'">แก้ไข</button><button class="btn small danger" data-del="bills" data-id="'+b.id+'">ลบ</button></div></div>';
  }).join(''):'<div class="empty">ยังไม่มีบิล</div>'
 }
 function renderDebts(){

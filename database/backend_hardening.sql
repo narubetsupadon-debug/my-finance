@@ -1,7 +1,12 @@
 -- Additive safeguards; financial records and original amounts are preserved.
 create index if not exists rent_records_account_idx on public.rent_records(account_id);
 create index if not exists rent_records_category_idx on public.rent_records(category_id);
-create unique index if not exists bill_payment_user_month_unique on public.transactions(user_id,source,date_trunc('month',transaction_date::timestamp)) where source like 'bill_payment:%' and status<>'cancelled';
+-- Preserve the legacy constraint until the installment migration replaces it.
+do $$ begin
+ if to_regclass('public.bill_payment_stage_unique') is null then
+  create unique index if not exists bill_payment_user_month_unique on public.transactions(user_id,source,date_trunc('month',transaction_date::timestamp)) where source like 'bill_payment:%' and status<>'cancelled';
+ end if;
+end $$;
 revoke execute on function public.import_r3_safe(jsonb) from public,anon,authenticated;
 
 CREATE OR REPLACE FUNCTION public.validate_finance_links()

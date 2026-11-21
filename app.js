@@ -5,12 +5,13 @@ import {fetchFinanceData,createRefreshCoordinator} from './app-data.js?v=2026102
 import {createSummaryRenderer} from './summary-highest.js?v=20261023-quality02&period=17';
 import {createDashboardRenderer} from './app-dashboard.js?v=20261023-quality02&budget=21&billfix=24&home=26';
 import {createTransactionRenderer} from './app-transactions.js?v=20261023-quality02';
-import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-quality02&payments=14&billfix=24';
+import {createPlanningRenderer,debtLogoBrands,debtLogoOptions,bindDebtLogoPicker} from './app-planning.js?v=20261023-quality02&payments=14&billfix=24&split=1';
 import {findDuplicateCandidates,runDataHealthCheck} from './app-safety.js?v=20261023-quality02';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 const retrySafeInsert=createRetrySafeInsert();
 // Per-account, per-month write acknowledgements prevent an accidental second bill
 // payment while the confirmed row is still waiting for a server readback.
+let installmentDraft=null;
 const billWriteStates=new Map();
 const billRequestsInFlight=new Set();
 const billWriteKey=(owner,billId,month)=>String(owner)+'|'+String(billId)+'|'+String(month);
@@ -222,7 +223,7 @@ $('logout').onclick=()=>requestLogout($('logout'));
 $('settingsLogout')?.addEventListener('click',()=>void requestLogout($('settingsLogout')));
 function clearSessionUI(){
  transactionRenderer.dispose();
- billWriteStates.clear();
+ billWriteStates.clear();installmentDraft=null;if($('billInstallmentDialog')?.open)$('billInstallmentDialog').close();
  clearSummaryPdf();
  sessionRevision++;user=null;refreshCoordinator.dispose();capacityMonitor.clear();
  clearTimeout(window.__toastTimer);$('appToast')?.classList.add('hidden');$('appToast')?.replaceChildren();
@@ -1182,7 +1183,39 @@ $('entityForm').onsubmit=async e=>{
  }catch(error){if(committed)savedNotice('บันทึกข้อมูลสำเร็จแล้ว',false,{label:'ดูข้อมูล',run:()=>showPage(table==='budgets'?'budget':table)});else alert(financeSaveFeedback(error).message)}finally{unlock();button.disabled=false}
 }
 
-async function payRecurringBill(bill,button){
+const installmentAmount=$('billInstallmentAmount');
+function openBillInstallment(id){
+ const bill=bills.find(b=>b.id===id);
+ if(!bill?.is_active||!user)return;
+ const day=bangkokDay(),status=recurringBillMonthStatus(bill,transactions,day);
+ if(!status.remainingCents||status.rows.length!==status.paidRows.length)return;
+ installmentDraft={owner:user.id,bill,day,paid:status.paidCents,remaining:status.remainingCents,id:crypto.randomUUID()};
+ $('billInstallmentTitle').textContent=bill.name;
+ $('billInstallmentSummary').textContent='จ่ายสะสม '+money(status.paidCents/100)+' · เหลือ '+money(status.remainingCents/100);
+ installmentAmount.max=(status.remainingCents/100).toFixed(2);
+ installmentAmount.value=installmentAmount.max;
+ updateInstallmentBalance();
+ $('billInstallmentDialog').showModal();
+ installmentAmount.focus();installmentAmount.select();
+}
+function updateInstallmentBalance(){
+ if(!installmentDraft)return;
+ const cents=Math.round(installmentAmount.valueAsNumber*100);
+ $('billInstallmentBalance').textContent=installmentAmount.validity.valid?'หลังจ่ายจะเหลือ '+money((installmentDraft.remaining-cents)/100):'';
+}
+installmentAmount?.addEventListener('input',updateInstallmentBalance);
+$('cancelBillInstallment')?.addEventListener('click',()=>$('billInstallmentDialog').close());
+$('billInstallmentForm')?.addEventListener('submit',async event=>{
+ event.preventDefault();
+ const draft=installmentDraft;
+ if(!draft||!installmentAmount.reportValidity())return;
+ installmentDraft=null;
+ $('billInstallmentDialog').close();
+ if(draft.owner!==user?.id||draft.day!==bangkokDay()){showAppToast('ข้อมูลเปลี่ยนแล้ว กรุณาเปิดบิลใหม่');return;}
+ await payRecurringBill(draft.bill,null,{...draft,amount:Number(installmentAmount.value)});
+});
+
+async function payRecurringBill(bill,button,installment=null){
  if(!bill||!user)return;
  const amount=Number(bill.amount||0);
  if(amount<=0){showAppToast('ใส่ยอดบิลก่อน แล้วค่อยกดจ่ายแล้ว');return;}
@@ -1194,12 +1227,14 @@ async function payRecurringBill(bill,button){
  const via=debt?'ผ่านบัตร '+debt.name:(bill.accounts?.name?'จาก '+bill.accounts.name:'');
  const source='bill_payment:'+bill.id;
  const localPaid=transactions.some(x=>x.status!=='cancelled'&&x.source===source&&String(x.transaction_date).slice(0,7)===ym);
- if(localPaid){const status=recurringBillMonthStatus(bill,transactions,bangkokDay());showAppToast(status.state==='paid'?'บิลนี้จ่ายแล้วในเดือนนี้ ✅':status.state==='partial'?'บิลนี้ชำระบางส่วน '+money(status.paidCents/100)+' ยังเหลือ '+money(status.remainingCents/100)+' กรุณาตรวจรายการก่อน':'บิลนี้มีรายการรอจ่ายหรือวันที่อนาคตแล้ว กรุณาตรวจรายการก่อน');renderBills();return;}
- if(!confirm('ยืนยันว่าจ่าย '+bill.name+' '+money(amount)+(via?' '+via:'')+' แล้ววันนี้?'))return;
+ if(localPaid&&!installment){const status=recurringBillMonthStatus(bill,transactions,bangkokDay());showAppToast(status.state==='paid'?'บิลนี้จ่ายแล้วในเดือนนี้ ✅':status.state==='partial'?'บิลนี้ชำระบางส่วน '+money(status.paidCents/100)+' ยังเหลือ '+money(status.remainingCents/100)+' กรุณาตรวจรายการก่อน':'บิลนี้มีรายการรอจ่ายหรือวันที่อนาคตแล้ว กรุณาตรวจรายการก่อน');renderBills();return;}
+ if(!installment&&!confirm('ยืนยันว่าจ่าย '+bill.name+' '+money(amount)+(via?' '+via:'')+' แล้ววันนี้?'))return;
  const originalText=button?.textContent||'✓ จ่ายแล้ว';if(button){button.disabled=true;button.textContent='กำลังบันทึก…';}
  billRequestsInFlight.add(key);
  try{
-  const {data:id,error}=await supabase.rpc('pay_recurring_bill',{p_bill_id:bill.id,p_paid_date:paidDay});
+  const {data:id,error}=installment?await supabase.rpc('pay_bill_installment',{
+   p_bill_id:bill.id,p_paid_date:paidDay,p_amount:installment.amount,p_expected_paid:installment.paid/100,p_request_id:installment.id
+  }):await supabase.rpc('pay_recurring_bill',{p_bill_id:bill.id,p_paid_date:paidDay});
   if(error)throw error;
   if(user?.id!==owner)return;
   billWriteStates.set(key,{state:'saved',id});confirmedWriteRevision++;
@@ -1213,12 +1248,13 @@ async function payRecurringBill(bill,button){
    status.state==='pending'?'พบรายการรอจ่ายหรือวันที่อนาคต':'กรุณาตรวจรายการบิลอีกครั้ง';
   showAppToast(message,{label:'ดูบิล',run:()=>showPage('bills')});
  }catch(error){const feedback=financeSaveFeedback(error);
-  if(user?.id===owner&&feedback.state==='uncertain'){billWriteStates.set(key,{state:'uncertain'});confirmedWriteRevision++;renderBills();renderDashboard();}
+  if(user?.id===owner&&feedback.state==='uncertain'){billWriteStates.set(key,{state:'uncertain',id:installment?.id});confirmedWriteRevision++;renderBills();renderDashboard();}
+  if(installment&&feedback.state!=='uncertain'&&user?.id===owner)await loadAll();
   if(user?.id===owner)showAppToast(feedback.message,{label:'ตรวจรายการ',run:()=>{showPage('transactions');void loadAll()}},feedback.state)}
  finally{billRequestsInFlight.delete(key);if(button?.isConnected){button.disabled=false;button.textContent=originalText;}}
 }
 
-document.addEventListener('click',async e=>{const debtHistory=e.target.closest('[data-debt-history]');if(debtHistory){planningRenderer.openDebtHistory(debtHistory.dataset.debtHistory);return;}const billHistory=e.target.closest('[data-bill-history]');if(billHistory){planningRenderer.openBillHistory(billHistory.dataset.billHistory);return;}const budgetHistory=e.target.closest('[data-budget-history]');if(budgetHistory){planningRenderer.openBudgetHistory(budgetHistory.dataset.budgetHistory);return;}const payBill=e.target.closest('[data-pay-bill]');if(payBill){const bill=bills.find(x=>x.id===payBill.dataset.payBill);if(bill)await payRecurringBill(bill,payBill);return;}const pay=e.target.closest('[data-pay-debt]');if(pay){const d=debts.find(x=>x.id===pay.dataset.payDebt);if(d){const progress=debtPaymentProgress(d,debts,transactions,$('txDate').value,bangkokDay());const extra=pay.dataset.payExtra==='true';if((progress.state==='complete'||progress.state==='recorded')&&!extra)return;const cat=categories.find(c=>c.type==='expense'&&c.name==='หนี้/ผ่อน');$('txType').value='expense';fillTxSelectors();if(cat)$('txCategory').value=cat.id;syncDebtPaymentLink();$('txDebtLink').value=d.id;$('txDesc').value='ชำระบัตร '+d.name;$('txAmount').value=!extra&&progress.remainingCents>0?progress.remainingCents/100:'';suggestedDebtPayment=extra?null:{debtId:d.id,month:progress.month,amount:$('txAmount').value};$('txNote').value='ยอดคงเหลือก่อนชำระ '+money(d.outstanding_amount||0);renderCardPaymentSuggestions();if(window.innerWidth>820)$('txAmount').focus()}return}const edit=e.target.closest('[data-edit]');if(edit){const t=edit.dataset.edit,id=edit.dataset.id;if(t==='tx'&&(transactions.find(x=>x.id===id)?.source==='car_installment'||transactions.find(x=>x.id===id)?.source==='car_expense'||carExpenseTxIds.has(id))){location.href='./car.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='salary'){location.href='./salary.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source?.startsWith('bill_payment:')){showPage('bills');showAppToast('รายการนี้มาจากบิลประจำ กรุณาจัดการที่หน้าบิลประจำ');return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='rent'){location.href='./rent.html';return}if(t==='tx')openTx(id);else openEntity(t,id);return}const del=e.target.closest('[data-del]');if(del){if(del.dataset.del==='transactions'&&(transactions.find(x=>x.id===del.dataset.id)?.source==='car_installment'||transactions.find(x=>x.id===del.dataset.id)?.source==='car_expense'||carExpenseTxIds.has(del.dataset.id))){alert('กรุณาจัดการรายการนี้ผ่านหน้ารถของฉัน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='salary'){alert('กรุณาจัดการรายการนี้ผ่านหน้าเงินเดือน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source?.startsWith('bill_payment:')){alert('รายการนี้มาจากบิลประจำ เพื่อให้ยอดบัตรตรงกัน กรุณาจัดการผ่านหน้าบิลประจำ');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='rent'){alert('กรุณาจัดการรายการนี้ผ่านหน้าค่าห้องเช่า');return}const used=del.dataset.del==='categories'?transactions.filter(t=>t.category_id===del.dataset.id).length:0;if(!confirm(used?'หมวดนี้ใช้ใน '+used+' รายการ การลบอาจทำให้รายการเดิมไม่มีหมวด ยืนยันลบหมวดนี้?':'ยืนยันลบรายการนี้?'))return;const {error}=await supabase.from(del.dataset.del).delete().eq('id',del.dataset.id).eq('user_id',user.id);if(error)alert('ลบไม่ได้: '+error.message);else await loadAll()}})
+document.addEventListener('click',async e=>{const debtHistory=e.target.closest('[data-debt-history]');if(debtHistory){planningRenderer.openDebtHistory(debtHistory.dataset.debtHistory);return;}const billHistory=e.target.closest('[data-bill-history]');if(billHistory){planningRenderer.openBillHistory(billHistory.dataset.billHistory);return;}const budgetHistory=e.target.closest('[data-budget-history]');if(budgetHistory){planningRenderer.openBudgetHistory(budgetHistory.dataset.budgetHistory);return;}const split=e.target.closest('[data-bill-installment]');if(split){openBillInstallment(split.dataset.billInstallment);return;}const payBill=e.target.closest('[data-pay-bill]');if(payBill){const bill=bills.find(x=>x.id===payBill.dataset.payBill);if(bill)await payRecurringBill(bill,payBill);return;}const pay=e.target.closest('[data-pay-debt]');if(pay){const d=debts.find(x=>x.id===pay.dataset.payDebt);if(d){const progress=debtPaymentProgress(d,debts,transactions,$('txDate').value,bangkokDay());const extra=pay.dataset.payExtra==='true';if((progress.state==='complete'||progress.state==='recorded')&&!extra)return;const cat=categories.find(c=>c.type==='expense'&&c.name==='หนี้/ผ่อน');$('txType').value='expense';fillTxSelectors();if(cat)$('txCategory').value=cat.id;syncDebtPaymentLink();$('txDebtLink').value=d.id;$('txDesc').value='ชำระบัตร '+d.name;$('txAmount').value=!extra&&progress.remainingCents>0?progress.remainingCents/100:'';suggestedDebtPayment=extra?null:{debtId:d.id,month:progress.month,amount:$('txAmount').value};$('txNote').value='ยอดคงเหลือก่อนชำระ '+money(d.outstanding_amount||0);renderCardPaymentSuggestions();if(window.innerWidth>820)$('txAmount').focus()}return}const edit=e.target.closest('[data-edit]');if(edit){const t=edit.dataset.edit,id=edit.dataset.id;if(t==='tx'&&(transactions.find(x=>x.id===id)?.source==='car_installment'||transactions.find(x=>x.id===id)?.source==='car_expense'||carExpenseTxIds.has(id))){location.href='./car.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='salary'){location.href='./salary.html';return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source?.startsWith('bill_payment:')){showPage('bills');showAppToast('รายการนี้มาจากบิลประจำ กรุณาจัดการที่หน้าบิลประจำ');return}if(t==='tx'&&transactions.find(x=>x.id===id)?.source==='rent'){location.href='./rent.html';return}if(t==='tx')openTx(id);else openEntity(t,id);return}const del=e.target.closest('[data-del]');if(del){if(del.dataset.del==='transactions'&&(transactions.find(x=>x.id===del.dataset.id)?.source==='car_installment'||transactions.find(x=>x.id===del.dataset.id)?.source==='car_expense'||carExpenseTxIds.has(del.dataset.id))){alert('กรุณาจัดการรายการนี้ผ่านหน้ารถของฉัน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='salary'){alert('กรุณาจัดการรายการนี้ผ่านหน้าเงินเดือน');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source?.startsWith('bill_payment:')){alert('รายการนี้มาจากบิลประจำ เพื่อให้ยอดบัตรตรงกัน กรุณาจัดการผ่านหน้าบิลประจำ');return}if(del.dataset.del==='transactions'&&transactions.find(x=>x.id===del.dataset.id)?.source==='rent'){alert('กรุณาจัดการรายการนี้ผ่านหน้าค่าห้องเช่า');return}const used=del.dataset.del==='categories'?transactions.filter(t=>t.category_id===del.dataset.id).length:0;if(!confirm(used?'หมวดนี้ใช้ใน '+used+' รายการ การลบอาจทำให้รายการเดิมไม่มีหมวด ยืนยันลบหมวดนี้?':'ยืนยันลบรายการนี้?'))return;const {error}=await supabase.from(del.dataset.del).delete().eq('id',del.dataset.id).eq('user_id',user.id);if(error)alert('ลบไม่ได้: '+error.message);else await loadAll()}})
 function subscribe(){if(channel)supabase.removeChannel(channel);channel=supabase.channel('finance-live').on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'categories',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'bills',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'debts',filter:'user_id=eq.'+user.id},scheduleLoad).on('postgres_changes',{event:'*',schema:'public',table:'budgets',filter:'user_id=eq.'+user.id},scheduleLoad).subscribe()}
 window.txDialog=$('txDialog');window.entityDialog=$('entityDialog');
 supabase.auth.onAuthStateChange((event,session)=>{
