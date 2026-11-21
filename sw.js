@@ -1,4 +1,4 @@
-const CACHE='my-finance-direct-payment-v1.0.23-home-20261121';
+const CACHE='my-finance-direct-payment-v1.0.23-bill-sync-20261121';
 const SHELL=['./summary-proportion.css?v=20261023-quality02','./summary-proportion.js?v=20261023-quality02','./summary-highest.js?v=20261023-quality02','./','./index.html','./style.css?v=20261023-quality02','./minimal-dark.css?v=20261023-quality02','./theme.js?v=20261023-quality02','./app.js?v=20261023-quality02','./app-data.js?v=20261023-quality02','./app-summary.js?v=20261023-quality02','./app-dashboard.js?v=20261023-quality02','./app-transactions.js?v=20261023-quality02','./app-planning.js?v=20261023-quality02','./app-safety.js?v=20261023-quality02','./finance-core.js?v=20261023-quality02','./finance-backup.js?v=20261023-quality02','./app-nav.js?v=20261023-quality02','./rent.html','./rent.css?v=20261023-quality02&navfix=03','./rent.js?v=20261023-quality02','./rent-core.js?v=20261023-quality02','./car.html','./car.css?v=20261023-quality02','./car.js?v=20261023-quality02','./salary.html','./salary.js?v=20261023-quality02','./salary-payslip.js?v=20261023-quality02','./summary.html','./manifest.webmanifest','./app-icon.svg','./app-icon.svg?v=20261023-quality02','./app-icon-192.png','./app-icon-512.png','./app-icon-maskable-512.png','./apple-touch-icon.png','./favicon-32.png'];
 SHELL.push('./ui-polish.css?v=20261023-quality02','./dashboard-design.css?v=20261023-quality02','./push-settings.css?v=20261023-quality02');
 SHELL.push('./app-storage.js?v=20261023-quality02');
@@ -27,10 +27,10 @@ SHELL.push('./navigation-modern.css?v=20261023-quality02&menus=22','./app-nav.js
 SHELL.push('./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=22','./finance-backup.js?v=20261023-quality02&backup=20');
 
 // Release QA: precache the exact updated finance assets and prevent stale offline modules.
-SHELL.push('./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=22&billfix=24&home=25',
+SHELL.push('./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=22&billfix=24&home=26',
  './finance-core.js?v=20261023-quality02&payment=10&billfix=24',
  './app-planning.js?v=20261023-quality02&payments=14&billfix=24',
- './app-dashboard.js?v=20261023-quality02&budget=21&billfix=24&home=25',
+ './app-dashboard.js?v=20261023-quality02&budget=21&billfix=24&home=26',
  './interface-refresh.css?v=20261023-quality02&ui=23&billfix=24');
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(url=>new Request(url,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('my-finance-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

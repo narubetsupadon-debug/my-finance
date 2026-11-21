@@ -5,7 +5,7 @@ import {createTotalDetails,bindTotal} from './total-details.js?v=20261023-qualit
 // Dashboard/Home renderer. Keeps Home calculations and insight UI out of app.js.
 export function createDashboardRenderer({
  $,money,fmtDate,esc,bangkokDate,bangkokDay,billDue,nextDueDate,
- getTransactions,getBudgets=()=>[],getBills,getDebts,getUiSettings,budgetTotals,orderedQuickItems,
+ getTransactions,getBudgets=()=>[],getBills,getDebts,getBillWriteState=()=>null,getUiSettings,budgetTotals,orderedQuickItems,
  showPage,renderTxList,refreshDailyGreeting
 }){
 const openInsightDetails=createTotalDetails({$,money,fmtDate});
@@ -37,7 +37,8 @@ function renderDashboard(){
  const exp=sumTransactionAmounts(monthly,'expense')
  const todayRows=monthly.filter(x=>x.type==='expense'&&x.transaction_date===today),todaySpent=sumTransactionAmounts(todayRows)
  const bsum=budgetTotals(),dailyLeft=bsum.daily,pct=bsum.limit?Math.min(100,bsum.spent/bsum.limit*100):0
- const billStates=bills.filter(b=>b.is_active&&(b.frequency==='monthly'||!b.frequency)).map(b=>recurringBillMonthStatus(b,transactions,today));
+ const statusByBill=new Map(bills.filter(b=>b.is_active&&(b.frequency==='monthly'||!b.frequency)).map(b=>[b.id,recurringBillMonthStatus(b,transactions,today)]));
+ const billStates=[...statusByBill.values()];
  if($('homeBillStatus'))$('homeBillStatus').textContent=billStates.length?'บิลเดือนนี้ · จ่ายแล้ว '+billStates.filter(s=>s.state==='paid').length+' · บางส่วน '+billStates.filter(s=>s.state==='partial').length+' · รอจ่าย '+billStates.filter(s=>s.state==='pending').length+' · ยังไม่บันทึก '+billStates.filter(s=>s.state==='unrecorded').length:'เพิ่มบิลประจำไว้ช่วยจำ ›';
  if($('homeBillStatusNote'))$('homeBillStatusNote').textContent='ตรวจเฉพาะรายการที่เชื่อมกับบิล · ถ้ากรอกแยกไว้ ตรวจรายการก่อนบันทึกซ้ำ';
  $('nextBillCard')?.classList.toggle('hidden',uiSettings.dueReminder===false);
@@ -94,7 +95,15 @@ function renderDashboard(){
  insights.slice(0,4).forEach(item=>{const b=document.createElement('button');b.type='button';b.className='insight-item insight-link';const icon=document.createElement('span');icon.textContent=item.icon;icon.setAttribute('aria-hidden','true');const text=document.createElement('div');text.textContent=item.text;const hint=document.createElement('small');hint.textContent='ดูรายละเอียด ›';text.append(document.createElement('br'),hint);b.append(icon,text);b.onclick=item.open;insightRoot.append(b);});
 
  const upcoming=[
-  ...bills.filter(x=>x.is_active).map(x=>({kind:'บิล',name:x.name,amount:Number(x.amount||0),due:billDue(x)})),
+  ...bills.filter(b=>b.is_active).flatMap(b=>{
+   const status=statusByBill.get(b.id);
+   const due=status?billDue({...b,frequency:'monthly'},monthKey+'-01'):billDue(b);
+   if(!due)return [];
+   const currentCycle=due.getFullYear()===y&&due.getMonth()===m;
+   if(currentCycle&&status&&(status.state==='paid'||getBillWriteState(b.id,monthKey)))return [];
+   const amount=currentCycle&&status?status.remainingCents/100:Number(b.amount||0);
+   return [{kind:'บิล',name:b.name,amount,due}];
+  }),
   ...debts.filter(x=>x.is_active&&Number(x.outstanding_amount||0)>0).map(x=>({kind:'บัตร/สินเชื่อ',name:x.name,amount:Number(x.installment_amount||0)||null,due:nextDueDate(x.due_day)}))
  ].filter(x=>x.due).sort((a,b)=>a.due-b.due).slice(0,5)
  const next=upcoming[0];

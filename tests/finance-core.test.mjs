@@ -12,8 +12,9 @@ assert.equal(core.monthlyDue(null,'2026-10-04'),null);
 assert.equal(core.monthlyDue(31,'2026-02-02').getDate(),28);
 assert.equal(core.monthlyDue(1,'2026-12-31').getFullYear(),2027);
 assert.equal(core.billDue({frequency:'yearly',due_day:5}),null);
-assert.equal(core.billDue({frequency:'monthly',due_day:15,next_due_date:'2026-09-15'},'2026-10-04').toISOString().slice(0,10),'2026-10-15'); // stale monthly next_due_date rolls forward
-assert.equal(core.billDue({frequency:'once',due_day:15,next_due_date:'2026-09-15'},'2026-10-04').toISOString().slice(0,10),'2026-09-15');
+const localDay=date=>[date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');
+assert.equal(localDay(core.billDue({frequency:'monthly',due_day:15,next_due_date:'2026-09-15'},'2026-10-04')),'2026-10-15'); // stale monthly next_due_date rolls forward
+assert.equal(localDay(core.billDue({frequency:'once',due_day:15,next_due_date:'2026-09-15'},'2026-10-04')),'2026-09-15');
 assert.equal(core.excelDay(1),'1899-12-31');
 assert.equal(core.excelDay('2026-10-04'),'2026-10-04');
 assert.equal(core.excelDay('04/10/2026'),'2026-10-04');
