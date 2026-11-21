@@ -28,7 +28,9 @@ assert.ok(read('index.html').includes('./dashboard-mobile.css?v=20261023-quality
 
 
 const released=read('index.html');
-assert.match(released,/ปรับช่องไฟระหว่างยอดเงิน เปอร์เซ็นต์ และลูกศรในหน้าสรุป/,'Settings describes current release');
+const release=JSON.parse(read('APP_VERSION.json'));
+assert.ok(released.includes('>'+release.version+'</strong>'));
+assert.ok(released.includes(release.notes[0]),'Settings describes current release');
 const refresh=read('interface-refresh.css');
 assert.match(refresh,/Narrow-screen financial amount resilience/,'Narrow-screen category amount regression guard');
 assert.match(refresh,/summary-category-numbers strong\{white-space:normal;overflow-wrap:anywhere;text-align:right\}/,'Large figures can wrap on narrow screens');

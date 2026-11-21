@@ -1,3 +1,9 @@
+## 1.0.24 — 2026-11-21
+
+- หน้าภาพรวมแสดงงบรวม ดูงบแต่ละก้อนได้ในหน้างบประมาณ
+- บิลรายเดือนแสดงยอดที่เหลือหลังจ่ายบางส่วน และนำบิลที่จ่ายครบออกจากกำหนดชำระรอบนั้น
+- ปรับการตรวจรายการบิลหลังซิงก์ การแสดงยอดบนจอแคบ และการเปิด PWA ออฟไลน์หลังอัปเดต
+
 ## 1.0.23 — 2026-11-11
 
 - Separate category amount, percentage and chevron; align amounts and compact subcategory rows. Preserve values and chart interaction.
