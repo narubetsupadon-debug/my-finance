@@ -3,7 +3,7 @@ const handlers={},cache=new Map(),origin='https://finance.test';let calls=0,offl
 const response=label=>({label,ok:true,clone(){return this;}});
 vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../sw.js'),'utf8'),{
  self:{addEventListener:(name,fn)=>handlers[name]=fn},URL,location:{origin},Response:{error:()=>response('error')},
- caches:{open:async()=>({match:async r=>cache.get(r.url),put:async(r,v)=>cache.set(r.url,v)}),match:async r=>cache.get(typeof r==='string'?r:r.url)},
+ caches:{open:async()=>({match:async r=>cache.get(typeof r==='string'?r:r.url),put:async(r,v)=>cache.set(r.url,v)}),match:async r=>cache.get(typeof r==='string'?r:r.url)},
  fetch:async()=>{calls++;if(offline)throw new Error('offline');return response('network');}
 });
 async function request(path,mode='cors'){let promise;handlers.fetch({request:{method:'GET',url:origin+path,mode},respondWith:p=>promise=p,waitUntil:()=>{}});return promise;}

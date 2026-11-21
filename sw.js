@@ -41,9 +41,10 @@ self.addEventListener('fetch',e=>{
   if(r.ok){const copy=r.clone();e.waitUntil(caches.open(CACHE).then(c=>c.put(e.request,copy)));}
   return r;
  }).catch(async()=>{
-  const cached=await caches.match(e.request);
+  const shell=await caches.open(CACHE);
+  const cached=await shell.match(e.request);
   if(cached)return cached;
-  if(e.request.mode==='navigate')return (await caches.match('./index.html'))||Response.error();
+  if(e.request.mode==='navigate')return (await shell.match('./index.html'))||Response.error();
   return Response.error();
  });
  e.respondWith(versioned?caches.open(CACHE).then(c=>c.match(e.request)).then(cached=>cached||network()):network());

@@ -35,6 +35,7 @@ function harness(){
  await (await h.caches.open(previous)).put('./app.js?v=20261023-quality02&payments=12',new Response('old module'));
  await (await h.caches.open('finance-push-receipt-v1')).put('./last-receipt',new Response('receipt'));
  await (await h.caches.open('unrelated-app')).put('./other',new Response('unrelated'));
+ await (await h.caches.open('unrelated-app')).put('./index.html',new Response('stale shell'));
  await h.lifecycle('install');
  assert.equal(h.state.skip,1);assert.ok(h.stores.has(previous),'install must retain the serving worker cache');
  assert.ok(h.requests.length>0);assert.ok(h.requests.every(r=>r.cache==='reload'),'precache must bypass stale HTTP cache');
