@@ -17,7 +17,13 @@ const payslip=fs.readFileSync(root+'salary-payslip.js','utf8').replaceAll('expor
 function dbMock(data,options={}){
  const state={fail:!!options.fail,writes:[],rpcs:[]};
  const db={auth:{getSession:async()=>({data:{session:options.signedOut?null:{user:{id:'user',email:'test@example.invalid'}}}}),signInWithPassword:async()=>({data:{user:{id:'user',email:'test@example.invalid'}},error:null}),getUser:async()=>({data:{user:{id:'user',email:'test@example.invalid'}}}),onAuthStateChange:callback=>{state.authChange=callback;return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>({error:state.signOutError||null})},channel:()=>({on(){return this},subscribe(){return this}}),removeChannel(){}};
- db.rpc=async(name,args)=>{state.rpcs.push({name,args});return state.fail?{error:{message:'offline'}}:{data:name==='export_finance_backup_v2'?state.backupPayload:name==='finance_health_check'?(state.healthCounts||Object.fromEntries(['duplicateGroups','orphanCar','orphanSalary','orphanInstallments','orphanRent','mismatchCar','mismatchSalary','mismatchInstallments','mismatchRent','brokenSourceLinks','invalidDimensions','billDuplicateGroups','orphanBills'].map(k=>[k,0]))):'rpc-saved',error:null};};
+ db.rpc=async(name,args)=>{state.rpcs.push({name,args});
+  if(name==='pay_bill_installment'&&state.persistWrites){
+   const bill=data.bills.find(b=>b.id===args.p_bill_id);
+   data.transactions.push({id:args.p_request_id,user_id:'user',source:'bill_payment:'+bill.id,type:'expense',transaction_date:args.p_paid_date,status:'paid',description:bill.name,amount:args.p_amount});
+   return {data:args.p_request_id,error:null};
+  }
+  return state.fail?{error:{message:'offline'}}:{data:name==='export_finance_backup_v2'?state.backupPayload:name==='finance_health_check'?(state.healthCounts||Object.fromEntries(['duplicateGroups','orphanCar','orphanSalary','orphanInstallments','orphanRent','mismatchCar','mismatchSalary','mismatchInstallments','mismatchRent','brokenSourceLinks','invalidDimensions','billDuplicateGroups','orphanBills'].map(k=>[k,0]))):'rpc-saved',error:null};};
  db.from=table=>{
   let rows=[...(data[table]||[])],write=null,writingUpdate=false;
   const q={select(){return q},order(){return q},limit(n){rows=rows.slice(0,n);return q},eq(k,v){rows=rows.filter(r=>r[k]===v);return q},neq(k,v){rows=rows.filter(r=>r[k]!==v);return q},not(k,op,v){if(op==='is'&&v===null)rows=rows.filter(r=>r[k]!==null&&r[k]!==undefined);return q},
@@ -330,6 +336,24 @@ async function page(html,js,data,expose,storage={},options={}){
  assert.match(paidBillsPage.el('billList').textContent,/จ่ายแล้วเดือนนี้/);assert.equal(paidBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);paidBillsPage.close();
  const partialBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[{...paidTx,amount:200}],bills:[bill]},'loadAll');
  assert.match(partialBillsPage.el('billList').textContent,/ชำระบางส่วน/);assert.match(partialBillsPage.el('billList').textContent,/399/);assert.equal(partialBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);assert.match(partialBillsPage.el('homeBillStatus').textContent,/บางส่วน 1/);partialBillsPage.close();
+ const splitData={categories,accounts,bills:[bill],transactions:[{...paidTx,amount:200}]};
+ const splitPage=await page('index.html','app.js',splitData,'loadAll');
+ splitPage.state.persistWrites=true;
+ splitPage.el('billList').querySelector('[data-bill-installment]').click();
+ const splitAmount=splitPage.el('billInstallmentAmount');
+ assert.equal(splitAmount.value,'399.00');
+ splitAmount.value='400';assert.equal(splitAmount.validity.valid,false);
+ splitAmount.value='150';splitAmount.dispatchEvent(new splitPage.w.Event('input'));
+ assert.match(splitPage.el('billInstallmentBalance').textContent,/249/);
+ splitPage.el('billInstallmentForm').requestSubmit();
+ await new Promise(r=>setTimeout(r,0));
+ const splitRpc=splitPage.state.rpcs.find(r=>r.name==='pay_bill_installment');
+ assert.equal(splitRpc.args.p_expected_paid,200);assert.equal(splitRpc.args.p_amount,150);
+ assert.match(splitPage.el('billList').textContent,/350.*249/);
+ splitPage.el('billList').querySelector('[data-bill-history]').click();
+ assert.match(splitPage.el('insightDetailBody').textContent,/200/);
+ assert.match(splitPage.el('insightDetailBody').textContent,/150/);
+ splitPage.close();
  // A stale tab may receive the ID of a pre-existing partial or pending row from the bill RPC.
  for(const [txStatus,expected] of [['paid','399'],['pending','รอจ่าย']]){
   const shared={categories,accounts,transactions:[],bills:[{...bill,frequency:'monthly'}]};
