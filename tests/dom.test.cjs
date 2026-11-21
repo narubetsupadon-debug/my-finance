@@ -260,6 +260,8 @@ async function page(html,js,data,expose,storage={},options={}){
  p.el('txFilterType').value='income';p.el('txFilterType').onchange();assert.equal(p.el('txFilterBadge').textContent,'1');assert.equal(p.el('txFilterBadge').hidden,false);p.el('txResetFilters').click();
  p.el('txFilterMonth').value=day.slice(0,7);p.el('txFilterMonth').onchange();assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.equal(p.el('txFilterMonth').value,day.slice(0,7));p.el('txResetFilters').click();
  p.el('viewToday').click();assert.equal(p.el('insightDetailDialog').open,true);p.el('insightDetailDialog').close();
+ assert.equal(p.el('dashboardPage').querySelector('.home-budget-breakdown'),null);
+ assert.ok(p.el('budgetPage').contains(p.el('budgetList')));
  for(const id of ['incomeTotal','expenseTotal','balanceTotal','sumIncome','sumExpense','sumBalance','sumRecurring','sumRent','budgetCard']){p.el(id).click();assert.equal(p.el('insightDetailDialog').open,true,id+' opens contributing records');assert.match(p.el('insightDetailNote').textContent,/รอดำเนินการ/);p.el('insightDetailDialog').close();}
  p.el('nextBillCard').click();assert.equal(p.el('billsPage').classList.contains('hidden'),false);
   // accent toast must not appear on ordinary navigation clicks
