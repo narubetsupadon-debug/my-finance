@@ -98,10 +98,20 @@ export function loadExcelTools(){
 // Read-only status of this month's explicitly linked recurring bill entries.
 export function recurringBillMonthStatus(bill,transactions,today=bangkokDay()){
  const rows=transactions.filter(x=>x.type==='expense'&&x.status!=='cancelled'&&x.source==='bill_payment:'+bill.id&&/^\d{4}-\d{2}-\d{2}$/.test(String(x.transaction_date))&&x.transaction_date.slice(0,7)===today.slice(0,7));
- const paidRows=rows.filter(x=>x.status!=='pending'&&x.transaction_date<=today);
- const state=paidRows.length?'paid':rows.length?'pending':'unrecorded';
+ const paidRows=rows.filter(x=>x.status==='paid'&&x.transaction_date<=today);
+ // Confirmed calendar-month payments are summed in satang and deduplicated by transaction ID.
+ const seen=new Set();let paidCents=0;
+ for(const row of paidRows){
+  if(row.id&&seen.has(row.id))continue;
+  if(row.id)seen.add(row.id);
+  const amount=Number(row.amount);
+  if(Number.isFinite(amount)&&amount>0)paidCents+=Math.round(amount*100);
+ }
+ const expected=Number(bill.amount),dueCents=Number.isFinite(expected)&&expected>0?Math.round(expected*100):0;
+ const state=paidRows.length&&(dueCents===0||paidCents>=dueCents)?'paid':paidCents>0?'partial':rows.length?'pending':'unrecorded';
+ const remainingCents=Math.max(0,dueCents-paidCents);
  const [y,m]=today.split('-').map(Number),day=Number(bill.due_day),dueDay=Number.isInteger(day)&&day>=1&&day<=31?Math.min(day,new Date(y,m,0).getDate()):null;
- return {state,rows,paidRows,due:dueDay!==null&&dueDay<=Number(today.slice(8,10))};
+ return {state,rows,paidRows,paidCents,dueCents,remainingCents,due:dueDay!==null&&dueDay<=Number(today.slice(8,10))};
 }
 
 // Diagnostics intentionally exclude messages, URLs, payloads and credentials.

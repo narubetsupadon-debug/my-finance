@@ -12,8 +12,9 @@ assert.equal(core.monthlyDue(null,'2026-10-04'),null);
 assert.equal(core.monthlyDue(31,'2026-02-02').getDate(),28);
 assert.equal(core.monthlyDue(1,'2026-12-31').getFullYear(),2027);
 assert.equal(core.billDue({frequency:'yearly',due_day:5}),null);
-assert.equal(core.billDue({frequency:'monthly',due_day:15,next_due_date:'2026-09-15'},'2026-10-04').toISOString().slice(0,10),'2026-10-15'); // stale monthly next_due_date rolls forward
-assert.equal(core.billDue({frequency:'once',due_day:15,next_due_date:'2026-09-15'},'2026-10-04').toISOString().slice(0,10),'2026-09-15');
+const localDay=date=>[date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');
+assert.equal(localDay(core.billDue({frequency:'monthly',due_day:15,next_due_date:'2026-09-15'},'2026-10-04')),'2026-10-15'); // stale monthly next_due_date rolls forward
+assert.equal(localDay(core.billDue({frequency:'once',due_day:15,next_due_date:'2026-09-15'},'2026-10-04')),'2026-09-15');
 assert.equal(core.excelDay(1),'1899-12-31');
 assert.equal(core.excelDay('2026-10-04'),'2026-10-04');
 assert.equal(core.excelDay('04/10/2026'),'2026-10-04');
@@ -52,3 +53,16 @@ for(const error of [{code:'SAVE_UNCONFIRMED'},{name:'TimeoutError'},{message:'Ty
 }
 for(const code of ['23505','23514','42501','P0001'])assert.equal(financeSaveFeedback({code,message:'server rejected write'}).state,'failed');
 console.log('PASS save feedback: uncertain transport acknowledgements stay distinct from explicit database rejections');
+
+// A linked bill is paid only when its confirmed rows meet its configured amount.
+const pricedBill={id:'b1',due_day:5,amount:599};
+const linkedBill=(id,amount,status='paid',date='2026-10-02')=>billTx(status,date,{id,amount});
+let partialBill=core.recurringBillMonthStatus(pricedBill,[linkedBill('one',200)],'2026-10-14');
+assert.equal(partialBill.state,'partial');assert.equal(partialBill.paidCents,20000);assert.equal(partialBill.remainingCents,39900);
+assert.equal(core.recurringBillMonthStatus(pricedBill,[linkedBill('one',200),linkedBill('two',399)],'2026-10-14').state,'paid');
+assert.equal(core.recurringBillMonthStatus(pricedBill,[linkedBill('one',200),linkedBill('one',200)],'2026-10-14').paidCents,20000);
+assert.equal(core.recurringBillMonthStatus(pricedBill,[linkedBill('one',200),linkedBill('two',399,'pending')],'2026-10-14').state,'partial');
+assert.equal(core.recurringBillMonthStatus(pricedBill,[linkedBill('one',200),linkedBill('two',399,'paid','2026-10-20')],'2026-10-14').state,'partial');
+assert.equal(core.recurringBillMonthStatus(pricedBill,[linkedBill('one',200),linkedBill('two',399,'cancelled')],'2026-10-14').state,'partial');
+assert.equal(core.recurringBillMonthStatus(pricedBill,[linkedBill('one',200.10),linkedBill('two',398.90)],'2026-10-14').state,'paid');
+console.log('PASS recurring bills: partial/complete, duplicate IDs, pending, future and cancelled amounts');

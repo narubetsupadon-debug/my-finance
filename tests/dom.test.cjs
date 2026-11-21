@@ -260,6 +260,8 @@ async function page(html,js,data,expose,storage={},options={}){
  p.el('txFilterType').value='income';p.el('txFilterType').onchange();assert.equal(p.el('txFilterBadge').textContent,'1');assert.equal(p.el('txFilterBadge').hidden,false);p.el('txResetFilters').click();
  p.el('txFilterMonth').value=day.slice(0,7);p.el('txFilterMonth').onchange();assert.equal(p.el('txCount').textContent,'1201 รายการ');assert.equal(p.el('txFilterMonth').value,day.slice(0,7));p.el('txResetFilters').click();
  p.el('viewToday').click();assert.equal(p.el('insightDetailDialog').open,true);p.el('insightDetailDialog').close();
+ assert.equal(p.el('dashboardPage').querySelector('.home-budget-breakdown'),null);
+ assert.ok(p.el('budgetPage').contains(p.el('budgetList')));
  for(const id of ['incomeTotal','expenseTotal','balanceTotal','sumIncome','sumExpense','sumBalance','sumRecurring','sumRent','budgetCard']){p.el(id).click();assert.equal(p.el('insightDetailDialog').open,true,id+' opens contributing records');assert.match(p.el('insightDetailNote').textContent,/รอดำเนินการ/);p.el('insightDetailDialog').close();}
  p.el('nextBillCard').click();assert.equal(p.el('billsPage').classList.contains('hidden'),false);
   // accent toast must not appear on ordinary navigation clicks
@@ -316,6 +318,8 @@ async function page(html,js,data,expose,storage={},options={}){
  const payButton=billsPage.el('billList').querySelector('[data-pay-bill="bill1"]');assert.ok(payButton);billsPage.w.confirm=()=>true;payButton.click();
  await new Promise(r=>setTimeout(r,0));
  assert.equal(billsPage.state.rpcs.at(-1).name,'pay_recurring_bill');assert.equal(billsPage.state.rpcs.at(-1).args.p_bill_id,'bill1');
+ assert.match(billsPage.el('billList').textContent,/บันทึกแล้ว · รอซิงก์/,'confirmed RPC must block second bill payment until readback');
+ assert.equal(billsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null,'no duplicate full-payment action after server confirmation');
  billsPage.w.openEntity('bill','bill1');assert.equal(billsPage.el('entityFields').querySelector('[name=payment_source]').value,'account:acc');billsPage.el('entityDialog').close();
  const cardBill={...bill,id:'bill2',name:'Spotify',account_id:null,debt_id:'kplus',accounts:null};
  const cardPage=await page('index.html','app.js',{categories,accounts,transactions:[],bills:[cardBill],debts:[debt]},'loadAll');
@@ -324,6 +328,26 @@ async function page(html,js,data,expose,storage={},options={}){
  const paidTx={id:'paidbill',user_id:'user',type:'expense',status:'paid',source:'bill_payment:bill1',transaction_date:day,description:'ค่าเน็ต',amount:599,category_id:'utilities',account_id:'acc',categories:categories[2],accounts:accounts[0]};
  const paidBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[paidTx],bills:[bill]},'loadAll');
  assert.match(paidBillsPage.el('billList').textContent,/จ่ายแล้วเดือนนี้/);assert.equal(paidBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);paidBillsPage.close();
+ const partialBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[{...paidTx,amount:200}],bills:[bill]},'loadAll');
+ assert.match(partialBillsPage.el('billList').textContent,/ชำระบางส่วน/);assert.match(partialBillsPage.el('billList').textContent,/399/);assert.equal(partialBillsPage.el('billList').querySelector('[data-pay-bill="bill1"]'),null);assert.match(partialBillsPage.el('homeBillStatus').textContent,/บางส่วน 1/);partialBillsPage.close();
+ // A stale tab may receive the ID of a pre-existing partial or pending row from the bill RPC.
+ for(const [txStatus,expected] of [['paid','399'],['pending','รอจ่าย']]){
+  const shared={categories,accounts,transactions:[],bills:[{...bill,frequency:'monthly'}]};
+  const stale=await page('index.html','app.js',shared,'loadAll');
+  shared.transactions.push({...paidTx,id:'rpc-saved',amount:200,status:txStatus});
+  stale.el('billList').querySelector('[data-pay-bill]').click();
+  await new Promise(r=>setTimeout(r,0));
+  assert.equal(stale.state.rpcs.filter(r=>r.name==='pay_recurring_bill').length,1);
+  assert.ok(stale.el('appToast').textContent.includes(expected));
+  assert.equal(stale.el('billList').querySelector('[data-pay-bill]'),null);
+  if(txStatus==='paid'){
+   assert.match(stale.el('nextBillAmount').textContent,/399/);
+   shared.transactions.push({...paidTx,id:'balance',amount:399});
+   await stale.api.loadAll();
+   assert.doesNotMatch(stale.el('upcomingList').textContent,/ค่าเน็ต/);
+  }
+  stale.close();
+ }
  const pendingBillsPage=await page('index.html','app.js',{categories,accounts,transactions:[{...paidTx,status:'pending'}],bills:[bill]},'loadAll');assert.match(pendingBillsPage.el('billList').textContent,/รอจ่าย/);assert.equal(pendingBillsPage.el('billList').querySelector('[data-pay-bill]'),null);assert.match(pendingBillsPage.el('homeBillStatus').textContent,/รอจ่าย 1/);assert.equal(pendingBillsPage.el('summaryMore'),null);pendingBillsPage.el('homeBillStatus').click();assert.equal(pendingBillsPage.el('billsPage').classList.contains('hidden'),false);pendingBillsPage.close();
  const s=await page('salary.html','salary.js',{categories,accounts,transactions:[]},'reset');
  assert.equal(s.el('salaryEditor').open,false);s.el('newSalary').click();assert.equal(s.el('salaryEditor').open,true);assert.equal(s.el('salarySavedLink').hidden,true);assert.equal(s.el('salaryOtherDetails').open,false);assert.equal(s.el('salaryDeductionDetails').open,false);

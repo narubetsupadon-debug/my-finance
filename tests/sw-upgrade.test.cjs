@@ -35,6 +35,7 @@ function harness(){
  await (await h.caches.open(previous)).put('./app.js?v=20261023-quality02&payments=12',new Response('old module'));
  await (await h.caches.open('finance-push-receipt-v1')).put('./last-receipt',new Response('receipt'));
  await (await h.caches.open('unrelated-app')).put('./other',new Response('unrelated'));
+ await (await h.caches.open('unrelated-app')).put('./index.html',new Response('stale shell'));
  await h.lifecycle('install');
  assert.equal(h.state.skip,1);assert.ok(h.stores.has(previous),'install must retain the serving worker cache');
  assert.ok(h.requests.length>0);assert.ok(h.requests.every(r=>r.cache==='reload'),'precache must bypass stale HTTP cache');
@@ -42,7 +43,7 @@ function harness(){
  assert.equal(h.state.claim,1);assert.equal(h.stores.has(previous),false);assert.ok(h.stores.has(current));
  assert.ok(h.stores.has('finance-push-receipt-v1'));assert.ok(h.stores.has('unrelated-app'));
  h.state.offline=true;
- for(const file of ['./app.js?v=20261023-quality02&payments=14&splash=02','./app-planning.js?v=20261023-quality02&payments=14','./index.html']){
+ for(const file of ['./app.js?v=20261023-quality02&payments=14&splash=02&summary=02&period=17&stability=22&billfix=24&home=26','./app-planning.js?v=20261023-quality02&payments=14&billfix=24','./finance-core.js?v=20261023-quality02&payment=10&billfix=24','./app-dashboard.js?v=20261023-quality02&budget=21&billfix=24&home=26','./interface-refresh.css?v=20261023-quality02&ui=23&billfix=24','./index.html']){
   assert.equal(await (await h.request(file)).text(),'network:'+key(file),'upgraded shell must work offline: '+file);
  }
  assert.equal(h.requests.filter(r=>key(r).includes('payments=12')).length,0,'new shell must not request the old payment module');
